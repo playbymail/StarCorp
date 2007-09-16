@@ -25,8 +25,10 @@ public class Corporation extends ANamedEntity {
 
 	private String playerName;
 	private String playerEmail;
+	private String playerPassword;
 	private int credits;
 	private GalacticDate foundedDate;
+	private GalacticDate lastTurnDate;
 	
 	public ActionReport buyItem(AItemType type, int quantity, ColonyItem colonyItem, List<MarketItem> marketItems, Facility colonyHub) {
 		// TODO buy item
@@ -71,5 +73,21 @@ public class Corporation extends ANamedEntity {
 	}
 	public void setFoundedDate(GalacticDate foundedDate) {
 		this.foundedDate = foundedDate;
+	}
+
+	public String getPlayerPassword() {
+		return playerPassword;
+	}
+
+	public void setPlayerPassword(String playerPassword) {
+		this.playerPassword = playerPassword;
+	}
+
+	public GalacticDate getLastTurnDate() {
+		return lastTurnDate;
+	}
+
+	public void setLastTurnDate(GalacticDate lastTurnDate) {
+		this.lastTurnDate = lastTurnDate;
 	}
 }

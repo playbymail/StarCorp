@@ -10,8 +10,11 @@
  */
 package starcorp.common.types;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -62,6 +65,21 @@ public abstract class AItemType extends ABaseType {
 	 */
 	public static AItemType getType(String key) {
 		return types.get(key);
+	}
+	
+	public List<AItemType> listTypes(Class<?> typeClass) {
+		List<AItemType> types = new ArrayList<AItemType>();
+		
+		Iterator<Map.Entry<String, AItemType>> i = AItemType.types.entrySet().iterator();
+		
+		while(i.hasNext()) {
+			Map.Entry<String, AItemType> entry = i.next();
+			if(typeClass.equals(entry.getValue().getClass())) {
+				types.add(entry.getValue());
+			}
+		}
+		
+		return types;
 	}
 	
 	/**

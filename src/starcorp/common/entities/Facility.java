@@ -19,6 +19,7 @@ import starcorp.common.types.Colonists;
 import starcorp.common.types.ColonyHub;
 import starcorp.common.types.AFacilityType;
 import starcorp.common.types.Factory;
+import starcorp.common.types.GalacticDate;
 import starcorp.common.types.Items;
 import starcorp.common.types.OrbitalDock;
 import starcorp.common.types.PopulationClass;
@@ -42,6 +43,7 @@ public class Facility extends ABaseEntity {
 	private int transactionCount;
 	private boolean open;
 	private Set<Items> itemQueue = new HashSet<Items>();
+	private GalacticDate builtDate;
 	
 	public ActionReport setSalary(PopulationClass popClass, int salary) {
 		// TODO set salary
@@ -168,5 +170,13 @@ public class Facility extends ABaseEntity {
 	}
 	public void setSalaries(Set<ColonistSalary> salaries) {
 		this.salaries = salaries;
+	}
+
+	public GalacticDate getBuiltDate() {
+		return builtDate;
+	}
+
+	public void setBuiltDate(GalacticDate builtDate) {
+		this.builtDate = builtDate;
 	}
 }

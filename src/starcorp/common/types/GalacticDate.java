@@ -50,6 +50,18 @@ public class GalacticDate {
 		this.month = copyFrom.month;
 	}
 	
+	public boolean before(GalacticDate other) {
+		if(this.year < other.year) {
+			return true;
+		}
+		else if(this.year == other.year) {
+			if(this.month < other.month) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public boolean after(GalacticDate other) {
 		if(this.year > other.year) {
 			return true;

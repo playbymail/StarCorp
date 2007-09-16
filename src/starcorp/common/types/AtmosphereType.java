@@ -10,6 +10,7 @@
  */
 package starcorp.common.types;
 
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.MissingResourceException;
@@ -21,16 +22,31 @@ import java.util.ResourceBundle;
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 15 Sep 2007
  */
-public abstract class AtmosphereType extends ABaseType {
+public class AtmosphereType extends ABaseType {
 	private static final ResourceBundle bundle = ResourceBundle.getBundle("items");
 	
 	private static Map<String, AtmosphereType> types = new HashMap<String, AtmosphereType>(); 
 
-	/**
-	 * @param type
-	 */
-	static void registerType(AtmosphereType type) {
-		types.put(type.getKey(), type);
+	static {
+		loadTypes();
+	}
+	
+	private static void loadTypes() {
+		Enumeration<String> keys = bundle.getKeys();
+		while(keys.hasMoreElements()) {
+			String key = keys.nextElement();
+			if(key.endsWith(".key")) {
+				String k = bundle.getString(key);
+				AtmosphereType type = new AtmosphereType(k);
+				types.put(k, type);
+			}
+		}
+	}
+	
+	private String key;
+	
+	public AtmosphereType(String key) {
+		this.key = key;
 	}
 	
 	/**
@@ -58,7 +74,9 @@ public abstract class AtmosphereType extends ABaseType {
 	/**
 	 * @return
 	 */
-	public abstract String getKey();
+	public String getKey() {
+		return key;
+	}
 	
 	/**
 	 * @return
