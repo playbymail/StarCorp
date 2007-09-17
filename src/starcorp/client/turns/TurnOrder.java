@@ -15,7 +15,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import starcorp.common.entities.ABaseEntity;
-import starcorp.common.entities.ActionReport;
 import starcorp.common.entities.Corporation;
 import starcorp.common.types.OrderType;
 
@@ -31,7 +30,7 @@ public class TurnOrder {
 	private ABaseEntity subject;
 	private OrderType type;
 	private List<String> args = new ArrayList<String>(); 
-	private ActionReport report;
+	private OrderReport report;
 	
 	public void add(String arg) {
 		args.add(arg);
@@ -86,16 +85,18 @@ public class TurnOrder {
 	public void setArgs(List<String> args) {
 		this.args = args;
 	}
-	public ActionReport getReport() {
-		return report;
-	}
-	public void setReport(ActionReport report) {
-		this.report = report;
-	}
 	public OrderType getType() {
 		return type;
 	}
 	public void setType(OrderType type) {
 		this.type = type;
+	}
+
+	public OrderReport getReport() {
+		return report;
+	}
+
+	public void setReport(OrderReport report) {
+		this.report = report;
 	}
 }

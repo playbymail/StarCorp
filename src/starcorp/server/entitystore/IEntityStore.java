@@ -14,7 +14,6 @@ import java.util.List;
 
 import starcorp.common.entities.ABaseEntity;
 import starcorp.common.entities.AStarSystemEntity;
-import starcorp.common.entities.ActionReport;
 import starcorp.common.entities.ColonistGrant;
 import starcorp.common.entities.Colony;
 import starcorp.common.entities.ColonyItem;
@@ -32,7 +31,6 @@ import starcorp.common.types.AItemType;
 import starcorp.common.types.Coordinates2D;
 import starcorp.common.types.Coordinates3D;
 import starcorp.common.types.CoordinatesPolar;
-import starcorp.common.types.GalacticDate;
 import starcorp.common.types.PopulationClass;
 
 /**
@@ -68,11 +66,6 @@ public interface IEntityStore {
 	public abstract ABaseEntity load(int ID);
 	public abstract ABaseEntity save(ABaseEntity entity);
 	
-	public abstract List<ActionReport> findReports(ABaseEntity subject);
-	public abstract List<ActionReport> findReports(Corporation toOrCC);
-	public abstract List<ActionReport> findReports(ABaseEntity subject, GalacticDate dateFrom, GalacticDate dateTo);
-	public abstract List<ActionReport> findReports(Corporation toOrCC, GalacticDate dateFrom, GalacticDate dateTo);
-	
 	public abstract List<AStarSystemEntity> listSystemEntities(StarSystem star);
 	public abstract List<AStarSystemEntity> listSystemEntities(StarSystem star, Coordinates3D location);
 
@@ -103,6 +96,7 @@ public interface IEntityStore {
 	public abstract List<Facility> listFacilities(Corporation owner);
 	public abstract List<Facility> listFacilities(Colony colony, Corporation owner, AFacilityType type);
 	public abstract List<Facility> listFacilities(Colony colony, Corporation owner, Class<?> type);
+	public abstract List<Facility> listFacilities(Colony colony, Class<?> type);
 	public abstract Facility getFacility(Colony colony, Corporation owner, Class<?> type);
 	
 	public abstract List<FacilityLease> listLeases(Corporation corp, boolean openOnly);

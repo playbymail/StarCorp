@@ -14,11 +14,11 @@ import java.util.Iterator;
 import starcorp.client.turns.Turn;
 import starcorp.client.turns.TurnError;
 import starcorp.client.turns.TurnOrder;
+import starcorp.client.turns.TurnReport;
 import starcorp.common.entities.Corporation;
 import starcorp.common.types.GalacticDate;
 import starcorp.common.types.OrderType;
 import starcorp.server.entitystore.IEntityStore;
-import starcorp.server.reports.TurnReport;
 import starcorp.server.turns.orders.AOrderProcessor;
 
 /**

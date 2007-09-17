@@ -13,6 +13,7 @@ package starcorp.common.types;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -131,6 +132,24 @@ public abstract class AFacilityType extends ABaseType {
 			}
 		}
 		return workers;
+	}
+	
+	public Set<Items> getBuildingRequirement() {
+		HashSet<Items> modules = new HashSet<Items>();
+		Enumeration<String> keys = bundle.getKeys();
+		while(keys.hasMoreElements()) {
+			String key = keys.nextElement();
+			int i;
+			if((i = key.indexOf(".module.type")) != -1) {
+				String facilityKey = key.substring(0, i);
+				String moduleNumber = key.substring(key.lastIndexOf(".") + 1);
+				Items item = new Items();
+				item.setType(bundle.getString(key));
+				item.setQuantity(Integer.parseInt(bundle.getString(facilityKey + ".module.qty." + moduleNumber)));
+				modules.add(item);
+			}
+		}
+		return modules;
 	}
 	
 	public double getEfficiency(Set<Colonists> currentWorkers) {

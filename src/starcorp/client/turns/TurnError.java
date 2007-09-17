@@ -30,6 +30,8 @@ public class TurnError {
 	public static final String NO_LEASE = "error.lease.none";
 	public static final String INVALID_SHIP_DESIGN = "error.ship.design";
 	public static final String INVALID_ITEM = "error.item";
+	public static final String MARKET_OUT_OF_TRANSACTIONS = "error.market.transactions";
+	public static final String INSUFFICIENT_SHIP_HULLS = "error.ship.hulls";
 	
 	private String msgKey;
 	private TurnOrder order;

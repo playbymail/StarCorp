@@ -11,7 +11,6 @@
 package starcorp.common.entities;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import starcorp.common.types.ColonistSalary;
@@ -22,7 +21,6 @@ import starcorp.common.types.Factory;
 import starcorp.common.types.GalacticDate;
 import starcorp.common.types.Items;
 import starcorp.common.types.OrbitalDock;
-import starcorp.common.types.PopulationClass;
 import starcorp.common.types.ServiceFacility;
 
 /**
@@ -45,48 +43,8 @@ public class Facility extends ABaseEntity {
 	private Set<Items> itemQueue = new HashSet<Items>();
 	private GalacticDate builtDate;
 	
-	public ActionReport setSalary(PopulationClass popClass, int salary) {
-		// TODO set salary
-		return null;
-	}
-	
-	public ActionReport close() {
-		// TODO close
-		return null;
-	}
-	
-	public ActionReport payWorkers() {
-		// TODO pay workers
-		return null;
-	}
-	
-	public ActionReport hireWorkers() {
-		// TODO hire workers
-		return null;
-	}
-	
-	public ActionReport usePower(List<ColonyItem> corporationPowerItems, List<MarketItem> marketPowerItems) {
-		// TODO use power
-		return null;
-	}
-	
-	public ActionReport queueItem(Items item) {
-		// TODO queue item
-		return null;
-	}
-	
 	public Items nextQueuedItem() {
 		return itemQueue.isEmpty() ? null : itemQueue.iterator().next();
-	}
-	
-	public ActionReport produceNextItem(ColonyItem item) {
-		// TODO produce item
-		return null;
-	}
-	
-	public ActionReport gatherItems(List<ColonyItem> gatheredItems) {
-		// TODO gather items
-		return null;
 	}
 	
 	public int getTransactionsRemaining() {
@@ -150,6 +108,11 @@ public class Facility extends ABaseEntity {
 	public int getTransactionCount() {
 		return transactionCount;
 	}
+	
+	public void incTransactionCount() {
+		this.transactionCount++;
+	}
+	
 	public void setTransactionCount(int transactionCount) {
 		this.transactionCount = transactionCount;
 	}

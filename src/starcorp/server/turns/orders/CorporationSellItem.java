@@ -10,11 +10,9 @@
  */
 package starcorp.server.turns.orders;
 
-import java.util.List;
-
+import starcorp.client.turns.OrderReport;
 import starcorp.client.turns.TurnError;
 import starcorp.client.turns.TurnOrder;
-import starcorp.common.entities.ActionReport;
 import starcorp.common.entities.Colony;
 import starcorp.common.entities.ColonyItem;
 import starcorp.common.entities.Corporation;
@@ -33,12 +31,10 @@ import starcorp.common.types.Items;
  */
 public class CorporationSellItem extends AOrderProcessor {
 
-	/* (non-Javadoc)
-	 * @see starcorp.server.turns.AOrderProcessor#process(starcorp.client.turns.TurnOrder)
-	 */
 	@Override
 	public TurnError process(TurnOrder order) {
 		TurnError error = null;
+		OrderReport report = null;
 		Corporation corp = order.getCorp();
 		int colonyId = order.getAsInt(0);
 		String itemTypeKey = order.get(1);
@@ -59,18 +55,35 @@ public class CorporationSellItem extends AOrderProcessor {
 		else if(colonyItem == null) {
 			error = new TurnError(TurnError.INVALID_ITEM);
 		}
+		else if(colonyHub.getTransactionsRemaining() < 1) {
+			error = new TurnError(TurnError.MARKET_OUT_OF_TRANSACTIONS);
+		}
 		else {
+			quantity = colonyItem.getItem().remove(quantity);
+			Items item = new Items();
+			item.setQuantity(quantity);
+			item.setTypeClass(type);
+			
 			MarketItem marketItem = new MarketItem();
 			marketItem.setColony(colony);
 			marketItem.setCostPerItem(price);
 			marketItem.setIssuedDate(GalacticDate.getCurrentDate());
 			marketItem.setSeller(corp);
+			marketItem.setItem(item);
 			
-			ActionReport report = corp.sellItem(type, quantity, colonyItem, marketItem, colonyHub);
-		
-			if(report.isSuccess()) {
-				entityStore.save(marketItem);
-			}
+			entityStore.save(marketItem);
+			
+			colonyHub.incTransactionCount();
+			
+			report = new OrderReport(order);
+			report.add(quantity);
+			report.add(type.getName());
+			report.add(colony.getName());
+			report.add(colony.getID());
+			report.add(price);
+			report.add(marketItem);
+			report.add(colonyItem);
+			order.setReport(report);
 		}
 		return error;
 	}

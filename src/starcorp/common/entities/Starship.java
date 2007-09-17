@@ -11,12 +11,10 @@
 package starcorp.common.entities;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import starcorp.common.types.Coordinates2D;
 import starcorp.common.types.GalacticDate;
-import starcorp.common.types.AItemType;
 import starcorp.common.types.Items;
 
 /**
@@ -34,86 +32,6 @@ public class Starship extends AStarSystemEntity {
 	private Set<Items> cargo = new HashSet<Items>();
 	private GalacticDate builtDate;
 	
-	public ActionReport orbit(Planet planet) {
-		// TODO orbit
-		return null;
-	}
-	
-	public ActionReport leaveOrbit() {
-		// TODO leave orbit
-		return null;
-	}
-	
-	public ActionReport buyItem(AItemType type, int quantity, List<MarketItem> marketItems, Facility colonyHub, Facility orbitalDock) {
-		// TODO buy item
-		return null;
-	}
-	
-	public ActionReport sellItem(AItemType type, int quantity, MarketItem marketItem, Facility colonyHub, Facility orbitalDock) {
-		// TODO sell item
-		return null;
-	}
-	
-	public ActionReport move(Coordinates2D location) {
-		// TODO move
-		return null;
-	}
-	
-	public ActionReport jump(StarSystem star) {
-		// TODO jump
-		return null;
-	}
-	
-	public ActionReport mine(AsteroidField asteroid) {
-		// TODO mine
-		return null;
-	}
-	
-	public ActionReport mine(GasField field) {
-		// TODO mine
-		return null;
-	}
-	
-	public ActionReport scanGalaxy(List<StarSystem> systems) {
-		// TODO scan galaxy
-		return null;
-	}
-	
-	public ActionReport scanSystem(List<AStarSystemEntity> scannableEntities) {
-		// TODO scan system
-		return null;
-	}
-	
-	public ActionReport probe(AsteroidField asteroid) {
-		// TODO probe
-		return null;
-	}
-	
-	public ActionReport probe(GasField field) {
-		// TODO probe
-		return null;
-	}
-	
-	public ActionReport probe() {
-		// TODO probe
-		return null;
-	}
-
-	public ActionReport prospect() {
-		// TODO prospect
-		return null;
-	}
-
-	public ActionReport investigate(StellarAnomoly anomoly) {
-		// TODO investigate
-		return null;
-	}
-	
-	public ActionReport foundColony(Facility colonyHub, Colony colony) {
-		// TODO found colony
-		return null;
-	}
-
 	public Corporation getOwner() {
 		return owner;
 	}

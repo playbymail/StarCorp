@@ -13,19 +13,15 @@ package starcorp.server.turns.orders;
 import java.util.Iterator;
 import java.util.List;
 
+import starcorp.client.turns.OrderReport;
 import starcorp.client.turns.TurnError;
 import starcorp.client.turns.TurnOrder;
-import starcorp.common.entities.ActionReport;
 import starcorp.common.entities.Colony;
 import starcorp.common.entities.ColonyItem;
 import starcorp.common.entities.Corporation;
-import starcorp.common.entities.DevelopmentGrant;
 import starcorp.common.entities.Facility;
-import starcorp.common.entities.FacilityLease;
 import starcorp.common.entities.MarketItem;
-import starcorp.common.types.AFacilityType;
 import starcorp.common.types.AItemType;
-import starcorp.common.types.BuildingModule;
 import starcorp.common.types.ColonyHub;
 import starcorp.common.types.GalacticDate;
 import starcorp.common.types.Items;
@@ -44,6 +40,7 @@ public class CorporationBuyItem extends AOrderProcessor {
 	@Override
 	public TurnError process(TurnOrder order) {
 		TurnError error = null;
+		OrderReport report = null;
 		Corporation corp = order.getCorp();
 		int colonyId = order.getAsInt(0);
 		String itemTypeKey = order.get(1);
@@ -60,6 +57,9 @@ public class CorporationBuyItem extends AOrderProcessor {
 		else if(colonyHub == null) {
 			error = new TurnError(TurnError.INVALID_COLONY);
 		}
+		else if(colonyHub.getTransactionsRemaining() < 1) {
+			error = new TurnError(TurnError.MARKET_OUT_OF_TRANSACTIONS);
+		}
 		else {	
 			ColonyItem colonyItem = entityStore.getItem(colony, corp, type);
 			if(colonyItem == null) {
@@ -70,12 +70,48 @@ public class CorporationBuyItem extends AOrderProcessor {
 				colonyItem.setItem(item);
 				colonyItem.setOwner(corp);
 			}
-			
-			ActionReport report = corp.buyItem(type, quantity, colonyItem, marketItems, colonyHub);
-		
-			if(report.isSuccess()) {
-				entityStore.save(colonyItem);
+			int quantityBought = 0;
+			int totalPrice = 0;
+			Iterator<MarketItem> i = marketItems.iterator();
+			while(i.hasNext() && quantityBought < quantity) {
+				MarketItem item = i.next();
+				int qty = quantity - quantityBought;
+				int qtyAvail = item.getItem().getQuantity();
+				int qtyAfford = corp.getCredits() / item.getCostPerItem();
+				if(qtyAfford < qty) {
+					qty = qtyAfford;
+				}
+				if(qtyAvail < qty) {
+					qty = qtyAvail;
+				}
+				
+				int price = qty * item.getCostPerItem();
+				
+				item.getSeller().add(price);
+				
+				item.getItem().remove(qty);
+				if(item.getItem().getQuantity() < 1) {
+					item.setSoldDate(GalacticDate.getCurrentDate());
+				}
+				
+				quantityBought += qty;
+				totalPrice += price;
 			}
+			colonyItem.getItem().add(quantityBought);
+			corp.remove(totalPrice);
+			
+			entityStore.save(colonyItem);
+			
+			colonyHub.incTransactionCount();
+			
+			report = new OrderReport(order);
+			report.add(quantityBought);
+			report.add(type.getName());
+			report.add(colony.getName());
+			report.add(colony.getID());
+			report.add(totalPrice);
+			report.add(colonyItem);
+			order.setReport(report);
 		}
 		return error;
 	}

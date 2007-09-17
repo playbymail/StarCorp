@@ -10,18 +10,17 @@
  */
 package starcorp.server.turns.orders;
 
-import java.util.List;
-
+import java.util.Iterator;
+import starcorp.client.turns.OrderReport;
 import starcorp.client.turns.TurnError;
 import starcorp.client.turns.TurnOrder;
-import starcorp.common.entities.ActionReport;
 import starcorp.common.entities.Colony;
 import starcorp.common.entities.ColonyItem;
 import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Starship;
 import starcorp.common.entities.StarshipDesign;
 import starcorp.common.types.GalacticDate;
-import starcorp.common.types.StarshipHull;
+import starcorp.common.types.Items;
 
 /**
  * starcorp.server.turns.BuildStarship
@@ -61,12 +60,40 @@ public class BuildStarship extends AOrderProcessor {
 			ship.setPlanetLocation(colony.getLocation());
 			ship.setSystem(colony.getPlanet().getSystem());
 			
-			List<ColonyItem> shipHulls = entityStore.listItems(corp, colony, StarshipHull.class);
+			boolean hasNeededHulls = true;
+			Iterator<Items> i = design.getHulls().iterator();
 			
-			ActionReport report = corp.buildShip(colony, ship, shipHulls);
+			while(i.hasNext()) {
+				Items item = i.next();
+				ColonyItem colonyItem = entityStore.getItem(colony, corp, item.getTypeClass());
+				if(colonyItem == null || colonyItem.getItem().getQuantity() < item.getQuantity()) {
+					error = new TurnError(TurnError.INSUFFICIENT_SHIP_HULLS);
+					hasNeededHulls = false;
+					break;
+				}
+			}
 			
-			if(report.isSuccess()) {
+			if(hasNeededHulls) {
+				i = design.getHulls().iterator();
+				
+				while(i.hasNext()) {
+					Items item = i.next();
+					ColonyItem colonyItem = entityStore.getItem(colony, corp, item.getTypeClass());
+					if(colonyItem != null || !(colonyItem.getItem().getQuantity() < item.getQuantity())) {
+						colonyItem.getItem().remove(item.getQuantity());
+					}
+				}
+				
 				entityStore.save(ship);
+				
+				OrderReport report = new OrderReport(order);
+				report.add(name);
+				report.add(design.getName());
+				report.add(design.getID());
+				report.add(colony.getName());
+				report.add(colony.getID());
+				report.add(ship);
+				order.setReport(report);
 			}
 		}
 		return error;

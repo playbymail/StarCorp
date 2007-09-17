@@ -10,10 +10,7 @@
  */
 package starcorp.common.entities;
 
-import java.util.List;
-
 import starcorp.common.types.GalacticDate;
-import starcorp.common.types.AItemType;
 
 /**
  * starcorp.common.entities.Corporation
@@ -30,26 +27,23 @@ public class Corporation extends ANamedEntity {
 	private GalacticDate foundedDate;
 	private GalacticDate lastTurnDate;
 	
-	public ActionReport buyItem(AItemType type, int quantity, ColonyItem colonyItem, List<MarketItem> marketItems, Facility colonyHub) {
-		// TODO buy item
-		return null;
+	public int add(int credits) {
+		this.credits += credits;
+		return this.credits;
 	}
 	
-	public ActionReport sellItem(AItemType type, int quantity, ColonyItem colonyItem, MarketItem marketItem, Facility colonyHub) {
-		// TODO sell item
-		return null;
+	public int remove(int credits) {
+		if(credits > this.credits) {
+			credits = this.credits;
+		}
+		this.credits -= credits;
+		return credits;
 	}
 	
-	public ActionReport buildFacility(Colony colony, Facility facility, List<ColonyItem> buildingModules, FacilityLease lease, DevelopmentGrant grant) {
-		// TODO build facility
-		return null;
+	public boolean hasCredits(int credits) {
+		return this.credits >= credits;
 	}
 	
-	public ActionReport buildShip(Colony colony, Starship ship, List<ColonyItem> shipHulls) {
-		// TODO build ship
-		return null;
-	}
-
 	public String getPlayerName() {
 		return playerName;
 	}

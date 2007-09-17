@@ -10,11 +10,10 @@
  */
 package starcorp.server.turns.orders;
 
-import java.util.List;
-
+import java.util.Iterator;
+import starcorp.client.turns.OrderReport;
 import starcorp.client.turns.TurnError;
 import starcorp.client.turns.TurnOrder;
-import starcorp.common.entities.ActionReport;
 import starcorp.common.entities.Colony;
 import starcorp.common.entities.ColonyItem;
 import starcorp.common.entities.Corporation;
@@ -22,8 +21,10 @@ import starcorp.common.entities.DevelopmentGrant;
 import starcorp.common.entities.Facility;
 import starcorp.common.entities.FacilityLease;
 import starcorp.common.types.AFacilityType;
-import starcorp.common.types.BuildingModule;
+import starcorp.common.types.ColonyHub;
 import starcorp.common.types.GalacticDate;
+import starcorp.common.types.Items;
+import starcorp.common.types.OrbitalDock;
 
 /**
  * starcorp.server.turns.BuildFacility
@@ -38,7 +39,6 @@ public class BuildFacility extends AOrderProcessor {
 	 */
 	@Override
 	public TurnError process(TurnOrder order) {
-		// TODO check for existing colony hub / orbital dock before building
 		TurnError error = null;
 		Corporation corp = order.getCorp();
 		int colonyId = order.getAsInt(0);
@@ -53,14 +53,21 @@ public class BuildFacility extends AOrderProcessor {
 		else if(facilityType == null) {
 			error = new TurnError(TurnError.INVALID_FACILITY_TYPE);
 		}
-		else {	
+		else if(facilityType instanceof ColonyHub) {
+			error = new TurnError(TurnError.INVALID_FACILITY_TYPE);
+		}
+		else {
+			if(facilityType instanceof OrbitalDock) {
+				if(entityStore.listFacilities(colony, OrbitalDock.class).size() > 0) {
+					return new TurnError(TurnError.INVALID_FACILITY_TYPE);
+				}
+			}
 			Facility facility = new Facility();
 			facility.setType(facilityType);
 			facility.setColony(colony);
 			facility.setOwner(corp);
 			facility.setBuiltDate(GalacticDate.getCurrentDate());
-			
-			List<ColonyItem> buildingModules = entityStore.listItems(corp, colony, BuildingModule.class);
+			facility.setOpen(true);
 			
 			FacilityLease lease = entityStore.getLease(colony, corp, facilityType, true);
 			
@@ -69,10 +76,50 @@ public class BuildFacility extends AOrderProcessor {
 			}
 			else {
 				DevelopmentGrant grant = entityStore.getDevelopmentGrant(colony, facilityType, true);
-				ActionReport report = corp.buildFacility(colony, facility, buildingModules, lease, grant);
-			
-				if(report.isSuccess()) {
+				
+				boolean hasNeededModules = true;
+				Iterator<Items> i = facilityType.getBuildingRequirement().iterator();
+				while(i.hasNext()) {
+					Items item = i.next();
+					ColonyItem colonyItem =  entityStore.getItem(colony, corp, item.getTypeClass());
+					if(colonyItem == null || colonyItem.getItem().getQuantity() < item.getQuantity()) {
+						error = new TurnError(TurnError.INSUFFICIENT_SHIP_HULLS);
+						hasNeededModules = false;
+						break;
+					}
+				}
+				
+				if(hasNeededModules) {
+					i = facilityType.getBuildingRequirement().iterator();
+					
+					while(i.hasNext()) {
+						Items item = i.next();
+						ColonyItem colonyItem = entityStore.getItem(colony, corp, item.getTypeClass());
+						if(colonyItem != null || !(colonyItem.getItem().getQuantity() < item.getQuantity())) {
+							colonyItem.getItem().remove(item.getQuantity());
+						}
+					}
+					
+					lease.setUsed(true);
+					lease.setUsedDate(GalacticDate.getCurrentDate());
+					
+					if(grant != null) {
+						grant.getColony().getGovernment().remove(grant.getGrant());
+						corp.add(grant.getGrant());
+					}
+					
 					entityStore.save(facility);
+					
+					OrderReport report = new OrderReport(order);
+					report.add(facilityType.getName());
+					report.add(facility.getID());
+					report.add(colony.getName());
+					report.add(colony.getID());
+					report.add(facility);
+					if(grant != null) {
+						report.add(grant);
+					}
+					order.setReport(report);
 				}
 			}
 		}

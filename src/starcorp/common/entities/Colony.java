@@ -34,21 +34,6 @@ public class Colony extends ANamedEntity {
 	private Set<ColonistHappiness> happiness = new HashSet<ColonistHappiness>();
 	private GalacticDate foundedDate;
 	
-	public ActionReport issueLease(FacilityLease lease) {
-		// TODO issue lease
-		return null;
-	}
-	
-	public ActionReport issueColonistGrant(ColonistGrant grant) {
-		// TODO issue colonist grant
-		return null;
-	}
-	
-	public ActionReport issueDevelopmentGrant(DevelopmentGrant grant) {
-		// TODO issue development grant
-		return null;
-	}
-	
 	public Corporation getGovernment() {
 		return government;
 	}
