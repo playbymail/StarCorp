@@ -83,7 +83,7 @@ public class BuildFacility extends AOrderProcessor {
 					Items item = i.next();
 					ColonyItem colonyItem =  entityStore.getItem(colony, corp, item.getTypeClass());
 					if(colonyItem == null || colonyItem.getItem().getQuantity() < item.getQuantity()) {
-						error = new TurnError(TurnError.INSUFFICIENT_SHIP_HULLS);
+						error = new TurnError(TurnError.INSUFFICIENT_BUILDING_MODULES);
 						hasNeededModules = false;
 						break;
 					}
@@ -115,10 +115,6 @@ public class BuildFacility extends AOrderProcessor {
 					report.add(facility.getID());
 					report.add(colony.getName());
 					report.add(colony.getID());
-					report.add(facility);
-					if(grant != null) {
-						report.add(grant);
-					}
 					order.setReport(report);
 				}
 			}

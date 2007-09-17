@@ -23,7 +23,7 @@ public class PlanetMapSquare {
 
 	private Coordinates2D location;
 	private TerrainType terrain;
-	private Set<ResourceYield> resources = new HashSet<ResourceYield>();
+	private Set<ResourceDeposit> resources = new HashSet<ResourceDeposit>();
 	public Coordinates2D getLocation() {
 		return location;
 	}
@@ -36,10 +36,10 @@ public class PlanetMapSquare {
 	public void setTerrain(TerrainType terrain) {
 		this.terrain = terrain;
 	}
-	public Set<ResourceYield> getResources() {
+	public Set<ResourceDeposit> getResources() {
 		return resources;
 	}
-	public void setResources(Set<ResourceYield> resources) {
+	public void setResources(Set<ResourceDeposit> resources) {
 		this.resources = resources;
 	}
 	

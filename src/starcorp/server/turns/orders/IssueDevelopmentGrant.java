@@ -10,24 +10,61 @@
  */
 package starcorp.server.turns.orders;
 
+import starcorp.client.turns.OrderReport;
 import starcorp.client.turns.TurnError;
 import starcorp.client.turns.TurnOrder;
+import starcorp.common.entities.Colony;
+import starcorp.common.entities.Corporation;
+import starcorp.common.entities.DevelopmentGrant;
+import starcorp.common.types.AFacilityType;
+import starcorp.common.types.GalacticDate;
 
 /**
- * starcorp.server.turns.BuildFacility
+ * starcorp.server.turns.IssueDevelopmentGrant
  *
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 16 Sep 2007
  */
 public class IssueDevelopmentGrant extends AOrderProcessor {
 
-	/* (non-Javadoc)
-	 * @see starcorp.server.turns.AOrderProcessor#process(starcorp.client.turns.TurnOrder)
-	 */
 	@Override
 	public TurnError process(TurnOrder order) {
-		// TODO Auto-generated method stub
-		return null;
+		TurnError error = null;
+		Corporation corp = order.getCorp(); 
+		int colonyId = order.getAsInt(0);
+		String facilityType = order.get(1);
+		int credit = order.getAsInt(2);
+		
+		Colony colony = (Colony) entityStore.load(colonyId);
+		AFacilityType type = AFacilityType.getType(facilityType);
+		
+		if(colony == null) {
+			error = new TurnError(TurnError.INVALID_COLONY);
+		}
+		else if(type == null) {
+			error = new TurnError(TurnError.INVALID_FACILITY_TYPE);
+		}
+		else if(!colony.getGovernment().equals(corp)){
+			error = new TurnError(TurnError.INVALID_COLONY);
+		}
+		else {
+			DevelopmentGrant grant = new DevelopmentGrant();
+			grant.setColony(colony);
+			grant.setGrant(credit);
+			grant.setIssuedDate(GalacticDate.getCurrentDate());
+			grant.setType(type);
+			
+			entityStore.save(grant);
+			
+			OrderReport report = new OrderReport(order);
+			report.add(colony.getName());
+			report.add(colony.getID());
+			report.add(type.getName());
+			report.add(credit);
+			order.setReport(report);
+			
+		}
+		return error;
 	}
 
 }

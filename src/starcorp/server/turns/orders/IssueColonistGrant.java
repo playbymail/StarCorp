@@ -10,24 +10,62 @@
  */
 package starcorp.server.turns.orders;
 
+import starcorp.client.turns.OrderReport;
 import starcorp.client.turns.TurnError;
 import starcorp.client.turns.TurnOrder;
+import starcorp.common.entities.ColonistGrant;
+import starcorp.common.entities.Colony;
+import starcorp.common.entities.Corporation;
+import starcorp.common.types.GalacticDate;
+import starcorp.common.types.PopulationClass;
 
 /**
- * starcorp.server.turns.BuildFacility
+ * starcorp.server.turns.IssueColonistGrant
  *
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 16 Sep 2007
  */
 public class IssueColonistGrant extends AOrderProcessor {
 
-	/* (non-Javadoc)
-	 * @see starcorp.server.turns.AOrderProcessor#process(starcorp.client.turns.TurnOrder)
-	 */
 	@Override
 	public TurnError process(TurnOrder order) {
-		// TODO Auto-generated method stub
-		return null;
+		TurnError error = null;
+		Corporation corp = order.getCorp(); 
+		int colonyId = order.getAsInt(0);
+		String popClassType = order.get(1);
+		int credit = order.getAsInt(2);
+		
+		Colony colony = (Colony) entityStore.load(colonyId);
+		PopulationClass popClass = PopulationClass.getType(popClassType);
+		
+		if(colony == null) {
+			error = new TurnError(TurnError.INVALID_COLONY);
+		}
+		else if(popClass == null) {
+			error = new TurnError(TurnError.INVALID_POP_CLASS);
+		}
+		else if(!colony.getGovernment().equals(corp)){
+			error = new TurnError(TurnError.INVALID_COLONY);
+		}
+		else {
+			ColonistGrant grant = new ColonistGrant();
+			grant.setAvailable(true);
+			grant.setColony(colony);
+			grant.setCredit(credit);
+			grant.setIssuedDate(GalacticDate.getCurrentDate());
+			grant.setPopClass(popClass);
+			
+			entityStore.save(grant);
+			
+			OrderReport report = new OrderReport(order);
+			report.add(colony.getName());
+			report.add(colony.getID());
+			report.add(popClass.getName());
+			report.add(credit);
+			order.setReport(report);
+			
+		}
+		return error;
 	}
 
 }

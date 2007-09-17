@@ -11,15 +11,16 @@
 package starcorp.common.types;
 
 /**
- * starcorp.common.types.Item
+ * starcorp.common.types.ResourceDeposit
  *
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 15 Sep 2007
  */
-public class ResourceYield {
+public class ResourceDeposit {
 
 	private AItemType type;
-	private int quantity;
+	private int totalQuantity;
+	private int yield;
 	
 	/**
 	 * @return
@@ -52,14 +53,14 @@ public class ResourceYield {
 	/**
 	 * @return
 	 */
-	public int getQuantity() {
-		return quantity;
+	public int getYield() {
+		return yield;
 	}
 	/**
 	 * @param quantity
 	 */
-	public void setQuantity(int quantity) {
-		this.quantity = quantity;
+	public void setYield(int quantity) {
+		this.yield = quantity;
 	}
 	
 	/**
@@ -67,8 +68,8 @@ public class ResourceYield {
 	 * @return
 	 */
 	public int add(int qty) {
-		quantity += qty;
-		return quantity;
+		yield += qty;
+		return yield;
 	}
 	
 	/**
@@ -76,10 +77,10 @@ public class ResourceYield {
 	 * @return
 	 */
 	public int remove(int qty) {
-		if(qty > quantity) {
-			qty = quantity;
+		if(qty > yield) {
+			qty = yield;
 		}
-		quantity -= qty;
+		yield -= qty;
 		return qty;
 	}
 
@@ -87,7 +88,7 @@ public class ResourceYield {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + quantity;
+		result = prime * result + yield;
 		result = prime * result + ((type == null) ? 0 : type.hashCode());
 		return result;
 	}
@@ -100,8 +101,8 @@ public class ResourceYield {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		final ResourceYield other = (ResourceYield) obj;
-		if (quantity != other.quantity)
+		final ResourceDeposit other = (ResourceDeposit) obj;
+		if (yield != other.yield)
 			return false;
 		if (type == null) {
 			if (other.type != null)
@@ -109,5 +110,13 @@ public class ResourceYield {
 		} else if (!type.equals(other.type))
 			return false;
 		return true;
+	}
+
+	public int getTotalQuantity() {
+		return totalQuantity;
+	}
+
+	public void setTotalQuantity(int totalQuantity) {
+		this.totalQuantity = totalQuantity;
 	}
 }

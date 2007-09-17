@@ -49,7 +49,7 @@ public class CorporationBuyItem extends AOrderProcessor {
 		Colony colony = (Colony) entityStore.load(colonyId);
 		AItemType type = AItemType.getType(itemTypeKey);
 		List<MarketItem> marketItems = entityStore.listMarket(colony, 1);
-		Facility colonyHub = entityStore.getFacility(colony, corp, ColonyHub.class);
+		Facility colonyHub = entityStore.getFacility(colony, colony.getGovernment(), ColonyHub.class);
 		
 		if(colony == null) {
 			error = new TurnError(TurnError.INVALID_COLONY);
@@ -110,7 +110,6 @@ public class CorporationBuyItem extends AOrderProcessor {
 			report.add(colony.getName());
 			report.add(colony.getID());
 			report.add(totalPrice);
-			report.add(colonyItem);
 			order.setReport(report);
 		}
 		return error;

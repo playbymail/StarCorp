@@ -43,6 +43,10 @@ public class Facility extends ABaseEntity {
 	private Set<Items> itemQueue = new HashSet<Items>();
 	private GalacticDate builtDate;
 	
+	public void queueItem(Items item) {
+		itemQueue.add(item);
+	}
+	
 	public Items nextQueuedItem() {
 		return itemQueue.isEmpty() ? null : itemQueue.iterator().next();
 	}

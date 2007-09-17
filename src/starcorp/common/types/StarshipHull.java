@@ -54,8 +54,8 @@ public class StarshipHull extends AFactoryItem {
 		return Boolean.parseBoolean(getResource(this, "mining.gasfield"));
 	}
 	
-	public boolean isLongScanner() {
-		return Boolean.parseBoolean(getResource(this, "scan.long"));
+	public int getLongScanner() {
+		return Integer.parseInt(getResource(this, "scan.long"));
 	}
 	
 	public boolean isShortScanner() {

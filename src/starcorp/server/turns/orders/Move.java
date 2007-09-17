@@ -10,8 +10,16 @@
  */
 package starcorp.server.turns.orders;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import starcorp.client.turns.OrderReport;
 import starcorp.client.turns.TurnError;
 import starcorp.client.turns.TurnOrder;
+import starcorp.common.entities.AStarSystemEntity;
+import starcorp.common.entities.Corporation;
+import starcorp.common.entities.Starship;
+import starcorp.common.types.CoordinatesPolar;
 
 /**
  * starcorp.server.turns.BuildFacility
@@ -26,8 +34,57 @@ public class Move extends AOrderProcessor {
 	 */
 	@Override
 	public TurnError process(TurnOrder order) {
-		// TODO Auto-generated method stub
-		return null;
+		TurnError error = null;
+		Corporation corp = order.getCorp();
+		int starshipId = order.getAsInt(0);
+		int quadrant = order.getAsInt(1);
+		int orbit = order.getAsInt(1);
+		CoordinatesPolar targetLocation = new CoordinatesPolar();
+		targetLocation.setX(quadrant);
+		targetLocation.setY(orbit);
+		
+		Starship ship = (Starship) entityStore.load(starshipId);
+				
+		if(ship == null || !ship.getOwner().equals(corp)) {
+			error = new TurnError(TurnError.INVALID_SHIP);
+		}
+		else {
+			if(ship.getPlanet() != null) {
+				error = new TurnError(TurnError.INVALID_LOCATION);
+			}
+			else {
+				CoordinatesPolar shipLocation = ship.getLocation();
+				double timeUnits = ship.getTimeUnitsRemaining();
+				double speed = ship.getDesign().getImpulseSpeed();
+				List<AStarSystemEntity> entities = new ArrayList<AStarSystemEntity>();
+				while(!shipLocation.equals(targetLocation) && timeUnits >= speed) {
+					if(shipLocation.getX() < targetLocation.getX()) {
+						shipLocation.setX(shipLocation.getX() + 1);
+					}
+					else if(shipLocation.getX() > targetLocation.getX()) {
+						shipLocation.setX(shipLocation.getX() - 1);
+					}
+					if(shipLocation.getY() < targetLocation.getY()) {
+						shipLocation.setY(shipLocation.getY() + 1);
+					}
+					else if(shipLocation.getY() > targetLocation.getY()) {
+						shipLocation.setY(shipLocation.getY() - 1);
+					}
+					timeUnits -= speed;
+					List<AStarSystemEntity> scan = entityStore.listSystemEntities(ship.getSystem(), shipLocation);
+					entities.addAll(scan);
+				}
+				ship.setLocation(shipLocation);
+				ship.setTimeUnitsRemaining((int)timeUnits);
+				OrderReport report = new OrderReport(order);
+				report.add(ship.getName());
+				report.add(ship.getID());
+				report.setScannedSystemEntities(entities);
+				order.setReport(report);
+			}
+		}
+		
+		return error;
 	}
 
 }

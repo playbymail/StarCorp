@@ -43,7 +43,7 @@ public class CorporationSellItem extends AOrderProcessor {
 		
 		Colony colony = (Colony) entityStore.load(colonyId);
 		AItemType type = AItemType.getType(itemTypeKey);
-		Facility colonyHub = entityStore.getFacility(colony, corp, ColonyHub.class);
+		Facility colonyHub = entityStore.getFacility(colony, colony.getGovernment(), ColonyHub.class);
 		ColonyItem colonyItem = entityStore.getItem(colony, corp, type);
 		
 		if(colony == null) {
@@ -81,8 +81,6 @@ public class CorporationSellItem extends AOrderProcessor {
 			report.add(colony.getName());
 			report.add(colony.getID());
 			report.add(price);
-			report.add(marketItem);
-			report.add(colonyItem);
 			order.setReport(report);
 		}
 		return error;

@@ -10,24 +10,49 @@
  */
 package starcorp.server.turns.orders;
 
+import starcorp.client.turns.OrderReport;
 import starcorp.client.turns.TurnError;
 import starcorp.client.turns.TurnOrder;
+import starcorp.common.entities.Corporation;
+import starcorp.common.entities.Starship;
 
 /**
- * starcorp.server.turns.BuildFacility
+ * starcorp.server.turns.ProbePlanet
  *
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 16 Sep 2007
  */
 public class ProbePlanet extends AOrderProcessor {
 
-	/* (non-Javadoc)
-	 * @see starcorp.server.turns.AOrderProcessor#process(starcorp.client.turns.TurnOrder)
-	 */
+	public static final int TIME_UNITS = 10;
+	
 	@Override
 	public TurnError process(TurnOrder order) {
-		// TODO Auto-generated method stub
-		return null;
+		TurnError error = null;
+		Corporation corp = order.getCorp();
+		int starshipId = order.getAsInt(0);
+		
+		Starship ship = (Starship) entityStore.load(starshipId);
+		
+		if(ship == null || !ship.getOwner().equals(corp)) {
+			error = new TurnError(TurnError.INVALID_SHIP);
+		}
+		else if(!ship.enoughTimeUnits(TIME_UNITS)) {
+			error = new TurnError(TurnError.INSUFFICIENT_TIME);
+		}
+		else if(ship.getPlanet() == null || ship.getPlanetLocation() != null) {
+			error = new TurnError(TurnError.INVALID_LOCATION);
+		}
+		else {
+			ship.incrementTimeUnitsUsed(TIME_UNITS);
+			OrderReport report = new OrderReport(order);
+			report.setScannedPlanet(ship.getPlanet());
+			report.setScannedColonies(entityStore.listColonies(ship.getPlanet()));
+			order.setReport(report);
+		}
+		
+		return error;	
+		
 	}
 
 }

@@ -25,13 +25,21 @@ public class TurnError {
 	public static final TurnError ERROR_EARLY_TURN = new TurnError("error.earlyturn");
 	
 	public static final String INVALID_ORDER_TYPE = "error.order.type";
+	public static final String INVALID_LOCATION = "error.order.location";
 	public static final String INVALID_COLONY = "error.colony";
+	public static final String INVALID_FACILITY = "error.facility";
 	public static final String INVALID_FACILITY_TYPE = "error.facility.type";
+	public static final String INSUFFICIENT_BUILDING_MODULES = "error.facility.modules";
 	public static final String NO_LEASE = "error.lease.none";
+	public static final String INVALID_SHIP = "error.ship";
 	public static final String INVALID_SHIP_DESIGN = "error.ship.design";
+	public static final String INSUFFICIENT_TIME = "error.ship.time";
+	public static final String OUT_OF_RANGE = "error.ship.range";
+	public static final String GRAVITY_TOO_HIGH = "error.ship.gravity";
+	public static final String INSUFFICIENT_SHIP_HULLS = "error.ship.hulls";
 	public static final String INVALID_ITEM = "error.item";
 	public static final String MARKET_OUT_OF_TRANSACTIONS = "error.market.transactions";
-	public static final String INSUFFICIENT_SHIP_HULLS = "error.ship.hulls";
+	public static final String INVALID_POP_CLASS = "error.pop.class";
 	
 	private String msgKey;
 	private TurnOrder order;

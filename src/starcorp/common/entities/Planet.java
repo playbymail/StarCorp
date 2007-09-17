@@ -11,9 +11,11 @@
 package starcorp.common.entities;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import starcorp.common.types.AtmosphereType;
+import starcorp.common.types.Coordinates2D;
 import starcorp.common.types.PlanetMapSquare;
 
 /**
@@ -28,6 +30,29 @@ public class Planet extends AStarSystemEntity {
 	private AtmosphereType atmosphereType;
 	private int gravityRating;
 	private Set<PlanetMapSquare> map = new HashSet<PlanetMapSquare>();
+	
+	public PlanetMapSquare get(Coordinates2D location) {
+		Iterator<PlanetMapSquare> i = map.iterator();
+		while(i.hasNext()) {
+			PlanetMapSquare sq = i.next();
+			if(sq.getLocation().equals(location)) {
+				return sq;
+			}
+		}
+		return null;
+	}
+	
+	public Planet set(PlanetMapSquare planetMapSquare) {
+		Iterator<PlanetMapSquare> i = map.iterator();
+		while(i.hasNext()) {
+			PlanetMapSquare sq = i.next();
+			if(sq.getLocation().equals(planetMapSquare.getLocation())) {
+				i.remove();
+			}
+		}
+		map.add(planetMapSquare);
+		return this;
+	}
 	
 	public Planet getOrbiting() {
 		return orbiting;

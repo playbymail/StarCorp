@@ -58,6 +58,7 @@ public class BuildStarship extends AOrderProcessor {
 			ship.setName(name);
 			ship.setOwner(corp);
 			ship.setPlanetLocation(colony.getLocation());
+			ship.setColony(colony);
 			ship.setSystem(colony.getPlanet().getSystem());
 			
 			boolean hasNeededHulls = true;
@@ -92,7 +93,6 @@ public class BuildStarship extends AOrderProcessor {
 				report.add(design.getID());
 				report.add(colony.getName());
 				report.add(colony.getID());
-				report.add(ship);
 				order.setReport(report);
 			}
 		}

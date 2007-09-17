@@ -14,64 +14,36 @@ import starcorp.client.turns.OrderReport;
 import starcorp.client.turns.TurnError;
 import starcorp.client.turns.TurnOrder;
 import starcorp.common.entities.Corporation;
-import starcorp.common.entities.StarSystem;
 import starcorp.common.entities.Starship;
-import starcorp.common.types.Coordinates3D;
 
 /**
- * starcorp.server.turns.Jump
+ * starcorp.server.turns.ProbeSystem
  *
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 16 Sep 2007
  */
-public class Jump extends AOrderProcessor {
-	public static final int TIME_UNITS = 20;
+public class ProbeSystem extends AOrderProcessor {
+	public static final int TIME_UNITS = 10;
 	
-	/* (non-Javadoc)
-	 * @see starcorp.server.turns.AOrderProcessor#process(starcorp.client.turns.TurnOrder)
-	 */
 	@Override
 	public TurnError process(TurnOrder order) {
 		TurnError error = null;
 		Corporation corp = order.getCorp();
 		int starshipId = order.getAsInt(0);
-		int systemId = order.getAsInt(1);
 		
 		Starship ship = (Starship) entityStore.load(starshipId);
-		StarSystem system = (StarSystem) entityStore.load(systemId);
 		
 		if(ship == null || !ship.getOwner().equals(corp)) {
 			error = new TurnError(TurnError.INVALID_SHIP);
-		}
-		else if(system == null) {
-			error = new TurnError(TurnError.INVALID_LOCATION);
 		}
 		else if(!ship.enoughTimeUnits(TIME_UNITS)) {
 			error = new TurnError(TurnError.INSUFFICIENT_TIME);
 		}
 		else {
-			if(ship.getPlanet() != null) {
-				error = new TurnError(TurnError.INVALID_LOCATION);
-			}
-			else {
-				Coordinates3D currentLocation = ship.getSystem().getLocation();
-				Coordinates3D targetLocation = system.getLocation();
-				int distance = targetLocation.getDistance(currentLocation);
-				if(distance > ship.getDesign().getJumpRange()) {
-					error = new TurnError(TurnError.OUT_OF_RANGE);
-				}
-				else {
-					ship.setSystem(system);
-					ship.incrementTimeUnitsUsed(TIME_UNITS);
-					OrderReport report = new OrderReport(order);
-					report.add(ship.getName());
-					report.add(ship.getID());
-					report.add(system.getName());
-					report.add(system.getID());
-					report.setScannedSystemEntities(entityStore.listSystemEntities(ship.getSystem(), ship.getLocation()));
-					order.setReport(report);
-				}
-			}
+			ship.incrementTimeUnitsUsed(TIME_UNITS);
+			OrderReport report = new OrderReport(order);
+			report.setScannedSystemEntities(entityStore.listSystemEntities(ship.getSystem(),ship.getLocation()));
+			order.setReport(report);
 		}
 		
 		return error;

@@ -27,6 +27,7 @@ import starcorp.common.types.StarshipHull;
 public class StarshipDesign extends ANamedEntity {
 
 	private Corporation owner;
+	private String name;
 	private GalacticDate designDate;
 	private Set<Items> hulls = new HashSet<Items>();
 	
@@ -178,15 +179,15 @@ public class StarshipDesign extends ANamedEntity {
 			totalThrust += item.getQuantity() * hull.getThrustPower();
 		}
 		int totalMass = getTotalMass();
-		return ((double) totalThrust / (double) totalMass);
+		return ((double) totalMass / (double) totalThrust);
 	}
 
 	public double getMaxOrbitGravity() {
-		return getImpulseSpeed() * 5;
+		return 5 / getImpulseSpeed();
 	}
 	
 	public double getMaxDockGravity() {
-		return getImpulseSpeed() * 3;
+		return 3 / getImpulseSpeed();
 	}
 	
 	public boolean canMineAsteroid() {
@@ -211,15 +212,16 @@ public class StarshipDesign extends ANamedEntity {
 		return false;
 	}
 
-	public boolean canScanGalaxy() {
+	public int getScanGalaxyRange() {
+		int range = 0;
 		Iterator<Items> i = hulls.iterator();
 		while(i.hasNext()) {
 			Items item = i.next();
 			StarshipHull hull = (StarshipHull) item.getTypeClass();
-			if(hull.isLongScanner())
-				return true;
+			range += hull.getLongScanner();
+			
 		}
-		return false;
+		return range;
 	}
 
 	public boolean canScanStarSystem() {
@@ -294,6 +296,45 @@ public class StarshipDesign extends ANamedEntity {
 	public void setOwner(Corporation owner) {
 		this.owner = owner;
 	}
+	
+	public Items getHulls(StarshipHull hullType) {
+		Iterator<Items> i = hulls.iterator();
+		while(i.hasNext()) {
+			Items item = i.next();
+			if(item.getTypeClass().equals(hullType)) {
+				return item;
+			}
+		}
+		return null;
+	}
+	
+	public Items setHulls(Items item) {
+		Iterator<Items> i = hulls.iterator();
+		while(i.hasNext()) {
+			Items item2 = i.next();
+			if(item2.getTypeClass().equals(item.getTypeClass())) {
+				item2.add(item.getQuantity());
+				item = item2;
+				i.remove();
+			}
+		}
+		hulls.add(item);
+		return item;
+	}
+	
+	public void addHulls(StarshipHull hullType, int quantity) {
+		Items item = getHulls(hullType);
+		if(item == null) {
+			item = new Items();
+			item.setQuantity(quantity);
+			item.setTypeClass(hullType);
+		}
+		else {
+			item.add(quantity);
+		}
+		setHulls(item);
+	}
+	
 	public Set<Items> getHulls() {
 		return hulls;
 	}
@@ -305,5 +346,13 @@ public class StarshipDesign extends ANamedEntity {
 	}
 	public void setDesignDate(GalacticDate designDate) {
 		this.designDate = designDate;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 }

@@ -10,24 +10,62 @@
  */
 package starcorp.server.turns.orders;
 
+import starcorp.client.turns.OrderReport;
 import starcorp.client.turns.TurnError;
 import starcorp.client.turns.TurnOrder;
+import starcorp.common.entities.Corporation;
+import starcorp.common.entities.Planet;
+import starcorp.common.entities.Starship;
 
 /**
- * starcorp.server.turns.BuildFacility
+ * starcorp.server.turns.Orbit
  *
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 16 Sep 2007
  */
 public class Orbit extends AOrderProcessor {
-
-	/* (non-Javadoc)
-	 * @see starcorp.server.turns.AOrderProcessor#process(starcorp.client.turns.TurnOrder)
-	 */
+	public static final int TIME_UNITS = 5;
 	@Override
 	public TurnError process(TurnOrder order) {
-		// TODO Auto-generated method stub
-		return null;
+		TurnError error = null;
+		Corporation corp = order.getCorp();
+		int starshipId = order.getAsInt(0);
+		int planetId = order.getAsInt(1);
+		
+		Starship ship = (Starship) entityStore.load(starshipId);
+		Planet planet = (Planet) entityStore.load(planetId);
+		
+		if(ship == null || !ship.getOwner().equals(corp)) {
+			error = new TurnError(TurnError.INVALID_SHIP);
+		}
+		else if(planet == null) {
+			error = new TurnError(TurnError.INVALID_LOCATION);
+		}
+		else if(!ship.enoughTimeUnits(TIME_UNITS)) {
+			error = new TurnError(TurnError.INSUFFICIENT_TIME);
+		}
+		else {
+			if(ship.getPlanet() != null) {
+				error = new TurnError(TurnError.INVALID_LOCATION);
+			}
+			else if(planet.getGravityRating() > ship.getDesign().getMaxOrbitGravity()){
+				error = new TurnError(TurnError.GRAVITY_TOO_HIGH);
+			}
+			else {
+				ship.setPlanet(planet);
+				ship.incrementTimeUnitsUsed(TIME_UNITS);
+				OrderReport report = new OrderReport(order);
+				report.add(ship.getName());
+				report.add(ship.getID());
+				report.add(planet.getName());
+				report.add(planet.getID());
+				report.setScannedShips(entityStore.listShips(planet));
+				order.setReport(report);
+			}
+		}
+		
+		return error;
+		
 	}
 
 }

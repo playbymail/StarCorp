@@ -66,8 +66,10 @@ public interface IEntityStore {
 	public abstract ABaseEntity load(int ID);
 	public abstract ABaseEntity save(ABaseEntity entity);
 	
+	public abstract List<StarSystem> listSystems(Coordinates3D origin, int range);
+	
 	public abstract List<AStarSystemEntity> listSystemEntities(StarSystem star);
-	public abstract List<AStarSystemEntity> listSystemEntities(StarSystem star, Coordinates3D location);
+	public abstract List<AStarSystemEntity> listSystemEntities(StarSystem star, CoordinatesPolar location);
 
 	public abstract List<ColonistGrant> listColonistGrants(Corporation owner, boolean openOnly);
 	public abstract List<ColonistGrant> listColonistGrants(Colony colony, boolean openOnly);
@@ -98,6 +100,7 @@ public interface IEntityStore {
 	public abstract List<Facility> listFacilities(Colony colony, Corporation owner, Class<?> type);
 	public abstract List<Facility> listFacilities(Colony colony, Class<?> type);
 	public abstract Facility getFacility(Colony colony, Corporation owner, Class<?> type);
+	public abstract Facility getFacility(Colony colony, Class<?> type);
 	
 	public abstract List<FacilityLease> listLeases(Corporation corp, boolean openOnly);
 	public abstract List<FacilityLease> listLeases(Colony colony, boolean openOnly);

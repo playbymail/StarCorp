@@ -10,24 +10,49 @@
  */
 package starcorp.server.turns.orders;
 
+import starcorp.client.turns.OrderReport;
 import starcorp.client.turns.TurnError;
 import starcorp.client.turns.TurnOrder;
+import starcorp.common.entities.Facility;
+import starcorp.common.types.AItemType;
+import starcorp.common.types.Items;
 
 /**
- * starcorp.server.turns.BuildFacility
+ * starcorp.server.turns.FactoryBuild
  *
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 16 Sep 2007
  */
 public class FactoryBuild extends AOrderProcessor {
 
-	/* (non-Javadoc)
-	 * @see starcorp.server.turns.AOrderProcessor#process(starcorp.client.turns.TurnOrder)
-	 */
 	@Override
 	public TurnError process(TurnOrder order) {
-		// TODO Auto-generated method stub
-		return null;
+		TurnError error = null;
+		int factoryId = order.getAsInt(0);
+		String itemTypeKey = order.get(1);
+		int quantity = order.getAsInt(2);
+		
+		Facility factory = (Facility) entityStore.load(factoryId);
+		AItemType type = AItemType.getType(itemTypeKey);
+		if(factory == null) {
+			error = new TurnError(TurnError.INVALID_FACILITY);
+		}
+		else if(type == null) {
+			error = new TurnError(TurnError.INVALID_ITEM);
+		}
+		else {
+			Items item = new Items();
+			item.setQuantity(quantity);
+			item.setTypeClass(type);
+			factory.queueItem(item);
+			
+			OrderReport report = new OrderReport(order);
+			report.add(factory.getID());
+			report.add(type.getName());
+			report.add(quantity);
+			order.setReport(report);
+		}
+		return error;
 	}
 
 }

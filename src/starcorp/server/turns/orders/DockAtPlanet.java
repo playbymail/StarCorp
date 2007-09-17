@@ -14,67 +14,72 @@ import starcorp.client.turns.OrderReport;
 import starcorp.client.turns.TurnError;
 import starcorp.client.turns.TurnOrder;
 import starcorp.common.entities.Corporation;
-import starcorp.common.entities.StarSystem;
+import starcorp.common.entities.Planet;
 import starcorp.common.entities.Starship;
-import starcorp.common.types.Coordinates3D;
+import starcorp.common.types.Coordinates2D;
+import starcorp.common.types.PlanetMapSquare;
 
 /**
- * starcorp.server.turns.Jump
+ * starcorp.server.turns.orders.DockAtPlanet
  *
  * @author Seyed Razavi <monkeyx@gmail.com>
- * @version 16 Sep 2007
+ * @version 17 Sep 2007
  */
-public class Jump extends AOrderProcessor {
-	public static final int TIME_UNITS = 20;
+public class DockAtPlanet extends AOrderProcessor {
+	public static final int TIME_UNITS = 10;
 	
-	/* (non-Javadoc)
-	 * @see starcorp.server.turns.AOrderProcessor#process(starcorp.client.turns.TurnOrder)
-	 */
 	@Override
 	public TurnError process(TurnOrder order) {
 		TurnError error = null;
 		Corporation corp = order.getCorp();
 		int starshipId = order.getAsInt(0);
-		int systemId = order.getAsInt(1);
+		int x = order.getAsInt(1);
+		int y = order.getAsInt(2);
 		
 		Starship ship = (Starship) entityStore.load(starshipId);
-		StarSystem system = (StarSystem) entityStore.load(systemId);
 		
 		if(ship == null || !ship.getOwner().equals(corp)) {
 			error = new TurnError(TurnError.INVALID_SHIP);
-		}
-		else if(system == null) {
-			error = new TurnError(TurnError.INVALID_LOCATION);
 		}
 		else if(!ship.enoughTimeUnits(TIME_UNITS)) {
 			error = new TurnError(TurnError.INSUFFICIENT_TIME);
 		}
 		else {
-			if(ship.getPlanet() != null) {
+			Planet planet = ship.getPlanet();
+			if(planet == null) {
 				error = new TurnError(TurnError.INVALID_LOCATION);
 			}
+			else if(planet.getGravityRating() > ship.getDesign().getMaxDockGravity()){
+				error = new TurnError(TurnError.GRAVITY_TOO_HIGH);
+			}
 			else {
-				Coordinates3D currentLocation = ship.getSystem().getLocation();
-				Coordinates3D targetLocation = system.getLocation();
-				int distance = targetLocation.getDistance(currentLocation);
-				if(distance > ship.getDesign().getJumpRange()) {
-					error = new TurnError(TurnError.OUT_OF_RANGE);
+				Coordinates2D location = new Coordinates2D();
+				location.setX(x);
+				location.setY(y);
+				PlanetMapSquare sq = planet.get(location);
+				if(sq == null) {
+					error = new TurnError(TurnError.INVALID_LOCATION);
 				}
 				else {
-					ship.setSystem(system);
+					ship.setPlanetLocation(location);
 					ship.incrementTimeUnitsUsed(TIME_UNITS);
 					OrderReport report = new OrderReport(order);
 					report.add(ship.getName());
 					report.add(ship.getID());
-					report.add(system.getName());
-					report.add(system.getID());
-					report.setScannedSystemEntities(entityStore.listSystemEntities(ship.getSystem(), ship.getLocation()));
+					report.add(planet.getName());
+					report.add(planet.getID());
+					report.add(x);
+					report.add(y);
+					report.add(sq.getTerrain().getName());
+					report.setScannedColony(entityStore.getColony(planet, location));
+					report.setScannedShips(entityStore.listShips(planet, location));
 					order.setReport(report);
 				}
 			}
 		}
 		
 		return error;
+		
 	}
 
 }

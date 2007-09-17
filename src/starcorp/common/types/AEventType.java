@@ -15,6 +15,9 @@ import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import starcorp.client.turns.OrderReport;
+import starcorp.common.entities.ABaseEntity;
+
 /**
  * starcorp.common.types.EventType
  *
@@ -26,6 +29,8 @@ public abstract class AEventType extends ABaseType {
 	
 	private static Map<String, AEventType> types = new HashMap<String, AEventType>(); 
 
+	public abstract OrderReport trigger(ABaseEntity entity);
+	
 	/**
 	 * @param type
 	 */

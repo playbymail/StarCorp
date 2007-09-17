@@ -11,11 +11,38 @@
 package starcorp.common.types;
 
 /**
- * starcorp.common.types.ResourceType
+ * starcorp.common.types.Resource
  *
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 15 Sep 2007
  */
 public class Resource extends AItemType {
+	
+	public boolean isOrganic() {
+		return Boolean.parseBoolean(getResource(this, "organic"));
+	}
 
+	public boolean isMinerals() {
+		return Boolean.parseBoolean(getResource(this, "mineral"));
+	}
+
+	public boolean isMetal() {
+		return Boolean.parseBoolean(getResource(this, "metal"));
+	}
+
+	public boolean isFissile() {
+		return Boolean.parseBoolean(getResource(this, "fissile"));
+	}
+
+	public boolean isFuel() {
+		return Boolean.parseBoolean(getResource(this, "fuel"));
+	}
+
+	public boolean isGas() {
+		return Boolean.parseBoolean(getResource(this, "gas"));
+	}
+
+	public boolean isLiquid() {
+		return Boolean.parseBoolean(getResource(this, "liquid"));
+	}
 }

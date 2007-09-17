@@ -10,8 +10,19 @@
  */
 package starcorp.server.turns.orders;
 
+import starcorp.client.turns.OrderReport;
 import starcorp.client.turns.TurnError;
 import starcorp.client.turns.TurnOrder;
+import starcorp.common.entities.Colony;
+import starcorp.common.entities.Corporation;
+import starcorp.common.entities.Facility;
+import starcorp.common.entities.MarketItem;
+import starcorp.common.entities.Starship;
+import starcorp.common.types.AItemType;
+import starcorp.common.types.ColonyHub;
+import starcorp.common.types.GalacticDate;
+import starcorp.common.types.Items;
+import starcorp.common.types.OrbitalDock;
 
 /**
  * starcorp.server.turns.BuildFacility
@@ -21,13 +32,78 @@ import starcorp.client.turns.TurnOrder;
  */
 public class ShipSellItem extends AOrderProcessor {
 
-	/* (non-Javadoc)
-	 * @see starcorp.server.turns.AOrderProcessor#process(starcorp.client.turns.TurnOrder)
-	 */
-	@Override
 	public TurnError process(TurnOrder order) {
-		// TODO Auto-generated method stub
-		return null;
+		TurnError error = null;
+		OrderReport report = null;
+		Corporation corp = order.getCorp();
+		int starshipId = order.getAsInt(0);
+		int colonyId = order.getAsInt(1);
+		String itemTypeKey = order.get(2);
+		int quantity = order.getAsInt(3);
+		int price = order.getAsInt(4);
+		
+		Starship ship = (Starship) entityStore.load(starshipId);
+		Colony colony = (Colony) entityStore.load(colonyId);
+		AItemType type = AItemType.getType(itemTypeKey);
+		
+		Facility colonyHub = entityStore.getFacility(colony, colony.getGovernment(), ColonyHub.class);
+		Facility orbitalDock = entityStore.getFacility(colony, OrbitalDock.class);
+		
+		if(ship == null || !ship.getOwner().equals(corp)) {
+			error = new TurnError(TurnError.INVALID_SHIP);
+		}
+		else if(colony == null) {
+			error = new TurnError(TurnError.INVALID_COLONY);
+		}
+		else if(ship.getPlanet() == null || !ship.getPlanet().equals(colony.getPlanet())) {
+			error = new TurnError(TurnError.INVALID_LOCATION);
+		}
+		else if(ship.getColony() != null && !ship.getColony().equals(colony)) {
+			error = new TurnError(TurnError.INVALID_COLONY);
+		}
+		else if(ship.getColony() == null && orbitalDock == null) {
+			error = new TurnError(TurnError.INVALID_LOCATION);
+		}
+		else if(colonyHub == null) {
+			error = new TurnError(TurnError.INVALID_COLONY);
+		}
+		else if(colonyHub.getTransactionsRemaining() < 1) {
+			error = new TurnError(TurnError.MARKET_OUT_OF_TRANSACTIONS);
+		}
+		else if(orbitalDock != null && ship.getColony() == null && orbitalDock.getTransactionsRemaining() < 1) {
+			error = new TurnError(TurnError.MARKET_OUT_OF_TRANSACTIONS);
+		}
+		else {
+			Items cargo = ship.getCargo(type);
+			if(quantity > cargo.getQuantity()) {
+				quantity = cargo.getQuantity();
+			}
+			MarketItem item = new MarketItem();
+			item.setColony(colony);
+			item.setCostPerItem(price);
+			item.setIssuedDate(GalacticDate.getCurrentDate());
+			item.setSeller(corp);
+			entityStore.save(item);
+			
+			ship.removeCargo(type, quantity);
+			
+			corp.remove(colonyHub.getServiceCharge());
+			colonyHub.incTransactionCount();
+			if(orbitalDock != null && ship.getColony() == null) {
+				corp.remove(orbitalDock.getServiceCharge());
+				orbitalDock.incTransactionCount();
+			}
+			report = new OrderReport(order);
+			report.add(ship.getName());
+			report.add(ship.getID());
+			report.add(quantity);
+			report.add(price);
+			report.add(type.getName());
+			report.add(colony.getName());
+			report.add(colony.getID());
+			order.setReport(report);
+		}
+		return error;
 	}
 
 }

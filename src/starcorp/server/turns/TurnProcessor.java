@@ -53,6 +53,7 @@ public class TurnProcessor {
 				Iterator<TurnOrder> i = turn.getOrders().iterator();
 				while(i.hasNext()) {
 					TurnOrder order = i.next();
+					order.setCorp(corp);
 					TurnError error = process(order);
 					if(error != null) {
 						turn.add(error);
