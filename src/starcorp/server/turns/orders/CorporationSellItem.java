@@ -10,11 +10,23 @@
  */
 package starcorp.server.turns.orders;
 
+import java.util.List;
+
 import starcorp.client.turns.TurnError;
 import starcorp.client.turns.TurnOrder;
+import starcorp.common.entities.ActionReport;
+import starcorp.common.entities.Colony;
+import starcorp.common.entities.ColonyItem;
+import starcorp.common.entities.Corporation;
+import starcorp.common.entities.Facility;
+import starcorp.common.entities.MarketItem;
+import starcorp.common.types.AItemType;
+import starcorp.common.types.ColonyHub;
+import starcorp.common.types.GalacticDate;
+import starcorp.common.types.Items;
 
 /**
- * starcorp.server.turns.BuildFacility
+ * starcorp.server.turns.CorporationSellItem
  *
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 16 Sep 2007
@@ -26,8 +38,41 @@ public class CorporationSellItem extends AOrderProcessor {
 	 */
 	@Override
 	public TurnError process(TurnOrder order) {
-		// TODO Auto-generated method stub
-		return null;
+		TurnError error = null;
+		Corporation corp = order.getCorp();
+		int colonyId = order.getAsInt(0);
+		String itemTypeKey = order.get(1);
+		int quantity = order.getAsInt(2);
+		int price = order.getAsInt(3);
+		
+		Colony colony = (Colony) entityStore.load(colonyId);
+		AItemType type = AItemType.getType(itemTypeKey);
+		Facility colonyHub = entityStore.getFacility(colony, corp, ColonyHub.class);
+		ColonyItem colonyItem = entityStore.getItem(colony, corp, type);
+		
+		if(colony == null) {
+			error = new TurnError(TurnError.INVALID_COLONY);
+		}
+		else if(colonyHub == null) {
+			error = new TurnError(TurnError.INVALID_COLONY);
+		}
+		else if(colonyItem == null) {
+			error = new TurnError(TurnError.INVALID_ITEM);
+		}
+		else {
+			MarketItem marketItem = new MarketItem();
+			marketItem.setColony(colony);
+			marketItem.setCostPerItem(price);
+			marketItem.setIssuedDate(GalacticDate.getCurrentDate());
+			marketItem.setSeller(corp);
+			
+			ActionReport report = corp.sellItem(type, quantity, colonyItem, marketItem, colonyHub);
+		
+			if(report.isSuccess()) {
+				entityStore.save(marketItem);
+			}
+		}
+		return error;
 	}
 
 }

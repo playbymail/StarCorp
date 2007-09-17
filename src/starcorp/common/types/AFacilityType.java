@@ -10,9 +10,11 @@
  */
 package starcorp.common.types;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -45,13 +47,10 @@ public abstract class AFacilityType extends ABaseType {
 					type.key = key.substring(0, key.indexOf(".class"));
 					types.put(type.getKey(), type);
 				} catch (InstantiationException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (IllegalAccessException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (ClassNotFoundException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -64,6 +63,18 @@ public abstract class AFacilityType extends ABaseType {
 	 */
 	public static AFacilityType getType(String key) {
 		return types.get(key);
+	}
+	
+	public static List<AFacilityType> listTypes(Class<?> typeClass) {
+		List<AFacilityType> types = new ArrayList<AFacilityType>();
+		Iterator<Map.Entry<String, AFacilityType>> i = AFacilityType.types.entrySet().iterator();
+		while(i.hasNext()) {
+			Map.Entry<String, AFacilityType> entry = i.next();
+			if(entry.getValue().getClass().equals(typeClass)) {
+				types.add(entry.getValue());
+			}
+		}
+		return types;
 	}
 	
 	/**

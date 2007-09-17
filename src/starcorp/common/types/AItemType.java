@@ -46,13 +46,10 @@ public abstract class AItemType extends ABaseType {
 					type.key = key.substring(0, key.indexOf(".class"));
 					types.put(type.getKey(), type);
 				} catch (InstantiationException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (IllegalAccessException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (ClassNotFoundException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}

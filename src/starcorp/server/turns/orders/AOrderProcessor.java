@@ -47,13 +47,10 @@ public abstract class AOrderProcessor {
 					processor.key = key.substring(0, key.indexOf(".class"));
 					processors.put(processor.getKey(), processor);
 				} catch (InstantiationException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (IllegalAccessException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (ClassNotFoundException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}

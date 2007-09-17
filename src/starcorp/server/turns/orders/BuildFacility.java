@@ -38,6 +38,7 @@ public class BuildFacility extends AOrderProcessor {
 	 */
 	@Override
 	public TurnError process(TurnOrder order) {
+		// TODO check for existing colony hub / orbital dock before building
 		TurnError error = null;
 		Corporation corp = order.getCorp();
 		int colonyId = order.getAsInt(0);

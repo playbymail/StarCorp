@@ -10,11 +10,28 @@
  */
 package starcorp.server.turns.orders;
 
+import java.util.Iterator;
+import java.util.List;
+
 import starcorp.client.turns.TurnError;
 import starcorp.client.turns.TurnOrder;
+import starcorp.common.entities.ActionReport;
+import starcorp.common.entities.Colony;
+import starcorp.common.entities.ColonyItem;
+import starcorp.common.entities.Corporation;
+import starcorp.common.entities.DevelopmentGrant;
+import starcorp.common.entities.Facility;
+import starcorp.common.entities.FacilityLease;
+import starcorp.common.entities.MarketItem;
+import starcorp.common.types.AFacilityType;
+import starcorp.common.types.AItemType;
+import starcorp.common.types.BuildingModule;
+import starcorp.common.types.ColonyHub;
+import starcorp.common.types.GalacticDate;
+import starcorp.common.types.Items;
 
 /**
- * starcorp.server.turns.BuildFacility
+ * starcorp.server.turns.CorporationBuyItem
  *
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 16 Sep 2007
@@ -26,8 +43,41 @@ public class CorporationBuyItem extends AOrderProcessor {
 	 */
 	@Override
 	public TurnError process(TurnOrder order) {
-		// TODO Auto-generated method stub
-		return null;
+		TurnError error = null;
+		Corporation corp = order.getCorp();
+		int colonyId = order.getAsInt(0);
+		String itemTypeKey = order.get(1);
+		int quantity = order.getAsInt(2);
+		
+		Colony colony = (Colony) entityStore.load(colonyId);
+		AItemType type = AItemType.getType(itemTypeKey);
+		List<MarketItem> marketItems = entityStore.listMarket(colony, 1);
+		Facility colonyHub = entityStore.getFacility(colony, corp, ColonyHub.class);
+		
+		if(colony == null) {
+			error = new TurnError(TurnError.INVALID_COLONY);
+		}
+		else if(colonyHub == null) {
+			error = new TurnError(TurnError.INVALID_COLONY);
+		}
+		else {	
+			ColonyItem colonyItem = entityStore.getItem(colony, corp, type);
+			if(colonyItem == null) {
+				colonyItem = new ColonyItem();
+				Items item = new Items();
+				item.setTypeClass(type);
+				colonyItem.setColony(colony);
+				colonyItem.setItem(item);
+				colonyItem.setOwner(corp);
+			}
+			
+			ActionReport report = corp.buyItem(type, quantity, colonyItem, marketItems, colonyHub);
+		
+			if(report.isSuccess()) {
+				entityStore.save(colonyItem);
+			}
+		}
+		return error;
 	}
 
 }

@@ -29,6 +29,7 @@ public class TurnError {
 	public static final String INVALID_FACILITY_TYPE = "error.facility.type";
 	public static final String NO_LEASE = "error.lease.none";
 	public static final String INVALID_SHIP_DESIGN = "error.ship.design";
+	public static final String INVALID_ITEM = "error.item";
 	
 	private String msgKey;
 	private TurnOrder order;

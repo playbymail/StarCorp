@@ -101,6 +101,9 @@ public interface IEntityStore {
 	public abstract List<Facility> listFacilities(Colony colony);
 	public abstract List<Facility> listFacilities(Colony colony, Corporation owner);
 	public abstract List<Facility> listFacilities(Corporation owner);
+	public abstract List<Facility> listFacilities(Colony colony, Corporation owner, AFacilityType type);
+	public abstract List<Facility> listFacilities(Colony colony, Corporation owner, Class<?> type);
+	public abstract Facility getFacility(Colony colony, Corporation owner, Class<?> type);
 	
 	public abstract List<FacilityLease> listLeases(Corporation corp, boolean openOnly);
 	public abstract List<FacilityLease> listLeases(Colony colony, boolean openOnly);
