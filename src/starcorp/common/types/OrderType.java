@@ -30,6 +30,7 @@ public class OrderType extends ABaseType {
 	public static final String ISSUE_DEVELOPMENT_GRANT = "grant-development";
 	public static final String ISSUE_LEASE = "lease";
 	public static final String FACTORY_BUILD = "build";
+	public static final String SET_SALARY = "salary";
 	public static final String CORP_BUY_ITEM = "corp-buy";
 	public static final String CORP_SELL_ITEM = "sell-item";
 	public static final String SHIP_BUY_ITEM = "ship-buy";
