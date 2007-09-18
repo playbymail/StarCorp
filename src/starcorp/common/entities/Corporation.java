@@ -10,6 +10,10 @@
  */
 package starcorp.common.entities;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import starcorp.common.types.CashTransaction;
 import starcorp.common.types.GalacticDate;
 
 /**
@@ -26,18 +30,17 @@ public class Corporation extends ANamedEntity {
 	private int credits;
 	private GalacticDate foundedDate;
 	private GalacticDate lastTurnDate;
+	private Set<CashTransaction> transactions = new HashSet<CashTransaction>();
 	
-	public int add(int credits) {
+	public int add(int credits, String description) {
 		this.credits += credits;
+		transactions.add(new CashTransaction(credits,description));
 		return this.credits;
 	}
 	
-	public int remove(int credits) {
-		if(credits > this.credits) {
-			credits = this.credits;
-		}
+	public void remove(int credits, String description) {
 		this.credits -= credits;
-		return credits;
+		transactions.add(new CashTransaction((0 - credits),description));
 	}
 	
 	public boolean hasCredits(int credits) {
@@ -83,5 +86,13 @@ public class Corporation extends ANamedEntity {
 
 	public void setLastTurnDate(GalacticDate lastTurnDate) {
 		this.lastTurnDate = lastTurnDate;
+	}
+
+	public Set<CashTransaction> getTransactions() {
+		return transactions;
+	}
+
+	public void setTransactions(Set<CashTransaction> transactions) {
+		this.transactions = transactions;
 	}
 }

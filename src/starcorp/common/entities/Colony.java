@@ -10,11 +10,6 @@
  */
 package starcorp.common.entities;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import starcorp.common.types.ColonistHappiness;
-import starcorp.common.types.Colonists;
 import starcorp.common.types.Coordinates2D;
 import starcorp.common.types.GalacticDate;
 
@@ -30,8 +25,6 @@ public class Colony extends ANamedEntity {
 	private Planet planet;
 	private Coordinates2D location;
 	private double hazardLevel;
-	private Set<Colonists> unemployed = new HashSet<Colonists>();
-	private Set<ColonistHappiness> happiness = new HashSet<ColonistHappiness>();
 	private GalacticDate foundedDate;
 	
 	public Corporation getGovernment() {
@@ -57,18 +50,6 @@ public class Colony extends ANamedEntity {
 	}
 	public void setHazardLevel(double hazardLevel) {
 		this.hazardLevel = hazardLevel;
-	}
-	public Set<Colonists> getUnemployed() {
-		return unemployed;
-	}
-	public void setUnemployed(Set<Colonists> unemployed) {
-		this.unemployed = unemployed;
-	}
-	public Set<ColonistHappiness> getHappiness() {
-		return happiness;
-	}
-	public void setHappiness(Set<ColonistHappiness> happiness) {
-		this.happiness = happiness;
 	}
 	public GalacticDate getFoundedDate() {
 		return foundedDate;

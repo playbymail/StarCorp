@@ -10,6 +10,10 @@
  */
 package starcorp.common.types;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 /**
  * starcorp.common.types.ConsumerGoods
  *
@@ -17,6 +21,55 @@ package starcorp.common.types;
  * @version 16 Sep 2007
  */
 public class ConsumerGoods extends TradeGoods {
+	
+	public static List<AItemType> listFood(int quality) {
+		List<AItemType> types = new ArrayList<AItemType>();
+		Iterator<AItemType> i = AItemType.listTypes(ConsumerGoods.class).iterator();
+		while(i.hasNext()) {
+			ConsumerGoods goods = (ConsumerGoods) i.next();
+			if(goods.isFood() && goods.getQuality() == quality) {
+				types.add(goods);
+			}
+		}
+		return types;
+	}
+	
+	public static List<AItemType> listDrink(int quality) {
+		List<AItemType> types = new ArrayList<AItemType>();
+		Iterator<AItemType> i = AItemType.listTypes(ConsumerGoods.class).iterator();
+		while(i.hasNext()) {
+			ConsumerGoods goods = (ConsumerGoods) i.next();
+			if(goods.isDrink() && goods.getQuality() == quality) {
+				types.add(goods);
+			}
+		}
+		return types;
+	}
+	
+	public static List<AItemType> listIntoxicant(int quality) {
+		List<AItemType> types = new ArrayList<AItemType>();
+		Iterator<AItemType> i = AItemType.listTypes(ConsumerGoods.class).iterator();
+		while(i.hasNext()) {
+			ConsumerGoods goods = (ConsumerGoods) i.next();
+			if(goods.isIntoxicant() && goods.getQuality() == quality) {
+				types.add(goods);
+			}
+		}
+		return types;
+	}
+	
+	public static List<AItemType> listClothes(int quality) {
+		List<AItemType> types = new ArrayList<AItemType>();
+		Iterator<AItemType> i = AItemType.listTypes(ConsumerGoods.class).iterator();
+		while(i.hasNext()) {
+			ConsumerGoods goods = (ConsumerGoods) i.next();
+			if(goods.isClothes() && goods.getQuality() == quality) {
+				types.add(goods);
+			}
+		}
+		return types;
+	}
+	
 	public int getQuality() {
 		return Integer.parseInt(getResource(this, "quality"));
 	}

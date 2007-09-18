@@ -10,6 +10,11 @@
  */
 package starcorp.common.entities;
 
+import java.util.Iterator;
+import java.util.List;
+
+import starcorp.common.types.AItemType;
+import starcorp.common.types.CashTransaction;
 import starcorp.common.types.GalacticDate;
 import starcorp.common.types.Items;
 
@@ -27,6 +32,45 @@ public class MarketItem extends ABaseEntity {
 	private int costPerItem;
 	private GalacticDate issuedDate;
 	private GalacticDate soldDate;
+	
+	public static class BuyResult {
+		public int quantityBought;
+		public int totalPrice;
+	}
+	
+	public static BuyResult buy(List<MarketItem> items, int quantity, int cashAvailable) {
+		BuyResult result = new BuyResult();
+		
+		Iterator<MarketItem> i = items.iterator();
+		while(i.hasNext() && result.quantityBought < quantity) {
+			MarketItem item = i.next();
+			AItemType type = item.getItem().getTypeClass();
+			int qty = quantity - result.quantityBought;
+			int avail = item.getItem().getQuantity();
+			int afford = cashAvailable / item.getCostPerItem();
+			if(afford < qty) {
+				qty = afford;
+			}
+			if(avail < qty) {
+				qty = avail;
+			}
+			int price = qty * item.getCostPerItem();
+			
+			Object[] args = {type.getName(), String.valueOf(qty)};
+			String desc = CashTransaction.getDescription(CashTransaction.ITEM_SOLD, args);
+			item.getSeller().add(price, desc);
+			item.getItem().remove(qty);
+			if(item.getItem().getQuantity() < 1) {
+				item.setSoldDate(GalacticDate.getCurrentDate());
+			}
+			result.quantityBought += qty;
+			result.totalPrice += price;
+			cashAvailable -= price;
+		}
+		
+		return result;
+	}
+	
 	public Colony getColony() {
 		return colony;
 	}

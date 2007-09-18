@@ -12,6 +12,7 @@ package starcorp.common.types;
 
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -65,6 +66,14 @@ public class PopulationClass extends ABaseType {
 		}
 	}
 	
+	public static int countTypes() {
+		return types.size();
+	}
+	
+	public static Iterator<String> typeKeys() {
+		return types.keySet().iterator();
+	}
+	
 	private String key;
 	
 	public PopulationClass(String key) {
@@ -85,4 +94,7 @@ public class PopulationClass extends ABaseType {
 		return getResource(this, "name");
 	}
 	
+	public int getQualityRequired() {
+		return Integer.parseInt(getResource(this, "quality"));
+	}
 }

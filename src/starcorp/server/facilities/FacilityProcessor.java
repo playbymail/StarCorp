@@ -8,28 +8,14 @@
  *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
  *  See the License for the specific language governing permissions and limitations under the License. 
  */
-package starcorp.common.types;
+package starcorp.server.facilities;
 
 /**
- * starcorp.common.types.Colonists
+ * starcorp.server.facilities.FacilityProcessor
  *
  * @author Seyed Razavi <monkeyx@gmail.com>
- * @version 15 Sep 2007
+ * @version 18 Sep 2007
  */
-public class Colonists {
+public class FacilityProcessor {
 
-	private int quantity;
-	private PopulationClass popClass;
-	public int getQuantity() {
-		return quantity;
-	}
-	public void setQuantity(int quantity) {
-		this.quantity = quantity;
-	}
-	public PopulationClass getPopClass() {
-		return popClass;
-	}
-	public void setPopClass(PopulationClass popClass) {
-		this.popClass = popClass;
-	}
 }

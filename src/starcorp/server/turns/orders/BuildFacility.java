@@ -21,6 +21,7 @@ import starcorp.common.entities.DevelopmentGrant;
 import starcorp.common.entities.Facility;
 import starcorp.common.entities.FacilityLease;
 import starcorp.common.types.AFacilityType;
+import starcorp.common.types.CashTransaction;
 import starcorp.common.types.ColonyHub;
 import starcorp.common.types.GalacticDate;
 import starcorp.common.types.Items;
@@ -104,8 +105,11 @@ public class BuildFacility extends AOrderProcessor {
 					lease.setUsedDate(GalacticDate.getCurrentDate());
 					
 					if(grant != null) {
-						grant.getColony().getGovernment().remove(grant.getGrant());
-						corp.add(grant.getGrant());
+						Object[] args = {facilityType.getName()};
+						String govtDesc = CashTransaction.getDescription(CashTransaction.GRANT_PAID, args);
+						String corpDesc = CashTransaction.getDescription(CashTransaction.GRANT_RECEIVED, args);
+						grant.getColony().getGovernment().remove(grant.getGrant(), govtDesc);
+						corp.add(grant.getGrant(), corpDesc);
 					}
 					
 					entityStore.save(facility);

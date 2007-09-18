@@ -64,7 +64,7 @@ public abstract class AItemType extends ABaseType {
 		return types.get(key);
 	}
 	
-	public List<AItemType> listTypes(Class<?> typeClass) {
+	public static List<AItemType> listTypes(Class<?> typeClass) {
 		List<AItemType> types = new ArrayList<AItemType>();
 		
 		Iterator<Map.Entry<String, AItemType>> i = AItemType.types.entrySet().iterator();

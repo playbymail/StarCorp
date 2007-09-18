@@ -21,6 +21,9 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import starcorp.common.entities.AColonists;
+import starcorp.common.entities.Workers;
+
 /**
  * starcorp.common.types.FacilityType
  *
@@ -115,8 +118,12 @@ public abstract class AFacilityType extends ABaseType {
 		return Integer.parseInt(getResource(this, "power"));
 	}
 	
-	public Map<PopulationClass, Colonists> getWorkerRequirement() {
-		HashMap<PopulationClass, Colonists> workers = new HashMap<PopulationClass, Colonists>();
+	public Population getWorkerRequirement(PopulationClass popClass) {
+		return getWorkerRequirement().get(popClass);
+	}
+	
+	public Map<PopulationClass, Population> getWorkerRequirement() {
+		HashMap<PopulationClass, Population> workers = new HashMap<PopulationClass, Population>();
 		Enumeration<String> keys = bundle.getKeys();
 		while(keys.hasMoreElements()) {
 			String key = keys.nextElement();
@@ -124,7 +131,7 @@ public abstract class AFacilityType extends ABaseType {
 			if((i = key.indexOf(".worker.type")) != -1) {
 				String facilityKey = key.substring(0, i);
 				String workerNumber = key.substring(key.lastIndexOf(".") + 1);
-				Colonists colonist = new Colonists();
+				Population colonist = new Population();
 				PopulationClass popClass = PopulationClass.getType(bundle.getString(key));
 				colonist.setPopClass(popClass);
 				colonist.setQuantity(Integer.parseInt(bundle.getString(facilityKey + ".worker.qty." + workerNumber)));
@@ -152,8 +159,8 @@ public abstract class AFacilityType extends ABaseType {
 		return modules;
 	}
 	
-	public double getEfficiency(Set<Colonists> currentWorkers) {
-		Map<PopulationClass, Colonists> requiredWorkers = getWorkerRequirement();
+	public double getEfficiency(List<Workers> currentWorkers) {
+		Map<PopulationClass, Population> requiredWorkers = getWorkerRequirement();
 		Iterator<PopulationClass> i = requiredWorkers.keySet().iterator();
 		
 		int requiredTotal = 0;
@@ -161,15 +168,16 @@ public abstract class AFacilityType extends ABaseType {
 		
 		while(i.hasNext()) {
 			PopulationClass popClass = i.next();
-			Colonists c = requiredWorkers.get(popClass);
+			Population c = requiredWorkers.get(popClass);
 			requiredTotal += c.getQuantity();
 		}
 		
-		Iterator<Colonists> n = currentWorkers.iterator();
+		Iterator<Workers> n = currentWorkers.iterator();
 		
 		while(n.hasNext()) {
-			Colonists c1 = n.next();
-			Colonists c2 = requiredWorkers.get(c1.getPopClass());
+			AColonists w = n.next();
+			Population c1 = w.getPopulation();
+			Population c2 = requiredWorkers.get(c1.getPopClass());
 			if(c2 != null) {
 				if(c1.getQuantity() <= c2.getQuantity()) {
 					currentTotal += c1.getQuantity();

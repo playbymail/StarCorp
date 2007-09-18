@@ -10,6 +10,8 @@
  */
 package starcorp.server.turns.orders;
 
+import java.util.List;
+
 import starcorp.client.turns.OrderReport;
 import starcorp.client.turns.TurnError;
 import starcorp.client.turns.TurnOrder;
@@ -18,6 +20,7 @@ import starcorp.common.entities.ColonyItem;
 import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Facility;
 import starcorp.common.entities.MarketItem;
+import starcorp.common.entities.Workers;
 import starcorp.common.types.AItemType;
 import starcorp.common.types.ColonyHub;
 import starcorp.common.types.GalacticDate;
@@ -45,6 +48,7 @@ public class CorporationSellItem extends AOrderProcessor {
 		AItemType type = AItemType.getType(itemTypeKey);
 		Facility colonyHub = entityStore.getFacility(colony, colony.getGovernment(), ColonyHub.class);
 		ColonyItem colonyItem = entityStore.getItem(colony, corp, type);
+		List<Workers> workers = entityStore.listWorkers(colonyHub);
 		
 		if(colony == null) {
 			error = new TurnError(TurnError.INVALID_COLONY);
@@ -55,7 +59,7 @@ public class CorporationSellItem extends AOrderProcessor {
 		else if(colonyItem == null) {
 			error = new TurnError(TurnError.INVALID_ITEM);
 		}
-		else if(colonyHub.getTransactionsRemaining() < 1) {
+		else if(colonyHub.getTransactionsRemaining(workers) < 1) {
 			error = new TurnError(TurnError.MARKET_OUT_OF_TRANSACTIONS);
 		}
 		else {

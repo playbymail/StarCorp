@@ -8,24 +8,25 @@
  *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
  *  See the License for the specific language governing permissions and limitations under the License. 
  */
-package starcorp.common.types;
+package starcorp.common.entities;
+
 
 /**
- * starcorp.common.types.ColonistSalary
+ * starcorp.common.entities.Worker
  *
  * @author Seyed Razavi <monkeyx@gmail.com>
- * @version 15 Sep 2007
+ * @version 18 Sep 2007
  */
-public class ColonistSalary {
+public class Workers extends AColonists {
 
+	private Facility facility;
 	private int salary;
-	private PopulationClass popClass;
 	
-	public PopulationClass getPopClass() {
-		return popClass;
+	public Facility getFacility() {
+		return facility;
 	}
-	public void setPopClass(PopulationClass popClass) {
-		this.popClass = popClass;
+	public void setFacility(Facility facility) {
+		this.facility = facility;
 	}
 	public int getSalary() {
 		return salary;
@@ -33,4 +34,9 @@ public class ColonistSalary {
 	public void setSalary(int salary) {
 		this.salary = salary;
 	}
+	@Override
+	public Corporation getEmployer() {
+		return facility.getOwner();
+	}
+	
 }

@@ -10,7 +10,10 @@
  */
 package starcorp.common.types;
 
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import starcorp.common.entities.Workers;
 
 /**
  * starcorp.common.types.ServiceFacility
@@ -20,11 +23,60 @@ import java.util.Set;
  */
 public class ServiceFacility extends AFacilityType {
 
+	public static List<AFacilityType> listMedical(int quality) {
+		List<AFacilityType> types = new ArrayList<AFacilityType>();
+		Iterator<AFacilityType> i = AFacilityType.listTypes(ServiceFacility.class).iterator();
+		while(i.hasNext()) {
+			ServiceFacility facility = (ServiceFacility) i.next();
+			if(facility.isMedical() && facility.getQuality() == quality) {
+				types.add(facility);
+			}
+		}
+		return types;
+	}
+	
+
+	public static List<AFacilityType> listFitness(int quality) {
+		List<AFacilityType> types = new ArrayList<AFacilityType>();
+		Iterator<AFacilityType> i = AFacilityType.listTypes(ServiceFacility.class).iterator();
+		while(i.hasNext()) {
+			ServiceFacility facility = (ServiceFacility) i.next();
+			if(facility.isFitness() && facility.getQuality() == quality) {
+				types.add(facility);
+			}
+		}
+		return types;
+	}
+	
+	public static List<AFacilityType> listEntertainment(int quality) {
+		List<AFacilityType> types = new ArrayList<AFacilityType>();
+		Iterator<AFacilityType> i = AFacilityType.listTypes(ServiceFacility.class).iterator();
+		while(i.hasNext()) {
+			ServiceFacility facility = (ServiceFacility) i.next();
+			if(facility.isEntertainment() && facility.getQuality() == quality) {
+				types.add(facility);
+			}
+		}
+		return types;
+	}
+	
+	public static List<AFacilityType> listEducation(int quality) {
+		List<AFacilityType> types = new ArrayList<AFacilityType>();
+		Iterator<AFacilityType> i = AFacilityType.listTypes(ServiceFacility.class).iterator();
+		while(i.hasNext()) {
+			ServiceFacility facility = (ServiceFacility) i.next();
+			if(facility.isEducation() && facility.getQuality() == quality) {
+				types.add(facility);
+			}
+		}
+		return types;
+	}
+	
 	public int getQuality() {
 		return Integer.parseInt(getResource(this, "quality"));
 	}
 	
-	public int getTotalColonistsServiceable(Set<Colonists> currentWorkers) {
+	public int getTotalColonistsServiceable(List<Workers> currentWorkers) {
 		double efficiency = getEfficiency(currentWorkers);
 		
 		if(efficiency < 1) {

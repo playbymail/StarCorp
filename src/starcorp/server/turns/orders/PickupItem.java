@@ -10,6 +10,8 @@
  */
 package starcorp.server.turns.orders;
 
+import java.util.List;
+
 import starcorp.client.turns.OrderReport;
 import starcorp.client.turns.TurnError;
 import starcorp.client.turns.TurnOrder;
@@ -18,7 +20,9 @@ import starcorp.common.entities.ColonyItem;
 import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Facility;
 import starcorp.common.entities.Starship;
+import starcorp.common.entities.Workers;
 import starcorp.common.types.AItemType;
+import starcorp.common.types.CashTransaction;
 import starcorp.common.types.ColonyHub;
 import starcorp.common.types.OrbitalDock;
 
@@ -46,6 +50,9 @@ public class PickupItem extends AOrderProcessor {
 		Facility colonyHub = entityStore.getFacility(colony, colony.getGovernment(), ColonyHub.class);
 		Facility orbitalDock = entityStore.getFacility(colony, OrbitalDock.class);
 		
+		List<Workers> hubWorkers = entityStore.listWorkers(colonyHub);
+		List<Workers> dockWorkers = entityStore.listWorkers(orbitalDock);
+		
 		if(ship == null || !ship.getOwner().equals(corp)) {
 			error = new TurnError(TurnError.INVALID_SHIP);
 		}
@@ -64,10 +71,10 @@ public class PickupItem extends AOrderProcessor {
 		else if(colonyHub == null) {
 			error = new TurnError(TurnError.INVALID_COLONY);
 		}
-		else if(colonyHub.getTransactionsRemaining() < 1) {
+		else if(colonyHub.getTransactionsRemaining(hubWorkers) < 1) {
 			error = new TurnError(TurnError.MARKET_OUT_OF_TRANSACTIONS);
 		}
-		else if(orbitalDock != null && ship.getColony() == null && orbitalDock.getTransactionsRemaining() < 1) {
+		else if(orbitalDock != null && ship.getColony() == null && orbitalDock.getTransactionsRemaining(dockWorkers) < 1) {
 			error = new TurnError(TurnError.MARKET_OUT_OF_TRANSACTIONS);
 		}
 		else if(item == null || item.getItem().getQuantity() < 1) {
@@ -84,11 +91,11 @@ public class PickupItem extends AOrderProcessor {
 			}
 			ship.addCargo(type, quantity);
 			item.getItem().remove(quantity);
-			
-			corp.remove(colonyHub.getServiceCharge());
+			String desc = CashTransaction.getDescription(CashTransaction.MARKET_FEES, null);
+			corp.remove(colonyHub.getServiceCharge(),desc);
 			colonyHub.incTransactionCount();
 			if(orbitalDock != null && ship.getColony() == null) {
-				corp.remove(orbitalDock.getServiceCharge());
+				corp.remove(orbitalDock.getServiceCharge(),desc);
 				orbitalDock.incTransactionCount();
 			}
 			report = new OrderReport(order);

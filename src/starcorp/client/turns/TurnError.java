@@ -10,8 +10,11 @@
  */
 package starcorp.client.turns;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
 
 /**
  * starcorp.client.turns.TurnError
@@ -20,6 +23,8 @@ import java.util.List;
  * @version 16 Sep 2007
  */
 public class TurnError {
+	
+	protected static final ResourceBundle bundle = ResourceBundle.getBundle("errors");
 
 	public static final TurnError ERROR_AUTHORIZATION_FAILED = new TurnError("error.authorization");
 	public static final TurnError ERROR_EARLY_TURN = new TurnError("error.earlyturn");
@@ -56,6 +61,19 @@ public class TurnError {
 	public TurnError(String msgKey, TurnOrder order) {
 		this(msgKey);
 		this.order = order;
+	}
+	
+	public String getMessage() {
+		Object[] args = msgArgs.toArray();
+		try {
+			return MessageFormat.format(bundle.getString(msgKey), args);
+		}
+		catch(MissingResourceException e) {
+			return msgKey;
+		}
+		catch(NullPointerException e) {
+			return "!" + msgKey + "!";
+		}
 	}
 	
 	public void addMsgArg(String arg) {

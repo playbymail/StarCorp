@@ -10,7 +10,6 @@
  */
 package starcorp.server.turns.orders;
 
-import java.util.Iterator;
 import java.util.List;
 
 import starcorp.client.turns.OrderReport;
@@ -21,9 +20,10 @@ import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Facility;
 import starcorp.common.entities.MarketItem;
 import starcorp.common.entities.Starship;
+import starcorp.common.entities.Workers;
 import starcorp.common.types.AItemType;
+import starcorp.common.types.CashTransaction;
 import starcorp.common.types.ColonyHub;
-import starcorp.common.types.GalacticDate;
 import starcorp.common.types.OrbitalDock;
 
 /**
@@ -49,6 +49,8 @@ public class ShipBuyItem extends AOrderProcessor {
 		List<MarketItem> marketItems = entityStore.listMarket(colony, 1);
 		Facility colonyHub = entityStore.getFacility(colony, colony.getGovernment(), ColonyHub.class);
 		Facility orbitalDock = entityStore.getFacility(colony, OrbitalDock.class);
+		List<Workers> hubWorkers = entityStore.listWorkers(colonyHub);
+		List<Workers> dockWorkers = entityStore.listWorkers(orbitalDock);
 		
 		if(ship == null || !ship.getOwner().equals(corp)) {
 			error = new TurnError(TurnError.INVALID_SHIP);
@@ -68,10 +70,10 @@ public class ShipBuyItem extends AOrderProcessor {
 		else if(colonyHub == null) {
 			error = new TurnError(TurnError.INVALID_COLONY);
 		}
-		else if(colonyHub.getTransactionsRemaining() < 1) {
+		else if(colonyHub.getTransactionsRemaining(hubWorkers) < 1) {
 			error = new TurnError(TurnError.MARKET_OUT_OF_TRANSACTIONS);
 		}
-		else if(orbitalDock != null && ship.getColony() == null && orbitalDock.getTransactionsRemaining() < 1) {
+		else if(orbitalDock != null && ship.getColony() == null && orbitalDock.getTransactionsRemaining(dockWorkers) < 1) {
 			error = new TurnError(TurnError.MARKET_OUT_OF_TRANSACTIONS);
 		}
 		else {
@@ -79,50 +81,28 @@ public class ShipBuyItem extends AOrderProcessor {
 			if(quantity > quantitySpaceFor) {
 				quantity = quantitySpaceFor;
 			}
-			int quantityBought = 0;
-			int totalPrice = 0;
-			Iterator<MarketItem> i = marketItems.iterator();
-			while(i.hasNext() && quantityBought < quantity) {
-				MarketItem item = i.next();
-				int qty = quantity - quantityBought;
-				int qtyAvail = item.getItem().getQuantity();
-				int qtyAfford = corp.getCredits() / item.getCostPerItem();
-				if(qtyAfford < qty) {
-					qty = qtyAfford;
-				}
-				if(qtyAvail < qty) {
-					qty = qtyAvail;
-				}
-				
-				int price = qty * item.getCostPerItem();
-				
-				item.getSeller().add(price);
-				
-				item.getItem().remove(qty);
-				if(item.getItem().getQuantity() < 1) {
-					item.setSoldDate(GalacticDate.getCurrentDate());
-				}
-				
-				quantityBought += qty;
-				totalPrice += price;
-			}
-			ship.addCargo(type, quantityBought);
-			corp.remove(totalPrice);
+			MarketItem.BuyResult result = MarketItem.buy(marketItems, quantity, corp.getCredits());
 			
-			corp.remove(colonyHub.getServiceCharge());
+			Object[] args = {type.getName(), String.valueOf(result.quantityBought)};
+			String desc = CashTransaction.getDescription(CashTransaction.ITEM_BOUGHT, args);
+			ship.addCargo(type, result.quantityBought);
+			corp.remove(result.totalPrice,desc);
+			
+			desc = CashTransaction.getDescription(CashTransaction.MARKET_FEES, null);
+			corp.remove(colonyHub.getServiceCharge(),desc);
 			colonyHub.incTransactionCount();
 			if(orbitalDock != null && ship.getColony() == null) {
-				corp.remove(orbitalDock.getServiceCharge());
+				corp.remove(orbitalDock.getServiceCharge(),desc);
 				orbitalDock.incTransactionCount();
 			}
 			report = new OrderReport(order);
 			report.add(ship.getName());
 			report.add(ship.getID());
-			report.add(quantityBought);
+			report.add(result.quantityBought);
 			report.add(type.getName());
 			report.add(colony.getName());
 			report.add(colony.getID());
-			report.add(totalPrice);
+			report.add(result.totalPrice);
 			order.setReport(report);
 		}
 		return error;

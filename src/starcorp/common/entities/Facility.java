@@ -11,12 +11,14 @@
 package starcorp.common.entities;
 
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-import starcorp.common.types.ColonistSalary;
-import starcorp.common.types.Colonists;
-import starcorp.common.types.ColonyHub;
 import starcorp.common.types.AFacilityType;
+import starcorp.common.types.CashTransaction;
+import starcorp.common.types.ColonyHub;
 import starcorp.common.types.Factory;
 import starcorp.common.types.GalacticDate;
 import starcorp.common.types.Items;
@@ -31,18 +33,55 @@ import starcorp.common.types.ServiceFacility;
  */
 public class Facility extends ABaseEntity {
 
+	public static class ServiceResult {
+		public int quantityServiced;
+		public int totalCost;
+	}
+	
 	private Corporation owner;
 	private Colony colony;
 	private AFacilityType type;
-	private Set<Colonists> workers = new HashSet<Colonists>();
-	private Set<ColonistSalary> salaries = new HashSet<ColonistSalary>();
-	private double efficiency;
+	private boolean powered;
 	private int serviceCharge;
 	private int transactionCount;
 	private boolean open;
 	private Set<Items> itemQueue = new HashSet<Items>();
 	private GalacticDate builtDate;
 	
+	public static ServiceResult service(Map<Facility, List<Workers>> facilities, int quantity, int cashAvailable) {
+		ServiceResult result = new ServiceResult();
+		
+		Iterator<Facility> i = facilities.keySet().iterator();
+		while(i.hasNext() && result.quantityServiced < quantity) {
+			Facility facility = i.next();
+			List<Workers> workers = facilities.get(facility);
+			int avail = facility.getTransactionsRemaining(workers);
+			int qty = quantity - result.quantityServiced;
+			int afford = cashAvailable / facility.getServiceCharge();
+			if(afford < qty) {
+				qty = afford;
+			}
+			if(avail < qty) {
+				qty = avail;
+			}
+			AFacilityType type = facility.getType();
+			int price = qty * facility.getServiceCharge();
+			Object[] args = {type.getName(), String.valueOf(qty)};
+			String desc = CashTransaction.getDescription(CashTransaction.SERVICE_CHARGE, args);
+			facility.getOwner().add(price, desc);
+			facility.incTransactionCount();
+			
+			result.quantityServiced += qty;
+			result.totalCost += price;
+			cashAvailable -= price;
+		}
+		return result;
+	}
+	
+	public double getEfficiency(List<Workers> currentWorkers) {
+		return isPowered() ?  type.getEfficiency(currentWorkers) : 0.0;
+	}
+
 	public void queueItem(Items item) {
 		itemQueue.add(item);
 	}
@@ -51,7 +90,7 @@ public class Facility extends ABaseEntity {
 		return itemQueue.isEmpty() ? null : itemQueue.iterator().next();
 	}
 	
-	public int getTransactionsRemaining() {
+	public int getTransactionsRemaining(List<Workers> workers) {
 		if(type instanceof Factory) {
 			Factory factory = (Factory) type;
 			return factory.getCapacity(workers) - transactionCount;
@@ -91,18 +130,6 @@ public class Facility extends ABaseEntity {
 	public void setType(AFacilityType type) {
 		this.type = type;
 	}
-	public Set<Colonists> getWorkers() {
-		return workers;
-	}
-	public void setWorkers(Set<Colonists> workers) {
-		this.workers = workers;
-	}
-	public double getEfficiency() {
-		return efficiency;
-	}
-	public void setEfficiency(double efficiency) {
-		this.efficiency = efficiency;
-	}
 	public int getServiceCharge() {
 		return serviceCharge;
 	}
@@ -132,18 +159,19 @@ public class Facility extends ABaseEntity {
 	public void setItemQueue(Set<Items> itemQueue) {
 		this.itemQueue = itemQueue;
 	}
-	public Set<ColonistSalary> getSalaries() {
-		return salaries;
-	}
-	public void setSalaries(Set<ColonistSalary> salaries) {
-		this.salaries = salaries;
-	}
-
 	public GalacticDate getBuiltDate() {
 		return builtDate;
 	}
 
 	public void setBuiltDate(GalacticDate builtDate) {
 		this.builtDate = builtDate;
+	}
+
+	public boolean isPowered() {
+		return powered;
+	}
+
+	public void setPowered(boolean powered) {
+		this.powered = powered;
 	}
 }

@@ -11,21 +11,41 @@
 package starcorp.common.types;
 
 /**
- * starcorp.common.types.ColonistHappiness
+ * starcorp.common.types.Population
  *
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 15 Sep 2007
  */
-public class ColonistHappiness {
+public class Population {
 
-	private double happiness;
+	private int quantity;
 	private PopulationClass popClass;
 	
-	public double getHappiness() {
-		return happiness;
+	public Population() {
+		
 	}
-	public void setHappiness(double happiness) {
-		this.happiness = happiness;
+	
+	public Population(PopulationClass popClass) {
+		this.popClass = popClass;
+	}
+	
+	public void add(int qty) {
+		quantity += qty;
+	}
+	
+	public int remove(int qty) {
+		if(qty > quantity) {
+			qty = quantity;
+		}
+		quantity -= qty;
+		return qty;
+	}
+	
+	public int getQuantity() {
+		return quantity;
+	}
+	public void setQuantity(int quantity) {
+		this.quantity = quantity;
 	}
 	public PopulationClass getPopClass() {
 		return popClass;
