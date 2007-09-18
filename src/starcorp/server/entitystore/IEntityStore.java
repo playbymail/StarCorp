@@ -102,6 +102,7 @@ public interface IEntityStore {
 	public abstract List<DevelopmentGrant> listDevelopmentGrants(Colony colony, boolean openOnly);
 	public abstract DevelopmentGrant getDevelopmentGrant(Colony colony, AFacilityType type, boolean openOnly);
 	
+	public abstract List<Facility> listFacilities();
 	public abstract List<Facility> listFacilities(Colony colony);
 	public abstract List<Facility> listFacilities(Colony colony, Corporation owner);
 	public abstract List<Facility> listFacilities(Corporation owner);

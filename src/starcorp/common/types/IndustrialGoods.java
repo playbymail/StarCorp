@@ -10,6 +10,10 @@
  */
 package starcorp.common.types;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 /**
  * starcorp.common.types.IndustrialGoods
  *
@@ -17,7 +21,102 @@ package starcorp.common.types;
  * @version 16 Sep 2007
  */
 public class IndustrialGoods extends TradeGoods {
-	
+	public static List<AItemType> listLightAlloy() {
+		List<AItemType> types = new ArrayList<AItemType>();
+		Iterator<AItemType> i = AItemType.listTypes(ConsumerGoods.class).iterator();
+		while(i.hasNext()) {
+			IndustrialGoods goods = (IndustrialGoods) i.next();
+			if(goods.isLightAlloy()) {
+				types.add(goods);
+			}
+		}
+		return types;
+	}
+
+	public static List<AItemType> listStrongAlloy() {
+		List<AItemType> types = new ArrayList<AItemType>();
+		Iterator<AItemType> i = AItemType.listTypes(ConsumerGoods.class).iterator();
+		while(i.hasNext()) {
+			IndustrialGoods goods = (IndustrialGoods) i.next();
+			if(goods.isStrongAlloy()) {
+				types.add(goods);
+			}
+		}
+		return types;
+	}
+
+	public static List<AItemType> listConcrete() {
+		List<AItemType> types = new ArrayList<AItemType>();
+		Iterator<AItemType> i = AItemType.listTypes(ConsumerGoods.class).iterator();
+		while(i.hasNext()) {
+			IndustrialGoods goods = (IndustrialGoods) i.next();
+			if(goods.isConcrete()) {
+				types.add(goods);
+			}
+		}
+		return types;
+	}
+
+	public static List<AItemType> listComputer() {
+		List<AItemType> types = new ArrayList<AItemType>();
+		Iterator<AItemType> i = AItemType.listTypes(ConsumerGoods.class).iterator();
+		while(i.hasNext()) {
+			IndustrialGoods goods = (IndustrialGoods) i.next();
+			if(goods.isComputer()) {
+				types.add(goods);
+			}
+		}
+		return types;
+	}
+
+	public static List<AItemType> listNetwork() {
+		List<AItemType> types = new ArrayList<AItemType>();
+		Iterator<AItemType> i = AItemType.listTypes(ConsumerGoods.class).iterator();
+		while(i.hasNext()) {
+			IndustrialGoods goods = (IndustrialGoods) i.next();
+			if(goods.isNetwork()) {
+				types.add(goods);
+			}
+		}
+		return types;
+	}
+
+	public static List<AItemType> listPlastic() {
+		List<AItemType> types = new ArrayList<AItemType>();
+		Iterator<AItemType> i = AItemType.listTypes(ConsumerGoods.class).iterator();
+		while(i.hasNext()) {
+			IndustrialGoods goods = (IndustrialGoods) i.next();
+			if(goods.isPlastic()) {
+				types.add(goods);
+			}
+		}
+		return types;
+	}
+
+	public static List<AItemType> listPower() {
+		List<AItemType> types = new ArrayList<AItemType>();
+		Iterator<AItemType> i = AItemType.listTypes(ConsumerGoods.class).iterator();
+		while(i.hasNext()) {
+			IndustrialGoods goods = (IndustrialGoods) i.next();
+			if(goods.isPower()) {
+				types.add(goods);
+			}
+		}
+		return types;
+	}
+
+	public static List<AItemType> listEngine() {
+		List<AItemType> types = new ArrayList<AItemType>();
+		Iterator<AItemType> i = AItemType.listTypes(ConsumerGoods.class).iterator();
+		while(i.hasNext()) {
+			IndustrialGoods goods = (IndustrialGoods) i.next();
+			if(goods.isEngine()) {
+				types.add(goods);
+			}
+		}
+		return types;
+	}
+
 	public boolean isLightAlloy() {
 		return Boolean.parseBoolean(getResource(this, "alloy.light"));
 	}

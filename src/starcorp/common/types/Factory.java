@@ -21,6 +21,25 @@ import starcorp.common.entities.Workers;
  */
 public class Factory extends AFacilityType {
 
+	public boolean canBuild(AItemType type) {
+		if(!(type instanceof AFactoryItem)) {
+			return false;
+		}
+		if(type instanceof ConsumerGoods && isConsumer()) {
+			return true;
+		}
+		if(type instanceof IndustrialGoods && isIndustrial()) {
+			return true;
+		}
+		if(type instanceof BuildingModule && isConstruction()) {
+			return true;
+		}
+		if(type instanceof StarshipHull && isShipard()) {
+			return true;
+		}
+		return false;
+	}
+	
 	public boolean isConsumer() {
 		return Boolean.parseBoolean(getResource(this, "consumer"));
 	}

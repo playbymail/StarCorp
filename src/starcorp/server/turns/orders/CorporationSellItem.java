@@ -22,6 +22,7 @@ import starcorp.common.entities.Facility;
 import starcorp.common.entities.MarketItem;
 import starcorp.common.entities.Workers;
 import starcorp.common.types.AItemType;
+import starcorp.common.types.CashTransaction;
 import starcorp.common.types.ColonyHub;
 import starcorp.common.types.GalacticDate;
 import starcorp.common.types.Items;
@@ -77,6 +78,8 @@ public class CorporationSellItem extends AOrderProcessor {
 			
 			entityStore.save(marketItem);
 			
+			String desc = CashTransaction.getDescription(CashTransaction.MARKET_FEES, null);
+			corp.remove(colonyHub.getServiceCharge(),desc);
 			colonyHub.incTransactionCount();
 			
 			report = new OrderReport(order);

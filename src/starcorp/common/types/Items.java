@@ -21,6 +21,19 @@ public class Items {
 	private AItemType type;
 	private int quantity;
 	
+	public Items() {
+		
+	}
+	
+	public Items(AItemType type) {
+		this.type = type;
+	}
+	
+	public Items(AItemType type, int qty) {
+		this.type = type;
+		this.quantity = qty;
+	}
+	
 	/**
 	 * @return
 	 */

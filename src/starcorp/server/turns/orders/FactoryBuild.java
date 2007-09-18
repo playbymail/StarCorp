@@ -14,6 +14,7 @@ import starcorp.client.turns.OrderReport;
 import starcorp.client.turns.TurnError;
 import starcorp.client.turns.TurnOrder;
 import starcorp.common.entities.Facility;
+import starcorp.common.types.AFactoryItem;
 import starcorp.common.types.AItemType;
 import starcorp.common.types.Items;
 
@@ -37,20 +38,23 @@ public class FactoryBuild extends AOrderProcessor {
 		if(factory == null) {
 			error = new TurnError(TurnError.INVALID_FACILITY);
 		}
-		else if(type == null) {
+		else if(type == null || !(type instanceof AFactoryItem)) {
 			error = new TurnError(TurnError.INVALID_ITEM);
 		}
 		else {
 			Items item = new Items();
 			item.setQuantity(quantity);
 			item.setTypeClass(type);
-			factory.queueItem(item);
-			
-			OrderReport report = new OrderReport(order);
-			report.add(factory.getID());
-			report.add(type.getName());
-			report.add(quantity);
-			order.setReport(report);
+			if(factory.queueItem(item)) {
+				OrderReport report = new OrderReport(order);
+				report.add(factory.getID());
+				report.add(type.getName());
+				report.add(quantity);
+				order.setReport(report);
+			}
+			else {
+				error = new TurnError(TurnError.INVALID_ITEM);
+			}
 		}
 		return error;
 	}

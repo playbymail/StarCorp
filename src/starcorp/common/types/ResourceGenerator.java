@@ -17,39 +17,61 @@ package starcorp.common.types;
  * @version 16 Sep 2007
  */
 public class ResourceGenerator extends AFacilityType {
-	public boolean isOrganics() {
-		return Boolean.parseBoolean(getResource(this, "organics"));
+	
+	public boolean canGenerate(AItemType type) {
+		if(!(type instanceof Resource)) {
+			return false;
+		}
+		Resource resource = (Resource) type;
+		if(resource.isFissile() && isFissile()) {
+			return true;
+		}
+		if(resource.isFuel() && isFuel()) {
+			return true;
+		}
+		if(resource.isGas() && isGas()) {
+			return true;
+		}
+		if(resource.isLiquid() && isLiquid()) {
+			return true;
+		}
+		if(resource.isMetal() && isMetal()) {
+			return true;
+		}
+		if(resource.isMinerals() && isMinerals()) {
+			return true;
+		}
+		if(resource.isOrganic() && isOrganic()) {
+			return true;
+		}
+		return false;
 	}
 	
-	public boolean isComplexMinerals() {
-		return Boolean.parseBoolean(getResource(this, "minerals"));
+	public boolean isOrganic() {
+		return Boolean.parseBoolean(getResource(this, "organic"));
 	}
-	
-	public boolean isLightMetal() {
-		return Boolean.parseBoolean(getResource(this, "metal.light"));
+
+	public boolean isMinerals() {
+		return Boolean.parseBoolean(getResource(this, "mineral"));
 	}
-	
-	public boolean isHeavyMetal() {
-		return Boolean.parseBoolean(getResource(this, "metal.heavy"));
+
+	public boolean isMetal() {
+		return Boolean.parseBoolean(getResource(this, "metal"));
 	}
-	
+
 	public boolean isFissile() {
-		return Boolean.parseBoolean(getResource(this, "metal.fissile"));
-	}
-	
-	public boolean isInertGas() {
-		return Boolean.parseBoolean(getResource(this, "gas.inert"));
-	}
-	
-	public boolean isNonInertGas() {
-		return Boolean.parseBoolean(getResource(this, "gas.noninert"));
+		return Boolean.parseBoolean(getResource(this, "fissile"));
 	}
 
-	public boolean isWater() {
-		return Boolean.parseBoolean(getResource(this, "water"));
+	public boolean isFuel() {
+		return Boolean.parseBoolean(getResource(this, "fuel"));
 	}
 
-	public boolean isHeavyWater() {
-		return Boolean.parseBoolean(getResource(this, "water.heavy"));
+	public boolean isGas() {
+		return Boolean.parseBoolean(getResource(this, "gas"));
+	}
+
+	public boolean isLiquid() {
+		return Boolean.parseBoolean(getResource(this, "liquid"));
 	}
 }

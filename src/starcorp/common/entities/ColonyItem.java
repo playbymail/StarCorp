@@ -10,6 +10,9 @@
  */
 package starcorp.common.entities;
 
+import java.util.Iterator;
+import java.util.List;
+
 import starcorp.common.types.Items;
 
 /**
@@ -20,9 +23,50 @@ import starcorp.common.types.Items;
  */
 public class ColonyItem extends ABaseEntity {
 
+	public static int count(List<ColonyItem> items) {
+		int count = 0;
+		Iterator<ColonyItem> i = items.iterator();
+		while(i.hasNext()) {
+			count += i.next().getQuantity();
+		}
+		return count;
+	}
+	
+	public static int use(List<ColonyItem> items, int quantity) {
+		int used = 0;
+		Iterator<ColonyItem> i = items.iterator();
+		while(i.hasNext() && used < quantity) {
+			ColonyItem item = i.next();
+			int qty = quantity - used;
+			if(qty > item.getQuantity()) {
+				qty = item.getQuantity();
+			}
+			item.remove(qty);
+		}
+		return used;
+	}
+	
 	private Corporation owner;
 	private Colony colony;
 	private Items item;
+	
+	public int getQuantity() {
+		return item == null ? 0 : item.getQuantity();
+	}
+	
+	public int add(int qty) {
+		if(item == null) {
+			return 0;
+		}
+		return item.add(qty);
+	}
+	
+	public int remove(int qty) {
+		if(item == null) {
+			return 0;
+		}
+		return item.remove(qty);
+	}
 	
 	public Corporation getOwner() {
 		return owner;

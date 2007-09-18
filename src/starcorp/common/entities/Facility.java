@@ -45,7 +45,9 @@ public class Facility extends ABaseEntity {
 	private int serviceCharge;
 	private int transactionCount;
 	private boolean open;
+	
 	private Set<Items> itemQueue = new HashSet<Items>();
+	private Set<Items> itemsCreated = new HashSet<Items>();
 	private GalacticDate builtDate;
 	
 	public static ServiceResult service(Map<Facility, List<Workers>> facilities, int quantity, int cashAvailable) {
@@ -81,13 +83,36 @@ public class Facility extends ABaseEntity {
 	public double getEfficiency(List<Workers> currentWorkers) {
 		return isPowered() ?  type.getEfficiency(currentWorkers) : 0.0;
 	}
-
-	public void queueItem(Items item) {
-		itemQueue.add(item);
+	
+	public void createdItem(Items item) {
+		itemsCreated.add(item);
 	}
 	
-	public Items nextQueuedItem() {
-		return itemQueue.isEmpty() ? null : itemQueue.iterator().next();
+	public boolean queueItem(Items item) {
+		if(type instanceof Factory) {
+			Factory factory = (Factory) type;
+			if(factory.canBuild(item.getTypeClass())) {
+				itemQueue.add(item);
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public Iterator<Items> created() {
+		return itemsCreated.iterator();
+	}
+	
+	public Iterator<Items> queue() {
+		return itemQueue.iterator();
+	}
+	
+	public void clearQueue() {
+		itemQueue.clear();
+	}
+	
+	public void clearCreated() {
+		itemsCreated.clear();
 	}
 	
 	public int getTransactionsRemaining(List<Workers> workers) {
@@ -144,6 +169,10 @@ public class Facility extends ABaseEntity {
 		this.transactionCount++;
 	}
 	
+	public void incTransactionCount(int qty) {
+		this.transactionCount += qty;
+	}
+	
 	public void setTransactionCount(int transactionCount) {
 		this.transactionCount = transactionCount;
 	}
@@ -173,5 +202,13 @@ public class Facility extends ABaseEntity {
 
 	public void setPowered(boolean powered) {
 		this.powered = powered;
+	}
+
+	public Set<Items> getItemsCreated() {
+		return itemsCreated;
+	}
+
+	public void setItemsCreated(Set<Items> itemsCreated) {
+		this.itemsCreated = itemsCreated;
 	}
 }

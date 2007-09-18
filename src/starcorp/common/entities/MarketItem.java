@@ -10,6 +10,7 @@
  */
 package starcorp.common.entities;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -36,6 +37,7 @@ public class MarketItem extends ABaseEntity {
 	public static class BuyResult {
 		public int quantityBought;
 		public int totalPrice;
+		public List<Items> bought = new ArrayList<Items>();
 	}
 	
 	public static BuyResult buy(List<MarketItem> items, int quantity, int cashAvailable) {
@@ -66,6 +68,7 @@ public class MarketItem extends ABaseEntity {
 			result.quantityBought += qty;
 			result.totalPrice += price;
 			cashAvailable -= price;
+			result.bought.add(new Items(type,qty));
 		}
 		
 		return result;

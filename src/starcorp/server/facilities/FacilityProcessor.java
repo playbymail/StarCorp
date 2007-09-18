@@ -10,6 +10,28 @@
  */
 package starcorp.server.facilities;
 
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
+import starcorp.common.entities.Colony;
+import starcorp.common.entities.ColonyItem;
+import starcorp.common.entities.Corporation;
+import starcorp.common.entities.Facility;
+import starcorp.common.entities.MarketItem;
+import starcorp.common.entities.Planet;
+import starcorp.common.entities.Workers;
+import starcorp.common.types.AFactoryItem;
+import starcorp.common.types.AItemType;
+import starcorp.common.types.Coordinates2D;
+import starcorp.common.types.Factory;
+import starcorp.common.types.IndustrialGoods;
+import starcorp.common.types.Items;
+import starcorp.common.types.PlanetMapSquare;
+import starcorp.common.types.ResourceDeposit;
+import starcorp.common.types.ResourceGenerator;
+import starcorp.server.entitystore.IEntityStore;
+
 /**
  * starcorp.server.facilities.FacilityProcessor
  *
@@ -18,4 +40,169 @@ package starcorp.server.facilities;
  */
 public class FacilityProcessor {
 
+	private IEntityStore entityStore;
+	
+	public FacilityProcessor(IEntityStore store) {
+		this.entityStore = store;
+	}
+	
+	public void process() {
+		List<Facility> facilities = entityStore.listFacilities();
+		Iterator<Facility> i = facilities.iterator();
+		while(i.hasNext()) {
+			Facility facility = i.next();
+			List<Workers> workers = entityStore.listWorkers(facility);
+			process(facility,workers);
+		}
+	}
+
+	private void process(Facility facility, List<Workers> workers) {
+		facility.setTransactionCount(0);
+		facility.setPowered(false);
+		usePower(facility);
+		if(facility.getType() instanceof Factory) {
+			processFactory(facility, workers);
+		}
+		else if(facility.getType() instanceof ResourceGenerator) {
+			processGenerator(facility, workers);
+		}
+	}
+	
+	private void usePower(Facility facility) {
+		int required = facility.getType().getPowerRequirement();
+		Corporation owner = facility.getOwner();
+		Colony colony = facility.getColony();
+		List<AItemType> types = IndustrialGoods.listPower();
+		List<ColonyItem> items = entityStore.listItems(owner, colony, types);
+		if(ColonyItem.count(items) < required) {
+			// attempt to buy from market
+			List<MarketItem> market = entityStore.listMarket(colony, types, 1);
+			MarketItem.BuyResult result = MarketItem.buy(market, required, owner.getCredits());
+			if(result.quantityBought < required) {
+				// not enough - just add this to the colonies stockpile
+				Iterator<Items> i = result.bought.iterator();
+				while(i.hasNext()) {
+					Items item = i.next();
+					ColonyItem cItem = entityStore.getItem(colony, owner, item.getTypeClass());
+					if(cItem == null) {
+						cItem = new ColonyItem();
+						cItem.setColony(colony);
+						cItem.setItem(new Items(item.getTypeClass()));
+						cItem.setOwner(owner);
+						entityStore.save(cItem);
+					}
+					cItem.add(item.getQuantity());
+				}
+			}
+			else {
+				facility.setPowered(true);
+			}
+		}
+		else {
+			ColonyItem.use(items, required);
+			facility.setPowered(true);
+		}
+	}
+	
+	private int hasMaterials(Corporation owner, AFactoryItem type) {
+		int max = 0;
+		Iterator<Items> i = type.getComponent().iterator();
+		while(i.hasNext()) {
+			Items item = i.next();
+			ColonyItem cItem = entityStore.getItem(owner, item.getTypeClass());
+			int x = cItem.getQuantity() / item.getQuantity();
+			if(x < max) {
+				max = x;
+			}
+		}
+		return max;
+	}
+	
+	private void useMaterials(Corporation owner, AFactoryItem type, int quantity) {
+		Iterator<Items> i = type.getComponent().iterator();
+		while(i.hasNext()) {
+			Items item = i.next();
+			ColonyItem cItem = entityStore.getItem(owner, item.getTypeClass());
+			int qty = item.getQuantity() * quantity;
+			cItem.remove(qty);
+		}
+	}
+	
+	private Items build(Facility factory, Items item, int maxCapacity) {
+		AFactoryItem type = (AFactoryItem) item.getTypeClass();
+		int avail = maxCapacity - factory.getTransactionCount();
+		int qty = avail / type.getMassUnits();
+		if(qty > item.getQuantity()) {
+			qty = item.getQuantity();
+		}
+		int materials = hasMaterials(factory.getOwner(), type);
+		if(qty > materials) {
+			qty = materials;
+		}
+		
+		int used = qty * type.getMassUnits();
+		factory.incTransactionCount(used);
+		ColonyItem cItem = null;
+		if(cItem == null) {
+			cItem = new ColonyItem();
+			cItem.setColony(factory.getColony());
+			cItem.setItem(new Items(type));
+			cItem.setOwner(factory.getOwner());
+			entityStore.save(cItem);
+		}
+		cItem.add(qty);
+		useMaterials(factory.getOwner(), type, qty); 
+		return new Items(item.getTypeClass(),qty);
+	}
+	
+	private void processFactory(Facility factory, List<Workers> workers) {
+		factory.clearCreated();
+		Factory type = (Factory) factory.getType();
+		int maxCapacity = factory.isPowered() ? type.getCapacity(workers) : 0;
+		int capacityUsed = factory.getTransactionCount();
+		Iterator<Items> i = factory.queue();
+		while(capacityUsed < maxCapacity && i.hasNext()) {
+			Items item = build(factory, i.next(), maxCapacity);
+			if(item != null) {
+				factory.createdItem(item);
+			}
+			capacityUsed = factory.getTransactionCount();
+		}
+	}
+	
+	private void processGenerator(Facility generator, List<Workers> workers) {
+		Corporation owner = generator.getOwner();
+		Colony colony = generator.getColony();
+		Planet planet = colony.getPlanet();
+		Coordinates2D location = colony.getLocation();
+		PlanetMapSquare sq = planet.get(location);
+		Set<ResourceDeposit> deposits = sq.getResources();
+		double efficiency = generator.getEfficiency(workers);
+		ResourceGenerator type = (ResourceGenerator) generator.getType();
+		
+		Iterator<ResourceDeposit> i = deposits.iterator();
+		while(i.hasNext()) {
+			ResourceDeposit deposit = i.next();
+			if(deposit.getTotalQuantity() < deposit.getYield()) {
+				continue;
+			}
+			if(type.canGenerate(deposit.getTypeClass())) {
+				int qty = (int) (deposit.getYield() * efficiency);
+				if(qty > deposit.getTotalQuantity()) {
+					qty = deposit.getTotalQuantity();
+				}
+				ColonyItem item = entityStore.getItem(colony, owner, deposit.getTypeClass());
+				if(item == null) {
+					item = new ColonyItem();
+					item.setColony(colony);
+					item.setItem(new Items(deposit.getTypeClass()));
+					item.setOwner(owner);
+					entityStore.save(item);
+				}
+				item.add(qty);
+				deposit.remove(qty);
+			}
+			
+		}
+	}
 }
