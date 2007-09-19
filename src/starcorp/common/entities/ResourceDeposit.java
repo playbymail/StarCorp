@@ -8,16 +8,21 @@
  *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
  *  See the License for the specific language governing permissions and limitations under the License. 
  */
-package starcorp.common.types;
+package starcorp.common.entities;
+
+import starcorp.common.types.AItemType;
+import starcorp.common.types.Coordinates2D;
 
 /**
- * starcorp.common.types.ResourceDeposit
+ * starcorp.common.entities.ResourceDeposit
  *
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 15 Sep 2007
  */
-public class ResourceDeposit {
+public class ResourceDeposit extends ABaseEntity {
 
+	private AStarSystemEntity systemEntity;
+	private Coordinates2D location;
 	private AItemType type;
 	private int totalQuantity;
 	private int yield;
@@ -118,5 +123,25 @@ public class ResourceDeposit {
 
 	public void setTotalQuantity(int totalQuantity) {
 		this.totalQuantity = totalQuantity;
+	}
+
+	public AStarSystemEntity getSystemEntity() {
+		return systemEntity;
+	}
+
+	public void setSystemEntity(AStarSystemEntity systemEntity) {
+		this.systemEntity = systemEntity;
+	}
+
+	public Coordinates2D getLocation() {
+		return location;
+	}
+
+	public void setLocation(Coordinates2D location) {
+		this.location = location;
+	}
+
+	public void setType(AItemType type) {
+		this.type = type;
 	}
 }

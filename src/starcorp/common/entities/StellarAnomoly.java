@@ -29,10 +29,16 @@ public class StellarAnomoly extends AStarSystemEntity {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	public AEventType getInvestigationEvent() {
+	public String getEvent() {
+		return investigationEvent == null ? null : investigationEvent.getKey();
+	}
+	public void setEvent(String event) {
+		investigationEvent = AEventType.getType(event);
+	}
+	public AEventType getEventClass() {
 		return investigationEvent;
 	}
-	public void setInvestigationEvent(AEventType investigationEvent) {
+	public void setEventClass(AEventType investigationEvent) {
 		this.investigationEvent = investigationEvent;
 	}
 	

@@ -23,7 +23,7 @@ public class ColonistGrant extends ABaseEntity {
 
 	private Colony colony;
 	private PopulationClass popClass;
-	private int credit;
+	private int credits;
 	private boolean available;
 	private GalacticDate issuedDate;
 	
@@ -33,17 +33,25 @@ public class ColonistGrant extends ABaseEntity {
 	public void setColony(Colony colony) {
 		this.colony = colony;
 	}
+	public String getPopClassType() {
+		return popClass == null ? null : popClass.getKey();
+	}
+	
+	public void setPopClassType(String key) {
+		popClass = PopulationClass.getType(key);
+	}
+	
 	public PopulationClass getPopClass() {
 		return popClass;
 	}
 	public void setPopClass(PopulationClass popClass) {
 		this.popClass = popClass;
 	}
-	public int getCredit() {
-		return credit;
+	public int getCredits() {
+		return credits;
 	}
-	public void setCredit(int credit) {
-		this.credit = credit;
+	public void setCredits(int credit) {
+		this.credits = credit;
 	}
 	public boolean isAvailable() {
 		return available;

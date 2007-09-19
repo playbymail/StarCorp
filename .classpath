@@ -6,5 +6,19 @@
 	<classpathentry kind="src" path="resources-server"/>
 	<classpathentry kind="src" path="resources-client"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/build/junit.jar"/>
+	<classpathentry kind="lib" path="lib/common/commons-logging.jar"/>
+	<classpathentry kind="lib" path="lib/common/log4j-1.2.8.jar"/>
+	<classpathentry kind="lib" path="lib/common/swt.jar"/>
+	<classpathentry kind="lib" path="lib/server/antlr-2.7.6.jar"/>
+	<classpathentry kind="lib" path="lib/server/asm.jar"/>
+	<classpathentry kind="lib" path="lib/server/asm-attrs.jar"/>
+	<classpathentry kind="lib" path="lib/server/cglib-2.1.3.jar"/>
+	<classpathentry kind="lib" path="lib/server/commons-collections.jar"/>
+	<classpathentry kind="lib" path="lib/server/commons-pool-1.3.jar"/>
+	<classpathentry kind="lib" path="lib/server/dom4j-1.6.1.jar"/>
+	<classpathentry kind="lib" path="lib/server/hibernate3.jar"/>
+	<classpathentry kind="lib" path="lib/server/hsqldb.jar"/>
+	<classpathentry kind="lib" path="lib/server/jta.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -15,8 +15,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-import starcorp.client.turns.TurnError;
-import starcorp.client.turns.TurnOrder;
+import starcorp.common.turns.TurnError;
+import starcorp.common.turns.TurnOrder;
 import starcorp.server.entitystore.IEntityStore;
 
 /**

@@ -8,7 +8,7 @@
  *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
  *  See the License for the specific language governing permissions and limitations under the License. 
  */
-package starcorp.client.turns;
+package starcorp.common.turns;
 
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -21,7 +21,7 @@ import java.util.ResourceBundle;
  */
 public class TurnError {
 	
-	protected static final ResourceBundle bundle = ResourceBundle.getBundle("errors");
+	protected static final ResourceBundle bundle = ResourceBundle.getBundle("starcorp.common.turns.errors");
 
 	public static final TurnError ERROR_AUTHORIZATION_FAILED = new TurnError("error.authorization");
 	public static final TurnError ERROR_EARLY_TURN = new TurnError("error.earlyturn");

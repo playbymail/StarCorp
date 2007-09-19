@@ -1,0 +1,283 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="starcorp.common.entities.ABaseEntity" table="ALL_ENTITIES">
+    	<id name="ID"><generator class="native"/></id>
+    	<timestamp name="lastModified"/>
+    	
+    	<joined-subclass name="starcorp.common.entities.AColonists" table="ALL_COLONISTS">
+    		<key column="ENTITY_ID"/>
+    		<many-to-one name="colony"/>
+    		<component name="population">
+    			<property name="quantity"/>
+    			<property name="popClassType"/>
+    		</component>
+    		<property name="cash"/>
+    		<property name="happiness"/>
+    		
+    		<joined-subclass name="starcorp.common.entities.Unemployed" table="UNEMPLOYED_COLONISTS">
+    			<key column="ENTITY_ID"/>
+    		</joined-subclass> <!-- Unemployed -->
+
+    		<joined-subclass name="starcorp.common.entities.Workers" table="EMPLOYED_COLONISTS">
+    			<key column="ENTITY_ID"/>
+    			<many-to-one name="facility"/>
+    			<property name="salary"/>
+    		</joined-subclass> <!-- Workers -->
+
+    	</joined-subclass> <!-- AColonists -->
+    	
+    	<joined-subclass name="starcorp.common.entities.ANamedEntity" table="NAMED_ENTITIES">
+    		<key column="ENTITY_ID"/>
+    		<property name="name"/>
+    		
+    		<joined-subclass name="starcorp.common.entities.AStarSystemEntity" table="STAR_SYSTEM_ENTITIES">
+    			<key column="ENTITY_ID"/>
+    			<many-to-one name="system"/>
+    			<component name="location">
+    				<property name="quadrant"/>
+    				<property name="orbit"/>
+    			</component>
+    			
+    			<joined-subclass name="starcorp.common.entities.AsteroidField" table="ASTEROIDS">
+    				<key column="ENTITY_ID"/>
+    			</joined-subclass> <!-- AsteroidField -->
+    			
+    			<joined-subclass name="starcorp.common.entities.GasField" table="GAS_FIELDS">
+    				<key column="ENTITY_ID"/>
+    			</joined-subclass> <!-- GasField -->
+    			
+    			<joined-subclass name="starcorp.common.entities.Planet" table="PLANETS">
+					<key column="ENTITY_ID"/>
+					<many-to-one name="orbiting"/>
+					<property name="atmosphereType"/>
+					<property name="gravityRating"/>
+					<set name="map" table="PLANET_MAP" lazy="true">
+    					<key column="ENTITY_ID"/>
+    					<composite-element class="starcorp.common.types.PlanetMapSquare">
+    						<property name="x"/>
+    						<property name="y"/>
+    						<property name="terrain"/>
+    					</composite-element>
+    				</set>
+				</joined-subclass> <!-- Planet -->
+				
+				<joined-subclass name="starcorp.common.entities.Starship" table="STARSHIPS">
+    				<key column="ENTITY_ID"/>
+    				<many-to-one name="owner"/>
+    				<many-to-one name="planet"/>
+    				<many-to-one name="colony"/>
+    				<many-to-one name="design"/>
+    				<component name="planetLocation">
+    					<property name="x"/>
+    					<property name="y"/>
+    				</component>
+    				<set name="cargo" table="SHIP_CARGO" lazy="true">
+    					<key column="ENTITY_ID"/>
+    					<composite-element class="starcorp.common.types.Items">
+    						<property name="type"/>
+    						<property name="quantity"/>
+    					</composite-element>
+    				</set>
+    				<component name="builtDate">
+    					<property name="year" column="builtYear"/>
+    					<property name="month" column="builtMonth"/>
+    				</component>
+    				<property name="timeUnitsUsed"/>
+    			</joined-subclass> <!-- Starship -->
+				
+				<joined-subclass name="starcorp.common.entities.StellarAnomoly" table="STELLAR_ANOMOLIES">
+    				<key column="ENTITY_ID"/>
+    				<property name="description"/>
+    				<property name="event"/>
+    			</joined-subclass> <!-- StellarAnomoly -->
+    			
+    		</joined-subclass> <!-- AStarSystemEntiy -->
+    		
+    		<joined-subclass name="starcorp.common.entities.Colony" table="COLONIES">
+    			<key column="ENTITY_ID"/>
+    			<many-to-one name="government"/>
+    			<many-to-one name="planet"/>
+    			<component name="location">
+    				<property name="x"/>
+    				<property name="y"/>
+    			</component>
+    			<property name="hazardLevel"/>
+    			<component name="foundedDate">
+    				<property name="year" column="foundedYear"/>
+    				<property name="month" column="foundedMonth"/>
+    			</component>
+    		</joined-subclass> <!-- Colony -->
+    		
+    		<joined-subclass name="starcorp.common.entities.Corporation" table="CORPORATIONS">
+    			<key column="ENTITY_ID"/>
+    			<property name="playerName"/>
+    			<property name="playerEmail"/>
+    			<property name="playerPassword"/>
+    			<property name="credits"/>
+    			<component name="foundedDate">
+    				<property name="year" column="foundedYear"/>
+    				<property name="month" column="foundedMonth"/>
+    			</component>
+    			<component name="lastTurnDate">
+    				<property name="year" column="lastTurnYear"/>
+    				<property name="month" column="lastTurnMonth"/>
+    			</component>
+    			<set name="transactions" table="CASH_TRANSACTIONS" lazy="true">
+    				<key column="ENTITY_ID"/>
+    				<composite-element class="starcorp.common.types.CashTransaction">
+    					<property name="amount"/>
+    					<property name="description"/>
+    					<property name="year"/>
+    					<property name="month"/>
+    				</composite-element>
+    			</set>
+    		</joined-subclass> <!-- Corporation -->
+    		
+    		<joined-subclass name="starcorp.common.entities.StarshipDesign" table="SHIP_DESIGNS" lazy="true">
+    			<key column="ENTITY_ID"/>
+    			<many-to-one name="owner"/>
+    			<component name="designDate">
+    				<property name="year" column="designYear"/>
+    				<property name="month" column="designMonth"/>
+    			</component>
+    			<set name="hulls" table="SHIP_DESIGN_HULLS" lazy="true">
+    				<key column="ENTITY_ID"/>
+    				<composite-element class="starcorp.common.types.Items">
+    					<property name="type"/>
+    					<property name="quantity"/>
+    				</composite-element>
+    			</set>
+    		</joined-subclass> <!-- StarshipDesign -->
+    		
+    		<joined-subclass name="starcorp.common.entities.StarSystem" table="STAR_SYSTEMS" lazy="true">
+    			<key column="ENTITY_ID"/>
+    			<property name="type"/>
+    			<component name="location">
+    				<property name="x"/>
+    				<property name="y"/>
+    				<property name="z"/>
+    			</component>
+    		</joined-subclass> <!-- StarSystem -->
+    	
+    	</joined-subclass> <!-- ANamedEntity -->
+    	
+    	<joined-subclass name="starcorp.common.entities.ColonistGrant" table="COLONIST_GRANTS">
+    		<key column="ENTITY_ID"/>
+    		<many-to-one name="colony"/>
+    		<property name="popClassType"/>
+    		<property name="credits"/>
+    		<property name="available"/>
+    		<component name="issuedDate">
+    			<property name="year" column="issuedYear"/>
+    			<property name="month" column="issuedMonth"/>
+    		</component>
+    	</joined-subclass> <!-- ColonistGrant -->
+    	
+    	<joined-subclass name="starcorp.common.entities.DevelopmentGrant" table="DEVELOPMENT_GRANTS">
+    		<key column="ENTITY_ID"/>
+    		<many-to-one name="colony"/>
+    		<property name="type"/>
+    		<property name="grant"/>
+    		<property name="used"/>
+    		<component name="issuedDate">
+    			<property name="year" column="issuedYear"/>
+    			<property name="month" column="issuedMonth"/>
+    		</component>
+    		<component name="usedDate">
+    			<property name="year" column="usedYear"/>
+    			<property name="month" column="usedMonth"/>
+    		</component>
+    	</joined-subclass> <!-- DevelopmentGrant -->
+
+    	<joined-subclass name="starcorp.common.entities.FacilityLease" table="FACILITY_LEASES">
+    		<key column="ENTITY_ID"/>
+    		<many-to-one name="colony"/>
+    		<property name="type"/>
+    		<many-to-one name="licensee"/>
+    		<property name="price"/>
+    		<property name="used"/>
+    		<component name="issuedDate">
+    			<property name="year" column="issuedYear"/>
+    			<property name="month" column="issuedMonth"/>
+    		</component>
+    		<component name="usedDate">
+    			<property name="year" column="usedYear"/>
+    			<property name="month" column="usedMonth"/>
+    		</component>
+    	</joined-subclass> <!-- FacilityLease -->
+    	
+    	<joined-subclass name="starcorp.common.entities.ColonyItem" table="COLONY_ITEMS">
+    		<key column="ENTITY_ID"/>
+    		<many-to-one name="owner"/>
+    		<many-to-one name="colony"/>
+    		<component name="item">
+    			<property name="type"/>
+    			<property name="quantity"/>
+    		</component>
+    	</joined-subclass> <!-- ColonyItem -->
+    	
+    	<joined-subclass name="starcorp.common.entities.ResourceDeposit" table="RESOURCE_DEPOSITS">
+    		<key column="ENTITY_ID"/>
+    		<many-to-one name="systemEntity"/>
+    		<component name="location">
+    			<property name="x"/>
+    			<property name="y"/>
+    		</component>
+    		<property name="type"/>
+    		<property name="totalQuantity"/>
+    		<property name="yield"/>
+    	</joined-subclass> <!-- ResourceDeposit -->
+    	
+    	<joined-subclass name="starcorp.common.entities.MarketItem" table="MARKET_ITEMS">
+    		<key column="ENTITY_ID"/>
+    		<many-to-one name="seller"/>
+    		<many-to-one name="colony"/>
+    		<component name="item">
+    			<property name="type"/>
+    			<property name="quantity"/>
+    		</component>
+    		<property name="costPerItem"/>
+    		<component name="issuedDate">
+    			<property name="year" column="issuedYear"/>
+    			<property name="month" column="issuedMonth"/>
+    		</component>
+    		<component name="soldDate">
+    			<property name="year" column="soldYear"/>
+    			<property name="month" column="soldMonth"/>
+    		</component>
+    	</joined-subclass> <!-- MarketItem -->
+    	
+    	<joined-subclass name="starcorp.common.entities.Facility" table="FACILITIES">
+    		<key column="ENTITY_ID"/>
+    		<many-to-one name="owner"/>
+    		<many-to-one name="colony"/>
+    		<property name="type"/>
+    		<property name="powered"/>
+    		<property name="serviceCharge"/>
+    		<property name="transactionCount"/>
+    		<property name="open"/>
+    		<set name="itemQueue" table="FACILITY_QUEUE" lazy="true">
+    			<key column="ENTITY_ID"/>
+    			<composite-element class="starcorp.common.types.Items">
+    				<property name="type"/>
+    				<property name="quantity"/>
+    			</composite-element>
+    		</set>
+    		<set name="itemsCreated" table="FACILITY_CREATED_ITEMS" lazy="true">
+    			<key column="ENTITY_ID"/>
+    			<composite-element class="starcorp.common.types.Items">
+    				<property name="type"/>
+    				<property name="quantity"/>
+    			</composite-element>
+    		</set>
+    		<component name="builtDate">
+    			<property name="year" column="builtYear"/>
+    			<property name="month" column="builtMonth"/>
+    		</component>
+    	</joined-subclass> <!-- Facility -->
+    	
+    </class> <!-- ABaseEntity -->
+</hibernate-mapping>

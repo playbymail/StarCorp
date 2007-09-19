@@ -10,10 +10,10 @@
  */
 package starcorp.server.turns.orders;
 
-import starcorp.client.turns.OrderReport;
-import starcorp.client.turns.TurnError;
-import starcorp.client.turns.TurnOrder;
 import starcorp.common.entities.Facility;
+import starcorp.common.turns.OrderReport;
+import starcorp.common.turns.TurnError;
+import starcorp.common.turns.TurnOrder;
 import starcorp.common.types.AFactoryItem;
 import starcorp.common.types.AItemType;
 import starcorp.common.types.Items;

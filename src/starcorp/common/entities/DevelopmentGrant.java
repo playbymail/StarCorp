@@ -33,10 +33,16 @@ public class DevelopmentGrant extends ABaseEntity {
 	public void setColony(Colony colony) {
 		this.colony = colony;
 	}
-	public AFacilityType getType() {
+	public String getType() {
+		return type == null ? null : type.getKey();
+	}
+	public void setType(String key) {
+		type = AFacilityType.getType(key);
+	}
+	public AFacilityType getTypeClass() {
 		return type;
 	}
-	public void setType(AFacilityType type) {
+	public void setTypeClass(AFacilityType type) {
 		this.type = type;
 	}
 	public int getGrant() {

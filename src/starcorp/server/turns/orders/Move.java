@@ -13,12 +13,12 @@ package starcorp.server.turns.orders;
 import java.util.ArrayList;
 import java.util.List;
 
-import starcorp.client.turns.OrderReport;
-import starcorp.client.turns.TurnError;
-import starcorp.client.turns.TurnOrder;
 import starcorp.common.entities.AStarSystemEntity;
 import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Starship;
+import starcorp.common.turns.OrderReport;
+import starcorp.common.turns.TurnError;
+import starcorp.common.turns.TurnOrder;
 import starcorp.common.types.CoordinatesPolar;
 
 /**
@@ -40,8 +40,8 @@ public class Move extends AOrderProcessor {
 		int quadrant = order.getAsInt(1);
 		int orbit = order.getAsInt(1);
 		CoordinatesPolar targetLocation = new CoordinatesPolar();
-		targetLocation.setX(quadrant);
-		targetLocation.setY(orbit);
+		targetLocation.setQuadrant(quadrant);
+		targetLocation.setOrbit(orbit);
 		
 		Starship ship = (Starship) entityStore.load(starshipId);
 				
@@ -58,17 +58,17 @@ public class Move extends AOrderProcessor {
 				double speed = ship.getDesign().getImpulseSpeed();
 				List<AStarSystemEntity> entities = new ArrayList<AStarSystemEntity>();
 				while(!shipLocation.equals(targetLocation) && timeUnits >= speed) {
-					if(shipLocation.getX() < targetLocation.getX()) {
-						shipLocation.setX(shipLocation.getX() + 1);
+					if(shipLocation.getQuadrant() < targetLocation.getQuadrant()) {
+						shipLocation.setQuadrant(shipLocation.getQuadrant() + 1);
 					}
-					else if(shipLocation.getX() > targetLocation.getX()) {
-						shipLocation.setX(shipLocation.getX() - 1);
+					else if(shipLocation.getQuadrant() > targetLocation.getQuadrant()) {
+						shipLocation.setQuadrant(shipLocation.getQuadrant() - 1);
 					}
-					if(shipLocation.getY() < targetLocation.getY()) {
-						shipLocation.setY(shipLocation.getY() + 1);
+					if(shipLocation.getOrbit() < targetLocation.getOrbit()) {
+						shipLocation.setOrbit(shipLocation.getOrbit() + 1);
 					}
-					else if(shipLocation.getY() > targetLocation.getY()) {
-						shipLocation.setY(shipLocation.getY() - 1);
+					else if(shipLocation.getOrbit() > targetLocation.getOrbit()) {
+						shipLocation.setOrbit(shipLocation.getOrbit() - 1);
 					}
 					timeUnits -= speed;
 					List<AStarSystemEntity> scan = entityStore.listSystemEntities(ship.getSystem(), shipLocation);
@@ -79,8 +79,8 @@ public class Move extends AOrderProcessor {
 				OrderReport report = new OrderReport(order);
 				report.add(ship.getName());
 				report.add(ship.getID());
-				report.add(shipLocation.getX());
-				report.add(shipLocation.getY());
+				report.add(shipLocation.getQuadrant());
+				report.add(shipLocation.getOrbit());
 				report.add(ship.getSystem().getName());
 				report.add(ship.getSystem().getID());
 				report.setScannedSystemEntities(entities);

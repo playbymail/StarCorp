@@ -10,12 +10,12 @@
  */
 package starcorp.server.turns.orders;
 
-import starcorp.client.turns.OrderReport;
-import starcorp.client.turns.TurnError;
-import starcorp.client.turns.TurnOrder;
 import starcorp.common.entities.ColonistGrant;
 import starcorp.common.entities.Colony;
 import starcorp.common.entities.Corporation;
+import starcorp.common.turns.OrderReport;
+import starcorp.common.turns.TurnError;
+import starcorp.common.turns.TurnOrder;
 import starcorp.common.types.GalacticDate;
 import starcorp.common.types.PopulationClass;
 
@@ -51,7 +51,7 @@ public class IssueColonistGrant extends AOrderProcessor {
 			ColonistGrant grant = new ColonistGrant();
 			grant.setAvailable(true);
 			grant.setColony(colony);
-			grant.setCredit(credit);
+			grant.setCredits(credit);
 			grant.setIssuedDate(GalacticDate.getCurrentDate());
 			grant.setPopClass(popClass);
 			

@@ -12,14 +12,14 @@ package starcorp.server.turns.orders;
 
 import java.util.Iterator;
 
-import starcorp.client.turns.OrderReport;
-import starcorp.client.turns.TurnError;
-import starcorp.client.turns.TurnOrder;
 import starcorp.common.entities.Colony;
 import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Facility;
 import starcorp.common.entities.Planet;
 import starcorp.common.entities.Starship;
+import starcorp.common.turns.OrderReport;
+import starcorp.common.turns.TurnError;
+import starcorp.common.turns.TurnOrder;
 import starcorp.common.types.AFacilityType;
 import starcorp.common.types.ColonyHub;
 import starcorp.common.types.Coordinates2D;
@@ -64,13 +64,13 @@ public class FoundColony extends AOrderProcessor {
 				}
 				else {
 					PlanetMapSquare sq = planet.get(location);
-					double hazardLevel = sq.getTerrain().getHazardLevel() + planet.getAtmosphereTypeClass().getHazardLevel();
+					double hazardLevel = sq.getTerrainType().getHazardLevel() + planet.getAtmosphereTypeClass().getHazardLevel();
 					
 					Facility hub = new Facility();
 					hub.setBuiltDate(GalacticDate.getCurrentDate());
 					hub.setOpen(true);
 					hub.setOwner(corp);
-					hub.setType(hubType);
+					hub.setTypeClass(hubType);
 					
 					boolean hasNeededModules = true;
 					Iterator<Items> i = hubType.getBuildingRequirement().iterator();

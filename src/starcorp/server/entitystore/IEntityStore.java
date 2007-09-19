@@ -25,6 +25,7 @@ import starcorp.common.entities.Facility;
 import starcorp.common.entities.FacilityLease;
 import starcorp.common.entities.MarketItem;
 import starcorp.common.entities.Planet;
+import starcorp.common.entities.ResourceDeposit;
 import starcorp.common.entities.StarSystem;
 import starcorp.common.entities.Starship;
 import starcorp.common.entities.StarshipDesign;
@@ -146,6 +147,7 @@ public interface IEntityStore {
 	public abstract Workers getWorkers(Facility facility, PopulationClass popClass);
 	public abstract Unemployed getUnemployed(Colony colony, PopulationClass popClass);
 	
-	
+	public abstract List<ResourceDeposit> listDeposits(AStarSystemEntity systemEntity);
+	public abstract List<ResourceDeposit> listDeposits(Planet planet, Coordinates2D location);
 	
 }

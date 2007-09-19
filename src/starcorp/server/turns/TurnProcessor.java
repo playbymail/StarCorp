@@ -11,11 +11,11 @@
 package starcorp.server.turns;
 
 import java.util.Iterator;
-import starcorp.client.turns.Turn;
-import starcorp.client.turns.TurnError;
-import starcorp.client.turns.TurnOrder;
-import starcorp.client.turns.TurnReport;
 import starcorp.common.entities.Corporation;
+import starcorp.common.turns.Turn;
+import starcorp.common.turns.TurnError;
+import starcorp.common.turns.TurnOrder;
+import starcorp.common.turns.TurnReport;
 import starcorp.common.types.GalacticDate;
 import starcorp.common.types.OrderType;
 import starcorp.server.entitystore.IEntityStore;

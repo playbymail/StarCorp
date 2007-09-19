@@ -11,15 +11,14 @@
 package starcorp.server.turns.orders;
 
 import java.util.Iterator;
-import java.util.Set;
-
-import starcorp.client.turns.OrderReport;
-import starcorp.client.turns.TurnError;
-import starcorp.client.turns.TurnOrder;
+import java.util.List;
 import starcorp.common.entities.AsteroidField;
 import starcorp.common.entities.Corporation;
+import starcorp.common.entities.ResourceDeposit;
 import starcorp.common.entities.Starship;
-import starcorp.common.types.ResourceDeposit;
+import starcorp.common.turns.OrderReport;
+import starcorp.common.turns.TurnError;
+import starcorp.common.turns.TurnOrder;
 
 /**
  * starcorp.server.turns.MineAsteroid
@@ -53,7 +52,7 @@ public class MineAsteroid extends AOrderProcessor {
 			error = new TurnError(TurnError.INVALID_SHIP);
 		}
 		else {
-			Set<ResourceDeposit> deposits = asteroid.getResources();
+			List<ResourceDeposit> deposits = entityStore.listDeposits(asteroid);
 			Iterator<ResourceDeposit> i = deposits.iterator();
 			while(i.hasNext()) {
 				ResourceDeposit y = i.next();

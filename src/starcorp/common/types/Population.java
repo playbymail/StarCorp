@@ -53,4 +53,12 @@ public class Population {
 	public void setPopClass(PopulationClass popClass) {
 		this.popClass = popClass;
 	}
+	
+	public String getPopClassType() {
+		return popClass == null ? null : popClass.getKey();
+	}
+	
+	public void setPopClassType(String key) {
+		popClass = PopulationClass.getType(key);
+	}
 }

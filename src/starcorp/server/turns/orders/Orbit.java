@@ -10,12 +10,12 @@
  */
 package starcorp.server.turns.orders;
 
-import starcorp.client.turns.OrderReport;
-import starcorp.client.turns.TurnError;
-import starcorp.client.turns.TurnOrder;
 import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Planet;
 import starcorp.common.entities.Starship;
+import starcorp.common.turns.OrderReport;
+import starcorp.common.turns.TurnError;
+import starcorp.common.turns.TurnOrder;
 
 /**
  * starcorp.server.turns.Orbit

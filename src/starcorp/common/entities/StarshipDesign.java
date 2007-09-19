@@ -27,7 +27,6 @@ import starcorp.common.types.StarshipHulls;
 public class StarshipDesign extends ANamedEntity {
 
 	private Corporation owner;
-	private String name;
 	private GalacticDate designDate;
 	private Set<Items> hulls = new HashSet<Items>();
 	
@@ -346,13 +345,5 @@ public class StarshipDesign extends ANamedEntity {
 	}
 	public void setDesignDate(GalacticDate designDate) {
 		this.designDate = designDate;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
 	}
 }

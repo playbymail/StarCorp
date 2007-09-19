@@ -10,11 +10,14 @@
  */
 package starcorp.server.turns.orders;
 
-import starcorp.client.turns.OrderReport;
-import starcorp.client.turns.TurnError;
-import starcorp.client.turns.TurnOrder;
+import java.util.List;
+
 import starcorp.common.entities.Corporation;
+import starcorp.common.entities.ResourceDeposit;
 import starcorp.common.entities.Starship;
+import starcorp.common.turns.OrderReport;
+import starcorp.common.turns.TurnError;
+import starcorp.common.turns.TurnOrder;
 
 /**
  * starcorp.server.turns.Prospect
@@ -46,10 +49,11 @@ public class Prospect extends AOrderProcessor {
 		else {
 			ship.incrementTimeUnitsUsed(TIME_UNITS);
 			OrderReport report = new OrderReport(order);
+			List<ResourceDeposit> deposits = entityStore.listDeposits(ship.getPlanet(), ship.getPlanetLocation());
 			report.setScannedLocation(ship.getPlanet().get(ship.getPlanetLocation()));
 			report.setScannedShips(entityStore.listShips(ship.getPlanet(),ship.getPlanetLocation()));
-			report.add(report.getScannedLocation().getTerrain().getName());
-			report.add(report.getScannedLocation().getResources().size());
+			report.add(report.getScannedLocation().getTerrainType().getName());
+			report.add(deposits.size());
 			report.add(report.getScannedShips().size());
 			order.setReport(report);
 		}

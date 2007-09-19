@@ -10,10 +10,6 @@
  */
 package starcorp.common.entities;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import starcorp.common.types.ResourceDeposit;
 
 /**
  * starcorp.common.entities.GasField
@@ -23,13 +19,4 @@ import starcorp.common.types.ResourceDeposit;
  */
 public class GasField extends AStarSystemEntity {
 
-	private Set<ResourceDeposit> resources = new HashSet<ResourceDeposit>();
-	public Set<ResourceDeposit> getResources() {
-		return resources;
-	}
-	public void setResources(Set<ResourceDeposit> resources) {
-		this.resources = resources;
-	}
-	
-	
 }

@@ -12,14 +12,13 @@ package starcorp.server.facilities;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-
 import starcorp.common.entities.Colony;
 import starcorp.common.entities.ColonyItem;
 import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Facility;
 import starcorp.common.entities.MarketItem;
 import starcorp.common.entities.Planet;
+import starcorp.common.entities.ResourceDeposit;
 import starcorp.common.entities.Workers;
 import starcorp.common.types.AFactoryItem;
 import starcorp.common.types.AItemType;
@@ -27,8 +26,6 @@ import starcorp.common.types.Coordinates2D;
 import starcorp.common.types.Factory;
 import starcorp.common.types.IndustrialGoods;
 import starcorp.common.types.Items;
-import starcorp.common.types.PlanetMapSquare;
-import starcorp.common.types.ResourceDeposit;
 import starcorp.common.types.ResourceGenerator;
 import starcorp.server.entitystore.IEntityStore;
 
@@ -60,16 +57,16 @@ public class FacilityProcessor {
 		facility.setTransactionCount(0);
 		facility.setPowered(false);
 		usePower(facility);
-		if(facility.getType() instanceof Factory) {
+		if(facility.getTypeClass() instanceof Factory) {
 			processFactory(facility, workers);
 		}
-		else if(facility.getType() instanceof ResourceGenerator) {
+		else if(facility.getTypeClass() instanceof ResourceGenerator) {
 			processGenerator(facility, workers);
 		}
 	}
 	
 	private void usePower(Facility facility) {
-		int required = facility.getType().getPowerRequirement();
+		int required = facility.getTypeClass().getPowerRequirement();
 		Corporation owner = facility.getOwner();
 		Colony colony = facility.getColony();
 		List<AItemType> types = IndustrialGoods.listPower();
@@ -157,7 +154,7 @@ public class FacilityProcessor {
 	
 	private void processFactory(Facility factory, List<Workers> workers) {
 		factory.clearCreated();
-		Factory type = (Factory) factory.getType();
+		Factory type = (Factory) factory.getTypeClass();
 		int maxCapacity = factory.isPowered() ? type.getCapacity(workers) : 0;
 		int capacityUsed = factory.getTransactionCount();
 		Iterator<Items> i = factory.queue();
@@ -175,10 +172,9 @@ public class FacilityProcessor {
 		Colony colony = generator.getColony();
 		Planet planet = colony.getPlanet();
 		Coordinates2D location = colony.getLocation();
-		PlanetMapSquare sq = planet.get(location);
-		Set<ResourceDeposit> deposits = sq.getResources();
+		List<ResourceDeposit> deposits = entityStore.listDeposits(planet, location);
 		double efficiency = generator.getEfficiency(workers);
-		ResourceGenerator type = (ResourceGenerator) generator.getType();
+		ResourceGenerator type = (ResourceGenerator) generator.getTypeClass();
 		
 		Iterator<ResourceDeposit> i = deposits.iterator();
 		while(i.hasNext()) {

@@ -12,15 +12,15 @@ package starcorp.server.turns.orders;
 
 import java.util.List;
 
-import starcorp.client.turns.OrderReport;
-import starcorp.client.turns.TurnError;
-import starcorp.client.turns.TurnOrder;
 import starcorp.common.entities.Colony;
 import starcorp.common.entities.ColonyItem;
 import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Facility;
 import starcorp.common.entities.MarketItem;
 import starcorp.common.entities.Workers;
+import starcorp.common.turns.OrderReport;
+import starcorp.common.turns.TurnError;
+import starcorp.common.turns.TurnOrder;
 import starcorp.common.types.AItemType;
 import starcorp.common.types.CashTransaction;
 import starcorp.common.types.ColonyHub;
@@ -78,7 +78,8 @@ public class CorporationSellItem extends AOrderProcessor {
 			
 			entityStore.save(marketItem);
 			
-			String desc = CashTransaction.getDescription(CashTransaction.MARKET_FEES, null);
+			Object[] args2 = {colonyHub.getTypeClass().getName(), colony.getName(), String.valueOf(colony.getID())};
+			String desc = CashTransaction.getDescription(CashTransaction.MARKET_FEES, args2);
 			corp.remove(colonyHub.getServiceCharge(),desc);
 			colonyHub.incTransactionCount();
 			

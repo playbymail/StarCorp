@@ -46,6 +46,7 @@ public class MarketItem extends ABaseEntity {
 		Iterator<MarketItem> i = items.iterator();
 		while(i.hasNext() && result.quantityBought < quantity) {
 			MarketItem item = i.next();
+			Colony colony = item.getColony();
 			AItemType type = item.getItem().getTypeClass();
 			int qty = quantity - result.quantityBought;
 			int avail = item.getItem().getQuantity();
@@ -58,7 +59,7 @@ public class MarketItem extends ABaseEntity {
 			}
 			int price = qty * item.getCostPerItem();
 			
-			Object[] args = {type.getName(), String.valueOf(qty)};
+			Object[] args = {String.valueOf(qty), type.getName(),colony.getName(),String.valueOf(colony.getID())};
 			String desc = CashTransaction.getDescription(CashTransaction.ITEM_SOLD, args);
 			item.getSeller().add(price, desc);
 			item.getItem().remove(qty);

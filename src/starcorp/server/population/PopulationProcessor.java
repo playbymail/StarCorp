@@ -118,7 +118,7 @@ public class PopulationProcessor {
 	}
 	
 	private void hireWorkers(Facility facility, PopulationClass popClass) {
-		Population required = facility.getType().getWorkerRequirement(popClass);
+		Population required = facility.getTypeClass().getWorkerRequirement(popClass);
 		Workers workers = entityStore.getWorkers(facility, popClass);
 		if(workers == null || workers.getPopulation().getQuantity() < required.getQuantity()) {
 			// more needed so hire any unemployed
@@ -201,7 +201,7 @@ public class PopulationProcessor {
 		ColonistGrant grant = entityStore.getColonistGrant(colonists.getColony(), colonists.getPopulation().getPopClass(), true);
 		if(grant != null) {
 			Corporation govt = grant.getColony().getGovernment();
-			int cash = grant.getCredit() * colonists.getQuantity();
+			int cash = grant.getCredits() * colonists.getQuantity();
 			if(cash < govt.getCredits()) {
 				cash = govt.getCredits();
 			}

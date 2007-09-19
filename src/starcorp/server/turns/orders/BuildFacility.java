@@ -11,15 +11,15 @@
 package starcorp.server.turns.orders;
 
 import java.util.Iterator;
-import starcorp.client.turns.OrderReport;
-import starcorp.client.turns.TurnError;
-import starcorp.client.turns.TurnOrder;
 import starcorp.common.entities.Colony;
 import starcorp.common.entities.ColonyItem;
 import starcorp.common.entities.Corporation;
 import starcorp.common.entities.DevelopmentGrant;
 import starcorp.common.entities.Facility;
 import starcorp.common.entities.FacilityLease;
+import starcorp.common.turns.OrderReport;
+import starcorp.common.turns.TurnError;
+import starcorp.common.turns.TurnOrder;
 import starcorp.common.types.AFacilityType;
 import starcorp.common.types.CashTransaction;
 import starcorp.common.types.ColonyHub;
@@ -64,7 +64,7 @@ public class BuildFacility extends AOrderProcessor {
 				}
 			}
 			Facility facility = new Facility();
-			facility.setType(facilityType);
+			facility.setTypeClass(facilityType);
 			facility.setColony(colony);
 			facility.setOwner(corp);
 			facility.setBuiltDate(GalacticDate.getCurrentDate());
@@ -105,7 +105,7 @@ public class BuildFacility extends AOrderProcessor {
 					lease.setUsedDate(GalacticDate.getCurrentDate());
 					
 					if(grant != null) {
-						Object[] args = {facilityType.getName()};
+						Object[] args = {facilityType.getName(), colony.getName(), String.valueOf(colony.getID())};
 						String govtDesc = CashTransaction.getDescription(CashTransaction.GRANT_PAID, args);
 						String corpDesc = CashTransaction.getDescription(CashTransaction.GRANT_RECEIVED, args);
 						grant.getColony().getGovernment().remove(grant.getGrant(), govtDesc);

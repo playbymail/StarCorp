@@ -10,9 +10,6 @@
  */
 package starcorp.common.types;
 
-import java.util.HashSet;
-import java.util.Set;
-
 /**
  * starcorp.common.types.PlanetMapSquare
  *
@@ -23,24 +20,47 @@ public class PlanetMapSquare {
 
 	private Coordinates2D location;
 	private TerrainType terrain;
-	private Set<ResourceDeposit> resources = new HashSet<ResourceDeposit>();
+	public String getTerrain() {
+		return terrain == null ? null : terrain.getKey();
+	}
+	
+	public void setTerrain(String key) {
+		terrain = TerrainType.getType(key);
+	}
+	
+	public int getX(){
+		return location == null ? 0 : location.getX();
+	}
+	
+	public void setX(int x) {
+		if(location == null) {
+			location = new Coordinates2D();
+		}
+		location.setX(x);
+	}
+	
+	public int getY(){
+		return location == null ? 0 : location.getY();
+	}
+	
+	public void setY(int y) {
+		if(location == null) {
+			location = new Coordinates2D();
+		}
+		location.setY(y);
+	}
+	
 	public Coordinates2D getLocation() {
 		return location;
 	}
 	public void setLocation(Coordinates2D location) {
 		this.location = location;
 	}
-	public TerrainType getTerrain() {
+	public TerrainType getTerrainType() {
 		return terrain;
 	}
-	public void setTerrain(TerrainType terrain) {
+	public void setTerrainType(TerrainType terrain) {
 		this.terrain = terrain;
-	}
-	public Set<ResourceDeposit> getResources() {
-		return resources;
-	}
-	public void setResources(Set<ResourceDeposit> resources) {
-		this.resources = resources;
 	}
 	
 }

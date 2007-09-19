@@ -64,6 +64,28 @@ public class CashTransaction {
 		this.date = GalacticDate.getCurrentDate();
 	}
 	
+	public int getYear() {
+		return date == null ? 0 : date.getYear();
+	}
+	
+	public void setYear(int year) {
+		if(date == null) {
+			this.date = new GalacticDate();
+		}
+		date.setYear(year);
+	}
+	
+	public int getMonth() {
+		return date == null ? 0 : date.getMonth();
+	}
+	
+	public void setMonth(int month) {
+		if(date == null) {
+			this.date = new GalacticDate();
+		}
+		date.setMonth(month);
+	}
+	
 	public int getAmount() {
 		return amount;
 	}

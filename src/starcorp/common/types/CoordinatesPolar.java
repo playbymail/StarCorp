@@ -43,16 +43,16 @@ public class CoordinatesPolar {
 		return distance;
 	}
 	
-	public int getX() {
+	public int getQuadrant() {
 		return quadrant;
 	}
-	public void setX(int x) {
+	public void setQuadrant(int x) {
 		this.quadrant = x;
 	}
-	public int getY() {
+	public int getOrbit() {
 		return orbit;
 	}
-	public void setY(int y) {
+	public void setOrbit(int y) {
 		this.orbit = y;
 	}
 	@Override
