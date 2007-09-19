@@ -19,10 +19,10 @@ package starcorp.common.types;
 public class ResourceGenerator extends AFacilityType {
 	
 	public boolean canGenerate(AItemType type) {
-		if(!(type instanceof Resource)) {
+		if(!(type instanceof Resources)) {
 			return false;
 		}
-		Resource resource = (Resource) type;
+		Resources resource = (Resources) type;
 		if(resource.isFissile() && isFissile()) {
 			return true;
 		}
@@ -73,5 +73,18 @@ public class ResourceGenerator extends AFacilityType {
 
 	public boolean isLiquid() {
 		return Boolean.parseBoolean(getResource(this, "liquid"));
+	}
+
+	@Override
+	public String getSubCategory() {
+		return "|| Generator ( " + 
+		(isOrganic() ? "organics " : "") + 
+		(isMinerals() ? "minerals " : "") +
+		(isMetal() ? "metal " : "") + 
+		(isFissile() ? "fissile " : "") + 
+		(isFuel() ? "fuel " : "") +
+		(isGas() ? "gas " : "") + 
+		(isLiquid() ? "liquid " : "" ) +
+		") ||";
 	}
 }

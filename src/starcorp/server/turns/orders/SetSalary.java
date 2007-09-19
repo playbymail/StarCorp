@@ -77,7 +77,6 @@ public class SetSalary extends AOrderProcessor {
 			workers.setSalary(salary);
 			
 			OrderReport report = new OrderReport(order);
-			report.add(facility.getType().getName());
 			report.add(facility.getID());
 			report.add(salary);
 			order.setReport(report);

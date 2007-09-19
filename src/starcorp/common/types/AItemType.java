@@ -12,12 +12,12 @@ package starcorp.common.types;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.TreeMap;
 
 /**
  * starcorp.common.types.ItemType
@@ -26,12 +26,33 @@ import java.util.ResourceBundle;
  * @version 15 Sep 2007
  */
 public abstract class AItemType extends ABaseType {
-	protected static final ResourceBundle bundle = ResourceBundle.getBundle("items");
+	protected static final ResourceBundle bundle = ResourceBundle.getBundle("starcorp.common.types.items");
 	
-	private static Map<String, AItemType> types = new HashMap<String, AItemType>(); 
+	private static Map<String, AItemType> types = new TreeMap<String, AItemType>(); 
 
 	static {
 		loadTypes();
+	}
+	
+	private static void print(List<AItemType> types, String category) {
+		System.out.print("\n");
+		Iterator<AItemType> i = types.iterator();
+		System.out.println("= " + category + " =");
+		System.out.println("|| *Key* || *Name* || *MU* || *Category* || *Sub-Category* ||");
+		while(i.hasNext()) {
+			AItemType type = i.next();
+			type.print();
+		}
+		System.out.print("\n");
+		
+	}
+	
+	public static void main(String[] args) {
+		print(listTypes(Resources.class), "Resources");
+		print(listTypes(ConsumerGoods.class), "Consumer Goods");
+		print(listTypes(IndustrialGoods.class), "Industrial Goods");
+		print(listTypes(BuildingModules.class), "Building Modules");
+		print(listTypes(StarshipHulls.class), "Starship Hulls");
 	}
 	
 	private static void loadTypes() {
@@ -55,6 +76,11 @@ public abstract class AItemType extends ABaseType {
 			}
 		}
 	}
+	
+	public String getCategory() {
+		return "[" + getClass().getSimpleName() + "]";
+	}
+	public abstract String getSubCategory();
 	
 	/**
 	 * @param key
@@ -93,6 +119,28 @@ public abstract class AItemType extends ABaseType {
 		}
 	}
 	
+	static int getResourceAsInt(AItemType type, String resourceName) {
+		try {
+			return Integer.parseInt(getResource(type, resourceName));
+		}
+		catch(NumberFormatException e) {
+			return 0;
+		}
+	}
+	
+	static double getResourceAsDouble(AItemType type, String resourceName) {
+		try {
+			return Double.parseDouble(getResource(type, resourceName));
+		}
+		catch(NumberFormatException e) {
+			return 0;
+		}
+	}
+	
+	static boolean getResourceAsBoolean(AItemType type, String resourceName) {
+		return Boolean.parseBoolean(getResource(type, resourceName));
+	}
+	
 	private String key;
 	
 	/**
@@ -113,9 +161,20 @@ public abstract class AItemType extends ABaseType {
 	 * @return
 	 */
 	public int getMassUnits() {
-		return Integer.parseInt(getResource(this,"mass"));
+		return getResourceAsInt(this,"mass");
 	}
 	
-	
-	
+	public void print() {
+		System.out.print("|| " + key + " || " + getName() + " || " + getMassUnits() + " || " + getCategory() + " || " + getSubCategory() + " ||");
+		if(this instanceof AFactoryItem) {
+			AFactoryItem fac = (AFactoryItem) this;
+			Iterator<Items> j = fac.getComponent().iterator();
+			while(j.hasNext()) {
+				Items item = j.next();
+				if(item.getTypeClass() != null)
+					System.out.print(" " + item.getQuantity() + " x " + item.getType() + " ||");
+			}
+		}
+		System.out.print("\n");
+	}
 }

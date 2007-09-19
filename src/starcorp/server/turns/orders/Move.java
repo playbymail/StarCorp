@@ -79,6 +79,10 @@ public class Move extends AOrderProcessor {
 				OrderReport report = new OrderReport(order);
 				report.add(ship.getName());
 				report.add(ship.getID());
+				report.add(shipLocation.getX());
+				report.add(shipLocation.getY());
+				report.add(ship.getSystem().getName());
+				report.add(ship.getSystem().getID());
 				report.setScannedSystemEntities(entities);
 				order.setReport(report);
 			}

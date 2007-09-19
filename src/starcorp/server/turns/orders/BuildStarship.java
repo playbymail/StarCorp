@@ -89,6 +89,7 @@ public class BuildStarship extends AOrderProcessor {
 				
 				OrderReport report = new OrderReport(order);
 				report.add(name);
+				report.add(ship.getID());
 				report.add(design.getName());
 				report.add(design.getID());
 				report.add(colony.getName());

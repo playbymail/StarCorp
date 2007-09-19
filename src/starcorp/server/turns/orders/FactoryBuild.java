@@ -47,9 +47,9 @@ public class FactoryBuild extends AOrderProcessor {
 			item.setTypeClass(type);
 			if(factory.queueItem(item)) {
 				OrderReport report = new OrderReport(order);
-				report.add(factory.getID());
 				report.add(type.getName());
 				report.add(quantity);
+				report.add(factory.getID());
 				order.setReport(report);
 			}
 			else {

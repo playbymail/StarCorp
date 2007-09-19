@@ -57,10 +57,10 @@ public class IssueDevelopmentGrant extends AOrderProcessor {
 			entityStore.save(grant);
 			
 			OrderReport report = new OrderReport(order);
-			report.add(colony.getName());
-			report.add(colony.getID());
 			report.add(type.getName());
 			report.add(credit);
+			report.add(colony.getName());
+			report.add(colony.getID());
 			order.setReport(report);
 			
 		}

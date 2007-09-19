@@ -42,6 +42,7 @@ public class ScanSystem extends AOrderProcessor {
 			ship.incrementTimeUnitsUsed(TIME_UNITS);
 			OrderReport report = new OrderReport(order);
 			report.setScannedSystemEntities(entityStore.listSystemEntities(ship.getSystem()));
+			report.add(report.getScannedSystemEntities().size());
 			order.setReport(report);
 		}
 		

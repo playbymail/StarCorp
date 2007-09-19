@@ -10,11 +10,14 @@
  */
 package starcorp.common.types;
 
+import java.text.MessageFormat;
 import java.util.Enumeration;
-import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.TreeMap;
 
 /**
  * starcorp.common.types.OrderType
@@ -55,20 +58,29 @@ public class OrderType extends ABaseType {
 	public static final String MOVE = "move";
 	public static final String JUMP  = "jump";
 	
-	protected static final ResourceBundle bundle = ResourceBundle.getBundle("orders");
+	protected static final ResourceBundle bundle = ResourceBundle.getBundle("starcorp.common.types.orders");
 	
-	private static Map<String, OrderType> types = new HashMap<String, OrderType>(); 
+	private static Map<String, OrderType> types = new TreeMap<String, OrderType>(); 
 
 	static {
 		loadTypes();
+	}
+	
+	public static void main(String[] args) {
+		System.out.println("|| *Key* || *Name* ||");
+		Iterator<String> i = types.keySet().iterator();
+		while(i.hasNext()) {
+			OrderType type = types.get(i.next());
+			System.out.println("|| " + type.getKey() + " || " + type.getName() + " ||");
+		}
 	}
 	
 	private static void loadTypes() {
 		Enumeration<String> keys = bundle.getKeys();
 		while(keys.hasMoreElements()) {
 			String key = keys.nextElement();
-			if(key.endsWith(".key")) {
-				String k = bundle.getString(key);
+			if(key.endsWith(".name")) {
+				String k = key.substring(0, key.indexOf("."));
 				OrderType type = new OrderType(k);
 				types.put(k, type);
 			}
@@ -117,4 +129,7 @@ public class OrderType extends ABaseType {
 		return getResource(this, "name");
 	}
 
+	public String getDescription(List<String> args) {
+		return MessageFormat.format(getResource(this,"desc"), args.toArray());
+	}
 }

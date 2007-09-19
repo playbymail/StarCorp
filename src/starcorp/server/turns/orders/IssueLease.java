@@ -60,10 +60,10 @@ public class IssueLease extends AOrderProcessor {
 			entityStore.save(lease);
 			
 			OrderReport report = new OrderReport(order);
-			report.add(colony.getName());
-			report.add(colony.getID());
 			report.add(type.getName());
 			report.add(price);
+			report.add(colony.getName());
+			report.add(colony.getID());
 			order.setReport(report);
 			
 		}

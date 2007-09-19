@@ -16,7 +16,7 @@ import java.util.Set;
 
 import starcorp.common.types.GalacticDate;
 import starcorp.common.types.Items;
-import starcorp.common.types.StarshipHull;
+import starcorp.common.types.StarshipHulls;
 
 /**
  * starcorp.common.entities.StarshipDesign
@@ -54,7 +54,7 @@ public class StarshipDesign extends ANamedEntity {
 		return total;
 	}
 	
-	public int countHulls(StarshipHull type) {
+	public int countHulls(StarshipHulls type) {
 		int total = 0;
 		Iterator<Items> i = hulls.iterator();
 		while(i.hasNext()) {
@@ -71,7 +71,7 @@ public class StarshipDesign extends ANamedEntity {
 		Iterator<Items> i = hulls.iterator();
 		while(i.hasNext()) {
 			Items item = i.next();
-			StarshipHull hull = (StarshipHull) item.getTypeClass();
+			StarshipHulls hull = (StarshipHulls) item.getTypeClass();
 			if(hull.isCommand()) {
 				total += item.getQuantity();
 			}
@@ -84,7 +84,7 @@ public class StarshipDesign extends ANamedEntity {
 		Iterator<Items> i = hulls.iterator();
 		while(i.hasNext()) {
 			Items item = i.next();
-			StarshipHull hull = (StarshipHull) item.getTypeClass();
+			StarshipHulls hull = (StarshipHulls) item.getTypeClass();
 			if(hull.isCrew()) {
 				total += item.getQuantity();
 			}
@@ -97,7 +97,7 @@ public class StarshipDesign extends ANamedEntity {
 		Iterator<Items> i = hulls.iterator();
 		while(i.hasNext()) {
 			Items item = i.next();
-			StarshipHull hull = (StarshipHull) item.getTypeClass();
+			StarshipHulls hull = (StarshipHulls) item.getTypeClass();
 			total += item.getQuantity() * hull.getConsumerCapacity();
 		}
 		return total;
@@ -108,7 +108,7 @@ public class StarshipDesign extends ANamedEntity {
 		Iterator<Items> i = hulls.iterator();
 		while(i.hasNext()) {
 			Items item = i.next();
-			StarshipHull hull = (StarshipHull) item.getTypeClass();
+			StarshipHulls hull = (StarshipHulls) item.getTypeClass();
 			total += item.getQuantity() * hull.getIndustrialCapacity();
 		}
 		return total;
@@ -119,7 +119,7 @@ public class StarshipDesign extends ANamedEntity {
 		Iterator<Items> i = hulls.iterator();
 		while(i.hasNext()) {
 			Items item = i.next();
-			StarshipHull hull = (StarshipHull) item.getTypeClass();
+			StarshipHulls hull = (StarshipHulls) item.getTypeClass();
 			total += item.getQuantity() * hull.getModulesCapacity();
 		}
 		return total;
@@ -130,7 +130,7 @@ public class StarshipDesign extends ANamedEntity {
 		Iterator<Items> i = hulls.iterator();
 		while(i.hasNext()) {
 			Items item = i.next();
-			StarshipHull hull = (StarshipHull) item.getTypeClass();
+			StarshipHulls hull = (StarshipHulls) item.getTypeClass();
 			total += item.getQuantity() * hull.getOrganicsCapacity();
 		}
 		return total;
@@ -141,7 +141,7 @@ public class StarshipDesign extends ANamedEntity {
 		Iterator<Items> i = hulls.iterator();
 		while(i.hasNext()) {
 			Items item = i.next();
-			StarshipHull hull = (StarshipHull) item.getTypeClass();
+			StarshipHulls hull = (StarshipHulls) item.getTypeClass();
 			total += item.getQuantity() * hull.getLiquidGasCapacity();
 		}
 		return total;
@@ -152,7 +152,7 @@ public class StarshipDesign extends ANamedEntity {
 		Iterator<Items> i = hulls.iterator();
 		while(i.hasNext()) {
 			Items item = i.next();
-			StarshipHull hull = (StarshipHull) item.getTypeClass();
+			StarshipHulls hull = (StarshipHulls) item.getTypeClass();
 			total += item.getQuantity() * hull.getMassUnits();
 		}
 		return total;
@@ -163,7 +163,7 @@ public class StarshipDesign extends ANamedEntity {
 		Iterator<Items> i = hulls.iterator();
 		while(i.hasNext()) {
 			Items item = i.next();
-			StarshipHull hull = (StarshipHull) item.getTypeClass();
+			StarshipHulls hull = (StarshipHulls) item.getTypeClass();
 			if(hull.getWarpFactor() > maxWarp)
 				maxWarp = hull.getWarpFactor();
 		}
@@ -175,7 +175,7 @@ public class StarshipDesign extends ANamedEntity {
 		Iterator<Items> i = hulls.iterator();
 		while(i.hasNext()) {
 			Items item = i.next();
-			StarshipHull hull = (StarshipHull) item.getTypeClass();
+			StarshipHulls hull = (StarshipHulls) item.getTypeClass();
 			totalThrust += item.getQuantity() * hull.getThrustPower();
 		}
 		int totalMass = getTotalMass();
@@ -194,7 +194,7 @@ public class StarshipDesign extends ANamedEntity {
 		Iterator<Items> i = hulls.iterator();
 		while(i.hasNext()) {
 			Items item = i.next();
-			StarshipHull hull = (StarshipHull) item.getTypeClass();
+			StarshipHulls hull = (StarshipHulls) item.getTypeClass();
 			if(hull.isAsteroidMining())
 				return true;
 		}
@@ -205,7 +205,7 @@ public class StarshipDesign extends ANamedEntity {
 		Iterator<Items> i = hulls.iterator();
 		while(i.hasNext()) {
 			Items item = i.next();
-			StarshipHull hull = (StarshipHull) item.getTypeClass();
+			StarshipHulls hull = (StarshipHulls) item.getTypeClass();
 			if(hull.isGasFieldMining())
 				return true;
 		}
@@ -217,7 +217,7 @@ public class StarshipDesign extends ANamedEntity {
 		Iterator<Items> i = hulls.iterator();
 		while(i.hasNext()) {
 			Items item = i.next();
-			StarshipHull hull = (StarshipHull) item.getTypeClass();
+			StarshipHulls hull = (StarshipHulls) item.getTypeClass();
 			range += hull.getLongScanner();
 			
 		}
@@ -228,7 +228,7 @@ public class StarshipDesign extends ANamedEntity {
 		Iterator<Items> i = hulls.iterator();
 		while(i.hasNext()) {
 			Items item = i.next();
-			StarshipHull hull = (StarshipHull) item.getTypeClass();
+			StarshipHulls hull = (StarshipHulls) item.getTypeClass();
 			if(hull.isShortScanner())
 				return true;
 		}
@@ -239,7 +239,7 @@ public class StarshipDesign extends ANamedEntity {
 		Iterator<Items> i = hulls.iterator();
 		while(i.hasNext()) {
 			Items item = i.next();
-			StarshipHull hull = (StarshipHull) item.getTypeClass();
+			StarshipHulls hull = (StarshipHulls) item.getTypeClass();
 			if(hull.isSystemProbe())
 				return true;
 		}
@@ -250,7 +250,7 @@ public class StarshipDesign extends ANamedEntity {
 		Iterator<Items> i = hulls.iterator();
 		while(i.hasNext()) {
 			Items item = i.next();
-			StarshipHull hull = (StarshipHull) item.getTypeClass();
+			StarshipHulls hull = (StarshipHulls) item.getTypeClass();
 			if(hull.isPlanetProbe())
 				return true;
 		}
@@ -261,7 +261,7 @@ public class StarshipDesign extends ANamedEntity {
 		Iterator<Items> i = hulls.iterator();
 		while(i.hasNext()) {
 			Items item = i.next();
-			StarshipHull hull = (StarshipHull) item.getTypeClass();
+			StarshipHulls hull = (StarshipHulls) item.getTypeClass();
 			if(hull.isBioLab())
 				return true;
 		}
@@ -272,7 +272,7 @@ public class StarshipDesign extends ANamedEntity {
 		Iterator<Items> i = hulls.iterator();
 		while(i.hasNext()) {
 			Items item = i.next();
-			StarshipHull hull = (StarshipHull) item.getTypeClass();
+			StarshipHulls hull = (StarshipHulls) item.getTypeClass();
 			if(hull.isPhysicsLab())
 				return true;
 		}
@@ -283,7 +283,7 @@ public class StarshipDesign extends ANamedEntity {
 		Iterator<Items> i = hulls.iterator();
 		while(i.hasNext()) {
 			Items item = i.next();
-			StarshipHull hull = (StarshipHull) item.getTypeClass();
+			StarshipHulls hull = (StarshipHulls) item.getTypeClass();
 			if(hull.isGeoLab())
 				return true;
 		}
@@ -297,7 +297,7 @@ public class StarshipDesign extends ANamedEntity {
 		this.owner = owner;
 	}
 	
-	public Items getHulls(StarshipHull hullType) {
+	public Items getHulls(StarshipHulls hullType) {
 		Iterator<Items> i = hulls.iterator();
 		while(i.hasNext()) {
 			Items item = i.next();
@@ -322,7 +322,7 @@ public class StarshipDesign extends ANamedEntity {
 		return item;
 	}
 	
-	public void addHulls(StarshipHull hullType, int quantity) {
+	public void addHulls(StarshipHulls hullType, int quantity) {
 		Items item = getHulls(hullType);
 		if(item == null) {
 			item = new Items();

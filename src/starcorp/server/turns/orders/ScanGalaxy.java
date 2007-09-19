@@ -44,6 +44,7 @@ public class ScanGalaxy extends AOrderProcessor {
 			int range = ship.getDesign().getScanGalaxyRange();
 			OrderReport report = new OrderReport(order);
 			report.setScannedSystems(entityStore.listSystems(ship.getSystem().getLocation(), range));
+			report.add(report.getScannedSystems().size());
 			order.setReport(report);
 		}
 		

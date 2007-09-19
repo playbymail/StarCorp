@@ -10,9 +10,6 @@
  */
 package starcorp.client.turns;
 
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
@@ -48,8 +45,6 @@ public class TurnError {
 	
 	private String msgKey;
 	private TurnOrder order;
-	private List<String> msgArgs = new ArrayList<String>();
-	
 	public TurnError() {
 		
 	}
@@ -64,9 +59,9 @@ public class TurnError {
 	}
 	
 	public String getMessage() {
-		Object[] args = msgArgs.toArray();
+		
 		try {
-			return MessageFormat.format(bundle.getString(msgKey), args);
+			return bundle.getString(msgKey);
 		}
 		catch(MissingResourceException e) {
 			return msgKey;
@@ -74,10 +69,6 @@ public class TurnError {
 		catch(NullPointerException e) {
 			return "!" + msgKey + "!";
 		}
-	}
-	
-	public void addMsgArg(String arg) {
-		msgArgs.add(arg);
 	}
 	
 	public String getMsgKey() {
@@ -91,11 +82,5 @@ public class TurnError {
 	}
 	public void setOrder(TurnOrder order) {
 		this.order = order;
-	}
-	public List<String> getMsgArgs() {
-		return msgArgs;
-	}
-	public void setMsgArgs(List<String> msgArgs) {
-		this.msgArgs = msgArgs;
 	}
 }

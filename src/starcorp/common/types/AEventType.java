@@ -10,7 +10,11 @@
  */
 package starcorp.common.types;
 
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -25,17 +29,36 @@ import starcorp.common.entities.ABaseEntity;
  * @version 15 Sep 2007
  */
 public abstract class AEventType extends ABaseType {
-	private static final ResourceBundle bundle = ResourceBundle.getBundle("events");
+	private static final ResourceBundle bundle = ResourceBundle.getBundle("starcorp.common.types.events");
 	
 	private static Map<String, AEventType> types = new HashMap<String, AEventType>(); 
 
 	public abstract OrderReport trigger(ABaseEntity entity);
 	
-	/**
-	 * @param type
-	 */
-	static void registerType(AEventType type) {
-		types.put(type.getKey(), type);
+	static {
+		loadTypes();
+	}
+	
+	private static void loadTypes() {
+		Enumeration<String> keys = bundle.getKeys();
+		while(keys.hasMoreElements()) {
+			String key = keys.nextElement();
+			if(key.endsWith(".class")) {
+				String className = bundle.getString(key);
+				AEventType type;
+				try {
+					type = (AEventType) Class.forName(className).newInstance();
+					type.key = key.substring(0, key.indexOf(".class"));
+					types.put(type.getKey(), type);
+				} catch (InstantiationException e) {
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					e.printStackTrace();
+				} catch (ClassNotFoundException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 	
 	/**
@@ -44,6 +67,21 @@ public abstract class AEventType extends ABaseType {
 	 */
 	public static AEventType getType(String key) {
 		return types.get(key);
+	}
+	
+	public static List<AEventType> listTypes(Class<?> typeClass) {
+		List<AEventType> types = new ArrayList<AEventType>();
+		
+		Iterator<Map.Entry<String, AEventType>> i = AEventType.types.entrySet().iterator();
+		
+		while(i.hasNext()) {
+			Map.Entry<String, AEventType> entry = i.next();
+			if(typeClass.equals(entry.getValue().getClass())) {
+				types.add(entry.getValue());
+			}
+		}
+		
+		return types;
 	}
 	
 	/**
@@ -60,10 +98,14 @@ public abstract class AEventType extends ABaseType {
 		}
 	}
 	
+	private String key;
+	
 	/**
 	 * @return
 	 */
-	public abstract String getKey();
+	public String getKey() {
+		return this.key;
+	}
 	
 	/**
 	 * @return
@@ -72,5 +114,4 @@ public abstract class AEventType extends ABaseType {
 		return getResource(this, "name");
 	}
 	
-
 }

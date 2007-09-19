@@ -46,4 +46,9 @@ public class OrbitalDock extends AFacilityType {
 		}
 	}
 
+	@Override
+	public String getSubCategory() {
+		return "";
+	}
+
 }

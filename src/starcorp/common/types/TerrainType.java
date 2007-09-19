@@ -11,10 +11,11 @@
 package starcorp.common.types;
 
 import java.util.Enumeration;
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.TreeMap;
 
 /**
  * starcorp.common.types.TerrainType
@@ -23,20 +24,28 @@ import java.util.ResourceBundle;
  * @version 15 Sep 2007
  */
 public class TerrainType extends ABaseType {
-	private static final ResourceBundle bundle = ResourceBundle.getBundle("terrain");
+	private static final ResourceBundle bundle = ResourceBundle.getBundle("starcorp.common.types.terrain");
 	
-	private static Map<String, TerrainType> types = new HashMap<String, TerrainType>(); 
+	private static Map<String, TerrainType> types = new TreeMap<String, TerrainType>(); 
 
 	static {
 		loadTypes();
+	}
+	
+	public static void main(String[] args) {
+		System.out.println("|| *Key* || *Name* || *Hazard Level* ||");
+		Iterator<String> i = types.keySet().iterator();
+		while(i.hasNext()) {
+			types.get(i.next()).print();
+		}
 	}
 	
 	private static void loadTypes() {
 		Enumeration<String> keys = bundle.getKeys();
 		while(keys.hasMoreElements()) {
 			String key = keys.nextElement();
-			if(key.endsWith(".key")) {
-				String k = bundle.getString(key);
+			if(key.endsWith(".name")) {
+				String k = key.substring(0, key.indexOf("."));
 				TerrainType type = new TerrainType(k);
 				types.put(k, type);
 			}
@@ -92,6 +101,8 @@ public class TerrainType extends ABaseType {
 		return Double.parseDouble(getResource(this,"hazard"));
 	}
 	
-	
+	public void print() {
+		System.out.println("|| " + getKey() + " || " + getName() + " || " + getHazardLevel() + " ||");
+	}
 	
 }

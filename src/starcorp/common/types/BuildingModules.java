@@ -16,25 +16,40 @@ package starcorp.common.types;
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 16 Sep 2007
  */
-public class BuildingModule extends AFactoryItem {
+public class BuildingModules extends AFactoryItem {
 	
 	public boolean isStructural() {
-		return Boolean.parseBoolean(getResource(this, "structural"));
+		return getResourceAsBoolean(this, "structural");
 	}
 
 	public boolean isIndustrial() {
-		return Boolean.parseBoolean(getResource(this, "industrial"));
+		return getResourceAsBoolean(this, "industrial");
 	}
 	
-	public boolean isOffice() {
-		return Boolean.parseBoolean(getResource(this, "office"));
+	public boolean isCommercial() {
+		return getResourceAsBoolean(this, "commercial");
 	}
 	
 	public boolean isHabitation() {
-		return Boolean.parseBoolean(getResource(this, "habitation"));
+		return getResourceAsBoolean(this, "habitation");
 	}
 
 	public boolean isMilitary() {
-		return Boolean.parseBoolean(getResource(this, "military"));
+		return getResourceAsBoolean(this, "military");
+	}
+
+	@Override
+	public String getSubCategory() {
+		if(isStructural())
+			return "Structural";
+		if(isIndustrial())
+			return "Industrial";
+		if(isCommercial())
+			return "Commercial";
+		if(isHabitation())
+			return "Habitation";
+		if(isMilitary())
+			return "Military";
+		return "";
 	}
 }

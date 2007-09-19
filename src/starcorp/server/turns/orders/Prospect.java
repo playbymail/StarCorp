@@ -48,6 +48,9 @@ public class Prospect extends AOrderProcessor {
 			OrderReport report = new OrderReport(order);
 			report.setScannedLocation(ship.getPlanet().get(ship.getPlanetLocation()));
 			report.setScannedShips(entityStore.listShips(ship.getPlanet(),ship.getPlanetLocation()));
+			report.add(report.getScannedLocation().getTerrain().getName());
+			report.add(report.getScannedLocation().getResources().size());
+			report.add(report.getScannedShips().size());
 			order.setReport(report);
 		}
 		

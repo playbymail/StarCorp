@@ -15,14 +15,14 @@ import java.util.Iterator;
 import java.util.Set;
 
 import starcorp.common.types.AItemType;
-import starcorp.common.types.BuildingModule;
+import starcorp.common.types.BuildingModules;
 import starcorp.common.types.ConsumerGoods;
 import starcorp.common.types.Coordinates2D;
 import starcorp.common.types.GalacticDate;
 import starcorp.common.types.IndustrialGoods;
 import starcorp.common.types.Items;
-import starcorp.common.types.Resource;
-import starcorp.common.types.StarshipHull;
+import starcorp.common.types.Resources;
+import starcorp.common.types.StarshipHulls;
 
 /**
  * starcorp.common.entities.Starship
@@ -62,8 +62,8 @@ public class Starship extends AStarSystemEntity {
 			if(item.getTypeClass() instanceof IndustrialGoods) {
 				mass += (item.getTypeClass().getMassUnits() * item.getQuantity());
 			}
-			else if(item.getTypeClass() instanceof Resource) {
-				Resource r = (Resource) item.getTypeClass();
+			else if(item.getTypeClass() instanceof Resources) {
+				Resources r = (Resources) item.getTypeClass();
 				if(r.isFissile() || r.isMetal() || r.isMinerals()) {
 					mass += (r.getMassUnits() * item.getQuantity()); 
 				}
@@ -77,7 +77,7 @@ public class Starship extends AStarSystemEntity {
 		Iterator<Items> i = cargo.iterator();
 		while(i.hasNext()) {
 			Items item = i.next();
-			if(item.getTypeClass() instanceof BuildingModule || item.getTypeClass() instanceof StarshipHull) {
+			if(item.getTypeClass() instanceof BuildingModules || item.getTypeClass() instanceof StarshipHulls) {
 				mass += (item.getTypeClass().getMassUnits() * item.getQuantity());
 			}
 		}
@@ -90,7 +90,7 @@ public class Starship extends AStarSystemEntity {
 		Iterator<Items> i = cargo.iterator();
 		while(i.hasNext()) {
 			Items item = i.next();
-			if(item.getTypeClass() instanceof StarshipHull) {
+			if(item.getTypeClass() instanceof StarshipHulls) {
 				mass += (item.getTypeClass().getMassUnits() * item.getQuantity());
 			}
 		}
@@ -103,8 +103,8 @@ public class Starship extends AStarSystemEntity {
 		Iterator<Items> i = cargo.iterator();
 		while(i.hasNext()) {
 			Items item = i.next();
-			if(item.getTypeClass() instanceof Resource) {
-				Resource r = (Resource) item.getTypeClass();
+			if(item.getTypeClass() instanceof Resources) {
+				Resources r = (Resources) item.getTypeClass();
 				if(r.isOrganic()) {
 					mass += (r.getMassUnits() * item.getQuantity()); 
 				}
@@ -119,8 +119,8 @@ public class Starship extends AStarSystemEntity {
 		Iterator<Items> i = cargo.iterator();
 		while(i.hasNext()) {
 			Items item = i.next();
-			if(item.getTypeClass() instanceof Resource) {
-				Resource r = (Resource) item.getTypeClass();
+			if(item.getTypeClass() instanceof Resources) {
+				Resources r = (Resources) item.getTypeClass();
 				if(r.isLiquid() || r.isGas()) {
 					mass += (r.getMassUnits() * item.getQuantity()); 
 				}
@@ -143,11 +143,11 @@ public class Starship extends AStarSystemEntity {
 		else if(type instanceof IndustrialGoods) {
 			cargoSpace = design.getIndustrialCapacity() - getCargoIndustrialGoodsMass();
 		}
-		else if(type instanceof BuildingModule || type instanceof StarshipHull) {
+		else if(type instanceof BuildingModules || type instanceof StarshipHulls) {
 			cargoSpace = design.getModulesCapacity() - getCargoModulesMass();
 		}
-		else if(type instanceof Resource) {
-			Resource r = (Resource) type;
+		else if(type instanceof Resources) {
+			Resources r = (Resources) type;
 			if(r.isFissile() || r.isMetal() || r.isMinerals()) {
 				cargoSpace = design.getIndustrialCapacity() - getCargoIndustrialGoodsMass();
 			}

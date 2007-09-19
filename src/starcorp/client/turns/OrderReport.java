@@ -20,6 +20,7 @@ import starcorp.common.entities.Facility;
 import starcorp.common.entities.Planet;
 import starcorp.common.entities.StarSystem;
 import starcorp.common.entities.Starship;
+import starcorp.common.types.OrderType;
 import starcorp.common.types.PlanetMapSquare;
 
 /**
@@ -30,7 +31,7 @@ import starcorp.common.types.PlanetMapSquare;
  */
 public class OrderReport {
 
-	private String msgKey;
+	private OrderType type;
 	private List<String> msgArgs = new ArrayList<String>();
 	private List<StarSystem> scannedSystems;
 	private List<Starship> scannedShips;
@@ -47,7 +48,11 @@ public class OrderReport {
 	}
 	
 	public OrderReport(TurnOrder order) {
-		this.msgKey = order.getType().getKey();
+		this.type = order.getType();
+	}
+	
+	public String getDescription() {
+		return type.getDescription(msgArgs);
 	}
 	
 	public void add(int msgArg) {
@@ -66,12 +71,6 @@ public class OrderReport {
 		return msgArgs.iterator();
 	}
 	
-	public String getMsgKey() {
-		return msgKey;
-	}
-	public void setMsgKey(String msgKey) {
-		this.msgKey = msgKey;
-	}
 	public List<String> getMsgArgs() {
 		return msgArgs;
 	}
@@ -150,6 +149,14 @@ public class OrderReport {
 
 	public void setScannedLocation(PlanetMapSquare scannedLocation) {
 		this.scannedLocation = scannedLocation;
+	}
+
+	public OrderType getType() {
+		return type;
+	}
+
+	public void setType(OrderType type) {
+		this.type = type;
 	}
 	
 	

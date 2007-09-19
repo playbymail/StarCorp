@@ -20,7 +20,7 @@ import starcorp.common.entities.Corporation;
 import starcorp.common.entities.StarshipDesign;
 import starcorp.common.types.AItemType;
 import starcorp.common.types.GalacticDate;
-import starcorp.common.types.StarshipHull;
+import starcorp.common.types.StarshipHulls;
 
 /**
  * starcorp.server.turns.DesignShip
@@ -36,12 +36,12 @@ public class DesignShip extends AOrderProcessor {
 		Corporation corp = order.getCorp();
 		int max = order.size();
 		String name = order.get(0);
-		List<StarshipHull> hullTypes = new ArrayList<StarshipHull>(); 
+		List<StarshipHulls> hullTypes = new ArrayList<StarshipHulls>(); 
 		for(int i = 1; i < max; i++) {
 			String s = order.get(i);
 			AItemType type = AItemType.getType(s);
-			if(type instanceof StarshipHull) {
-				hullTypes.add((StarshipHull)type);
+			if(type instanceof StarshipHulls) {
+				hullTypes.add((StarshipHulls)type);
 			}
 		}
 		
@@ -53,9 +53,9 @@ public class DesignShip extends AOrderProcessor {
 			design.setDesignDate(GalacticDate.getCurrentDate());
 			design.setName(name);
 			design.setOwner(corp);
-			Iterator<StarshipHull> i = hullTypes.iterator();
+			Iterator<StarshipHulls> i = hullTypes.iterator();
 			while(i.hasNext()) {
-				StarshipHull hull = i.next();
+				StarshipHulls hull = i.next();
 				design.addHulls(hull, 1);
 			}
 			

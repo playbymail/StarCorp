@@ -27,7 +27,7 @@ import starcorp.server.entitystore.IEntityStore;
  */
 public abstract class AOrderProcessor {
 
-	private static ResourceBundle bundle = ResourceBundle.getBundle("orderprocessors");
+	private static ResourceBundle bundle = ResourceBundle.getBundle("starcorp.server.turns.orders.orderprocessors");
 	
 	private static Map<String, AOrderProcessor> processors = new HashMap<String, AOrderProcessor>();
 	
@@ -40,7 +40,7 @@ public abstract class AOrderProcessor {
 		while(keys.hasMoreElements()) {
 			String key = keys.nextElement();
 			if(key.endsWith(".class")) {
-				String className = bundle.getString(key);
+				String className = "starcorp.server.turns.orders." + bundle.getString(key);
 				AOrderProcessor processor;
 				try {
 					processor = (AOrderProcessor) Class.forName(className).newInstance();

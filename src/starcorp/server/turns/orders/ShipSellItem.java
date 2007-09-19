@@ -100,13 +100,13 @@ public class ShipSellItem extends AOrderProcessor {
 				orbitalDock.incTransactionCount();
 			}
 			report = new OrderReport(order);
-			report.add(ship.getName());
-			report.add(ship.getID());
 			report.add(quantity);
 			report.add(price);
 			report.add(type.getName());
 			report.add(colony.getName());
 			report.add(colony.getID());
+			report.add(ship.getName());
+			report.add(ship.getID());
 			order.setReport(report);
 		}
 		return error;

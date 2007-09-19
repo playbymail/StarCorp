@@ -11,11 +11,11 @@
 package starcorp.common.types;
 
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.TreeMap;
 
 /**
  * starcorp.common.types.PopulationClass
@@ -24,20 +24,28 @@ import java.util.ResourceBundle;
  * @version 15 Sep 2007
  */
 public class PopulationClass extends ABaseType {
-	private static final ResourceBundle bundle = ResourceBundle.getBundle("population");
+	private static final ResourceBundle bundle = ResourceBundle.getBundle("starcorp.common.types.population");
 	
-	private static Map<String, PopulationClass> types = new HashMap<String, PopulationClass>(); 
+	private static Map<String, PopulationClass> types = new TreeMap<String, PopulationClass>(); 
 
 	static {
 		loadTypes();
+	}
+	
+	public static void main(String[] args) {
+		System.out.println("|| *Key* || *Name* || *Service Quality* || *Consumer Quality* ||");
+		Iterator<String> i = types.keySet().iterator();
+		while(i.hasNext()) {
+			types.get(i.next()).print();
+		}
 	}
 	
 	private static void loadTypes() {
 		Enumeration<String> keys = bundle.getKeys();
 		while(keys.hasMoreElements()) {
 			String key = keys.nextElement();
-			if(key.endsWith(".key")) {
-				String k = bundle.getString(key);
+			if(key.endsWith(".name")) {
+				String k = key.substring(0, key.indexOf("."));
 				PopulationClass type = new PopulationClass(k);
 				types.put(k, type);
 			}
@@ -94,7 +102,26 @@ public class PopulationClass extends ABaseType {
 		return getResource(this, "name");
 	}
 	
-	public int getQualityRequired() {
-		return Integer.parseInt(getResource(this, "quality"));
+	public int getServiceQualityRequired() {
+		try {
+			return Integer.parseInt(getResource(this, "quality.service"));
+		}
+		catch(NumberFormatException e) {
+			return 0;
+		}
+	}
+
+	public int getConsumerQualityRequired() {
+		try {
+			return Integer.parseInt(getResource(this, "quality.consumer"));
+		}
+		catch(NumberFormatException e) {
+			return 0;
+		}
+	}
+	
+	public void print() {
+		String s = "|| " + getKey() + " || [" + getName() + "] || " + getServiceQualityRequired() + " || " + getConsumerQualityRequired() + " ||";
+		System.out.println(s);
 	}
 }

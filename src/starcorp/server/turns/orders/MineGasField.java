@@ -63,6 +63,8 @@ public class MineGasField extends AOrderProcessor {
 			ship.incrementTimeUnitsUsed(TIME_UNITS);
 			OrderReport report = new OrderReport(order);
 			report.setScannedSystemEntities(entityStore.listSystemEntities(ship.getSystem(),ship.getLocation()));
+			report.add(gasfield.getName());
+			report.add(gasfield.getID());
 			order.setReport(report);
 		}
 		

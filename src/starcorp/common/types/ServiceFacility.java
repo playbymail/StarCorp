@@ -72,6 +72,17 @@ public class ServiceFacility extends AFacilityType {
 		return types;
 	}
 	
+
+	@Override
+	public String getSubCategory() {
+		return " || Service (" + 
+		(isMedical() ? " medical / " : "") + 
+		(isFitness() ? " fitness / " : "") + 
+		(isEntertainment() ? " ent / " : "") + 
+		(isEducation() ? " edu / " : "") + 
+		getQuality() + ") || ";
+	}
+	
 	public int getQuality() {
 		return Integer.parseInt(getResource(this, "quality"));
 	}
@@ -117,6 +128,8 @@ public class ServiceFacility extends AFacilityType {
 	public boolean isEducation() {
 		return Boolean.parseBoolean(getResource(this, "education"));
 	}
+
+
 
 
 }

@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.TreeMap;
 
 import starcorp.common.entities.AColonists;
 import starcorp.common.entities.Workers;
@@ -31,12 +32,20 @@ import starcorp.common.entities.Workers;
  * @version 15 Sep 2007
  */
 public abstract class AFacilityType extends ABaseType {
-	protected static final ResourceBundle bundle = ResourceBundle.getBundle("facilities");
+	protected static final ResourceBundle bundle = ResourceBundle.getBundle("starcorp.common.types.facilities");
 	
-	private static Map<String, AFacilityType> types = new HashMap<String, AFacilityType>(); 
+	private static Map<String, AFacilityType> types = new TreeMap<String, AFacilityType>(); 
 
 	static {
 		loadTypes();
+	}
+	
+	public static void main(String[] args) {
+		print(listTypes(ColonyHub.class),"Colony Hub");
+		print(listTypes(OrbitalDock.class),"Orbital Dock");
+		print(listTypes(Factory.class),"Factories");
+		print(listTypes(ResourceGenerator.class),"Resource Generators");
+		print(listTypes(ServiceFacility.class),"Service Facilities");
 	}
 	
 	private static void loadTypes() {
@@ -95,7 +104,61 @@ public abstract class AFacilityType extends ABaseType {
 		}
 	}
 	
+	private static void print(List<AFacilityType> types, String category) {
+		System.out.print("\n");
+		Iterator<AFacilityType> i = types.iterator();
+		System.out.println("= " + category + " =");
+		System.out.println("|| *Key* || *Name* || *Power* || *Workers* || *Modules* ||");
+		while(i.hasNext()) {
+			AFacilityType type = i.next();
+			type.print();
+		}
+		System.out.print("\n");
+		
+	}
+	
 	private String key;
+	
+	public void print() {
+		StringBuffer s = new StringBuffer();
+		s.append("|| ");
+		s.append(getKey());
+		s.append(" || ");
+		s.append(getName());
+		s.append(" || ");
+		s.append(getPowerRequirement());
+		s.append(" || ");
+		Iterator<PopulationClass> i = getWorkerRequirement().keySet().iterator();
+		while(i.hasNext()) {
+			Population pop = getWorkerRequirement(i.next());
+			if(pop.getPopClass() != null) {
+				s.append(pop.getQuantity());
+				s.append(" x ");
+				s.append(pop.getPopClass().getName());
+				s.append(" ");
+			}
+		}
+		s.append(" || ");
+		Iterator<Items> j = getBuildingRequirement().iterator();
+		while(j.hasNext()) {
+			Items item = j.next();
+			if(item.getTypeClass() != null) {
+				s.append(item.getQuantity());
+				s.append(" x ");
+				s.append(item.getType());
+				s.append(" ");
+			}
+		}
+		s.append(" ||");
+		s.append(getSubCategory());
+		System.out.println(s.toString());
+	}
+	
+	public String getCategory() {
+		return "[" + getClass().getSimpleName() + "]";
+	}
+	
+	public abstract String getSubCategory();
 	
 	/**
 	 * @return
@@ -127,14 +190,20 @@ public abstract class AFacilityType extends ABaseType {
 		Enumeration<String> keys = bundle.getKeys();
 		while(keys.hasMoreElements()) {
 			String key = keys.nextElement();
-			int i;
-			if((i = key.indexOf(".worker.type")) != -1) {
-				String facilityKey = key.substring(0, i);
+			if(key.indexOf(getKey() + ".worker.type") != -1) {
 				String workerNumber = key.substring(key.lastIndexOf(".") + 1);
 				Population colonist = new Population();
 				PopulationClass popClass = PopulationClass.getType(bundle.getString(key));
 				colonist.setPopClass(popClass);
-				colonist.setQuantity(Integer.parseInt(bundle.getString(facilityKey + ".worker.qty." + workerNumber)));
+				try {
+					colonist.setQuantity(Integer.parseInt(bundle.getString(getKey() + ".worker.qty." + workerNumber)));
+				}
+				catch(NumberFormatException e) {
+					// ignore
+				}
+				catch(MissingResourceException e) {
+					// ignore
+				}
 				workers.put(popClass, colonist);
 			}
 		}
@@ -146,13 +215,16 @@ public abstract class AFacilityType extends ABaseType {
 		Enumeration<String> keys = bundle.getKeys();
 		while(keys.hasMoreElements()) {
 			String key = keys.nextElement();
-			int i;
-			if((i = key.indexOf(".module.type")) != -1) {
-				String facilityKey = key.substring(0, i);
+			if(key.indexOf(getKey() + ".module.type") != -1) {
 				String moduleNumber = key.substring(key.lastIndexOf(".") + 1);
 				Items item = new Items();
 				item.setType(bundle.getString(key));
-				item.setQuantity(Integer.parseInt(bundle.getString(facilityKey + ".module.qty." + moduleNumber)));
+				try {
+					item.setQuantity(Integer.parseInt(bundle.getString(getKey() + ".module.qty." + moduleNumber)));
+				}
+				catch(NumberFormatException e) {
+					// ignore
+				}
 				modules.add(item);
 			}
 		}

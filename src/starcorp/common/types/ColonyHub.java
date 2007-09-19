@@ -46,4 +46,9 @@ public class ColonyHub extends AFacilityType {
 			return -1; // unlimited
 		}
 	}
+
+	@Override
+	public String getSubCategory() {
+		return "";
+	}
 }

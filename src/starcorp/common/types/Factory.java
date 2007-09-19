@@ -31,10 +31,10 @@ public class Factory extends AFacilityType {
 		if(type instanceof IndustrialGoods && isIndustrial()) {
 			return true;
 		}
-		if(type instanceof BuildingModule && isConstruction()) {
+		if(type instanceof BuildingModules && isConstruction()) {
 			return true;
 		}
-		if(type instanceof StarshipHull && isShipard()) {
+		if(type instanceof StarshipHulls && isShipard()) {
 			return true;
 		}
 		return false;
@@ -63,5 +63,15 @@ public class Factory extends AFacilityType {
 	public int getCapacity(List<Workers> currentWorkers) {
 		double efficiency = getEfficiency(currentWorkers);
 		return (int) ((double) getMaxCapacity() * efficiency / 100);
+	}
+
+	@Override
+	public String getSubCategory() {
+		return " || Factory ( " + 
+		(isConsumer() ? "consumer / " : "") + 
+		(isIndustrial() ? "industrial / " : "") + 
+		(isConstruction() ? "construction / " : "") + 
+		(isShipard() ? "shipyard / " : "") +
+		getMaxCapacity() + ") || ";
 	}
 }

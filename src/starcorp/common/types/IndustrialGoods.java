@@ -21,77 +21,6 @@ import java.util.List;
  * @version 16 Sep 2007
  */
 public class IndustrialGoods extends TradeGoods {
-	public static List<AItemType> listLightAlloy() {
-		List<AItemType> types = new ArrayList<AItemType>();
-		Iterator<AItemType> i = AItemType.listTypes(ConsumerGoods.class).iterator();
-		while(i.hasNext()) {
-			IndustrialGoods goods = (IndustrialGoods) i.next();
-			if(goods.isLightAlloy()) {
-				types.add(goods);
-			}
-		}
-		return types;
-	}
-
-	public static List<AItemType> listStrongAlloy() {
-		List<AItemType> types = new ArrayList<AItemType>();
-		Iterator<AItemType> i = AItemType.listTypes(ConsumerGoods.class).iterator();
-		while(i.hasNext()) {
-			IndustrialGoods goods = (IndustrialGoods) i.next();
-			if(goods.isStrongAlloy()) {
-				types.add(goods);
-			}
-		}
-		return types;
-	}
-
-	public static List<AItemType> listConcrete() {
-		List<AItemType> types = new ArrayList<AItemType>();
-		Iterator<AItemType> i = AItemType.listTypes(ConsumerGoods.class).iterator();
-		while(i.hasNext()) {
-			IndustrialGoods goods = (IndustrialGoods) i.next();
-			if(goods.isConcrete()) {
-				types.add(goods);
-			}
-		}
-		return types;
-	}
-
-	public static List<AItemType> listComputer() {
-		List<AItemType> types = new ArrayList<AItemType>();
-		Iterator<AItemType> i = AItemType.listTypes(ConsumerGoods.class).iterator();
-		while(i.hasNext()) {
-			IndustrialGoods goods = (IndustrialGoods) i.next();
-			if(goods.isComputer()) {
-				types.add(goods);
-			}
-		}
-		return types;
-	}
-
-	public static List<AItemType> listNetwork() {
-		List<AItemType> types = new ArrayList<AItemType>();
-		Iterator<AItemType> i = AItemType.listTypes(ConsumerGoods.class).iterator();
-		while(i.hasNext()) {
-			IndustrialGoods goods = (IndustrialGoods) i.next();
-			if(goods.isNetwork()) {
-				types.add(goods);
-			}
-		}
-		return types;
-	}
-
-	public static List<AItemType> listPlastic() {
-		List<AItemType> types = new ArrayList<AItemType>();
-		Iterator<AItemType> i = AItemType.listTypes(ConsumerGoods.class).iterator();
-		while(i.hasNext()) {
-			IndustrialGoods goods = (IndustrialGoods) i.next();
-			if(goods.isPlastic()) {
-				types.add(goods);
-			}
-		}
-		return types;
-	}
 
 	public static List<AItemType> listPower() {
 		List<AItemType> types = new ArrayList<AItemType>();
@@ -105,48 +34,45 @@ public class IndustrialGoods extends TradeGoods {
 		return types;
 	}
 
-	public static List<AItemType> listEngine() {
-		List<AItemType> types = new ArrayList<AItemType>();
-		Iterator<AItemType> i = AItemType.listTypes(ConsumerGoods.class).iterator();
-		while(i.hasNext()) {
-			IndustrialGoods goods = (IndustrialGoods) i.next();
-			if(goods.isEngine()) {
-				types.add(goods);
-			}
-		}
-		return types;
+	public boolean isAlloy() {
+		return getResourceAsBoolean(this, "alloy");
 	}
 
-	public boolean isLightAlloy() {
-		return Boolean.parseBoolean(getResource(this, "alloy.light"));
-	}
-
-	public boolean isStrongAlloy() {
-		return Boolean.parseBoolean(getResource(this, "alloy.strong"));
+	public boolean isCeramic() {
+		return getResourceAsBoolean(this, "ceramic");
 	}
 	
-	public boolean isConcrete() {
-		return Boolean.parseBoolean(getResource(this, "concrete"));
+	public boolean isElectronic() {
+		return getResourceAsBoolean(this, "electronic");
 	}
 	
-	public boolean isComputer() {
-		return Boolean.parseBoolean(getResource(this, "computer"));
-	}
-	
-	public boolean isNetwork() {
-		return Boolean.parseBoolean(getResource(this, "network"));
-	}
-
 	public boolean isPlastic() {
-		return Boolean.parseBoolean(getResource(this, "plastic"));
+		return getResourceAsBoolean(this, "plastic");
 	}
 	
 	public boolean isPower() {
-		return Boolean.parseBoolean(getResource(this, "power"));
+		return getResourceAsBoolean(this, "power");
 	}
 	
 	public boolean isEngine() {
-		return Boolean.parseBoolean(getResource(this, "engine"));
+		return getResourceAsBoolean(this, "engine");
+	}
+
+	@Override
+	public String getSubCategory() {
+		if(isAlloy())
+			return "Alloy";
+		if(isCeramic())
+			return "Ceramic";
+		if(isElectronic())
+			return "Electronic";
+		if(isPlastic())
+			return "Plastic";
+		if(isPower())
+			return "Power";
+		if(isEngine())
+			return "Engine";
+		return "";
 	}
 
 }

@@ -71,23 +71,38 @@ public class ConsumerGoods extends TradeGoods {
 	}
 	
 	public int getQuality() {
-		return Integer.parseInt(getResource(this, "quality"));
+		return getResourceAsInt(this, "quality");
 	}
 	
 	public boolean isFood() {
-		return Boolean.parseBoolean(getResource(this, "food"));
+		return getResourceAsBoolean(this, "food");
 	}
 
 	public boolean isDrink() {
-		return Boolean.parseBoolean(getResource(this, "drink"));
+		return getResourceAsBoolean(this, "drink");
 	}
 	
 	public boolean isIntoxicant() {
-		return Boolean.parseBoolean(getResource(this, "intoxicant"));
+		return getResourceAsBoolean(this, "intoxicant");
 	}
 	
 	public boolean isClothes() {
-		return Boolean.parseBoolean(getResource(this, "clothes"));
+		return getResourceAsBoolean(this, "clothes");
+	}
+
+	@Override
+	public String getSubCategory() {
+		String s = String.valueOf(getQuality());
+		if(isFood())
+			return "Food (" + s + ")";
+		if(isDrink())
+			return "Drink (" + s + ")";
+		if(isIntoxicant())
+			return "Intoxicant (" + s + ")";
+		if(isClothes())
+			return "Clothes (" + s + ")";
+		return "Unknown + (" + s + ")";
+			
 	}
 
 }

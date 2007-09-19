@@ -20,7 +20,7 @@ import java.util.ResourceBundle;
  */
 public class GalacticDate {
 
-	private static final ResourceBundle bundle = ResourceBundle.getBundle("date");
+	private static final ResourceBundle bundle = ResourceBundle.getBundle("starcorp.common.types.date");
 
 	private static GalacticDate currentDate;
 	

@@ -16,33 +16,52 @@ package starcorp.common.types;
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 15 Sep 2007
  */
-public class Resource extends AItemType {
+public class Resources extends AItemType {
 	
 	public boolean isOrganic() {
-		return Boolean.parseBoolean(getResource(this, "organic"));
+		return getResourceAsBoolean(this, "organic");
 	}
 
 	public boolean isMinerals() {
-		return Boolean.parseBoolean(getResource(this, "mineral"));
+		return getResourceAsBoolean(this, "mineral");
 	}
 
 	public boolean isMetal() {
-		return Boolean.parseBoolean(getResource(this, "metal"));
+		return getResourceAsBoolean(this, "metal");
 	}
 
 	public boolean isFissile() {
-		return Boolean.parseBoolean(getResource(this, "fissile"));
+		return getResourceAsBoolean(this, "fissile");
 	}
 
 	public boolean isFuel() {
-		return Boolean.parseBoolean(getResource(this, "fuel"));
+		return getResourceAsBoolean(this, "fuel");
 	}
 
 	public boolean isGas() {
-		return Boolean.parseBoolean(getResource(this, "gas"));
+		return getResourceAsBoolean(this, "gas");
 	}
 
 	public boolean isLiquid() {
-		return Boolean.parseBoolean(getResource(this, "liquid"));
+		return getResourceAsBoolean(this, "liquid");
+	}
+
+	@Override
+	public String getSubCategory() {
+		if(isOrganic())
+			return "Organic";
+		if(isMinerals())
+			return "Mineral";
+		if(isMetal())
+			return "Metal";
+		if(isFissile())
+			return "Fissile";
+		if(isFuel())
+			return "Fuel";
+		if(isGas())
+			return "Gas";
+		if(isLiquid())
+			return "Liquid";
+		return "";
 	}
 }

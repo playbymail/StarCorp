@@ -225,7 +225,7 @@ public class PopulationProcessor {
 	}
 	
 	private void doConsumerNeeds(AColonists colonists) {
-		int quality = colonists.getPopClass().getQualityRequired();
+		int quality = colonists.getPopClass().getConsumerQualityRequired();
 		List<AItemType> foodTypes = ConsumerGoods.listFood(quality);
 		doConsumerNeeds(colonists, foodTypes, HAPPINESS_FOOD);
 		List<AItemType> drinkTypes = ConsumerGoods.listDrink(quality);
@@ -249,7 +249,7 @@ public class PopulationProcessor {
 	}
 	
 	private void doServiceNeeds(AColonists colonists) {
-		int quality = colonists.getPopClass().getQualityRequired();
+		int quality = colonists.getPopClass().getServiceQualityRequired();
 		List<AFacilityType> medicalTypes = ServiceFacility.listMedical(quality);
 		doServiceNeeds(colonists, medicalTypes, HAPPINESS_MEDICAL);
 		List<AFacilityType> fitnessTypes = ServiceFacility.listFitness(quality);
