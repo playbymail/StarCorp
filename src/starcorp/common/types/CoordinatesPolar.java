@@ -20,6 +20,15 @@ public class CoordinatesPolar {
 	private int quadrant;
 	private int orbit;
 	
+	public CoordinatesPolar() {
+		
+	}
+	
+	public CoordinatesPolar(int quadrant, int orbit) {
+		this.quadrant = quadrant;
+		this.orbit = orbit;
+	}
+	
 	public int getDistance(CoordinatesPolar other) {
 		int distance = 0;
 		CoordinatesPolar current = new CoordinatesPolar();

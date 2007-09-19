@@ -23,20 +23,20 @@ import starcorp.common.types.Items;
  */
 public class ColonyItem extends ABaseEntity {
 
-	public static int count(List<ColonyItem> items) {
+	public static int count(List<?> items) {
 		int count = 0;
-		Iterator<ColonyItem> i = items.iterator();
+		Iterator<?> i = items.iterator();
 		while(i.hasNext()) {
-			count += i.next().getQuantity();
+			count += ((ColonyItem)i.next()).getQuantity();
 		}
 		return count;
 	}
 	
-	public static int use(List<ColonyItem> items, int quantity) {
+	public static int use(List<?> items, int quantity) {
 		int used = 0;
-		Iterator<ColonyItem> i = items.iterator();
+		Iterator<?> i = items.iterator();
 		while(i.hasNext() && used < quantity) {
-			ColonyItem item = i.next();
+			ColonyItem item = (ColonyItem) i.next();
 			int qty = quantity - used;
 			if(qty > item.getQuantity()) {
 				qty = item.getQuantity();

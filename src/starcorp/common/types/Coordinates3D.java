@@ -21,6 +21,16 @@ public class Coordinates3D {
 	private int y;
 	private int z;
 	
+	public Coordinates3D() {
+		
+	}
+	
+	public Coordinates3D(int x, int y, int z) {
+		this.x = x;
+		this.y = y;
+		this.z = z;
+	}
+	
 	public int getDistance(Coordinates3D other) {
 		int distance = 0;
 		Coordinates3D current = new Coordinates3D();

@@ -10,6 +10,8 @@
  */
 package starcorp.server.turns.orders;
 
+import java.util.List;
+
 import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Starship;
 import starcorp.common.turns.OrderReport;
@@ -31,7 +33,7 @@ public class ScanGalaxy extends AOrderProcessor {
 		Corporation corp = order.getCorp();
 		int starshipId = order.getAsInt(0);
 		
-		Starship ship = (Starship) entityStore.load(starshipId);
+		Starship ship = (Starship) entityStore.load(Starship.class, starshipId);
 		
 		if(ship == null || !ship.getOwner().equals(corp)) {
 			error = new TurnError(TurnError.INVALID_SHIP);
@@ -43,8 +45,9 @@ public class ScanGalaxy extends AOrderProcessor {
 			ship.incrementTimeUnitsUsed(TIME_UNITS);
 			int range = ship.getDesign().getScanGalaxyRange();
 			OrderReport report = new OrderReport(order);
-			report.setScannedSystems(entityStore.listSystems(ship.getSystem().getLocation(), range));
-			report.add(report.getScannedSystems().size());
+			List<?> systems = entityStore.listSystems(ship.getSystem().getLocation(), range);
+			report.addScannedEntities(systems);
+			report.add(systems.size());
 			order.setReport(report);
 		}
 		

@@ -10,6 +10,8 @@
  */
 package starcorp.common.types;
 
+import org.dom4j.Element;
+
 /**
  * starcorp.common.types.PlanetMapSquare
  *
@@ -20,6 +22,31 @@ public class PlanetMapSquare {
 
 	private Coordinates2D location;
 	private TerrainType terrain;
+	
+	public PlanetMapSquare() {
+		
+	}
+	
+	public PlanetMapSquare(Coordinates2D location, TerrainType terrain) {
+		this.location = location;
+		this.terrain = terrain;
+	}
+	
+	public PlanetMapSquare(Element e) {
+		int x = Integer.parseInt(e.attributeValue("x","0"));
+		int y = Integer.parseInt(e.attributeValue("y","0"));
+		this.terrain = TerrainType.getType(e.attributeValue("terrain"));
+		this.location = new Coordinates2D(x,y);
+	}
+	
+	public Element toXML(Element parent) {
+		Element root = parent.addElement("map-square");
+		root.addAttribute("x", String.valueOf(location.getX()));
+		root.addAttribute("y", String.valueOf(location.getY()));
+		root.addAttribute("terrain", terrain.getKey());
+		return root;
+	}
+	
 	public String getTerrain() {
 		return terrain == null ? null : terrain.getKey();
 	}

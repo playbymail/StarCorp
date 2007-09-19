@@ -42,7 +42,6 @@ public class TurnProcessor {
 			turn.add(TurnError.ERROR_AUTHORIZATION_FAILED);
 		}
 		else {
-			report.setTo(corp);
 			turn.setCorporation(corp);
 			GalacticDate lastTurn = corp.getLastTurnDate();
 			GalacticDate currentDate = GalacticDate.getCurrentDate();
@@ -59,14 +58,14 @@ public class TurnProcessor {
 						turn.add(error);
 					}
 				}
-				report.setColonistGrants(entityStore.listColonistGrants(corp, true));
-				report.setDesigns(entityStore.listDesigns(corp));
-				report.setDevelopmentGrants(entityStore.listDevelopmentGrants(corp, true));
-				report.setFacilities(entityStore.listFacilities(corp));
-				report.setItems(entityStore.listItems(corp));
-				report.setLeases(entityStore.listLeases(corp, true));
-				report.setMarkets(entityStore.listMarket(1));
-				report.setStarships(entityStore.listShips(corp));
+				report.addPlayerEntities(entityStore.listColonistGrants(corp, true));
+				report.addPlayerEntities(entityStore.listDesigns(corp));
+				report.addPlayerEntities(entityStore.listDevelopmentGrants(corp, true));
+				report.addPlayerEntities(entityStore.listFacilities(corp));
+				report.addPlayerEntities(entityStore.listItems(corp));
+				report.addPlayerEntities(entityStore.listLeases(corp, true));
+				report.addPlayerEntities(entityStore.listMarket(1));
+				report.addPlayerEntities(entityStore.listShips(corp));
 			}
 		}
 		return report;

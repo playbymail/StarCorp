@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.dom4j.Element;
+
 import starcorp.common.entities.Corporation;
 import starcorp.common.types.GalacticDate;
 
@@ -30,6 +32,45 @@ public class Turn {
 	private Corporation corporation;
 	private List<TurnOrder> orders = new ArrayList<TurnOrder>();
 	private List<TurnError> errors = new ArrayList<TurnError>();
+	
+	public Turn() {
+		
+	}
+	
+	public Turn(String email, String password) {
+		corporation = new Corporation(email,password);
+	}
+	
+	public Turn(Element root) {
+		this.corporation = new Corporation();
+		this.corporation.readXML(root.element("corporation").element("entity"));
+		this.submittedDate = new GalacticDate(root.element("submitted").element("date"));
+		this.processedDate = new GalacticDate(root.element("processed").element("date"));
+		for(Iterator<?> i = root.elementIterator("order"); i.hasNext();) {
+			this.orders.add(new TurnOrder((Element)i.next()));
+		}
+		for(Iterator<?> i = root.elementIterator("error"); i.hasNext();) {
+			this.errors.add(new TurnError((Element)i.next()));
+		}
+	}
+	
+	public Element toXML(Element parent) {
+		Element root = parent.addElement("turn");
+		corporation.toFullXML(root.addElement("corporation"));
+		submittedDate.toXML(root.addElement("submitted"));
+		processedDate.toXML(root.addElement("processed"));
+		Element eOrders = root.addElement("orders");
+		eOrders.addAttribute("size", String.valueOf(orders.size()));
+		for(int i = 0; i < orders.size(); i++) {
+			orders.get(i).toXML(eOrders);
+		}
+		Element eErrors = root.addElement("errors");
+		eErrors.addAttribute("size", String.valueOf(errors.size()));
+		for(int i = 0; i < errors.size(); i++) {
+			errors.get(i).toXML(eErrors);
+		}
+		return root;
+	}
 	
 	public void add(TurnOrder order) {
 		orders.add(order);

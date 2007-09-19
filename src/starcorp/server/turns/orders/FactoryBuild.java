@@ -33,7 +33,7 @@ public class FactoryBuild extends AOrderProcessor {
 		String itemTypeKey = order.get(1);
 		int quantity = order.getAsInt(2);
 		
-		Facility factory = (Facility) entityStore.load(factoryId);
+		Facility factory = (Facility) entityStore.load(Facility.class, factoryId);
 		AItemType type = AItemType.getType(itemTypeKey);
 		if(factory == null) {
 			error = new TurnError(TurnError.INVALID_FACILITY);

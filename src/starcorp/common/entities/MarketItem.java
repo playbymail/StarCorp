@@ -40,12 +40,12 @@ public class MarketItem extends ABaseEntity {
 		public List<Items> bought = new ArrayList<Items>();
 	}
 	
-	public static BuyResult buy(List<MarketItem> items, int quantity, int cashAvailable) {
+	public static BuyResult buy(List<?> items, int quantity, int cashAvailable) {
 		BuyResult result = new BuyResult();
 		
-		Iterator<MarketItem> i = items.iterator();
+		Iterator<?> i = items.iterator();
 		while(i.hasNext() && result.quantityBought < quantity) {
-			MarketItem item = i.next();
+			MarketItem item = (MarketItem) i.next();
 			Colony colony = item.getColony();
 			AItemType type = item.getItem().getTypeClass();
 			int qty = quantity - result.quantityBought;

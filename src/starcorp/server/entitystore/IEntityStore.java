@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 
 import starcorp.common.entities.ABaseEntity;
-import starcorp.common.entities.AColonists;
 import starcorp.common.entities.AStarSystemEntity;
 import starcorp.common.entities.ColonistGrant;
 import starcorp.common.entities.Colony;
@@ -23,12 +22,8 @@ import starcorp.common.entities.Corporation;
 import starcorp.common.entities.DevelopmentGrant;
 import starcorp.common.entities.Facility;
 import starcorp.common.entities.FacilityLease;
-import starcorp.common.entities.MarketItem;
 import starcorp.common.entities.Planet;
-import starcorp.common.entities.ResourceDeposit;
 import starcorp.common.entities.StarSystem;
-import starcorp.common.entities.Starship;
-import starcorp.common.entities.StarshipDesign;
 import starcorp.common.entities.Unemployed;
 import starcorp.common.entities.Workers;
 import starcorp.common.types.AFacilityType;
@@ -68,86 +63,66 @@ public interface IEntityStore {
 		
 	}
 	
-	public abstract ABaseEntity load(int ID);
+	public abstract ABaseEntity load(Class<?> entityClass, int ID);
 	public abstract ABaseEntity save(ABaseEntity entity);
 	
-	public abstract List<StarSystem> listSystems(Coordinates3D origin, int range);
+	public abstract List<?> listSystems(Coordinates3D origin, int range);
 	
-	public abstract List<AStarSystemEntity> listSystemEntities(StarSystem star);
-	public abstract List<AStarSystemEntity> listSystemEntities(StarSystem star, CoordinatesPolar location);
+	public abstract List<?> listSystemEntities(StarSystem star);
+	public abstract List<?> listSystemEntities(StarSystem star, CoordinatesPolar location);
 
-	public abstract List<ColonistGrant> listColonistGrants(Corporation owner, boolean openOnly);
-	public abstract List<ColonistGrant> listColonistGrants(Colony colony, boolean openOnly);
+	public abstract List<?> listColonistGrants(Corporation owner, boolean openOnly);
 	public abstract ColonistGrant getColonistGrant(Colony colony, PopulationClass popClass, boolean openOnly);
 	
-	public abstract List<Colony> listColonies();
-	public abstract List<Colony> listColonies(Planet planet);
-	public abstract List<Colony> listColonies(StarSystem system, CoordinatesPolar location, Planet excludePlanet);
-	public abstract List<Colony> listColonies(StarSystem system, CoordinatesPolar excludeLocation);
-	public abstract List<Colony> listColonies(StarSystem excludeSystem);
-	public abstract List<Colony> listColonies(Corporation owner);
+	public abstract List<?> listColonies();
+	public abstract List<?> listColonies(Planet planet);
+	public abstract List<?> listColonies(StarSystem system, CoordinatesPolar location, Planet excludePlanet);
+	public abstract List<?> listColonies(StarSystem system, CoordinatesPolar excludeLocation);
+	public abstract List<?> listColonies(StarSystem excludeSystem);
 	public abstract Colony getColony(Planet planet, Coordinates2D location);
 	
-	public abstract List<ColonyItem> listItems(Colony colony);
-	public abstract List<ColonyItem> listItems(Colony colony, Corporation owner);
-	public abstract List<ColonyItem> listItems(Corporation owner);
-	public abstract List<ColonyItem> listItems(Corporation owner, Colony colony, Class<?> typeClass);
-	public abstract List<ColonyItem> listItems(Corporation owner, Colony colony, List<AItemType> types);
+	public abstract List<?> listItems(Corporation owner);
+	public abstract List<?> listItems(Corporation owner, Colony colony, List<AItemType> types);
 	public abstract ColonyItem getItem(Colony colony, AItemType type);
 	public abstract ColonyItem getItem(Colony colony, Corporation owner, AItemType type);
-	public abstract ColonyItem getItem(Corporation owner, AItemType type);
 	
 	public abstract Corporation getCorporation(String email, String password);
 
-	public abstract List<DevelopmentGrant> listDevelopmentGrants(Corporation owner, boolean openOnly);
-	public abstract List<DevelopmentGrant> listDevelopmentGrants(Colony colony, boolean openOnly);
+	public abstract List<?> listDevelopmentGrants(Corporation owner, boolean openOnly);
 	public abstract DevelopmentGrant getDevelopmentGrant(Colony colony, AFacilityType type, boolean openOnly);
 	
-	public abstract List<Facility> listFacilities();
-	public abstract List<Facility> listFacilities(Colony colony);
-	public abstract List<Facility> listFacilities(Colony colony, Corporation owner);
-	public abstract List<Facility> listFacilities(Corporation owner);
-	public abstract List<Facility> listFacilities(Colony colony, Corporation owner, AFacilityType type);
-	public abstract List<Facility> listFacilities(Colony colony, Corporation owner, Class<?> type);
-	public abstract List<Facility> listFacilities(Colony colony, Class<?> type);
-	public abstract List<Facility> listFacilities(Colony colony, List<AFacilityType> types);
-	public abstract List<Facility> listFacilities(Colony colony, Corporation owner, List<AFacilityType> types);
-	public abstract List<Facility> listFacilities(Corporation owner, List<AFacilityType> types);
-	public abstract List<Facility> listFacilitiesBySalary(Colony colony, PopulationClass popClass);
-	public abstract Map<Facility,List<Workers>> listFacilitiesWithWorkers(Colony colony, List<AFacilityType> types);
+	public abstract List<?> listFacilities();
+	public abstract List<?> listFacilities(Colony colony);
+	public abstract List<?> listFacilities(Corporation owner);
+	public abstract List<?> listFacilities(Colony colony, Class<?> type);
+	public abstract List<?> listFacilitiesBySalary(Colony colony, PopulationClass popClass);
+	public abstract Map<Facility,List<?>> listFacilitiesWithWorkers(Colony colony, List<AFacilityType> types);
 	public abstract Facility getFacility(Colony colony, Corporation owner, Class<?> type);
 	public abstract Facility getFacility(Colony colony, Class<?> type);
 	
-	public abstract List<FacilityLease> listLeases(Corporation corp, boolean openOnly);
-	public abstract List<FacilityLease> listLeases(Colony colony, boolean openOnly);
-	public abstract List<FacilityLease> listLeases(Colony colony, Corporation owner, boolean openOnly);
+	public abstract List<?> listLeases(Corporation corp, boolean openOnly);
 	public abstract FacilityLease getLease(Colony colony, Corporation owner, AFacilityType type, boolean openOnly);
 	
-	public abstract List<MarketItem> listMarket(int minQty);
-	public abstract List<MarketItem> listMarket(Colony colony, int minQty);
-	public abstract List<MarketItem> listMarket(Colony colony, Corporation owner, int minQty);
-	public abstract List<MarketItem> listMarket(Corporation owner, int minQty);
-	public abstract List<MarketItem> listMarket(Colony colony, List<AItemType> types, int minQty);
+	public abstract List<?> listMarket(int minQty);
+	public abstract List<?> listMarket(Colony colony, int minQty);
+	public abstract List<?> listMarket(Colony colony, List<AItemType> types, int minQty);
 	
-	public abstract List<Starship> listShips(Corporation owner);
-	public abstract List<Starship> listShips(StarSystem star);
-	public abstract List<Starship> listShips(StarSystem star, CoordinatesPolar location);
-	public abstract List<Starship> listShips(Planet orbiting);
-	public abstract List<Starship> listShips(Planet planet, Coordinates2D location);
-	public abstract List<Starship> listShips(Colony docked);
+	public abstract List<?> listShips(Corporation owner);
+	public abstract List<?> listShips(Planet orbiting);
+	public abstract List<?> listShips(Planet planet, Coordinates2D location);
+	public abstract List<?> listShips(Colony docked);
 	
-	public abstract List<StarshipDesign> listDesigns(Corporation owner);
+	public abstract List<?> listDesigns(Corporation owner);
 	
-	public abstract List<AColonists> listColonists(Colony colony);
-	public abstract List<AColonists> listColonists(Colony colony, PopulationClass popClass);
-	public abstract List<Workers> listWorkers(Facility facility);
-	public abstract List<Workers> listWorkers(Colony colony);
-	public abstract List<Unemployed> listUnemployed(Colony colony);
-	public abstract List<Workers> listWorkers(Colony colony, PopulationClass popClass);
+	public abstract List<?> listColonists(Colony colony);
+	public abstract List<?> listColonists(Colony colony, PopulationClass popClass);
+	public abstract List<?> listWorkers(Facility facility);
+	public abstract List<?> listWorkers(Colony colony);
+	public abstract List<?> listWorkers(Colony colony, PopulationClass popClass);
 	public abstract Workers getWorkers(Facility facility, PopulationClass popClass);
 	public abstract Unemployed getUnemployed(Colony colony, PopulationClass popClass);
 	
-	public abstract List<ResourceDeposit> listDeposits(AStarSystemEntity systemEntity);
-	public abstract List<ResourceDeposit> listDeposits(Planet planet, Coordinates2D location);
+	public abstract List<?> listDeposits(AStarSystemEntity systemEntity);
+	public abstract List<?> listDeposits(Planet planet, Coordinates2D location);
 	
 }

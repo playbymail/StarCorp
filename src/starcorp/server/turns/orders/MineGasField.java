@@ -36,8 +36,8 @@ public class MineGasField extends AOrderProcessor {
 		int starshipId = order.getAsInt(0);
 		int gasFieldId = order.getAsInt(1);
 		
-		Starship ship = (Starship) entityStore.load(starshipId);
-		GasField gasfield = (GasField) entityStore.load(gasFieldId);
+		Starship ship = (Starship) entityStore.load(Starship.class, starshipId);
+		GasField gasfield = (GasField) entityStore.load(GasField.class, gasFieldId);
 		
 		if(ship == null || !ship.getOwner().equals(corp)) {
 			error = new TurnError(TurnError.INVALID_SHIP);
@@ -52,16 +52,16 @@ public class MineGasField extends AOrderProcessor {
 			error = new TurnError(TurnError.INVALID_SHIP);
 		}
 		else {
-			List<ResourceDeposit> deposits = entityStore.listDeposits(gasfield);
-			Iterator<ResourceDeposit> i = deposits.iterator();
+			List<?> deposits = entityStore.listDeposits(gasfield);
+			Iterator<?> i = deposits.iterator();
 			while(i.hasNext()) {
-				ResourceDeposit y = i.next();
+				ResourceDeposit y = (ResourceDeposit) i.next();
 				int qty = ship.addCargo(y.getTypeClass(), y.getYield());
 				y.setTotalQuantity(y.getTotalQuantity() - qty);
 			}
 			ship.incrementTimeUnitsUsed(TIME_UNITS);
 			OrderReport report = new OrderReport(order);
-			report.setScannedSystemEntities(entityStore.listSystemEntities(ship.getSystem(),ship.getLocation()));
+			report.addScannedEntities(entityStore.listSystemEntities(ship.getSystem(),ship.getLocation()));
 			report.add(gasfield.getName());
 			report.add(gasfield.getID());
 			order.setReport(report);

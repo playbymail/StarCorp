@@ -43,7 +43,7 @@ public class FoundColony extends AOrderProcessor {
 		String hubTypeKey = order.get(1);
 		String name = order.get(2);
 		
-		Starship ship = (Starship) entityStore.load(starshipId);
+		Starship ship = (Starship) entityStore.load(Starship.class, starshipId);
 		ColonyHub hubType = (ColonyHub) AFacilityType.getType(hubTypeKey);
 		if(ship == null || !ship.getOwner().equals(corp)) {
 			error = new TurnError(TurnError.INVALID_SHIP);

@@ -31,7 +31,7 @@ public class ProbeSystem extends AOrderProcessor {
 		Corporation corp = order.getCorp();
 		int starshipId = order.getAsInt(0);
 		
-		Starship ship = (Starship) entityStore.load(starshipId);
+		Starship ship = (Starship) entityStore.load(Starship.class, starshipId);
 		
 		if(ship == null || !ship.getOwner().equals(corp)) {
 			error = new TurnError(TurnError.INVALID_SHIP);
@@ -42,7 +42,7 @@ public class ProbeSystem extends AOrderProcessor {
 		else {
 			ship.incrementTimeUnitsUsed(TIME_UNITS);
 			OrderReport report = new OrderReport(order);
-			report.setScannedSystemEntities(entityStore.listSystemEntities(ship.getSystem(),ship.getLocation()));
+			report.addScannedEntities(entityStore.listSystemEntities(ship.getSystem(),ship.getLocation()));
 			order.setReport(report);
 		}
 		

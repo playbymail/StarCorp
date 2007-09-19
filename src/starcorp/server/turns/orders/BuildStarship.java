@@ -41,8 +41,8 @@ public class BuildStarship extends AOrderProcessor {
 		int designId = order.getAsInt(1);
 		String name = order.get(2);
 		
-		Colony colony = (Colony) entityStore.load(colonyId);
-		StarshipDesign design = (StarshipDesign) entityStore.load(designId);
+		Colony colony = (Colony) entityStore.load(Colony.class, colonyId);
+		StarshipDesign design = (StarshipDesign) entityStore.load(StarshipDesign.class, designId);
 			
 		if(colony == null) {
 			error = new TurnError(TurnError.INVALID_COLONY);

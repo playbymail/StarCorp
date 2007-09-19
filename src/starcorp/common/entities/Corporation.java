@@ -11,7 +11,10 @@
 package starcorp.common.entities;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
+
+import org.dom4j.Element;
 
 import starcorp.common.types.CashTransaction;
 import starcorp.common.types.GalacticDate;
@@ -31,6 +34,45 @@ public class Corporation extends ANamedEntity {
 	private GalacticDate foundedDate;
 	private GalacticDate lastTurnDate;
 	private Set<CashTransaction> transactions = new HashSet<CashTransaction>();
+	
+	public Corporation() {
+		
+	}
+	
+	public Corporation(String email, String password) {
+		this.playerEmail = email;
+		this.playerPassword = password;
+	}
+	
+	public void readXML(Element e) {
+		super.readXML(e);
+		Element player = e.element("player");
+		this.playerEmail = player.attributeValue("email");
+		this.playerName = player.attributeValue("name");
+		this.playerPassword = player.attributeValue("password");
+		this.credits = Integer.parseInt(e.attributeValue("credits", "0"));
+		this.foundedDate = new GalacticDate(e.element("founded").element("date"));
+		this.lastTurnDate = new GalacticDate(e.element("last-turn").element("date"));
+		for(Iterator<?> i = e.elementIterator("transaction"); i.hasNext();) {
+			this.transactions.add(new CashTransaction((Element)i.next()));
+		}
+	}
+	
+	public Element toFullXML(Element parent) {
+		Element root = super.toFullXML(parent);
+		Element p = root.addElement("player");
+		p.addAttribute("email", playerEmail);
+		p.addAttribute("name", playerName);
+		p.addAttribute("password", playerPassword);
+		root.addAttribute("credits", String.valueOf(credits));
+		foundedDate.toXML(root.addElement("founded"));
+		lastTurnDate.toXML(root.addElement("last-turn"));
+		Element e = root.addElement("transactions");
+		for(Iterator<CashTransaction> i = transactions.iterator(); i.hasNext();) {
+			i.next().toXML(e);
+		}
+		return root;
+	}
 	
 	public int add(int credits, String description) {
 		this.credits += credits;

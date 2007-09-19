@@ -10,18 +10,13 @@
  */
 package starcorp.common.turns;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
-import starcorp.common.entities.ColonistGrant;
-import starcorp.common.entities.ColonyItem;
-import starcorp.common.entities.Corporation;
-import starcorp.common.entities.DevelopmentGrant;
-import starcorp.common.entities.Facility;
-import starcorp.common.entities.FacilityLease;
-import starcorp.common.entities.MarketItem;
-import starcorp.common.entities.Starship;
-import starcorp.common.entities.StarshipDesign;
-import starcorp.common.types.GalacticDate;
+import org.dom4j.Element;
+
+import starcorp.common.entities.ABaseEntity;
 
 /**
  * starcorp.client.turns.TurnReport
@@ -31,88 +26,50 @@ import starcorp.common.types.GalacticDate;
  */
 public class TurnReport {
 
-	private GalacticDate reportDate;
-	private Corporation to;
 	private Turn turn;
-	private List<ColonistGrant> colonistGrants;
-	private List<ColonyItem> items;
-	private List<DevelopmentGrant> developmentGrants;
-	private List<Facility> facilities;
-	private List<FacilityLease> leases;
-	private List<MarketItem> markets;
-	private List<Starship> starships;
-	private List<StarshipDesign> designs;
+	@SuppressWarnings("unchecked")
+	private List playerEntities = new ArrayList();
 	
 	public TurnReport(Turn turn) {
 		this.turn = turn;
-		this.reportDate = GalacticDate.getCurrentDate();
 	}
 	
-	public GalacticDate getTurnDate() {
-		return reportDate;
+	@SuppressWarnings("unchecked")
+	public TurnReport(Element e) {
+		this.turn = new Turn(e.element("turn"));
+		for(Iterator<?> i = e.element("player-entities").elementIterator("entity"); i.hasNext();) {
+			ABaseEntity entity = ABaseEntity.fromXML((Element)i.next());
+			if(entity != null)
+				playerEntities.add(entity);
+		}
 	}
-	public void setTurnDate(GalacticDate turnDate) {
-		this.reportDate = turnDate;
+	
+	public Element toXML(Element parent) {
+		Element root = parent.addElement("turn-report");
+		turn.toXML(root);
+		Element e = root.addElement("player-entities");
+		for(Iterator<?> i = playerEntities.iterator(); i.hasNext();) {
+			ABaseEntity entity = (ABaseEntity) i.next();
+			entity.toFullXML(e);
+		}
+		return root;
 	}
-	public Corporation getTo() {
-		return to;
-	}
-	public void setTo(Corporation to) {
-		this.to = to;
-	}
+	
 	public Turn getTurn() {
 		return turn;
 	}
 	public void setTurn(Turn turn) {
 		this.turn = turn;
 	}
-	public List<ColonistGrant> getColonistGrants() {
-		return colonistGrants;
+	public List<?> getPlayerEntities() {
+		return playerEntities;
 	}
-	public void setColonistGrants(List<ColonistGrant> colonistGrants) {
-		this.colonistGrants = colonistGrants;
+	@SuppressWarnings("unchecked")
+	public void addPlayerEntities(List entities) {
+		playerEntities.addAll(entities);
 	}
-	public List<ColonyItem> getItems() {
-		return items;
+	@SuppressWarnings("unchecked")
+	public void addPlayerEntity(ABaseEntity entity) {
+		playerEntities.add(entity);
 	}
-	public void setItems(List<ColonyItem> items) {
-		this.items = items;
-	}
-	public List<DevelopmentGrant> getDevelopmentGrants() {
-		return developmentGrants;
-	}
-	public void setDevelopmentGrants(List<DevelopmentGrant> developmentGrants) {
-		this.developmentGrants = developmentGrants;
-	}
-	public List<Facility> getFacilities() {
-		return facilities;
-	}
-	public void setFacilities(List<Facility> facilities) {
-		this.facilities = facilities;
-	}
-	public List<FacilityLease> getLeases() {
-		return leases;
-	}
-	public void setLeases(List<FacilityLease> leases) {
-		this.leases = leases;
-	}
-	public List<MarketItem> getMarkets() {
-		return markets;
-	}
-	public void setMarkets(List<MarketItem> markets) {
-		this.markets = markets;
-	}
-	public List<Starship> getStarships() {
-		return starships;
-	}
-	public void setStarships(List<Starship> starships) {
-		this.starships = starships;
-	}
-	public List<StarshipDesign> getDesigns() {
-		return designs;
-	}
-	public void setDesigns(List<StarshipDesign> designs) {
-		this.designs = designs;
-	}
-	
 }

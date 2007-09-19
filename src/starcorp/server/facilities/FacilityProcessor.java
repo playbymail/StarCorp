@@ -19,7 +19,6 @@ import starcorp.common.entities.Facility;
 import starcorp.common.entities.MarketItem;
 import starcorp.common.entities.Planet;
 import starcorp.common.entities.ResourceDeposit;
-import starcorp.common.entities.Workers;
 import starcorp.common.types.AFactoryItem;
 import starcorp.common.types.AItemType;
 import starcorp.common.types.Coordinates2D;
@@ -44,16 +43,16 @@ public class FacilityProcessor {
 	}
 	
 	public void process() {
-		List<Facility> facilities = entityStore.listFacilities();
-		Iterator<Facility> i = facilities.iterator();
+		List<?> facilities = entityStore.listFacilities();
+		Iterator<?> i = facilities.iterator();
 		while(i.hasNext()) {
-			Facility facility = i.next();
-			List<Workers> workers = entityStore.listWorkers(facility);
+			Facility facility = (Facility) i.next();
+			List<?> workers = entityStore.listWorkers(facility);
 			process(facility,workers);
 		}
 	}
 
-	private void process(Facility facility, List<Workers> workers) {
+	private void process(Facility facility, List<?> workers) {
 		facility.setTransactionCount(0);
 		facility.setPowered(false);
 		usePower(facility);
@@ -70,10 +69,10 @@ public class FacilityProcessor {
 		Corporation owner = facility.getOwner();
 		Colony colony = facility.getColony();
 		List<AItemType> types = IndustrialGoods.listPower();
-		List<ColonyItem> items = entityStore.listItems(owner, colony, types);
+		List<?> items = entityStore.listItems(owner, colony, types);
 		if(ColonyItem.count(items) < required) {
 			// attempt to buy from market
-			List<MarketItem> market = entityStore.listMarket(colony, types, 1);
+			List<?> market = entityStore.listMarket(colony, types, 1);
 			MarketItem.BuyResult result = MarketItem.buy(market, required, owner.getCredits());
 			if(result.quantityBought < required) {
 				// not enough - just add this to the colonies stockpile
@@ -101,12 +100,12 @@ public class FacilityProcessor {
 		}
 	}
 	
-	private int hasMaterials(Corporation owner, AFactoryItem type) {
+	private int hasMaterials(Colony colony, Corporation owner, AFactoryItem type) {
 		int max = 0;
 		Iterator<Items> i = type.getComponent().iterator();
 		while(i.hasNext()) {
 			Items item = i.next();
-			ColonyItem cItem = entityStore.getItem(owner, item.getTypeClass());
+			ColonyItem cItem = entityStore.getItem(colony, owner, item.getTypeClass());
 			int x = cItem.getQuantity() / item.getQuantity();
 			if(x < max) {
 				max = x;
@@ -115,11 +114,11 @@ public class FacilityProcessor {
 		return max;
 	}
 	
-	private void useMaterials(Corporation owner, AFactoryItem type, int quantity) {
+	private void useMaterials(Colony colony, Corporation owner, AFactoryItem type, int quantity) {
 		Iterator<Items> i = type.getComponent().iterator();
 		while(i.hasNext()) {
 			Items item = i.next();
-			ColonyItem cItem = entityStore.getItem(owner, item.getTypeClass());
+			ColonyItem cItem = entityStore.getItem(colony, owner, item.getTypeClass());
 			int qty = item.getQuantity() * quantity;
 			cItem.remove(qty);
 		}
@@ -132,7 +131,7 @@ public class FacilityProcessor {
 		if(qty > item.getQuantity()) {
 			qty = item.getQuantity();
 		}
-		int materials = hasMaterials(factory.getOwner(), type);
+		int materials = hasMaterials(factory.getColony(), factory.getOwner(), type);
 		if(qty > materials) {
 			qty = materials;
 		}
@@ -148,11 +147,11 @@ public class FacilityProcessor {
 			entityStore.save(cItem);
 		}
 		cItem.add(qty);
-		useMaterials(factory.getOwner(), type, qty); 
+		useMaterials(factory.getColony(),factory.getOwner(), type, qty); 
 		return new Items(item.getTypeClass(),qty);
 	}
 	
-	private void processFactory(Facility factory, List<Workers> workers) {
+	private void processFactory(Facility factory, List<?> workers) {
 		factory.clearCreated();
 		Factory type = (Factory) factory.getTypeClass();
 		int maxCapacity = factory.isPowered() ? type.getCapacity(workers) : 0;
@@ -167,18 +166,18 @@ public class FacilityProcessor {
 		}
 	}
 	
-	private void processGenerator(Facility generator, List<Workers> workers) {
+	private void processGenerator(Facility generator, List<?> workers) {
 		Corporation owner = generator.getOwner();
 		Colony colony = generator.getColony();
 		Planet planet = colony.getPlanet();
 		Coordinates2D location = colony.getLocation();
-		List<ResourceDeposit> deposits = entityStore.listDeposits(planet, location);
+		List<?> deposits = entityStore.listDeposits(planet, location);
 		double efficiency = generator.getEfficiency(workers);
 		ResourceGenerator type = (ResourceGenerator) generator.getTypeClass();
 		
-		Iterator<ResourceDeposit> i = deposits.iterator();
+		Iterator<?> i = deposits.iterator();
 		while(i.hasNext()) {
-			ResourceDeposit deposit = i.next();
+			ResourceDeposit deposit = (ResourceDeposit) i.next();
 			if(deposit.getTotalQuantity() < deposit.getYield()) {
 				continue;
 			}

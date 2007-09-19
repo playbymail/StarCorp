@@ -35,7 +35,7 @@ public class IssueDevelopmentGrant extends AOrderProcessor {
 		String facilityType = order.get(1);
 		int credit = order.getAsInt(2);
 		
-		Colony colony = (Colony) entityStore.load(colonyId);
+		Colony colony = (Colony) entityStore.load(Colony.class, colonyId);
 		AFacilityType type = AFacilityType.getType(facilityType);
 		
 		if(colony == null) {

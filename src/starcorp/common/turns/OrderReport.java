@@ -14,12 +14,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import starcorp.common.entities.AStarSystemEntity;
-import starcorp.common.entities.Colony;
-import starcorp.common.entities.Facility;
-import starcorp.common.entities.Planet;
-import starcorp.common.entities.StarSystem;
-import starcorp.common.entities.Starship;
+import org.dom4j.Element;
+
+import starcorp.common.entities.ABaseEntity;
 import starcorp.common.types.OrderType;
 import starcorp.common.types.PlanetMapSquare;
 
@@ -33,14 +30,8 @@ public class OrderReport {
 
 	private OrderType type;
 	private List<String> msgArgs = new ArrayList<String>();
-	private List<StarSystem> scannedSystems;
-	private List<Starship> scannedShips;
-	private List<Colony> scannedColonies;
-	private List<Facility> scannedFacilities;
-	private List<AStarSystemEntity> scannedSystemEntities;
-	private Planet scannedPlanet;
-	private StarSystem scannedStar;
-	private Colony scannedColony;
+	@SuppressWarnings("unchecked")
+	private List scannedEntities = new ArrayList();
 	private PlanetMapSquare scannedLocation;
 	
 	public OrderReport() {
@@ -49,6 +40,45 @@ public class OrderReport {
 	
 	public OrderReport(TurnOrder order) {
 		this.type = order.getType();
+	}
+	
+	@SuppressWarnings("unchecked")
+	public OrderReport(Element e) {
+		this.type = OrderType.getType(e.attributeValue("type"));
+		for(Iterator<?> i = e.elementIterator("report-arg"); i.hasNext();) {
+			Element arg = (Element) i.next();
+			msgArgs.set(Integer.parseInt(arg.attributeValue("position")), arg.getText());
+		}
+		Element scanned = e.element("scanned");
+		for(Iterator<?> i = scanned.elementIterator("entity"); i.hasNext();) {
+			ABaseEntity entity = ABaseEntity.fromXML((Element) i.next());
+			if(entity != null)
+				scannedEntities.add(entity);
+		}
+		Element eSquare = scanned.element("map-square");
+		if(eSquare != null) {
+			this.scannedLocation = new PlanetMapSquare(eSquare);
+		}
+	}
+	
+	public Element toXML(Element parent) {
+		Element root = parent.addElement("order-report");
+		root.addAttribute("type", type.getKey());
+		for(int i = 0; i < msgArgs.size(); i++) {
+			Element e = root.addElement("report-arg");
+			e.addAttribute("position", String.valueOf(i));
+			e.addText(msgArgs.get(i));
+		}
+		Element scanned = root.addElement("scanned");
+		Iterator<?> i = scannedEntities.iterator();
+		while(i.hasNext()) {
+			ABaseEntity entity = (ABaseEntity) i.next();
+			entity.toBasicXML(scanned);
+		}
+		if(scannedLocation != null) {
+			scannedLocation.toXML(scanned);
+		}
+		return root;
 	}
 	
 	public String getDescription() {
@@ -78,69 +108,16 @@ public class OrderReport {
 		this.msgArgs = msgArgs;
 	}
 
-	public List<Starship> getScannedShips() {
-		return scannedShips;
+	public List<?> getScannedEntities() {
+		return scannedEntities;
 	}
-
-	public void setScannedShips(List<Starship> scannedShips) {
-		this.scannedShips = scannedShips;
+	@SuppressWarnings("unchecked")
+	public void addScannedEntities(List<?> scanned) {
+		scannedEntities.addAll(scanned);
 	}
-
-	public List<Colony> getScannedColonies() {
-		return scannedColonies;
-	}
-
-	public void setScannedColonies(List<Colony> scannedColonies) {
-		this.scannedColonies = scannedColonies;
-	}
-
-	public List<Facility> getScannedFacilities() {
-		return scannedFacilities;
-	}
-
-	public void setScannedFacilities(List<Facility> scannedFacilities) {
-		this.scannedFacilities = scannedFacilities;
-	}
-
-	public List<AStarSystemEntity> getScannedSystemEntities() {
-		return scannedSystemEntities;
-	}
-
-	public void setScannedSystemEntities(
-			List<AStarSystemEntity> scannedSystemEntities) {
-		this.scannedSystemEntities = scannedSystemEntities;
-	}
-
-	public Planet getScannedPlanet() {
-		return scannedPlanet;
-	}
-
-	public void setScannedPlanet(Planet scannedPlanet) {
-		this.scannedPlanet = scannedPlanet;
-	}
-
-	public StarSystem getScannedStar() {
-		return scannedStar;
-	}
-
-	public void setScannedStar(StarSystem scannedStar) {
-		this.scannedStar = scannedStar;
-	}
-
-	public Colony getScannedColony() {
-		return scannedColony;
-	}
-
-	public void setScannedColony(Colony scannedColony) {
-		this.scannedColony = scannedColony;
-	}
-
-	public List<StarSystem> getScannedSystems() {
-		return scannedSystems;
-	}
-
-	public void setScannedSystems(List<StarSystem> scannedSystems) {
-		this.scannedSystems = scannedSystems;
+	@SuppressWarnings("unchecked")
+	public void addScannedEntity(ABaseEntity entity) {
+		scannedEntities.add(entity);
 	}
 
 	public PlanetMapSquare getScannedLocation() {

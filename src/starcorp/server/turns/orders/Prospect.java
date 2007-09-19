@@ -13,7 +13,6 @@ package starcorp.server.turns.orders;
 import java.util.List;
 
 import starcorp.common.entities.Corporation;
-import starcorp.common.entities.ResourceDeposit;
 import starcorp.common.entities.Starship;
 import starcorp.common.turns.OrderReport;
 import starcorp.common.turns.TurnError;
@@ -35,7 +34,7 @@ public class Prospect extends AOrderProcessor {
 		Corporation corp = order.getCorp();
 		int starshipId = order.getAsInt(0);
 		
-		Starship ship = (Starship) entityStore.load(starshipId);
+		Starship ship = (Starship) entityStore.load(Starship.class, starshipId);
 		
 		if(ship == null || !ship.getOwner().equals(corp)) {
 			error = new TurnError(TurnError.INVALID_SHIP);
@@ -49,12 +48,13 @@ public class Prospect extends AOrderProcessor {
 		else {
 			ship.incrementTimeUnitsUsed(TIME_UNITS);
 			OrderReport report = new OrderReport(order);
-			List<ResourceDeposit> deposits = entityStore.listDeposits(ship.getPlanet(), ship.getPlanetLocation());
+			List<?> deposits = entityStore.listDeposits(ship.getPlanet(), ship.getPlanetLocation());
 			report.setScannedLocation(ship.getPlanet().get(ship.getPlanetLocation()));
-			report.setScannedShips(entityStore.listShips(ship.getPlanet(),ship.getPlanetLocation()));
+			List<?> ships = entityStore.listShips(ship.getPlanet(),ship.getPlanetLocation());
+			report.addScannedEntities(ships);
 			report.add(report.getScannedLocation().getTerrainType().getName());
 			report.add(deposits.size());
-			report.add(report.getScannedShips().size());
+			report.add(ships.size());
 			order.setReport(report);
 		}
 		

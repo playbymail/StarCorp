@@ -45,7 +45,7 @@ public class BuildFacility extends AOrderProcessor {
 		int colonyId = order.getAsInt(0);
 		String facilityTypeKey = order.get(1);
 		
-		Colony colony = (Colony) entityStore.load(colonyId);
+		Colony colony = (Colony) entityStore.load(Colony.class, colonyId);
 		AFacilityType facilityType = AFacilityType.getType(facilityTypeKey);
 			
 		if(colony == null) {

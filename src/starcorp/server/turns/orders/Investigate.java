@@ -33,8 +33,8 @@ public class Investigate extends AOrderProcessor {
 		int starshipId = order.getAsInt(0);
 		int anomolyId = order.getAsInt(1);
 		
-		Starship ship = (Starship) entityStore.load(starshipId);
-		StellarAnomoly anomoly = (StellarAnomoly) entityStore.load(anomolyId);
+		Starship ship = (Starship) entityStore.load(Starship.class, starshipId);
+		StellarAnomoly anomoly = (StellarAnomoly) entityStore.load(StellarAnomoly.class, anomolyId);
 		
 		if(ship == null || !ship.getOwner().equals(corp)) {
 			error = new TurnError(TurnError.INVALID_SHIP);

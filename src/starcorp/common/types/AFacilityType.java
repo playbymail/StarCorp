@@ -23,7 +23,6 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import starcorp.common.entities.AColonists;
-import starcorp.common.entities.Workers;
 
 /**
  * starcorp.common.types.FacilityType
@@ -231,7 +230,7 @@ public abstract class AFacilityType extends ABaseType {
 		return modules;
 	}
 	
-	public double getEfficiency(List<Workers> currentWorkers) {
+	public double getEfficiency(List<?> currentWorkers) {
 		Map<PopulationClass, Population> requiredWorkers = getWorkerRequirement();
 		Iterator<PopulationClass> i = requiredWorkers.keySet().iterator();
 		
@@ -244,10 +243,10 @@ public abstract class AFacilityType extends ABaseType {
 			requiredTotal += c.getQuantity();
 		}
 		
-		Iterator<Workers> n = currentWorkers.iterator();
+		Iterator<?> n = currentWorkers.iterator();
 		
 		while(n.hasNext()) {
-			AColonists w = n.next();
+			AColonists w = (AColonists) n.next();
 			Population c1 = w.getPopulation();
 			Population c2 = requiredWorkers.get(c1.getPopClass());
 			if(c2 != null) {

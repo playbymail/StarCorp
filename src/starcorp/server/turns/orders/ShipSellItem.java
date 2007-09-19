@@ -17,7 +17,6 @@ import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Facility;
 import starcorp.common.entities.MarketItem;
 import starcorp.common.entities.Starship;
-import starcorp.common.entities.Workers;
 import starcorp.common.turns.OrderReport;
 import starcorp.common.turns.TurnError;
 import starcorp.common.turns.TurnOrder;
@@ -46,14 +45,14 @@ public class ShipSellItem extends AOrderProcessor {
 		int quantity = order.getAsInt(3);
 		int price = order.getAsInt(4);
 		
-		Starship ship = (Starship) entityStore.load(starshipId);
-		Colony colony = (Colony) entityStore.load(colonyId);
+		Starship ship = (Starship) entityStore.load(Starship.class, starshipId);
+		Colony colony = (Colony) entityStore.load(Colony.class, colonyId);
 		AItemType type = AItemType.getType(itemTypeKey);
 		
 		Facility colonyHub = entityStore.getFacility(colony, colony.getGovernment(), ColonyHub.class);
 		Facility orbitalDock = entityStore.getFacility(colony, OrbitalDock.class);
-		List<Workers> hubWorkers = entityStore.listWorkers(colonyHub);
-		List<Workers> dockWorkers = entityStore.listWorkers(orbitalDock);
+		List<?> hubWorkers = colonyHub == null ? null : entityStore.listWorkers(colonyHub);
+		List<?> dockWorkers = orbitalDock == null ? null : entityStore.listWorkers(orbitalDock);
 		
 		if(ship == null || !ship.getOwner().equals(corp)) {
 			error = new TurnError(TurnError.INVALID_SHIP);

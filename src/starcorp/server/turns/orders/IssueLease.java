@@ -36,9 +36,9 @@ public class IssueLease extends AOrderProcessor {
 		int price = order.getAsInt(2);
 		int licenseeId = order.getAsInt(3);
 		
-		Colony colony = (Colony) entityStore.load(colonyId);
+		Colony colony = (Colony) entityStore.load(Colony.class, colonyId);
 		AFacilityType type = AFacilityType.getType(facilityType);
-		Corporation licensee = (Corporation) entityStore.load(licenseeId);
+		Corporation licensee = (Corporation) entityStore.load(Corporation.class, licenseeId);
 		
 		if(colony == null) {
 			error = new TurnError(TurnError.INVALID_COLONY);

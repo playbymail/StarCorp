@@ -20,6 +20,15 @@ public class Coordinates2D {
 	private int x;
 	private int y;
 	
+	public Coordinates2D() {
+		
+	}
+	
+	public Coordinates2D(int x, int y) {
+		this.x = x;
+		this.y = y;
+	}
+	
 	public int getDistance(Coordinates2D other) {
 		int distance = 0;
 		Coordinates2D current = new Coordinates2D();

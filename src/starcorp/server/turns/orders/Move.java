@@ -13,7 +13,6 @@ package starcorp.server.turns.orders;
 import java.util.ArrayList;
 import java.util.List;
 
-import starcorp.common.entities.AStarSystemEntity;
 import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Starship;
 import starcorp.common.turns.OrderReport;
@@ -32,6 +31,7 @@ public class Move extends AOrderProcessor {
 	/* (non-Javadoc)
 	 * @see starcorp.server.turns.AOrderProcessor#process(starcorp.client.turns.TurnOrder)
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public TurnError process(TurnOrder order) {
 		TurnError error = null;
@@ -43,7 +43,7 @@ public class Move extends AOrderProcessor {
 		targetLocation.setQuadrant(quadrant);
 		targetLocation.setOrbit(orbit);
 		
-		Starship ship = (Starship) entityStore.load(starshipId);
+		Starship ship = (Starship) entityStore.load(Starship.class, starshipId);
 				
 		if(ship == null || !ship.getOwner().equals(corp)) {
 			error = new TurnError(TurnError.INVALID_SHIP);
@@ -56,7 +56,7 @@ public class Move extends AOrderProcessor {
 				CoordinatesPolar shipLocation = ship.getLocation();
 				double timeUnits = ship.getTimeUnitsRemaining();
 				double speed = ship.getDesign().getImpulseSpeed();
-				List<AStarSystemEntity> entities = new ArrayList<AStarSystemEntity>();
+				List entities = new ArrayList();
 				while(!shipLocation.equals(targetLocation) && timeUnits >= speed) {
 					if(shipLocation.getQuadrant() < targetLocation.getQuadrant()) {
 						shipLocation.setQuadrant(shipLocation.getQuadrant() + 1);
@@ -71,7 +71,7 @@ public class Move extends AOrderProcessor {
 						shipLocation.setOrbit(shipLocation.getOrbit() - 1);
 					}
 					timeUnits -= speed;
-					List<AStarSystemEntity> scan = entityStore.listSystemEntities(ship.getSystem(), shipLocation);
+					List<?> scan = entityStore.listSystemEntities(ship.getSystem(), shipLocation);
 					entities.addAll(scan);
 				}
 				ship.setLocation(shipLocation);
@@ -83,7 +83,7 @@ public class Move extends AOrderProcessor {
 				report.add(shipLocation.getOrbit());
 				report.add(ship.getSystem().getName());
 				report.add(ship.getSystem().getID());
-				report.setScannedSystemEntities(entities);
+				report.addScannedEntities(entities);
 				order.setReport(report);
 			}
 		}

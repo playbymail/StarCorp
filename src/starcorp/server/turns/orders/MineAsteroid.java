@@ -36,8 +36,8 @@ public class MineAsteroid extends AOrderProcessor {
 		int starshipId = order.getAsInt(0);
 		int asteroidId = order.getAsInt(1);
 		
-		Starship ship = (Starship) entityStore.load(starshipId);
-		AsteroidField asteroid = (AsteroidField) entityStore.load(asteroidId);
+		Starship ship = (Starship) entityStore.load(Starship.class, starshipId);
+		AsteroidField asteroid = (AsteroidField) entityStore.load(AsteroidField.class, asteroidId);
 		
 		if(ship == null || !ship.getOwner().equals(corp)) {
 			error = new TurnError(TurnError.INVALID_SHIP);
@@ -52,16 +52,16 @@ public class MineAsteroid extends AOrderProcessor {
 			error = new TurnError(TurnError.INVALID_SHIP);
 		}
 		else {
-			List<ResourceDeposit> deposits = entityStore.listDeposits(asteroid);
-			Iterator<ResourceDeposit> i = deposits.iterator();
+			List<?> deposits = entityStore.listDeposits(asteroid);
+			Iterator<?> i = deposits.iterator();
 			while(i.hasNext()) {
-				ResourceDeposit y = i.next();
+				ResourceDeposit y = (ResourceDeposit) i.next();
 				int qty = ship.addCargo(y.getTypeClass(), y.getYield());
 				y.setTotalQuantity(y.getTotalQuantity() - qty);
 			}
 			ship.incrementTimeUnitsUsed(TIME_UNITS);
 			OrderReport report = new OrderReport(order);
-			report.setScannedSystemEntities(entityStore.listSystemEntities(ship.getSystem(),ship.getLocation()));
+			report.addScannedEntities(entityStore.listSystemEntities(ship.getSystem(),ship.getLocation()));
 			report.add(asteroid.getName());
 			report.add(asteroid.getID());
 			order.setReport(report);

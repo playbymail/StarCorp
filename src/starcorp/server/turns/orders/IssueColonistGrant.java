@@ -35,7 +35,7 @@ public class IssueColonistGrant extends AOrderProcessor {
 		String popClassType = order.get(1);
 		int credit = order.getAsInt(2);
 		
-		Colony colony = (Colony) entityStore.load(colonyId);
+		Colony colony = (Colony) entityStore.load(Colony.class, colonyId);
 		PopulationClass popClass = PopulationClass.getType(popClassType);
 		
 		if(colony == null) {

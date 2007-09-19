@@ -13,7 +13,6 @@ package starcorp.common.types;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import starcorp.common.entities.Workers;
 
 /**
  * starcorp.common.types.ServiceFacility
@@ -87,7 +86,7 @@ public class ServiceFacility extends AFacilityType {
 		return Integer.parseInt(getResource(this, "quality"));
 	}
 	
-	public int getTotalColonistsServiceable(List<Workers> currentWorkers) {
+	public int getTotalColonistsServiceable(List<?> currentWorkers) {
 		double efficiency = getEfficiency(currentWorkers);
 		
 		if(efficiency < 1) {

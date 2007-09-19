@@ -32,7 +32,7 @@ public class TakeOff extends AOrderProcessor {
 		Corporation corp = order.getCorp();
 		int starshipId = order.getAsInt(0);
 		
-		Starship ship = (Starship) entityStore.load(starshipId);
+		Starship ship = (Starship) entityStore.load(Starship.class, starshipId);
 		
 		if(ship == null || !ship.getOwner().equals(corp)) {
 			error = new TurnError(TurnError.INVALID_SHIP);
@@ -56,7 +56,7 @@ public class TakeOff extends AOrderProcessor {
 				report.add(ship.getID());
 				report.add(planet.getName());
 				report.add(planet.getID());
-				report.setScannedShips(entityStore.listShips(planet));
+				report.addScannedEntities(entityStore.listShips(planet));
 				order.setReport(report);
 			}
 		}

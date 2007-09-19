@@ -32,8 +32,8 @@ public class Orbit extends AOrderProcessor {
 		int starshipId = order.getAsInt(0);
 		int planetId = order.getAsInt(1);
 		
-		Starship ship = (Starship) entityStore.load(starshipId);
-		Planet planet = (Planet) entityStore.load(planetId);
+		Starship ship = (Starship) entityStore.load(Starship.class, starshipId);
+		Planet planet = (Planet) entityStore.load(Planet.class, planetId);
 		
 		if(ship == null || !ship.getOwner().equals(corp)) {
 			error = new TurnError(TurnError.INVALID_SHIP);
@@ -59,7 +59,7 @@ public class Orbit extends AOrderProcessor {
 				report.add(ship.getID());
 				report.add(planet.getName());
 				report.add(planet.getID());
-				report.setScannedShips(entityStore.listShips(planet));
+				report.addScannedEntities(entityStore.listShips(planet));
 				order.setReport(report);
 			}
 		}

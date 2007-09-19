@@ -11,7 +11,6 @@
 package starcorp.common.types;
 
 import java.util.List;
-import starcorp.common.entities.Workers;
 
 /**
  * starcorp.common.types.OrbitalDock
@@ -20,7 +19,7 @@ import starcorp.common.entities.Workers;
  * @version 16 Sep 2007
  */
 public class OrbitalDock extends AFacilityType {
-	public int getMaxMarketTransactions(List<Workers> currentWorkers) {
+	public int getMaxMarketTransactions(List<?> currentWorkers) {
 		double efficiency = getEfficiency(currentWorkers);
 		
 		if(efficiency < 1) {

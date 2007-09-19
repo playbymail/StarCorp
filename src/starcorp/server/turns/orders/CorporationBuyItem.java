@@ -17,7 +17,6 @@ import starcorp.common.entities.ColonyItem;
 import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Facility;
 import starcorp.common.entities.MarketItem;
-import starcorp.common.entities.Workers;
 import starcorp.common.turns.OrderReport;
 import starcorp.common.turns.TurnError;
 import starcorp.common.turns.TurnOrder;
@@ -46,12 +45,12 @@ public class CorporationBuyItem extends AOrderProcessor {
 		String itemTypeKey = order.get(1);
 		int quantity = order.getAsInt(2);
 		
-		Colony colony = (Colony) entityStore.load(colonyId);
+		Colony colony = (Colony) entityStore.load(Colony.class, colonyId);
 		AItemType type = AItemType.getType(itemTypeKey);
-		List<MarketItem> marketItems = entityStore.listMarket(colony, 1);
+		List<?> marketItems = entityStore.listMarket(colony, 1);
 		Facility colonyHub = entityStore.getFacility(colony, colony.getGovernment(), ColonyHub.class);
 		
-		List<Workers> workers = entityStore.listWorkers(colonyHub);
+		List<?> workers = entityStore.listWorkers(colonyHub);
 		
 		if(colony == null) {
 			error = new TurnError(TurnError.INVALID_COLONY);

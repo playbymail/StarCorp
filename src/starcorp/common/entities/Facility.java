@@ -50,13 +50,13 @@ public class Facility extends ABaseEntity {
 	private Set<Items> itemsCreated = new HashSet<Items>();
 	private GalacticDate builtDate;
 	
-	public static ServiceResult service(Map<Facility, List<Workers>> facilities, int quantity, int cashAvailable) {
+	public static ServiceResult service(Map<Facility, List<?>> facilities, int quantity, int cashAvailable) {
 		ServiceResult result = new ServiceResult();
 		
 		Iterator<Facility> i = facilities.keySet().iterator();
 		while(i.hasNext() && result.quantityServiced < quantity) {
 			Facility facility = i.next();
-			List<Workers> workers = facilities.get(facility);
+			List<?> workers = facilities.get(facility);
 			int avail = facility.getTransactionsRemaining(workers);
 			int qty = quantity - result.quantityServiced;
 			int afford = cashAvailable / facility.getServiceCharge();
@@ -81,7 +81,7 @@ public class Facility extends ABaseEntity {
 		return result;
 	}
 	
-	public double getEfficiency(List<Workers> currentWorkers) {
+	public double getEfficiency(List<?> currentWorkers) {
 		return isPowered() ?  type.getEfficiency(currentWorkers) : 0.0;
 	}
 	
@@ -116,7 +116,7 @@ public class Facility extends ABaseEntity {
 		itemsCreated.clear();
 	}
 	
-	public int getTransactionsRemaining(List<Workers> workers) {
+	public int getTransactionsRemaining(List<?> workers) {
 		if(type instanceof Factory) {
 			Factory factory = (Factory) type;
 			return factory.getCapacity(workers) - transactionCount;

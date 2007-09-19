@@ -36,7 +36,7 @@ public class DockAtPlanet extends AOrderProcessor {
 		int x = order.getAsInt(1);
 		int y = order.getAsInt(2);
 		
-		Starship ship = (Starship) entityStore.load(starshipId);
+		Starship ship = (Starship) entityStore.load(Starship.class, starshipId);
 		
 		if(ship == null || !ship.getOwner().equals(corp)) {
 			error = new TurnError(TurnError.INVALID_SHIP);
@@ -71,8 +71,8 @@ public class DockAtPlanet extends AOrderProcessor {
 					report.add(x);
 					report.add(y);
 					report.add(sq.getTerrainType().getName());
-					report.setScannedColony(entityStore.getColony(planet, location));
-					report.setScannedShips(entityStore.listShips(planet, location));
+					report.addScannedEntity(entityStore.getColony(planet, location));
+					report.addScannedEntities(entityStore.listShips(planet, location));
 					order.setReport(report);
 				}
 			}

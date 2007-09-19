@@ -13,6 +13,8 @@ package starcorp.common.turns;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.dom4j.Element;
+
 /**
  * starcorp.client.turns.TurnError
  *
@@ -45,6 +47,7 @@ public class TurnError {
 	
 	private String msgKey;
 	private TurnOrder order;
+	
 	public TurnError() {
 		
 	}
@@ -56,6 +59,23 @@ public class TurnError {
 	public TurnError(String msgKey, TurnOrder order) {
 		this(msgKey);
 		this.order = order;
+	}
+	
+	public TurnError(Element e) {
+		this.msgKey = e.attributeValue("key");
+		Element eOrder = e.element("order");
+		if(eOrder != null) {
+			this.order = new TurnOrder(eOrder);
+		}
+	}
+	
+	public Element toXML(Element parent) {
+		Element root = parent.addElement("error");
+		root.addAttribute("key", msgKey);
+		if(order != null) {
+			order.toXML(root);
+		}
+		return root;
 	}
 	
 	public String getMessage() {

@@ -69,11 +69,11 @@ public class PopulationProcessor {
 	
 	public void process() {
 		
-		List<Colony> colonies = entityStore.listColonies();
+		List<?> colonies = entityStore.listColonies();
 		
-		Iterator<Colony> i = colonies.iterator();
+		Iterator<?> i = colonies.iterator();
 		while(i.hasNext()) {
-			Colony colony = i.next();
+			Colony colony = (Colony) i.next();
 			process(colony);
 		}
 	}
@@ -82,10 +82,10 @@ public class PopulationProcessor {
 		Iterator<String> k = PopulationClass.typeKeys();
 		while(k.hasNext()) {
 			PopulationClass popClass = PopulationClass.getType(k.next());
-			List<Facility> sorted = entityStore.listFacilitiesBySalary(colony, popClass);
-			Iterator<Facility> i = sorted.iterator();
+			List<?> sorted = entityStore.listFacilitiesBySalary(colony, popClass);
+			Iterator<?> i = sorted.iterator();
 			while(i.hasNext()) {
-				Facility facility = i.next();
+				Facility facility = (Facility) i.next();
 				// employment
 				hireWorkers(facility,popClass);
 				Workers workers = entityStore.getWorkers(facility, popClass);
@@ -96,10 +96,10 @@ public class PopulationProcessor {
 				payWorkers(workers);
 			}
 			// meet needs
-			List<Workers> workers = entityStore.listWorkers(colony, popClass);
-			Iterator<Workers> w = workers.iterator();
+			List<?> workers = entityStore.listWorkers(colony, popClass);
+			Iterator<?> w = workers.iterator();
 			while(w.hasNext()) {
-				AColonists worker = w.next();
+				AColonists worker = (AColonists) w.next();
 				worker.setHappiness(0.0);
 				payGrants(worker);
 				doConsumerNeeds(worker);
@@ -214,7 +214,7 @@ public class PopulationProcessor {
 	
 	private void doConsumerNeeds(AColonists colonists, List<AItemType> types, double happinessRating) {
 		Colony colony = colonists.getColony();
-		List<MarketItem> market = entityStore.listMarket(colony, types, 0);
+		List<?> market = entityStore.listMarket(colony, types, 0);
 		MarketItem.BuyResult result = MarketItem.buy(market, colonists.getQuantity(), colonists.getCash());
 		
 		double ratio = (double) colonists.getQuantity() / (double) result.quantityBought;
@@ -238,7 +238,7 @@ public class PopulationProcessor {
 	
 	private void doServiceNeeds(AColonists colonists, List<AFacilityType> types, double happinessRating) {
 		Colony colony = colonists.getColony();
-		Map<Facility, List<Workers>> facilities = entityStore.listFacilitiesWithWorkers(colony, types);
+		Map<Facility, List<?>> facilities = entityStore.listFacilitiesWithWorkers(colony, types);
 		Facility.ServiceResult result = Facility.service(facilities, colonists.getQuantity(), colonists.getCash());
 		
 		double ratio = (double) colonists.getQuantity() / (double) result.quantityServiced;
@@ -308,11 +308,11 @@ public class PopulationProcessor {
 			}
 			
 			if(killed < deathsPerClass) {
-				List<Workers> workers = entityStore.listWorkers(colony);
+				List<?> workers = entityStore.listWorkers(colony);
 				int size = workers.size();
 				while(size > 0 && killed < deathsPerClass) {
 					int random = rnd.nextInt(size);
-					Workers w = workers.get(random);
+					Workers w = (Workers) workers.get(random);
 					qty = (deathsPerClass - killed) / size;
 					int mod = (deathsPerClass - killed) % size; 
 					if(size == 1) {
@@ -334,7 +334,7 @@ public class PopulationProcessor {
 	private void doMigration(Unemployed unemployed, Colony colony, double distanceModifier) {
 		if(unemployed.getQuantity() < 1)
 			return;
-		List<AColonists> colonists = entityStore.listColonists(colony, unemployed.getPopClass());
+		List<?> colonists = entityStore.listColonists(colony, unemployed.getPopClass());
 		double happiness = AColonists.getAverageHappiness(colonists);
 		
 		double migrationRate = unemployed.getHappiness() - happiness;
@@ -358,12 +358,12 @@ public class PopulationProcessor {
 		}
 	}
 	
-	private void doMigration(Unemployed unemployed, List<Colony> colonies, double distanceModifier) {
+	private void doMigration(Unemployed unemployed, List<?> colonies, double distanceModifier) {
 		if(unemployed.getQuantity() < 1)
 			return;
-		Iterator<Colony> i = colonies.iterator();
+		Iterator<?> i = colonies.iterator();
 		while(i.hasNext()) {
-			doMigration(unemployed, i.next(), distanceModifier);
+			doMigration(unemployed, (Colony) i.next(), distanceModifier);
 		}
 	}
 
@@ -373,10 +373,10 @@ public class PopulationProcessor {
 		Planet planet = unemployed.getColony().getPlanet();
 		StarSystem system = planet.getSystem();
 		CoordinatesPolar location = planet.getLocation();
-		List<Colony> samePlanet = entityStore.listColonies(planet);
-		List<Colony> sameLocation = entityStore.listColonies(system, location, planet);
-		List<Colony> sameSystem = entityStore.listColonies(system, location);
-		List<Colony> others = entityStore.listColonies(system);
+		List<?> samePlanet = entityStore.listColonies(planet);
+		List<?> sameLocation = entityStore.listColonies(system, location, planet);
+		List<?> sameSystem = entityStore.listColonies(system, location);
+		List<?> others = entityStore.listColonies(system);
 		
 		doMigration(unemployed, samePlanet, MIGRATION_DISTANCE_SAME_PLANET);
 		doMigration(unemployed, sameLocation, MIGRATION_DISTANCE_SAME_LOCATION);

@@ -11,7 +11,6 @@
 package starcorp.common.types;
 
 import java.util.List;
-import starcorp.common.entities.Workers;
 
 /**
  * starcorp.common.types.Factory
@@ -60,7 +59,7 @@ public class Factory extends AFacilityType {
 		return Integer.parseInt(getResource(this, "capacity"));
 	}
 	
-	public int getCapacity(List<Workers> currentWorkers) {
+	public int getCapacity(List<?> currentWorkers) {
 		double efficiency = getEfficiency(currentWorkers);
 		return (int) ((double) getMaxCapacity() * efficiency / 100);
 	}

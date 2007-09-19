@@ -36,7 +36,7 @@ public class SetSalary extends AOrderProcessor {
 		int salary = order.getAsInt(2);
 		
 		PopulationClass popClass = PopulationClass.getType(popClassKey);
-		Facility facility = (Facility) entityStore.load(facilityId);
+		Facility facility = (Facility) entityStore.load(Facility.class, facilityId);
 		
 		if(facility == null) {
 			error = new TurnError(TurnError.INVALID_FACILITY);

@@ -11,7 +11,6 @@
 package starcorp.common.types;
 
 import java.util.List;
-import starcorp.common.entities.Workers;
 
 /**
  * starcorp.common.types.ColonyHub
@@ -21,7 +20,7 @@ import starcorp.common.entities.Workers;
  */
 public class ColonyHub extends AFacilityType {
 
-	public int getMaxMarketTransactions(List<Workers> currentWorkers) {
+	public int getMaxMarketTransactions(List<?> currentWorkers) {
 		double efficiency = getEfficiency(currentWorkers);
 		
 		if(efficiency < 1) {

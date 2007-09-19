@@ -24,22 +24,22 @@ import starcorp.common.types.PopulationClass;
  */
 public abstract class AColonists extends ABaseEntity {
 
-	public static int countColonists(List<AColonists> colonists) {
+	public static int countColonists(List<?> colonists) {
 		int totalQty = 0;
-		Iterator<AColonists> i = colonists.iterator();
+		Iterator<?> i = colonists.iterator();
 		while(i.hasNext()) {
-			AColonists colonist = i.next();
+			AColonists colonist = (AColonists) i.next();
 			totalQty += colonist.getQuantity();
 		}
 		return totalQty;
 	}
 	
-	public static double getAverageHappiness(List<AColonists> colonists) {
+	public static double getAverageHappiness(List<?> colonists) {
 		int totalQty = 0;
 		double totalHappiness = 0.0;
-		Iterator<AColonists> i = colonists.iterator();
+		Iterator<?> i = colonists.iterator();
 		while(i.hasNext()) {
-			AColonists colonist = i.next();
+			AColonists colonist = (AColonists) i.next();
 			totalQty += colonist.getQuantity();
 			totalHappiness += (colonist.getQuantity() * colonist.getHappiness());
 		}

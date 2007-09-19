@@ -14,6 +14,8 @@ import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.dom4j.Element;
+
 /**
  * starcorp.common.types.CashTransaction
  *
@@ -62,6 +64,21 @@ public class CashTransaction {
 		this.amount = amount;
 		this.description = description;
 		this.date = GalacticDate.getCurrentDate();
+	}
+	
+	public CashTransaction(Element e) {
+		this.amount = Integer.parseInt(e.attributeValue("amount","0"));
+		this.description = e.attributeValue("description");
+		this.date = new GalacticDate(e.element("trans-date").element("date"));
+	}
+	
+	public Element toXML(Element parent) {
+		Element root = parent.addElement("transaction");
+		root.addAttribute("amount", String.valueOf(amount));
+		root.addAttribute("description", description);
+		date.toXML(root.addElement("trans-date"));
+		
+		return root;
 	}
 	
 	public int getYear() {

@@ -12,6 +12,8 @@ package starcorp.common.types;
 
 import java.util.ResourceBundle;
 
+import org.dom4j.Element;
+
 /**
  * starcorp.common.types.GalacticDate
  *
@@ -48,6 +50,18 @@ public class GalacticDate {
 	public GalacticDate(GalacticDate copyFrom) {
 		this.year = copyFrom.year;
 		this.month = copyFrom.month;
+	}
+	
+	public GalacticDate(Element e) {
+		this.year = Integer.parseInt(e.attributeValue("year"));
+		this.month = Integer.parseInt(e.attributeValue("month"));
+	}
+	
+	public Element toXML(Element parent) {
+		Element root = parent.addElement("date");
+		root.addAttribute("year", String.valueOf(year));
+		root.addAttribute("month", String.valueOf(year));
+		return root;
 	}
 	
 	public boolean before(GalacticDate other) {

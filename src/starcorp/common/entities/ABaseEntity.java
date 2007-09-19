@@ -12,6 +12,8 @@ package starcorp.common.entities;
 
 import java.sql.Timestamp;
 
+import org.dom4j.Element;
+
 /**
  * starcorp.common.entities.BaseEntity
  *
@@ -19,8 +21,45 @@ import java.sql.Timestamp;
  * @version 15 Sep 2007
  */
 public abstract class ABaseEntity {
+	
+	public static ABaseEntity fromXML(Element e) {
+		String className = "starcorp.common.entities." + e.attributeValue("class");
+		ABaseEntity entity;
+		try {
+			entity = (ABaseEntity) Class.forName(className).newInstance();
+			entity.readXML(e);
+			return entity;
+		} catch (InstantiationException e1) {
+			e1.printStackTrace();
+		} catch (IllegalAccessException e1) {
+			e1.printStackTrace();
+		} catch (ClassNotFoundException e1) {
+			e1.printStackTrace();
+		}
+		return null;
+	}
+	
 	private int ID;
 	private Timestamp lastModified;
+	
+	public ABaseEntity() {
+		
+	}
+	
+	public void readXML(Element e) {
+		this.ID = Integer.parseInt(e.attributeValue("ID","0"));
+	}
+	
+	public Element toBasicXML(Element parent) {
+		Element root = parent.addElement("entity");
+		root.addAttribute("ID", String.valueOf("ID"));
+		root.addAttribute("class", getClass().getSimpleName());
+		return root;
+	}
+	
+	public Element toFullXML(Element parent) {
+		return toBasicXML(parent);
+	}
 	
 	public int getID() {
 		return ID;

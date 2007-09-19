@@ -34,8 +34,8 @@ public class DockAtColony extends AOrderProcessor {
 		int starshipId = order.getAsInt(0);
 		int colonyId = order.getAsInt(1);
 		
-		Starship ship = (Starship) entityStore.load(starshipId);
-		Colony colony = (Colony) entityStore.load(colonyId);
+		Starship ship = (Starship) entityStore.load(Starship.class, starshipId);
+		Colony colony = (Colony) entityStore.load(Colony.class, colonyId);
 		
 		if(ship == null || !ship.getOwner().equals(corp)) {
 			error = new TurnError(TurnError.INVALID_SHIP);
@@ -66,9 +66,9 @@ public class DockAtColony extends AOrderProcessor {
 				report.add(ship.getID());
 				report.add(colony.getName());
 				report.add(colony.getID());
-				report.setScannedColony(colony);
-				report.setScannedFacilities(entityStore.listFacilities(colony));
-				report.setScannedShips(entityStore.listShips(colony));
+				report.addScannedEntity(colony);
+				report.addScannedEntities(entityStore.listFacilities(colony));
+				report.addScannedEntities(entityStore.listShips(colony));
 				order.setReport(report);
 			}
 		}

@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.dom4j.Element;
+
 import starcorp.common.entities.Corporation;
 import starcorp.common.types.OrderType;
 
@@ -29,6 +31,44 @@ public class TurnOrder {
 	private OrderType type;
 	private List<String> args = new ArrayList<String>(); 
 	private OrderReport report;
+	
+	public TurnOrder() {
+		
+	}
+	
+	public TurnOrder(Turn turn, OrderType type) {
+		this.corp = turn.getCorporation();
+		this.type = type;
+	}
+	
+	public TurnOrder(Element e) {
+		this.type = OrderType.getType(e.attributeValue("type"));
+		this.corp = new Corporation();
+		this.corp.readXML(e.element("corp").element("entity"));
+		for(Iterator<?> i = e.elementIterator("order-arg"); i.hasNext();) {
+			Element arg = (Element) i.next();
+			args.set(Integer.parseInt(arg.attributeValue("position")), arg.getTextTrim());
+		}
+		Element eRep = e.element("order-report");
+		if(eRep != null) {
+			report = new OrderReport(eRep);
+		}
+	}
+	
+	public Element toXML(Element parent) {
+		Element root = parent.addElement("order");
+		corp.toFullXML(root.addElement("corp"));
+		root.addAttribute("type", type.getKey());
+		for(int i = 0; i < args.size(); i++) {
+			Element e = root.addElement("order-arg");
+			e.addAttribute("position", String.valueOf(i));
+			e.addText(args.get(i));
+		}
+		if(report != null) {
+			report.toXML(root);
+		}
+		return root;
+	}
 	
 	public void add(String arg) {
 		args.add(arg);

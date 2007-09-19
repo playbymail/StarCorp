@@ -37,8 +37,8 @@ public class Jump extends AOrderProcessor {
 		int starshipId = order.getAsInt(0);
 		int systemId = order.getAsInt(1);
 		
-		Starship ship = (Starship) entityStore.load(starshipId);
-		StarSystem system = (StarSystem) entityStore.load(systemId);
+		Starship ship = (Starship) entityStore.load(Starship.class, starshipId);
+		StarSystem system = (StarSystem) entityStore.load(StarSystem.class, systemId);
 		
 		if(ship == null || !ship.getOwner().equals(corp)) {
 			error = new TurnError(TurnError.INVALID_SHIP);
@@ -68,7 +68,7 @@ public class Jump extends AOrderProcessor {
 					report.add(ship.getID());
 					report.add(system.getName());
 					report.add(system.getID());
-					report.setScannedSystemEntities(entityStore.listSystemEntities(ship.getSystem(), ship.getLocation()));
+					report.addScannedEntities(entityStore.listSystemEntities(ship.getSystem(), ship.getLocation()));
 					order.setReport(report);
 				}
 			}
