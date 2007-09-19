@@ -10,6 +10,8 @@
  */
 package starcorp.common.types;
 
+import org.dom4j.Element;
+
 /**
  * starcorp.common.types.CoordinatesPolar
  *
@@ -27,6 +29,17 @@ public class CoordinatesPolar {
 	public CoordinatesPolar(int quadrant, int orbit) {
 		this.quadrant = quadrant;
 		this.orbit = orbit;
+	}
+	
+	public CoordinatesPolar(Element e) {
+		this.quadrant = Integer.parseInt(e.attributeValue("quadrant","0"));
+		this.orbit = Integer.parseInt(e.attributeValue("orbit","0"));
+	}
+	
+	public Element toXML(Element parent) {
+		parent.addAttribute("quadrant", String.valueOf(quadrant));
+		parent.addAttribute("orbit", String.valueOf(orbit));
+		return parent;
 	}
 	
 	public int getDistance(CoordinatesPolar other) {

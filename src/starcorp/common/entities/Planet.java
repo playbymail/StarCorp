@@ -14,6 +14,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.dom4j.Element;
+
 import starcorp.common.types.AtmosphereType;
 import starcorp.common.types.Coordinates2D;
 import starcorp.common.types.PlanetMapSquare;
@@ -86,6 +88,46 @@ public class Planet extends AStarSystemEntity {
 	}
 	public void setMap(Set<PlanetMapSquare> map) {
 		this.map = map;
+	}
+
+	@Override
+	public void readXML(Element e) {
+		super.readXML(e);
+		Element eOrbiting = e.element("orbiting");
+		if(eOrbiting != null) {
+			this.orbiting = new Planet();
+			this.orbiting.readXML(eOrbiting.element("entity"));
+		}
+		this.atmosphereType = AtmosphereType.getType(e.attributeValue("atmosphere"));
+		this.gravityRating = Integer.parseInt(e.attributeValue("gravity","0"));
+		Element eMap = e.element("map");
+		if(eMap != null) {
+			for(Iterator i = eMap.elementIterator("map-square"); i.hasNext(); ) {
+				map.add(new PlanetMapSquare((Element)i.next()));
+			}
+		}
+	}
+
+	@Override
+	public Element toBasicXML(Element parent) {
+		Element e = super.toBasicXML(parent);
+		if(orbiting != null) {
+			orbiting.toBasicXML(e.addElement("orbiting"));
+		}
+		e.addAttribute("atmosphere", atmosphereType.getKey());
+		e.addAttribute("gravity", String.valueOf(gravityRating));
+		return e;
+	}
+
+	@Override
+	public Element toFullXML(Element parent) {
+		Element e = super.toFullXML(parent);
+		Element eMap = e.addElement("map");
+		Iterator<PlanetMapSquare> i = map.iterator();
+		while(i.hasNext()) {
+			i.next().toXML(eMap);
+		}
+		return e;
 	}
 	
 }

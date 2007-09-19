@@ -13,6 +13,8 @@ package starcorp.common.entities;
 import java.util.Iterator;
 import java.util.List;
 
+import org.dom4j.Element;
+
 import starcorp.common.types.Items;
 
 /**
@@ -85,5 +87,24 @@ public class ColonyItem extends ABaseEntity {
 	}
 	public void setItem(Items item) {
 		this.item = item;
+	}
+
+	@Override
+	public void readXML(Element e) {
+		super.readXML(e);
+		this.owner = new Corporation();
+		this.owner.readXML(e.element("owner").element("entity"));
+		this.colony = new Colony();
+		this.colony.readXML(e.element("colony").element("entity"));
+		this.item = new Items(e);
+	}
+
+	@Override
+	public Element toBasicXML(Element parent) {
+		Element e = super.toBasicXML(parent);
+		owner.toBasicXML(e.addElement("owner"));
+		colony.toBasicXML(e.addElement("colony"));
+		item.toXML(e);
+		return e;
 	}
 }

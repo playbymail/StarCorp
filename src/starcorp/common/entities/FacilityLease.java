@@ -10,6 +10,8 @@
  */
 package starcorp.common.entities;
 
+import org.dom4j.Element;
+
 import starcorp.common.types.AFacilityType;
 import starcorp.common.types.GalacticDate;
 
@@ -77,4 +79,36 @@ public class FacilityLease extends ABaseEntity {
 	public void setUsedDate(GalacticDate usedDate) {
 		this.usedDate = usedDate;
 	}
+	
+	@Override
+	public void readXML(Element e) {
+		super.readXML(e);
+		this.colony = new Colony();
+		colony.readXML(e.element("colony").element("entity"));
+		this.licensee = new Corporation();
+		Element eLicensee =e.element("licensee");
+		if(eLicensee != null) {
+			licensee.readXML(eLicensee.element("entity"));
+		}
+		this.type = AFacilityType.getType(e.attributeValue("type"));
+		this.price = Integer.parseInt(e.attributeValue("price","0"));
+		this.used = Boolean.parseBoolean(e.attributeValue("used","false"));
+		this.issuedDate = new GalacticDate(e.element("issued").element("date"));
+		this.usedDate = new GalacticDate(e.element("used").element("date"));
+	}
+	@Override
+	public Element toBasicXML(Element parent) {
+		Element e = super.toBasicXML(parent);
+		colony.toBasicXML(e.addElement("colony"));
+		if(licensee != null) {
+			licensee.toBasicXML(e.addElement("licensee"));
+		}
+		e.addAttribute("type", type.getKey());
+		e.addAttribute("price",String.valueOf(price));
+		e.addAttribute("used",String.valueOf(used));
+		issuedDate.toXML(e.addElement("issued"));
+		usedDate.toXML(e.addElement("used"));
+		return e;
+	}
+	
 }

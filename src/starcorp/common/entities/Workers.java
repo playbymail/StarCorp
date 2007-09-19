@@ -10,6 +10,10 @@
  */
 package starcorp.common.entities;
 
+import org.dom4j.Element;
+
+import starcorp.common.types.AEventType;
+
 
 /**
  * starcorp.common.entities.Worker
@@ -22,6 +26,21 @@ public class Workers extends AColonists {
 	private Facility facility;
 	private int salary;
 	
+	@Override
+	public void readXML(Element e) {
+		super.readXML(e);
+		this.facility = new Facility();
+		this.facility.readXML(e.element("facility").element("entity"));
+		this.salary = Integer.parseInt(e.attributeValue("salary","0"));
+	}
+	@Override
+	public Element toBasicXML(Element parent) {
+		Element e = super.toBasicXML(parent);
+		facility.toBasicXML(e.addElement("facility"));
+		e.addAttribute("salary", String.valueOf(salary));
+		return e;
+	}
+
 	public Facility getFacility() {
 		return facility;
 	}

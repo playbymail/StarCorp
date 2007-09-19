@@ -10,6 +10,8 @@
  */
 package starcorp.common.entities;
 
+import org.dom4j.Element;
+
 import starcorp.common.types.Coordinates3D;
 
 /**
@@ -34,5 +36,18 @@ public class StarSystem extends ANamedEntity {
 	}
 	public void setLocation(Coordinates3D location) {
 		this.location = location;
+	}
+	@Override
+	public void readXML(Element e) {
+		super.readXML(e);
+		this.type = e.attributeValue("type");
+		this.location = new Coordinates3D(e);
+	}
+	@Override
+	public Element toBasicXML(Element parent) {
+		Element e = super.toBasicXML(parent);
+		e.addAttribute("type", type);
+		location.toXML(e);
+		return e;
 	}
 }

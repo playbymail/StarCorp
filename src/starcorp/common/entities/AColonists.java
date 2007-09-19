@@ -13,6 +13,8 @@ package starcorp.common.entities;
 import java.util.Iterator;
 import java.util.List;
 
+import org.dom4j.Element;
+
 import starcorp.common.types.Population;
 import starcorp.common.types.PopulationClass;
 
@@ -128,6 +130,32 @@ public abstract class AColonists extends ABaseEntity {
 
 	public void setCash(int cash) {
 		this.cash = cash;
+	}
+
+	@Override
+	public void readXML(Element e) {
+		super.readXML(e);
+		this.colony = new Colony();
+		colony.readXML(e.element("colony").element("entity"));
+		this.population = new Population(e.element("population"));
+		this.cash = Integer.parseInt(e.attributeValue("cash","0"));
+		this.happiness = Double.parseDouble(e.attributeValue("happiness","0.0"));
+	}
+
+	@Override
+	public Element toBasicXML(Element parent) {
+		Element e = super.toBasicXML(parent);
+		colony.toBasicXML(e.addElement("colony"));
+		population.toXML(e);
+		return e;
+	}
+
+	@Override
+	public Element toFullXML(Element parent) {
+		Element e = super.toFullXML(parent);
+		e.addAttribute("cash", String.valueOf(cash));
+		e.addAttribute("happiness", String.valueOf(happiness));
+		return e;
 	}
 
 }

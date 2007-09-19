@@ -10,7 +10,10 @@
  */
 package starcorp.common.entities;
 
+import org.dom4j.Element;
+
 import starcorp.common.types.AEventType;
+import starcorp.common.types.Coordinates3D;
 
 /**
  * starcorp.common.entities.StellarAnomoly
@@ -23,6 +26,20 @@ public class StellarAnomoly extends AStarSystemEntity {
 	private String description;
 	private AEventType investigationEvent;
 	
+	@Override
+	public void readXML(Element e) {
+		super.readXML(e);
+		this.description = e.attributeValue("description");
+		this.investigationEvent = AEventType.getType(e.attributeValue("event"));
+	}
+	@Override
+	public Element toBasicXML(Element parent) {
+		Element e = super.toBasicXML(parent);
+		e.addAttribute("description", description);
+		e.addAttribute("event", investigationEvent.getKey());
+		return e;
+	}
+
 	public String getDescription() {
 		return description;
 	}

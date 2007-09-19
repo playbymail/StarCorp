@@ -10,6 +10,8 @@
  */
 package starcorp.common.entities;
 
+import org.dom4j.Element;
+
 import starcorp.common.types.Coordinates2D;
 import starcorp.common.types.GalacticDate;
 
@@ -56,6 +58,26 @@ public class Colony extends ANamedEntity {
 	}
 	public void setFoundedDate(GalacticDate foundedDate) {
 		this.foundedDate = foundedDate;
+	}
+	@Override
+	public void readXML(Element e) {
+		super.readXML(e);
+		this.government = new Corporation();
+		this.government.readXML(e.element("government").element("entity"));
+		this.planet = new Planet();
+		this.planet.readXML(e.element("planet").element("entity"));
+		this.location = new Coordinates2D(e);
+		this.foundedDate = new GalacticDate(e.element("founded").element("date"));
+	}
+	@Override
+	public Element toBasicXML(Element parent) {
+		Element e = super.toBasicXML(parent);
+		government.toBasicXML(e.addElement("government"));
+		planet.toBasicXML(e.addElement("planet"));
+		location.toXML(e);
+		e.addAttribute("hazard", String.valueOf(hazardLevel));
+		foundedDate.toXML(e.addElement("founded"));
+		return e;
 	}
 	
 }

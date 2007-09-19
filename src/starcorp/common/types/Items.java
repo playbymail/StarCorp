@@ -10,6 +10,8 @@
  */
 package starcorp.common.types;
 
+import org.dom4j.Element;
+
 /**
  * starcorp.common.types.Item
  *
@@ -32,6 +34,17 @@ public class Items {
 	public Items(AItemType type, int qty) {
 		this.type = type;
 		this.quantity = qty;
+	}
+	
+	public Items(Element e) {
+		this.type = AItemType.getType(e.attributeValue("type"));
+		this.quantity = Integer.parseInt(e.attributeValue("quantity","0"));
+	}
+	
+	public Element toXML(Element parent) {
+		parent.addAttribute("type", type.getKey());
+		parent.addAttribute("quantity", String.valueOf(quantity));
+		return parent;
 	}
 	
 	/**

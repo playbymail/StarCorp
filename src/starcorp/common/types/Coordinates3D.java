@@ -10,6 +10,8 @@
  */
 package starcorp.common.types;
 
+import org.dom4j.Element;
+
 /**
  * starcorp.common.types.Coordinates3D
  *
@@ -29,6 +31,19 @@ public class Coordinates3D {
 		this.x = x;
 		this.y = y;
 		this.z = z;
+	}
+	
+	public Coordinates3D(Element e) {
+		this.x = Integer.parseInt(e.attributeValue("x","0"));
+		this.y = Integer.parseInt(e.attributeValue("y","0"));
+		this.z = Integer.parseInt(e.attributeValue("z","0"));
+	}
+	
+	public Element toXML(Element parent) {
+		parent.addAttribute("x", String.valueOf(x));
+		parent.addAttribute("y", String.valueOf(y));
+		parent.addAttribute("z", String.valueOf(z));
+		return parent;
 	}
 	
 	public int getDistance(Coordinates3D other) {

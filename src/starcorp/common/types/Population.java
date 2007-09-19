@@ -10,6 +10,8 @@
  */
 package starcorp.common.types;
 
+import org.dom4j.Element;
+
 /**
  * starcorp.common.types.Population
  *
@@ -27,6 +29,18 @@ public class Population {
 	
 	public Population(PopulationClass popClass) {
 		this.popClass = popClass;
+	}
+	
+	public Population(Element e) {
+		this.quantity = Integer.parseInt(e.attributeValue("quantity","0"));
+		this.popClass = PopulationClass.getType(e.attributeValue("key"));
+	}
+	
+	public Element toXML(Element parent) {
+		Element root = parent.addElement("population");
+		root.addAttribute("quantity", String.valueOf(quantity));
+		root.addAttribute("key", popClass.getKey());
+		return root;
 	}
 	
 	public void add(int qty) {

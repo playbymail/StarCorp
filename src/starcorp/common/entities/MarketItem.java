@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.dom4j.Element;
+
 import starcorp.common.types.AItemType;
 import starcorp.common.types.CashTransaction;
 import starcorp.common.types.GalacticDate;
@@ -111,4 +113,30 @@ public class MarketItem extends ABaseEntity {
 	public void setSoldDate(GalacticDate soldDate) {
 		this.soldDate = soldDate;
 	}
+	
+	@Override
+	public void readXML(Element e) {
+		super.readXML(e);
+		this.seller = new Corporation();
+		this.seller.readXML(e.element("seller").element("entity"));
+		this.colony = new Colony();
+		this.colony.readXML(e.element("colony").element("entity"));
+		this.item = new Items(e);
+		this.costPerItem = Integer.parseInt(e.attributeValue("price","0"));
+		this.issuedDate = new GalacticDate(e.element("issued").element("date"));
+		this.soldDate = new GalacticDate(e.element("sold").element("date"));
+	}
+
+	@Override
+	public Element toBasicXML(Element parent) {
+		Element e = super.toBasicXML(parent);
+		seller.toBasicXML(e.addElement("seller"));
+		colony.toBasicXML(e.addElement("colony"));
+		item.toXML(e);
+		e.addAttribute("price",String.valueOf(costPerItem));
+		issuedDate.toXML(e.addElement("issued"));
+		soldDate.toXML(e.addElement("sold"));
+		return e;
+	}
+	
 }

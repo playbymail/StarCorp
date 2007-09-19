@@ -14,6 +14,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.dom4j.Element;
+
+import starcorp.common.types.Coordinates2D;
 import starcorp.common.types.GalacticDate;
 import starcorp.common.types.Items;
 import starcorp.common.types.StarshipHulls;
@@ -346,4 +349,31 @@ public class StarshipDesign extends ANamedEntity {
 	public void setDesignDate(GalacticDate designDate) {
 		this.designDate = designDate;
 	}
+
+	@Override
+	public void readXML(Element e) {
+		super.readXML(e);
+		this.owner = new Corporation();
+		this.owner.readXML(e.element("owner").element("entity"));
+		this.designDate = new GalacticDate(e.element("designed").element("date"));
+		
+		for(Iterator i = e.element("hulls").elementIterator("item"); i.hasNext();) {
+			hulls.add(new Items((Element)i.next()));
+		}
+	}
+
+	@Override
+	public Element toBasicXML(Element parent) {
+		Element e = super.toBasicXML(parent);
+		owner.toBasicXML(e.addElement("owner"));
+		designDate.toXML(e.addElement("designed"));
+		Element eHulls = e.addElement("hulls");
+		Iterator<Items> i = hulls.iterator();
+		while(i.hasNext()) {
+			i.next().toXML(eHulls.addElement("item"));
+		}
+		return e;
+	}
+
+	
 }

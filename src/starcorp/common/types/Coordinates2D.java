@@ -10,6 +10,8 @@
  */
 package starcorp.common.types;
 
+import org.dom4j.Element;
+
 /**
  * starcorp.common.types.Coordinates2D
  *
@@ -27,6 +29,17 @@ public class Coordinates2D {
 	public Coordinates2D(int x, int y) {
 		this.x = x;
 		this.y = y;
+	}
+	
+	public Coordinates2D(Element e) {
+		this.x = Integer.parseInt(e.attributeValue("x","0"));
+		this.y = Integer.parseInt(e.attributeValue("y","0"));
+	}
+	
+	public Element toXML(Element parent) {
+		parent.addAttribute("x", String.valueOf(x));
+		parent.addAttribute("y", String.valueOf(y));
+		return parent;
 	}
 	
 	public int getDistance(Coordinates2D other) {

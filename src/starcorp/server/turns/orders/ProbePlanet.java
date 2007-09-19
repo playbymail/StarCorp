@@ -46,7 +46,7 @@ public class ProbePlanet extends AOrderProcessor {
 		else {
 			ship.incrementTimeUnitsUsed(TIME_UNITS);
 			OrderReport report = new OrderReport(order);
-			report.addScannedEntity(ship.getPlanet());
+			report.setMappedPlanet(ship.getPlanet());
 			report.addScannedEntities(entityStore.listColonies(ship.getPlanet()));
 			order.setReport(report);
 		}

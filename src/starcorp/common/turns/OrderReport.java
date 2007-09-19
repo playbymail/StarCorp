@@ -13,10 +13,12 @@ package starcorp.common.turns;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.dom4j.Element;
 
 import starcorp.common.entities.ABaseEntity;
+import starcorp.common.entities.Planet;
 import starcorp.common.types.OrderType;
 import starcorp.common.types.PlanetMapSquare;
 
@@ -33,6 +35,7 @@ public class OrderReport {
 	@SuppressWarnings("unchecked")
 	private List scannedEntities = new ArrayList();
 	private PlanetMapSquare scannedLocation;
+	private Planet mappedPlanet;
 	
 	public OrderReport() {
 		
@@ -59,6 +62,11 @@ public class OrderReport {
 		if(eSquare != null) {
 			this.scannedLocation = new PlanetMapSquare(eSquare);
 		}
+		Element eMap = scanned.element("planet");
+		if(eMap != null) {
+			this.mappedPlanet = new Planet();
+			this.mappedPlanet.readXML(eMap.element("entity"));
+		}
 	}
 	
 	public Element toXML(Element parent) {
@@ -77,6 +85,9 @@ public class OrderReport {
 		}
 		if(scannedLocation != null) {
 			scannedLocation.toXML(scanned);
+		}
+		if(mappedPlanet != null) {
+			mappedPlanet.toFullXML(scanned);
 		}
 		return root;
 	}
@@ -134,6 +145,14 @@ public class OrderReport {
 
 	public void setType(OrderType type) {
 		this.type = type;
+	}
+
+	public Planet getMappedPlanet() {
+		return mappedPlanet;
+	}
+
+	public void setMappedPlanet(Planet mappedPlanet) {
+		this.mappedPlanet = mappedPlanet;
 	}
 	
 	

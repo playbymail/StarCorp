@@ -14,6 +14,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.dom4j.Element;
+
 import starcorp.common.types.AItemType;
 import starcorp.common.types.BuildingModules;
 import starcorp.common.types.ConsumerGoods;
@@ -284,5 +286,59 @@ public class Starship extends AStarSystemEntity {
 	public boolean enoughTimeUnits(int required) {
 		return getTimeUnitsRemaining() <= required;
 	}
+
+	@Override
+	public void readXML(Element e) {
+		super.readXML(e);
+		this.owner = new Corporation();
+		this.owner.readXML(e.element("owner").element("entity"));
+		Element ePlanet = e.element("planet");
+		if(ePlanet != null) {
+			this.planet = new Planet();
+			this.planet.readXML(ePlanet.element("entity"));
+		}
+		Element eLoc = e.element("planet-location");
+		if(eLoc != null) {
+			this.planetLocation = new Coordinates2D(eLoc);
+		}
+		Element eCol = e.element("colony");
+		if(eCol != null) {
+			this.colony = new Colony();
+			this.colony.readXML(eCol.element("entity"));
+		}
+		this.design = new StarshipDesign();
+		this.design.readXML(e.element("design").element("entity"));
+		this.builtDate = new GalacticDate(e.element("built").element("date"));
+		
+		for(Iterator i = e.element("cargo").elementIterator("item"); i.hasNext();) {
+			cargo.add(new Items((Element)i.next()));
+		}
+	}
+
+	@Override
+	public Element toBasicXML(Element parent) {
+		Element e = super.toBasicXML(parent);
+		owner.toBasicXML(e.addElement("owner"));
+		if(planet != null)
+			planet.toBasicXML(e.addElement("planet"));
+		if(planetLocation != null)
+			planetLocation.toXML(e.addElement("planet-location"));
+		if(colony != null)
+			colony.toBasicXML(e.addElement("colony"));
+		design.toBasicXML(e.addElement("design"));
+		builtDate.toXML(e.addElement("built"));
+		return e;
+	}
+
+	@Override
+	public Element toFullXML(Element parent) {
+		Element e =super.toFullXML(parent);
+		Element eCargo = e.addElement("cargo");
+		Iterator<Items> i = cargo.iterator();
+		while(i.hasNext()) {
+			i.next().toXML(eCargo.addElement("item"));
+		}
+		return e;
+	} 
 
 }

@@ -1,5 +1,7 @@
 package starcorp.common.entities;
 
+import org.dom4j.Element;
+
 import starcorp.common.types.CoordinatesPolar;
 
 public abstract class AStarSystemEntity extends ANamedEntity {
@@ -22,6 +24,22 @@ public abstract class AStarSystemEntity extends ANamedEntity {
 	}
 	public void setLocation(CoordinatesPolar location) {
 		this.location = location;
+	}
+
+	@Override
+	public void readXML(Element e) {
+		super.readXML(e);
+		this.system = new StarSystem();
+		this.system.readXML(e.element("system").element("entity"));
+		this.location = new CoordinatesPolar(e);
+	}
+
+	@Override
+	public Element toBasicXML(Element parent) {
+		Element e =super.toBasicXML(parent);
+		system.toBasicXML(parent.addElement("system"));
+		location.toXML(e);
+		return e;
 	}
 	
 }

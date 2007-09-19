@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.dom4j.Element;
+
 import starcorp.common.types.AFacilityType;
 import starcorp.common.types.CashTransaction;
 import starcorp.common.types.ColonyHub;
@@ -217,5 +219,55 @@ public class Facility extends ABaseEntity {
 
 	public void setItemsCreated(Set<Items> itemsCreated) {
 		this.itemsCreated = itemsCreated;
+	}
+
+	@Override
+	public void readXML(Element e) {
+		super.readXML(e);
+		this.owner = new Corporation();
+		this.owner.readXML(e.element("owner").element("entity"));
+		this.colony = new Colony();
+		this.colony.readXML(e.element("colony").element("entity"));
+		this.type = AFacilityType.getType(e.attributeValue("type"));
+		this.powered = Boolean.parseBoolean(e.attributeValue("powered","false"));
+		this.serviceCharge =Integer.parseInt(e.attributeValue("charge","0"));
+		this.open = Boolean.parseBoolean(e.attributeValue("open","false"));
+		this.builtDate = new GalacticDate(e.element("built").element("date"));
+		
+		for(Iterator i = e.element("production-queue").elementIterator("item"); i.hasNext();) {
+			itemQueue.add(new Items((Element)i.next()));
+		}
+		for(Iterator i = e.element("items-created").elementIterator("item"); i.hasNext();) {
+			itemsCreated.add(new Items((Element)i.next()));
+		}
+	}
+
+	@Override
+	public Element toBasicXML(Element parent) {
+		Element e = super.toBasicXML(parent);
+		owner.toBasicXML(e.addElement("owner"));
+		colony.toBasicXML(e.addElement("colony"));
+		e.addAttribute("type", type.getKey());
+		e.addAttribute("powered", powered ? "true" : "false");
+		e.addAttribute("charge", String.valueOf(serviceCharge));
+		e.addAttribute("open", open ? "true" : "false");
+		builtDate.toXML(e.addElement("built"));
+		return e;
+	}
+
+	@Override
+	public Element toFullXML(Element parent) {
+		Element e = super.toFullXML(parent);
+		Element queue = e.addElement("production-queue");
+		Iterator<Items> i = itemQueue.iterator();
+		while(i.hasNext()) {
+			i.next().toXML(queue.addElement("item"));
+		}
+		Element created = e.addElement("items-created");
+		i = itemsCreated.iterator();
+		while(i.hasNext()) {
+			i.next().toXML(created.addElement("item"));
+		}
+		return e;
 	}
 }

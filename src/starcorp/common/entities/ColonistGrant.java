@@ -10,6 +10,8 @@
  */
 package starcorp.common.entities;
 
+import org.dom4j.Element;
+
 import starcorp.common.types.GalacticDate;
 import starcorp.common.types.PopulationClass;
 
@@ -64,5 +66,25 @@ public class ColonistGrant extends ABaseEntity {
 	}
 	public void setIssuedDate(GalacticDate issuedDate) {
 		this.issuedDate = issuedDate;
+	}
+	@Override
+	public void readXML(Element e) {
+		super.readXML(e);
+		this.colony = new Colony();
+		colony.readXML(e.element("colony").element("entity"));
+		this.popClass = PopulationClass.getType(e.attributeValue("popClass"));
+		this.credits = Integer.parseInt(e.attributeValue("credits","0"));
+		this.available = Boolean.parseBoolean(e.attributeValue("available","false"));
+		this.issuedDate = new GalacticDate(e.element("issued").element("date"));
+	}
+	@Override
+	public Element toBasicXML(Element parent) {
+		Element e = super.toBasicXML(parent);
+		colony.toBasicXML(e.addElement("colony"));
+		e.addAttribute("popClass", popClass.getKey());
+		e.addAttribute("credits",String.valueOf(credits));
+		e.addAttribute("available",String.valueOf(available));
+		issuedDate.toXML(e.addElement("issued"));
+		return e;
 	}
 }

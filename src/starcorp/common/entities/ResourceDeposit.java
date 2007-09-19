@@ -10,6 +10,8 @@
  */
 package starcorp.common.entities;
 
+import org.dom4j.Element;
+
 import starcorp.common.types.AItemType;
 import starcorp.common.types.Coordinates2D;
 
@@ -143,5 +145,26 @@ public class ResourceDeposit extends ABaseEntity {
 
 	public void setType(AItemType type) {
 		this.type = type;
+	}
+
+	@Override
+	public void readXML(Element e) {
+		super.readXML(e);
+		this.systemEntity = (AStarSystemEntity) ABaseEntity.fromXML(e.element("entity"));
+		this.location = new Coordinates2D(e);
+		this.type = AItemType.getType(e.attributeValue("type"));
+		this.totalQuantity = Integer.parseInt(e.attributeValue("total","0"));
+		this.yield = Integer.parseInt(e.attributeValue("yield","0"));
+	}
+
+	@Override
+	public Element toBasicXML(Element parent) {
+		Element e = super.toBasicXML(parent);
+		systemEntity.toBasicXML(e);
+		location.toXML(e);
+		e.addAttribute("type", type.getKey());
+		e.addAttribute("total", String.valueOf(totalQuantity));
+		e.addAttribute("yield", String.valueOf(yield));
+		return e;
 	}
 }
