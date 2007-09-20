@@ -39,7 +39,8 @@ public class Corporation extends ANamedEntity {
 		
 	}
 	
-	public Corporation(String email, String password) {
+	public Corporation(String name, String email, String password) {
+		this.playerName = name;
 		this.playerEmail = email;
 		this.playerPassword = password;
 	}
@@ -51,8 +52,14 @@ public class Corporation extends ANamedEntity {
 		this.playerName = player.attributeValue("name");
 		this.playerPassword = player.attributeValue("password");
 		this.credits = Integer.parseInt(e.attributeValue("credits", "0"));
-		this.foundedDate = new GalacticDate(e.element("founded").element("date"));
-		this.lastTurnDate = new GalacticDate(e.element("last-turn").element("date"));
+		Element eDate = e.element("founded");
+		if(eDate != null) {
+			this.foundedDate = new GalacticDate(eDate.element("date"));
+		}
+		eDate = e.element("last-turn");
+		if(eDate != null) {
+			this.lastTurnDate = new GalacticDate(eDate.element("date"));
+		}
 		for(Iterator<?> i = e.elementIterator("transaction"); i.hasNext();) {
 			this.transactions.add(new CashTransaction((Element)i.next()));
 		}
@@ -78,15 +85,15 @@ public class Corporation extends ANamedEntity {
 		return root;
 	}
 	
-	public int add(int credits, String description) {
+	public int add(int credits, GalacticDate date, String description) {
 		this.credits += credits;
-		transactions.add(new CashTransaction(credits,description));
+		transactions.add(new CashTransaction(date, credits,description));
 		return this.credits;
 	}
 	
-	public void remove(int credits, String description) {
+	public void remove(int credits, GalacticDate date, String description) {
 		this.credits -= credits;
-		transactions.add(new CashTransaction((0 - credits),description));
+		transactions.add(new CashTransaction(date, (0 - credits),description));
 	}
 	
 	public boolean hasCredits(int credits) {

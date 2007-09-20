@@ -653,4 +653,10 @@ public class HibernateStore implements IEntityStore {
 		return (ABaseEntity) loadObject(entityClass, ID);
 	}
 
+	public Corporation getCorporation(String email) {
+		String q = "from Corporation where playerEmail = :email";
+		Map<String, Object> map = prepareParameters(null, "email", email);
+		return (Corporation) loadObject(prepareQuery(q, map));
+	}
+
 }

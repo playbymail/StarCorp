@@ -18,6 +18,7 @@ import starcorp.common.turns.TurnOrder;
 import starcorp.common.turns.TurnReport;
 import starcorp.common.types.GalacticDate;
 import starcorp.common.types.OrderType;
+import starcorp.server.ServerConfiguration;
 import starcorp.server.entitystore.IEntityStore;
 import starcorp.server.turns.orders.AOrderProcessor;
 
@@ -39,12 +40,15 @@ public class TurnProcessor {
 		Corporation corp = authorize(turn.getCorporation());
 		TurnReport report = new TurnReport(turn);
 		if(corp == null) {
-			turn.add(TurnError.ERROR_AUTHORIZATION_FAILED);
+			corp = register(turn.getCorporation());
+			if(corp == null) {
+				turn.add(TurnError.ERROR_AUTHORIZATION_FAILED);
+			}
 		}
-		else {
+		if(corp != null){
 			turn.setCorporation(corp);
 			GalacticDate lastTurn = corp.getLastTurnDate();
-			GalacticDate currentDate = GalacticDate.getCurrentDate();
+			GalacticDate currentDate = ServerConfiguration.getCurrentDate();
 			if(lastTurn != null && !lastTurn.before(currentDate)) {
 				turn.add(TurnError.ERROR_EARLY_TURN);
 			}
@@ -69,6 +73,20 @@ public class TurnProcessor {
 			}
 		}
 		return report;
+	}
+	
+	private Corporation register(Corporation corp) {
+		Corporation existing = entityStore.getCorporation(corp.getPlayerEmail());
+		if(existing == null) {
+			corp.add(ServerConfiguration.SETUP_INITIAL_CREDITS,ServerConfiguration.getCurrentDate(),ServerConfiguration.SETUP_DESCRIPTION);
+			corp.setFoundedDate(ServerConfiguration.getCurrentDate());
+			corp.setLastTurnDate(ServerConfiguration.getCurrentDate());
+			entityStore.save(corp);
+			return corp;
+		}
+		else {
+			return null;
+		}
 	}
 	
 	private Corporation authorize(Corporation corp) {

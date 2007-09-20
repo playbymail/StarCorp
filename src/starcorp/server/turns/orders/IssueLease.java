@@ -17,7 +17,7 @@ import starcorp.common.turns.OrderReport;
 import starcorp.common.turns.TurnError;
 import starcorp.common.turns.TurnOrder;
 import starcorp.common.types.AFacilityType;
-import starcorp.common.types.GalacticDate;
+import starcorp.server.ServerConfiguration;
 
 /**
  * starcorp.server.turns.IssueLease
@@ -52,7 +52,7 @@ public class IssueLease extends AOrderProcessor {
 		else {
 			FacilityLease lease = new FacilityLease();
 			lease.setColony(colony);
-			lease.setIssuedDate(GalacticDate.getCurrentDate());
+			lease.setIssuedDate(ServerConfiguration.getCurrentDate());
 			lease.setLicensee(licensee);
 			lease.setPrice(price);
 			lease.setTypeClass(type);

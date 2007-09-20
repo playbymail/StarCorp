@@ -19,8 +19,8 @@ import starcorp.common.turns.OrderReport;
 import starcorp.common.turns.TurnError;
 import starcorp.common.turns.TurnOrder;
 import starcorp.common.types.AItemType;
-import starcorp.common.types.GalacticDate;
 import starcorp.common.types.StarshipHulls;
+import starcorp.server.ServerConfiguration;
 
 /**
  * starcorp.server.turns.DesignShip
@@ -50,7 +50,7 @@ public class DesignShip extends AOrderProcessor {
 		}
 		else {
 			StarshipDesign design = new StarshipDesign();
-			design.setDesignDate(GalacticDate.getCurrentDate());
+			design.setDesignDate(ServerConfiguration.getCurrentDate());
 			design.setName(name);
 			design.setOwner(corp);
 			Iterator<StarshipHulls> i = hullTypes.iterator();

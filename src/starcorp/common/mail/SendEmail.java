@@ -30,12 +30,12 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 /**
- * starcorp.common.mail.EmailUtil
+ * starcorp.common.mail.SendEmail
  *
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 19 Sep 2007
  */
-public class EmailUtil {
+public class SendEmail {
 
 	private static final String SSL_FACTORY = "javax.net.ssl.SSLSocketFactory";
 	
@@ -44,7 +44,7 @@ public class EmailUtil {
 	private String smtpUser;
 	private String smtpPassword;
 	
-	public EmailUtil(String smtpHost, String smtpPort, String smtpUser,
+	public SendEmail(String smtpHost, String smtpPort, String smtpUser,
 			String smtpPassword) {
 		super();
 		this.smtpHost = smtpHost;
@@ -56,7 +56,7 @@ public class EmailUtil {
 	public void send(String[] to, String[] cc, String[] bcc, String subject, String message, String from, String attachmentFile) throws MessagingException {
 		Security.addProvider(new com.sun.net.ssl.internal.ssl.Provider());
 		
-		Properties props = new Properties();
+		Properties props = System.getProperties();
 		props.put("mail.smtp.host", smtpHost);
 		props.put("mail.smtp.auth", "true");
 		props.put("mail.stmp.port", smtpPort);
@@ -97,7 +97,8 @@ public class EmailUtil {
 		msg.setSubject(subject);
 		
 		if(attachmentFile == null) {
-			msg.setContent(message, "text/plain");
+			if(message != null)
+				msg.setContent(message, "text/plain");
 		}
 		else {
 			BodyPart msgBody = new MimeBodyPart();

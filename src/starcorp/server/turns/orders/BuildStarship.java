@@ -19,8 +19,8 @@ import starcorp.common.entities.StarshipDesign;
 import starcorp.common.turns.OrderReport;
 import starcorp.common.turns.TurnError;
 import starcorp.common.turns.TurnOrder;
-import starcorp.common.types.GalacticDate;
 import starcorp.common.types.Items;
+import starcorp.server.ServerConfiguration;
 
 /**
  * starcorp.server.turns.BuildStarship
@@ -52,7 +52,7 @@ public class BuildStarship extends AOrderProcessor {
 		}
 		else {	
 			Starship ship = new Starship();
-			ship.setBuiltDate(GalacticDate.getCurrentDate());
+			ship.setBuiltDate(ServerConfiguration.getCurrentDate());
 			ship.setDesign(design);
 			ship.setPlanet(colony.getPlanet());
 			ship.setName(name);

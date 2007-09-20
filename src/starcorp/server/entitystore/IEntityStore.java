@@ -86,6 +86,7 @@ public interface IEntityStore {
 	public abstract ColonyItem getItem(Colony colony, AItemType type);
 	public abstract ColonyItem getItem(Colony colony, Corporation owner, AItemType type);
 	
+	public abstract Corporation getCorporation(String email);
 	public abstract Corporation getCorporation(String email, String password);
 
 	public abstract List<?> listDevelopmentGrants(Corporation owner, boolean openOnly);

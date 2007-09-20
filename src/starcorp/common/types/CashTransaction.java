@@ -60,10 +60,10 @@ public class CashTransaction {
 		
 	}
 	
-	public CashTransaction(int amount, String description) {
+	public CashTransaction(GalacticDate date, int amount, String description) {
 		this.amount = amount;
 		this.description = description;
-		this.date = GalacticDate.getCurrentDate();
+		this.date = date;
 	}
 	
 	public CashTransaction(Element e) {

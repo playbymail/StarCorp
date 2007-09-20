@@ -10,8 +10,6 @@
  */
 package starcorp.common.types;
 
-import java.util.ResourceBundle;
-
 import org.dom4j.Element;
 
 /**
@@ -22,19 +20,6 @@ import org.dom4j.Element;
  */
 public class GalacticDate {
 
-	private static final ResourceBundle bundle = ResourceBundle.getBundle("date");
-
-	private static GalacticDate currentDate;
-	
-	public static GalacticDate getCurrentDate() {
-		if(currentDate == null) {
-			int year = Integer.parseInt(bundle.getString("current.year"));
-			int month = Integer.parseInt(bundle.getString("current.month"));
-			currentDate = new GalacticDate(year,month);
-		}
-		return currentDate;
-	}
-	
 	private int year;
 	private int month;
 	

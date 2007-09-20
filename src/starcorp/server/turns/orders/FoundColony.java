@@ -23,9 +23,9 @@ import starcorp.common.turns.TurnOrder;
 import starcorp.common.types.AFacilityType;
 import starcorp.common.types.ColonyHub;
 import starcorp.common.types.Coordinates2D;
-import starcorp.common.types.GalacticDate;
 import starcorp.common.types.Items;
 import starcorp.common.types.PlanetMapSquare;
+import starcorp.server.ServerConfiguration;
 
 /**
  * starcorp.server.turns.FoundColony
@@ -67,7 +67,7 @@ public class FoundColony extends AOrderProcessor {
 					double hazardLevel = sq.getTerrainType().getHazardLevel() + planet.getAtmosphereTypeClass().getHazardLevel();
 					
 					Facility hub = new Facility();
-					hub.setBuiltDate(GalacticDate.getCurrentDate());
+					hub.setBuiltDate(ServerConfiguration.getCurrentDate());
 					hub.setOpen(true);
 					hub.setOwner(corp);
 					hub.setTypeClass(hubType);
@@ -98,7 +98,7 @@ public class FoundColony extends AOrderProcessor {
 						
 					
 						colony = new Colony();
-						colony.setFoundedDate(GalacticDate.getCurrentDate());
+						colony.setFoundedDate(ServerConfiguration.getCurrentDate());
 						colony.setGovernment(corp);
 						colony.setHazardLevel(hazardLevel);
 						colony.setLocation(location);

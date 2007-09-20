@@ -52,7 +52,7 @@ public class Facility extends ABaseEntity {
 	private Set<Items> itemsCreated = new HashSet<Items>();
 	private GalacticDate builtDate;
 	
-	public static ServiceResult service(Map<Facility, List<?>> facilities, int quantity, int cashAvailable) {
+	public static ServiceResult service(GalacticDate date, Map<Facility, List<?>> facilities, int quantity, int cashAvailable) {
 		ServiceResult result = new ServiceResult();
 		
 		Iterator<Facility> i = facilities.keySet().iterator();
@@ -73,7 +73,7 @@ public class Facility extends ABaseEntity {
 			Colony colony = facility.getColony();
 			Object[] args = {type.getName(), String.valueOf(qty), colony.getName(), String.valueOf(colony.getID())};
 			String desc = CashTransaction.getDescription(CashTransaction.SERVICE_CHARGE, args);
-			facility.getOwner().add(price, desc);
+			facility.getOwner().add(price, date, desc);
 			facility.incTransactionCount();
 			
 			result.quantityServiced += qty;

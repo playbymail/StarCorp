@@ -42,7 +42,7 @@ public class MarketItem extends ABaseEntity {
 		public List<Items> bought = new ArrayList<Items>();
 	}
 	
-	public static BuyResult buy(List<?> items, int quantity, int cashAvailable) {
+	public static BuyResult buy(GalacticDate date, List<?> items, int quantity, int cashAvailable) {
 		BuyResult result = new BuyResult();
 		
 		Iterator<?> i = items.iterator();
@@ -63,10 +63,10 @@ public class MarketItem extends ABaseEntity {
 			
 			Object[] args = {String.valueOf(qty), type.getName(),colony.getName(),String.valueOf(colony.getID())};
 			String desc = CashTransaction.getDescription(CashTransaction.ITEM_SOLD, args);
-			item.getSeller().add(price, desc);
+			item.getSeller().add(price, date, desc);
 			item.getItem().remove(qty);
 			if(item.getItem().getQuantity() < 1) {
-				item.setSoldDate(GalacticDate.getCurrentDate());
+				item.setSoldDate(date);
 			}
 			result.quantityBought += qty;
 			result.totalPrice += price;

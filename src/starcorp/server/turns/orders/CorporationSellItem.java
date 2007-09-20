@@ -23,8 +23,8 @@ import starcorp.common.turns.TurnOrder;
 import starcorp.common.types.AItemType;
 import starcorp.common.types.CashTransaction;
 import starcorp.common.types.ColonyHub;
-import starcorp.common.types.GalacticDate;
 import starcorp.common.types.Items;
+import starcorp.server.ServerConfiguration;
 
 /**
  * starcorp.server.turns.CorporationSellItem
@@ -71,7 +71,7 @@ public class CorporationSellItem extends AOrderProcessor {
 			MarketItem marketItem = new MarketItem();
 			marketItem.setColony(colony);
 			marketItem.setCostPerItem(price);
-			marketItem.setIssuedDate(GalacticDate.getCurrentDate());
+			marketItem.setIssuedDate(ServerConfiguration.getCurrentDate());
 			marketItem.setSeller(corp);
 			marketItem.setItem(item);
 			
@@ -79,7 +79,7 @@ public class CorporationSellItem extends AOrderProcessor {
 			
 			Object[] args2 = {colonyHub.getTypeClass().getName(), colony.getName(), String.valueOf(colony.getID())};
 			String desc = CashTransaction.getDescription(CashTransaction.MARKET_FEES, args2);
-			corp.remove(colonyHub.getServiceCharge(),desc);
+			corp.remove(colonyHub.getServiceCharge(),ServerConfiguration.getCurrentDate(),desc);
 			colonyHub.incTransactionCount();
 			
 			report = new OrderReport(order);

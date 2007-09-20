@@ -23,9 +23,9 @@ import starcorp.common.turns.TurnOrder;
 import starcorp.common.types.AFacilityType;
 import starcorp.common.types.CashTransaction;
 import starcorp.common.types.ColonyHub;
-import starcorp.common.types.GalacticDate;
 import starcorp.common.types.Items;
 import starcorp.common.types.OrbitalDock;
+import starcorp.server.ServerConfiguration;
 
 /**
  * starcorp.server.turns.BuildFacility
@@ -67,7 +67,7 @@ public class BuildFacility extends AOrderProcessor {
 			facility.setTypeClass(facilityType);
 			facility.setColony(colony);
 			facility.setOwner(corp);
-			facility.setBuiltDate(GalacticDate.getCurrentDate());
+			facility.setBuiltDate(ServerConfiguration.getCurrentDate());
 			facility.setOpen(true);
 			
 			FacilityLease lease = entityStore.getLease(colony, corp, facilityType, true);
@@ -102,14 +102,14 @@ public class BuildFacility extends AOrderProcessor {
 					}
 					
 					lease.setUsed(true);
-					lease.setUsedDate(GalacticDate.getCurrentDate());
+					lease.setUsedDate(ServerConfiguration.getCurrentDate());
 					
 					if(grant != null) {
 						Object[] args = {facilityType.getName(), colony.getName(), String.valueOf(colony.getID())};
 						String govtDesc = CashTransaction.getDescription(CashTransaction.GRANT_PAID, args);
 						String corpDesc = CashTransaction.getDescription(CashTransaction.GRANT_RECEIVED, args);
-						grant.getColony().getGovernment().remove(grant.getGrant(), govtDesc);
-						corp.add(grant.getGrant(), corpDesc);
+						grant.getColony().getGovernment().remove(grant.getGrant(), ServerConfiguration.getCurrentDate(), govtDesc);
+						corp.add(grant.getGrant(), ServerConfiguration.getCurrentDate(), corpDesc);
 					}
 					
 					entityStore.save(facility);

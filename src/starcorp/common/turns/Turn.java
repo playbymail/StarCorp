@@ -27,7 +27,6 @@ import starcorp.common.types.GalacticDate;
  */
 public class Turn {
 
-	private GalacticDate submittedDate;
 	private GalacticDate processedDate;
 	private Corporation corporation;
 	private List<TurnOrder> orders = new ArrayList<TurnOrder>();
@@ -37,15 +36,17 @@ public class Turn {
 		
 	}
 	
-	public Turn(String email, String password) {
-		corporation = new Corporation(email,password);
+	public Turn(Corporation corp) {
+		corporation = corp;
 	}
 	
 	public Turn(Element root) {
 		this.corporation = new Corporation();
 		this.corporation.readXML(root.element("corporation").element("entity"));
-		this.submittedDate = new GalacticDate(root.element("submitted").element("date"));
-		this.processedDate = new GalacticDate(root.element("processed").element("date"));
+		Element eDate = root.element("processed");
+		if(eDate != null) {
+			this.processedDate = new GalacticDate(eDate.element("date"));
+		}
 		for(Iterator<?> i = root.elementIterator("order"); i.hasNext();) {
 			this.orders.add(new TurnOrder((Element)i.next()));
 		}
@@ -57,7 +58,6 @@ public class Turn {
 	public Element toXML(Element parent) {
 		Element root = parent.addElement("turn");
 		corporation.toFullXML(root.addElement("corporation"));
-		submittedDate.toXML(root.addElement("submitted"));
 		if(processedDate != null)
 			processedDate.toXML(root.addElement("processed"));
 		if(orders.size() > 0) {
@@ -93,12 +93,6 @@ public class Turn {
 		return errors.iterator();
 	}
 	
-	public GalacticDate getSubmittedDate() {
-		return submittedDate;
-	}
-	public void setSubmittedDate(GalacticDate submittedDate) {
-		this.submittedDate = submittedDate;
-	}
 	public GalacticDate getProcessedDate() {
 		return processedDate;
 	}

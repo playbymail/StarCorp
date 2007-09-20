@@ -33,6 +33,7 @@ import starcorp.common.types.CoordinatesPolar;
 import starcorp.common.types.Population;
 import starcorp.common.types.PopulationClass;
 import starcorp.common.types.ServiceFacility;
+import starcorp.server.ServerConfiguration;
 import starcorp.server.entitystore.IEntityStore;
 
 /**
@@ -186,14 +187,14 @@ public class PopulationProcessor {
 			workers.removePopulation(quit);
 			Object[] args = {workers.getPopulation().getPopClass().getName(), String.valueOf(quit)};
 			String desc = CashTransaction.getDescription(CashTransaction.REDUNDANCY_PAY, args);
-			employer.remove(redundancy, desc);
+			employer.remove(redundancy, ServerConfiguration.getCurrentDate(), desc);
 			unemployed.addCash(redundancy);
 			qty -= quit;
 		}
 		int salaryPaid = (qty * workers.getSalary());
 		Object[] args = {workers.getPopulation().getPopClass().getName(), String.valueOf(qty)};
 		String desc = CashTransaction.getDescription(CashTransaction.SALARY_PAID, args);
-		employer.remove(salaryPaid,desc);
+		employer.remove(salaryPaid, ServerConfiguration.getCurrentDate(), desc);
 		workers.addCash(salaryPaid);
 	}
 	
@@ -207,7 +208,7 @@ public class PopulationProcessor {
 			}
 			Object[] args = {colonists.getPopClass().getName(), String.valueOf(colonists.getQuantity())};
 			String desc = CashTransaction.getDescription(CashTransaction.GRANT_PAID, args);
-			govt.add(cash, desc);
+			govt.add(cash, ServerConfiguration.getCurrentDate(), desc);
 			colonists.addCash(cash);
 		}
 	}
@@ -215,7 +216,7 @@ public class PopulationProcessor {
 	private void doConsumerNeeds(AColonists colonists, List<AItemType> types, double happinessRating) {
 		Colony colony = colonists.getColony();
 		List<?> market = entityStore.listMarket(colony, types, 0);
-		MarketItem.BuyResult result = MarketItem.buy(market, colonists.getQuantity(), colonists.getCash());
+		MarketItem.BuyResult result = MarketItem.buy(ServerConfiguration.getCurrentDate(), market, colonists.getQuantity(), colonists.getCash());
 		
 		double ratio = (double) colonists.getQuantity() / (double) result.quantityBought;
 		double happiness = ratio * happinessRating;
@@ -239,7 +240,7 @@ public class PopulationProcessor {
 	private void doServiceNeeds(AColonists colonists, List<AFacilityType> types, double happinessRating) {
 		Colony colony = colonists.getColony();
 		Map<Facility, List<?>> facilities = entityStore.listFacilitiesWithWorkers(colony, types);
-		Facility.ServiceResult result = Facility.service(facilities, colonists.getQuantity(), colonists.getCash());
+		Facility.ServiceResult result = Facility.service(ServerConfiguration.getCurrentDate(),facilities, colonists.getQuantity(), colonists.getCash());
 		
 		double ratio = (double) colonists.getQuantity() / (double) result.quantityServiced;
 		double happiness = ratio * happinessRating;

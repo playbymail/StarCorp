@@ -24,6 +24,7 @@ import starcorp.common.types.AItemType;
 import starcorp.common.types.CashTransaction;
 import starcorp.common.types.ColonyHub;
 import starcorp.common.types.OrbitalDock;
+import starcorp.server.ServerConfiguration;
 
 /**
  * starcorp.server.turns.ShipBuyItem
@@ -80,20 +81,20 @@ public class ShipBuyItem extends AOrderProcessor {
 			if(quantity > quantitySpaceFor) {
 				quantity = quantitySpaceFor;
 			}
-			MarketItem.BuyResult result = MarketItem.buy(marketItems, quantity, corp.getCredits());
+			MarketItem.BuyResult result = MarketItem.buy(ServerConfiguration.getCurrentDate(), marketItems, quantity, corp.getCredits());
 			
 			Object[] args = {String.valueOf(result.quantityBought), type.getName(),colony.getName(),String.valueOf(colony.getID())};
 			String desc = CashTransaction.getDescription(CashTransaction.ITEM_BOUGHT, args);
 			ship.addCargo(type, result.quantityBought);
-			corp.remove(result.totalPrice,desc);
+			corp.remove(result.totalPrice,ServerConfiguration.getCurrentDate(),desc);
 			Object[] args2 = {colonyHub.getTypeClass().getName(), colony.getName(), String.valueOf(colony.getID())};
 			desc = CashTransaction.getDescription(CashTransaction.MARKET_FEES, args2);
-			corp.remove(colonyHub.getServiceCharge(),desc);
+			corp.remove(colonyHub.getServiceCharge(),ServerConfiguration.getCurrentDate(),desc);
 			colonyHub.incTransactionCount();
 			if(orbitalDock != null && ship.getColony() == null) {
 				args2[0] = orbitalDock.getTypeClass().getName();
 				desc = CashTransaction.getDescription(CashTransaction.MARKET_FEES, args2);
-				corp.remove(orbitalDock.getServiceCharge(),desc);
+				corp.remove(orbitalDock.getServiceCharge(),ServerConfiguration.getCurrentDate(),desc);
 				orbitalDock.incTransactionCount();
 			}
 			report = new OrderReport(order);

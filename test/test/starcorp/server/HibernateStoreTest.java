@@ -19,10 +19,10 @@ import starcorp.common.types.AtmosphereType;
 import starcorp.common.types.Coordinates2D;
 import starcorp.common.types.Coordinates3D;
 import starcorp.common.types.CoordinatesPolar;
-import starcorp.common.types.GalacticDate;
 import starcorp.common.types.PlanetMapSquare;
 import starcorp.common.types.PopulationClass;
 import starcorp.common.types.TerrainType;
+import starcorp.server.ServerConfiguration;
 import starcorp.server.entitystore.HibernateStore;
 import starcorp.server.entitystore.IEntityStore;
 import junit.framework.TestCase;
@@ -57,7 +57,7 @@ public class HibernateStoreTest extends TestCase {
 		if(corp == null) {
 			corp = new Corporation();
 			corp.setCredits(10000000);
-			corp.setFoundedDate(GalacticDate.getCurrentDate());
+			corp.setFoundedDate(ServerConfiguration.getCurrentDate());
 			corp.setName("Test Corp");
 			corp.setPlayerEmail("test" + System.currentTimeMillis() + "@test.com");
 			corp.setPlayerName("Test Player");
@@ -86,7 +86,7 @@ public class HibernateStoreTest extends TestCase {
 		
 		if(colony == null) {
 			colony = new Colony();
-			colony.setFoundedDate(GalacticDate.getCurrentDate());
+			colony.setFoundedDate(ServerConfiguration.getCurrentDate());
 			colony.setGovernment(corp);
 			colony.setHazardLevel(planet.getAtmosphereTypeClass().getHazardLevel() + plainsTerrain.getHazardLevel());
 			colony.setLocation(planetLocation);
@@ -100,7 +100,7 @@ public class HibernateStoreTest extends TestCase {
 			grant.setAvailable(true);
 			grant.setColony(colony);
 			grant.setCredits(1000);
-			grant.setIssuedDate(GalacticDate.getCurrentDate());
+			grant.setIssuedDate(ServerConfiguration.getCurrentDate());
 			grant.setPopClass(admin);
 			entityStore.save(grant);
 		}

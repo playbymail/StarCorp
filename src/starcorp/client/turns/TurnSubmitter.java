@@ -24,10 +24,9 @@ import org.dom4j.io.XMLWriter;
 
 import starcorp.client.ClientConfiguration;
 import starcorp.common.entities.Corporation;
-import starcorp.common.mail.EmailUtil;
+import starcorp.common.mail.SendEmail;
 import starcorp.common.turns.Turn;
 import starcorp.common.turns.TurnOrder;
-import starcorp.common.types.GalacticDate;
 import starcorp.common.types.OrderType;
 
 /**
@@ -43,9 +42,9 @@ public class TurnSubmitter {
 	public static void main(String[] args) {
 		try {
 			Turn turn = new Turn();
-			Corporation corporation = new Corporation("monkeyx@gmail.com","test");
+			Corporation corporation = new Corporation(ClientConfiguration.PLAYER_NAME, ClientConfiguration.PLAYER_EMAIL,ClientConfiguration.PLAYER_PASSWORD);
+			corporation.setName("Test Corp");
 			turn.setCorporation(corporation);
-			turn.setSubmittedDate(GalacticDate.getCurrentDate());
 			for(int i = 0; i < 10; i++) {
 				TurnOrder order = new TurnOrder();
 				order.setCorp(corporation);
@@ -63,11 +62,10 @@ public class TurnSubmitter {
 		}
 	}
 	
-	private static EmailUtil email = new EmailUtil(ClientConfiguration.SMTP_HOST_NAME, ClientConfiguration.SMTP_PORT, ClientConfiguration.SMTP_AUTH_USER, ClientConfiguration.SMTP_AUTH_PASSWORD);
+	private static SendEmail email = new SendEmail(ClientConfiguration.SMTP_HOST_NAME, ClientConfiguration.SMTP_PORT, ClientConfiguration.SMTP_AUTH_USER, ClientConfiguration.SMTP_AUTH_PASSWORD);
 	
 	public static void submit(Turn turn) throws IOException, MessagingException {
-		GalacticDate date = GalacticDate.getCurrentDate();
-		String filename = "turn-" + date.getMonth() + "-" + date.getYear() + ".xml";
+		String filename = "turn.xml";
 		// TODO switch to compact format to save space after debugging
 		// OutputFormat format = OutputFormat.createCompactFormat();
 		OutputFormat format = OutputFormat.createPrettyPrint();
@@ -85,7 +83,7 @@ public class TurnSubmitter {
 		String from = turn.getCorporation().getPlayerEmail();
 		String[] to = {ClientConfiguration.SERVER_EMAIL_TURNS};
 		String[] cc = {turn.getCorporation().getPlayerEmail()};
-		email.send(to, cc, null, "StarCorp Turn Submission " + date, "", from, filename);
+		email.send(to, cc, null, "StarCorp Turn Submission", "", from, filename);
 		log.info("Submitted turn.");
 	}
 }

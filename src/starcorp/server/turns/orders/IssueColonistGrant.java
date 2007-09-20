@@ -16,8 +16,8 @@ import starcorp.common.entities.Corporation;
 import starcorp.common.turns.OrderReport;
 import starcorp.common.turns.TurnError;
 import starcorp.common.turns.TurnOrder;
-import starcorp.common.types.GalacticDate;
 import starcorp.common.types.PopulationClass;
+import starcorp.server.ServerConfiguration;
 
 /**
  * starcorp.server.turns.IssueColonistGrant
@@ -52,7 +52,7 @@ public class IssueColonistGrant extends AOrderProcessor {
 			grant.setAvailable(true);
 			grant.setColony(colony);
 			grant.setCredits(credit);
-			grant.setIssuedDate(GalacticDate.getCurrentDate());
+			grant.setIssuedDate(ServerConfiguration.getCurrentDate());
 			grant.setPopClass(popClass);
 			
 			entityStore.save(grant);

@@ -17,7 +17,7 @@ import starcorp.common.turns.OrderReport;
 import starcorp.common.turns.TurnError;
 import starcorp.common.turns.TurnOrder;
 import starcorp.common.types.AFacilityType;
-import starcorp.common.types.GalacticDate;
+import starcorp.server.ServerConfiguration;
 
 /**
  * starcorp.server.turns.IssueDevelopmentGrant
@@ -51,7 +51,7 @@ public class IssueDevelopmentGrant extends AOrderProcessor {
 			DevelopmentGrant grant = new DevelopmentGrant();
 			grant.setColony(colony);
 			grant.setGrant(credit);
-			grant.setIssuedDate(GalacticDate.getCurrentDate());
+			grant.setIssuedDate(ServerConfiguration.getCurrentDate());
 			grant.setTypeClass(type);
 			
 			entityStore.save(grant);

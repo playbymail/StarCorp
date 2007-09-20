@@ -26,6 +26,7 @@ import starcorp.common.types.Factory;
 import starcorp.common.types.IndustrialGoods;
 import starcorp.common.types.Items;
 import starcorp.common.types.ResourceGenerator;
+import starcorp.server.ServerConfiguration;
 import starcorp.server.entitystore.IEntityStore;
 
 /**
@@ -73,7 +74,7 @@ public class FacilityProcessor {
 		if(ColonyItem.count(items) < required) {
 			// attempt to buy from market
 			List<?> market = entityStore.listMarket(colony, types, 1);
-			MarketItem.BuyResult result = MarketItem.buy(market, required, owner.getCredits());
+			MarketItem.BuyResult result = MarketItem.buy(ServerConfiguration.getCurrentDate(), market, required, owner.getCredits());
 			if(result.quantityBought < required) {
 				// not enough - just add this to the colonies stockpile
 				Iterator<Items> i = result.bought.iterator();
