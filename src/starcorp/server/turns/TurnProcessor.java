@@ -10,7 +10,18 @@
  */
 package starcorp.server.turns;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.util.Iterator;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
+import org.dom4j.io.OutputFormat;
+import org.dom4j.io.SAXReader;
+import org.dom4j.io.XMLWriter;
+
 import starcorp.common.entities.Corporation;
 import starcorp.common.turns.Turn;
 import starcorp.common.turns.TurnError;
@@ -18,9 +29,10 @@ import starcorp.common.turns.TurnOrder;
 import starcorp.common.turns.TurnReport;
 import starcorp.common.types.GalacticDate;
 import starcorp.common.types.OrderType;
+import starcorp.common.util.SendEmail;
 import starcorp.server.ServerConfiguration;
+import starcorp.server.entitystore.HibernateStore;
 import starcorp.server.entitystore.IEntityStore;
-import starcorp.server.turns.orders.AOrderProcessor;
 
 /**
  * starcorp.server.turns.TurnProcessor
@@ -29,11 +41,80 @@ import starcorp.server.turns.orders.AOrderProcessor;
  * @version 16 Sep 2007
  */
 public class TurnProcessor {
-
-	private IEntityStore entityStore;
+	
+	private final Log log = LogFactory.getLog(TurnProcessor.class);
+	private final IEntityStore entityStore;
+	private final SendEmail sendEmail;
+	private final File reportsFolder;
+	
+	private int processed;
 	
 	public TurnProcessor(IEntityStore entityStore) {
 		this.entityStore = entityStore;
+		this.sendEmail = new SendEmail(ServerConfiguration.SMTP_HOST_NAME,ServerConfiguration.SMTP_PORT,ServerConfiguration.SMTP_AUTH_USER,ServerConfiguration.SMTP_AUTH_PASSWORD);
+		this.reportsFolder = new File(ServerConfiguration.REPORTS_FOLDER);
+		if(!reportsFolder.exists()) {
+			reportsFolder.mkdirs();
+		}
+	}
+	
+	private void processFolder(File folder) {
+		File[] turns = folder.listFiles();
+		SAXReader reader = new SAXReader();
+		for(int i = 0; i < turns.length; i++) {
+			if(turns[i].isDirectory()) {
+				processFolder(turns[i]);
+			}
+			else {
+				Turn turn = null;
+				try {
+					Document doc = reader.read(turns[i]);
+					turn = new Turn(doc.getRootElement().element("turn"));
+				}
+				catch(Exception e) {
+					log.warn("Error reading turn file " + turns[i].getName() + " because " + e.getMessage());
+				}
+				if(turn != null) {
+					try {
+						TurnReport report = process(turn);
+						GalacticDate date = ServerConfiguration.getCurrentDate();
+						Corporation corp = report.getTurn().getCorporation();
+						Document doc = DocumentHelper.createDocument();
+						report.toXML(doc.addElement("starcorp"));
+						String filename = ServerConfiguration.REPORTS_FOLDER + "/" + corp.getPlayerEmail() + "-turn-" + date.getMonth() + "-" +  date.getYear() + ".xml";
+						// TODO switch to compact format to save space after debugging
+						// OutputFormat format = OutputFormat.createCompactFormat();
+						OutputFormat format = OutputFormat.createPrettyPrint();
+						XMLWriter writer = new XMLWriter(
+							new FileWriter(filename), format
+						);
+						
+						writer.write(doc);
+						writer.close();
+						
+						String[] to = {corp.getPlayerName() + "<" + corp.getPlayerEmail() + ">"};
+						String subject = "Starcorp turn " + date.getMonth() + "." + date.getYear();
+						String message = "Please find your reports file attached.  Save to a convenient location and open it with your StarCorp client.";
+						String from = ServerConfiguration.SERVER_EMAIL_TURNS;
+						sendEmail.send(to, null, null, subject, message, from, filename);
+						turns[i].deleteOnExit();
+					}
+					catch(Exception e) {
+						log.error("Error sending report for " + turn + " because " + e.getMessage(),e);
+					}
+				}
+			}
+		}
+	}
+	
+	public void processTurns() {
+		log.info("Started processing turns.");
+		processed = 0;
+		File turnFolder = new File(ServerConfiguration.TURNS_FOLDER);
+		if(turnFolder.exists()) {
+			processFolder(turnFolder);
+		}
+		log.info("Finished processing turns.");
 	}
 	
 	public TurnReport process(Turn turn) {
@@ -72,6 +153,8 @@ public class TurnProcessor {
 				report.addPlayerEntities(entityStore.listShips(corp));
 			}
 		}
+		log.info("Processed turn from " + turn.getCorporation() + ". Order: " + turn.getOrders().size() + ". Errors: " + turn.getErrors().size());
+		processed++;
 		return report;
 	}
 	
@@ -80,7 +163,6 @@ public class TurnProcessor {
 		if(existing == null) {
 			corp.add(ServerConfiguration.SETUP_INITIAL_CREDITS,ServerConfiguration.getCurrentDate(),ServerConfiguration.SETUP_DESCRIPTION);
 			corp.setFoundedDate(ServerConfiguration.getCurrentDate());
-			corp.setLastTurnDate(ServerConfiguration.getCurrentDate());
 			entityStore.save(corp);
 			return corp;
 		}
@@ -106,5 +188,9 @@ public class TurnProcessor {
 		}
 		return error;
 		
+	}
+
+	public int getProcessed() {
+		return processed;
 	}
 }

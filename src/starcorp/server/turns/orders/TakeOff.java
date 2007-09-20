@@ -16,6 +16,8 @@ import starcorp.common.entities.Starship;
 import starcorp.common.turns.OrderReport;
 import starcorp.common.turns.TurnError;
 import starcorp.common.turns.TurnOrder;
+import starcorp.common.types.OrderType;
+import starcorp.server.turns.AOrderProcessor;
 
 /**
  * starcorp.server.turns.orders.TakeOff
@@ -62,6 +64,11 @@ public class TakeOff extends AOrderProcessor {
 		}
 		
 		return error;
+	}
+
+	@Override
+	public String getKey() {
+		return OrderType.TAKE_OFF;
 	}
 
 }

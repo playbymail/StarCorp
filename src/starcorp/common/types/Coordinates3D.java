@@ -121,4 +121,9 @@ public class Coordinates3D {
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		return "(" + x + " , " + y + " , " + z + ")";
+	}
+	
 }

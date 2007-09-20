@@ -21,20 +21,18 @@ import javax.mail.MessagingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dom4j.Document;
-import org.dom4j.DocumentHelper;
-import org.dom4j.Element;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
 
 import starcorp.common.entities.Corporation;
-import starcorp.common.mail.FetchEmail;
-import starcorp.common.mail.SendEmail;
-import starcorp.common.mail.FetchEmail.Attachment;
-import starcorp.common.mail.FetchEmail.IEmail;
-import starcorp.common.mail.FetchEmail.PlainTextEmail;
 import starcorp.common.turns.Turn;
 import starcorp.common.types.GalacticDate;
+import starcorp.common.util.FetchEmail;
+import starcorp.common.util.SendEmail;
+import starcorp.common.util.FetchEmail.Attachment;
+import starcorp.common.util.FetchEmail.IEmail;
+import starcorp.common.util.FetchEmail.PlainTextEmail;
 import starcorp.server.ServerConfiguration;
 
 
@@ -46,34 +44,33 @@ import starcorp.server.ServerConfiguration;
  */
 public class TurnFetcher {
 
-	public static void main(String[] args) {
-		new TurnFetcher().fetchTurns();
-	}
+	private final Log log = LogFactory.getLog(TurnFetcher.class);
 	
-	private Log log = LogFactory.getLog(TurnFetcher.class);
+	private final FetchEmail fetcher;
+	private final SendEmail sender;
 	
-	private FetchEmail fetcher;
-	private SendEmail sender;
-	
-	private File turnsFolder;
+	private final File turnsFolder;
+	private int fetched;
 	
 	public TurnFetcher() {
 		fetcher = new FetchEmail(ServerConfiguration.FETCHER_USER,ServerConfiguration.FETCHER_PASSWORD,ServerConfiguration.FETCHER_SERVER,ServerConfiguration.FETCHER_PROVIDER);
 		sender = new SendEmail(ServerConfiguration.SMTP_HOST_NAME,ServerConfiguration.SMTP_PORT,ServerConfiguration.SMTP_AUTH_USER,ServerConfiguration.SMTP_AUTH_PASSWORD);
 		
-		turnsFolder = new File("turns");
+		turnsFolder = new File(ServerConfiguration.TURNS_FOLDER);
 		if(!turnsFolder.exists())
 			turnsFolder.mkdirs();
 		
 	}
 	
 	public void fetchTurns() {
+		fetched = 0;
 		try {
 			List<IEmail> emails = fetcher.fetch();
 			log.info("Fetched " + emails.size() + " emails.");
 			Iterator<IEmail> i = emails.iterator();
 			while(i.hasNext()) {
-				handle(i.next());
+				if(handle(i.next()))
+					fetched++;
 			}
 		} catch (Exception e) {
 			log.fatal(e.getMessage(),e);
@@ -90,13 +87,15 @@ public class TurnFetcher {
 		}
 	}
 	
-	private void handle(IEmail email) {
+	private boolean handle(IEmail email) {
+		boolean saved = false;
 		if(email instanceof PlainTextEmail) {
 			forward(email);
 		}
-		else if(email.countAttachments() < 1 || !saveTurn(email)){
+		else if(email.countAttachments() < 1 || !(saved = saveTurn(email))){
 			forward(email);
 		}
+		return saved;
 	}
 	
 	private boolean saveTurn(IEmail email) {
@@ -111,7 +110,7 @@ public class TurnFetcher {
 				Turn turn = new Turn(doc.getRootElement().element("turn"));
 				Corporation corp = turn.getCorporation();
 				GalacticDate date = ServerConfiguration.getCurrentDate();
-				String filename = "turns/" + corp.getPlayerEmail() + "-turn-" + date.getMonth() + "-" +  date.getYear() + ".xml";
+				String filename = ServerConfiguration.TURNS_FOLDER + "/" + corp.getPlayerEmail() + "-turn-" + date.getMonth() + "-" +  date.getYear() + ".xml";
 				// TODO switch to compact format to save space after debugging
 				// OutputFormat format = OutputFormat.createCompactFormat();
 				OutputFormat format = OutputFormat.createPrettyPrint();
@@ -130,6 +129,10 @@ public class TurnFetcher {
 			}
 		}
 		return saved;
+	}
+
+	public int getFetched() {
+		return fetched;
 	}
 	
 }

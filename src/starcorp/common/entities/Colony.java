@@ -79,5 +79,9 @@ public class Colony extends ANamedEntity {
 		foundedDate.toXML(e.addElement("founded"));
 		return e;
 	}
+	@Override
+	public String toString() {
+		return super.toString() + " @ " + planet + " " + location;
+	}
 	
 }

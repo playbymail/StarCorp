@@ -117,7 +117,7 @@ public class GalacticDate {
 
 	@Override
 	public String toString() {
-		return month + "." + year;
+		return month + "." + year + " GY";
 	}
 
 	@Override

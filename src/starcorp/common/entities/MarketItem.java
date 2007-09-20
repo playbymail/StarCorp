@@ -138,5 +138,9 @@ public class MarketItem extends ABaseEntity {
 		soldDate.toXML(e.addElement("sold"));
 		return e;
 	}
+	@Override
+	public String toString() {
+		return item + " \u20a1 " + costPerItem + "ea. " + super.toString() + " @ " + colony;
+	}
 	
 }

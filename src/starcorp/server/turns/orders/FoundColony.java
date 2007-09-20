@@ -24,8 +24,10 @@ import starcorp.common.types.AFacilityType;
 import starcorp.common.types.ColonyHub;
 import starcorp.common.types.Coordinates2D;
 import starcorp.common.types.Items;
+import starcorp.common.types.OrderType;
 import starcorp.common.types.PlanetMapSquare;
 import starcorp.server.ServerConfiguration;
+import starcorp.server.turns.AOrderProcessor;
 
 /**
  * starcorp.server.turns.FoundColony
@@ -121,6 +123,10 @@ public class FoundColony extends AOrderProcessor {
 		}
 		
 		return error;
+	}
+	@Override
+	public String getKey() {
+		return OrderType.FOUND_COLONY;
 	}
 
 }

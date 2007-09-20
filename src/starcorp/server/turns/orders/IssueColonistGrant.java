@@ -16,8 +16,10 @@ import starcorp.common.entities.Corporation;
 import starcorp.common.turns.OrderReport;
 import starcorp.common.turns.TurnError;
 import starcorp.common.turns.TurnOrder;
+import starcorp.common.types.OrderType;
 import starcorp.common.types.PopulationClass;
 import starcorp.server.ServerConfiguration;
+import starcorp.server.turns.AOrderProcessor;
 
 /**
  * starcorp.server.turns.IssueColonistGrant
@@ -66,6 +68,10 @@ public class IssueColonistGrant extends AOrderProcessor {
 			
 		}
 		return error;
+	}
+	@Override
+	public String getKey() {
+		return OrderType.ISSUE_COLONIST_GRANT;
 	}
 
 }

@@ -8,7 +8,7 @@
  *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
  *  See the License for the specific language governing permissions and limitations under the License. 
  */
-package starcorp.common.mail;
+package starcorp.common.util;
 
 import java.security.Security;
 import java.util.Properties;
@@ -30,7 +30,7 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 /**
- * starcorp.common.mail.SendEmail
+ * starcorp.common.util.SendEmail
  *
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 19 Sep 2007

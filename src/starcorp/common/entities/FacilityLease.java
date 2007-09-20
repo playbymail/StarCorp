@@ -110,5 +110,9 @@ public class FacilityLease extends ABaseEntity {
 		usedDate.toXML(e.addElement("used"));
 		return e;
 	}
+	@Override
+	public String toString() {
+		return type.getKey() + " " + super.toString() + " @ " + colony;
+	}
 	
 }

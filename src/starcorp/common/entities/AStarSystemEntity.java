@@ -41,5 +41,10 @@ public abstract class AStarSystemEntity extends ANamedEntity {
 		location.toXML(e);
 		return e;
 	}
+
+	@Override
+	public String toString() {
+		return super.toString() + " @ " + system + " " + location;
+	}
 	
 }

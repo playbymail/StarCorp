@@ -167,4 +167,9 @@ public class ResourceDeposit extends ABaseEntity {
 		e.addAttribute("yield", String.valueOf(yield));
 		return e;
 	}
+
+	@Override
+	public String toString() {
+		return type.getKey() + " x " + totalQuantity + " " + super.toString() + " @ " + systemEntity + " " + location;
+	}
 }

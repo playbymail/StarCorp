@@ -158,4 +158,9 @@ public abstract class AColonists extends ABaseEntity {
 		return e;
 	}
 
+	@Override
+	public String toString() {
+		return population + " " + super.toString() + " @ " + colony;
+	}
+
 }

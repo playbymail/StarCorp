@@ -17,7 +17,9 @@ import starcorp.common.turns.OrderReport;
 import starcorp.common.turns.TurnError;
 import starcorp.common.turns.TurnOrder;
 import starcorp.common.types.Coordinates2D;
+import starcorp.common.types.OrderType;
 import starcorp.common.types.PlanetMapSquare;
+import starcorp.server.turns.AOrderProcessor;
 
 /**
  * starcorp.server.turns.orders.DockAtPlanet
@@ -80,6 +82,10 @@ public class DockAtPlanet extends AOrderProcessor {
 		
 		return error;
 		
+	}
+	@Override
+	public String getKey() {
+		return OrderType.DOCK_PLANET;
 	}
 
 }

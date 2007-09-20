@@ -17,6 +17,8 @@ import starcorp.common.turns.OrderReport;
 import starcorp.common.turns.TurnError;
 import starcorp.common.turns.TurnOrder;
 import starcorp.common.types.Coordinates3D;
+import starcorp.common.types.OrderType;
+import starcorp.server.turns.AOrderProcessor;
 
 /**
  * starcorp.server.turns.Jump
@@ -75,6 +77,10 @@ public class Jump extends AOrderProcessor {
 		}
 		
 		return error;
+	}
+	@Override
+	public String getKey() {
+		return OrderType.JUMP;
 	}
 
 }

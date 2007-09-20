@@ -129,5 +129,10 @@ public class Planet extends AStarSystemEntity {
 		}
 		return e;
 	}
+
+	@Override
+	public String toString() {
+		return super.toString() + (orbiting == null ? "" : " orbiting " + orbiting) + " " + atmosphereType.getKey() + " " + gravityRating;
+	}
 	
 }

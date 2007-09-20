@@ -16,6 +16,8 @@ import starcorp.common.entities.Starship;
 import starcorp.common.turns.OrderReport;
 import starcorp.common.turns.TurnError;
 import starcorp.common.turns.TurnOrder;
+import starcorp.common.types.OrderType;
+import starcorp.server.turns.AOrderProcessor;
 
 /**
  * starcorp.server.turns.LeaveOrbit
@@ -60,6 +62,10 @@ public class LeaveOrbit extends AOrderProcessor {
 		
 		return error;
 		
+	}
+	@Override
+	public String getKey() {
+		return OrderType.LEAVE_ORBIT;
 	}
 
 }

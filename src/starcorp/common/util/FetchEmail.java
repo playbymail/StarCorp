@@ -8,7 +8,7 @@
  *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
  *  See the License for the specific language governing permissions and limitations under the License. 
  */
-package starcorp.common.mail;
+package starcorp.common.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -27,7 +27,7 @@ import javax.mail.Session;
 import javax.mail.Store;
 
 /**
- * starcorp.common.mail.FetchEmail
+ * starcorp.common.util.FetchEmail
  *
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 20 Sep 2007

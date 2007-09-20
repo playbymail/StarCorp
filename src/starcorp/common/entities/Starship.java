@@ -339,6 +339,11 @@ public class Starship extends AStarSystemEntity {
 			i.next().toXML(eCargo.addElement("item"));
 		}
 		return e;
+	}
+
+	@Override
+	public String toString() {
+		return super.toString() + " [" + design + "}" + (planet == null ? "" : " " + planet) + (planetLocation == null ? "" : " " + planetLocation) + (colony == null ? "" : " " + colony);
 	} 
 
 }

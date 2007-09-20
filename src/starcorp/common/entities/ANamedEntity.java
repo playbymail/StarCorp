@@ -30,4 +30,9 @@ public abstract class ANamedEntity extends ABaseEntity {
 		return e;
 	}
 
+	@Override
+	public String toString() {
+		return name + " " + super.toString();
+	}
+
 }

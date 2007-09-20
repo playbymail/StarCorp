@@ -107,4 +107,9 @@ public class ColonyItem extends ABaseEntity {
 		item.toXML(e);
 		return e;
 	}
+
+	@Override
+	public String toString() {
+		return item + " for " + owner + " " + super.toString() + " @ " + colony;
+	}
 }

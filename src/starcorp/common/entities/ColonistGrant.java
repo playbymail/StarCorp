@@ -87,4 +87,8 @@ public class ColonistGrant extends ABaseEntity {
 		issuedDate.toXML(e.addElement("issued"));
 		return e;
 	}
+	@Override
+	public String toString() {
+		return popClass.getKey() + " \u20a1 " + credits + " " + super.toString() + " @ " + colony;
+	}
 }

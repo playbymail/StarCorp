@@ -198,7 +198,7 @@ public class PopulationProcessor {
 		workers.addCash(salaryPaid);
 	}
 	
-	public void payGrants(AColonists colonists) {
+	private void payGrants(AColonists colonists) {
 		ColonistGrant grant = entityStore.getColonistGrant(colonists.getColony(), colonists.getPopulation().getPopClass(), true);
 		if(grant != null) {
 			Corporation govt = grant.getColony().getGovernment();

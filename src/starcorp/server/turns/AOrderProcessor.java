@@ -8,15 +8,17 @@
  *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
  *  See the License for the specific language governing permissions and limitations under the License. 
  */
-package starcorp.server.turns.orders;
+package starcorp.server.turns;
 
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
 import starcorp.common.turns.TurnError;
 import starcorp.common.turns.TurnOrder;
+import starcorp.common.util.PackageExplorer;
 import starcorp.server.entitystore.IEntityStore;
 
 /**
@@ -27,8 +29,6 @@ import starcorp.server.entitystore.IEntityStore;
  */
 public abstract class AOrderProcessor {
 
-	private static ResourceBundle bundle = ResourceBundle.getBundle("starcorp.server.turns.orders.orderprocessors");
-	
 	private static Map<String, AOrderProcessor> processors = new HashMap<String, AOrderProcessor>();
 	
 	static {
@@ -36,23 +36,22 @@ public abstract class AOrderProcessor {
 	}
 	
 	private static void loadProcessors() {
-		Enumeration<String> keys = bundle.getKeys();
-		while(keys.hasMoreElements()) {
-			String key = keys.nextElement();
-			if(key.endsWith(".class")) {
-				String className = "starcorp.server.turns.orders." + bundle.getString(key);
-				AOrderProcessor processor;
-				try {
-					processor = (AOrderProcessor) Class.forName(className).newInstance();
-					processor.key = key.substring(0, key.indexOf(".class"));
-					processors.put(processor.getKey(), processor);
-				} catch (InstantiationException e) {
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-				} catch (ClassNotFoundException e) {
-					e.printStackTrace();
-				}
+		List<Class> classes;
+		try {
+			classes = PackageExplorer.getClassesForPackage("starcorp.server.turns.orders");
+		} catch (ClassNotFoundException e1) {
+			e1.printStackTrace();
+			return;
+		}
+		for(int i = 0; i < classes.size(); i++) {
+			AOrderProcessor processor;
+			try {
+				processor = (AOrderProcessor) classes.get(i).newInstance();
+				processors.put(processor.getKey(), processor);
+			} catch (InstantiationException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
 			}
 		}
 	}
@@ -61,18 +60,11 @@ public abstract class AOrderProcessor {
 		return processors.get(type);
 	}
 
-	private String key;
 	protected IEntityStore entityStore;
 	
 	public abstract TurnError process(TurnOrder order);
 
-	public String getKey() {
-		return key;
-	}
-
-	public void setKey(String key) {
-		this.key = key;
-	}
+	public abstract String getKey();
 
 	public IEntityStore getEntityStore() {
 		return entityStore;

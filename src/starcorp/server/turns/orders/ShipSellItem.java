@@ -25,7 +25,9 @@ import starcorp.common.types.CashTransaction;
 import starcorp.common.types.ColonyHub;
 import starcorp.common.types.Items;
 import starcorp.common.types.OrbitalDock;
+import starcorp.common.types.OrderType;
 import starcorp.server.ServerConfiguration;
+import starcorp.server.turns.AOrderProcessor;
 
 /**
  * starcorp.server.turns.BuildFacility
@@ -112,6 +114,11 @@ public class ShipSellItem extends AOrderProcessor {
 			order.setReport(report);
 		}
 		return error;
+	}
+
+	@Override
+	public String getKey() {
+		return OrderType.SHIP_SELL_ITEM;
 	}
 
 }

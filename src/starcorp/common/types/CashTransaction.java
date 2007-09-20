@@ -33,7 +33,7 @@ public class CashTransaction {
 	public static final String REDUNDANCY_PAY = "salary.redundancy";
 	public static final String SERVICE_CHARGE = "service.charge";
 	
-	protected static final ResourceBundle bundle = ResourceBundle.getBundle("cash");
+	protected static final ResourceBundle bundle = ResourceBundle.getBundle("starcorp.common.types.cash");
 	
 	public static String getDescription(String key, Object[] args) {
 		try {
@@ -120,6 +120,22 @@ public class CashTransaction {
 	}
 	public void setDate(GalacticDate date) {
 		this.date = date;
+	}
+
+	public String toString()
+	{
+	    final String TAB = "    ";
+	    
+	    String retValue = "";
+	    
+	    retValue = "CashTransaction ( "
+	        + super.toString() + TAB
+	        + "amount = " + this.amount + TAB
+	        + "description = " + this.description + TAB
+	        + "date = " + this.date + TAB
+	        + " )";
+	
+	    return retValue;
 	}
 	
 }

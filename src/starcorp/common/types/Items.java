@@ -136,4 +136,9 @@ public class Items {
 			return false;
 		return true;
 	}
+
+	@Override
+	public String toString() {
+		return quantity + " x " + type;
+	}
 }

@@ -55,5 +55,9 @@ public class Workers extends AColonists {
 	public Corporation getEmployer() {
 		return facility.getOwner();
 	}
+	@Override
+	public String toString() {
+		return super.toString() + " [Employer: " + facility + "]";
+	}
 	
 }

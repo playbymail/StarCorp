@@ -344,7 +344,7 @@ public class HibernateStore implements IEntityStore {
 	 */
 	public List<?> listColonistGrants(Corporation owner,
 			boolean openOnly) {
-		String q = "from ColonistGrant where owner = :owner";
+		String q = "from ColonistGrant grant left join grant.colony as col where col.government = :owner";
 		if(openOnly) {
 			q = q + " and available = true";
 		}

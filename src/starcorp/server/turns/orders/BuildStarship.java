@@ -20,7 +20,9 @@ import starcorp.common.turns.OrderReport;
 import starcorp.common.turns.TurnError;
 import starcorp.common.turns.TurnOrder;
 import starcorp.common.types.Items;
+import starcorp.common.types.OrderType;
 import starcorp.server.ServerConfiguration;
+import starcorp.server.turns.AOrderProcessor;
 
 /**
  * starcorp.server.turns.BuildStarship
@@ -99,6 +101,10 @@ public class BuildStarship extends AOrderProcessor {
 		}
 		return error;
 
+	}
+	@Override
+	public String getKey() {
+		return OrderType.BUILD_STARSHIP;
 	}
 
 }

@@ -101,4 +101,9 @@ public class Coordinates2D {
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		return "(" + x + " , " + y + ")";
+	}
+
 }

@@ -23,6 +23,9 @@ import starcorp.common.types.GalacticDate;
 public class ServerConfiguration {
 	private static final ResourceBundle bundle = ResourceBundle.getBundle("server");
 
+	public static final String REPORTS_FOLDER = bundle.getString("reports.folder");
+	public static final String TURNS_FOLDER = bundle.getString("turns.folder");
+	
 	public static final String FETCHER_USER = bundle.getString("fetcher.user");
 	public static final String FETCHER_PASSWORD = bundle.getString("fetcher.password");
 	public static final String FETCHER_SERVER = bundle.getString("fetcher.server");

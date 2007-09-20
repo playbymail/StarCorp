@@ -77,7 +77,7 @@
     				<set name="cargo" table="cargo" lazy="true">
     					<key column="ENTITY_ID"/>
     					<composite-element class="starcorp.common.types.Items">
-    						<property name="type"/>
+    						<property name="type" column="itemType"/>
     						<property name="quantity"/>
     					</composite-element>
     				</set>
@@ -91,7 +91,7 @@
 				<joined-subclass name="starcorp.common.entities.StellarAnomoly" table="anomolies">
     				<key column="ENTITY_ID"/>
     				<property name="description"/>
-    				<property name="event"/>
+    				<property name="event" column="eventType"/>
     			</joined-subclass> <!-- StellarAnomoly -->
     			
     		</joined-subclass> <!-- AStarSystemEntiy -->
@@ -146,7 +146,7 @@
     			<set name="hulls" table="ship_design_hulls" lazy="true">
     				<key column="ENTITY_ID"/>
     				<composite-element class="starcorp.common.types.Items">
-    					<property name="type"/>
+    					<property name="type" column="itemType"/>
     					<property name="quantity"/>
     				</composite-element>
     			</set>
@@ -154,7 +154,7 @@
     		
     		<joined-subclass name="starcorp.common.entities.StarSystem" table="star_system" lazy="true">
     			<key column="ENTITY_ID"/>
-    			<property name="type"/>
+    			<property name="type" column="systemType"/>
     			<component name="location">
     				<property name="x"/>
     				<property name="y"/>
@@ -179,8 +179,8 @@
     	<joined-subclass name="starcorp.common.entities.DevelopmentGrant" table="development_grants">
     		<key column="ENTITY_ID"/>
     		<many-to-one name="colony"/>
-    		<property name="type"/>
-    		<property name="grant"/>
+    		<property name="type" column="facilityType"/>
+    		<property name="grant" column="credits"/>
     		<property name="used"/>
     		<component name="issuedDate">
     			<property name="year" column="issuedYear"/>
@@ -195,7 +195,7 @@
     	<joined-subclass name="starcorp.common.entities.FacilityLease" table="facility_leases">
     		<key column="ENTITY_ID"/>
     		<many-to-one name="colony"/>
-    		<property name="type"/>
+    		<property name="type" column="facilityType"/>
     		<many-to-one name="licensee"/>
     		<property name="price"/>
     		<property name="used"/>
@@ -214,7 +214,7 @@
     		<many-to-one name="owner"/>
     		<many-to-one name="colony"/>
     		<component name="item">
-    			<property name="type"/>
+    			<property name="type" column="itemType"/>
     			<property name="quantity"/>
     		</component>
     	</joined-subclass> <!-- ColonyItem -->
@@ -226,7 +226,7 @@
     			<property name="x"/>
     			<property name="y"/>
     		</component>
-    		<property name="type"/>
+    		<property name="type" column="itemType"/>
     		<property name="totalQuantity"/>
     		<property name="yield"/>
     	</joined-subclass> <!-- ResourceDeposit -->
@@ -236,7 +236,7 @@
     		<many-to-one name="seller"/>
     		<many-to-one name="colony"/>
     		<component name="item">
-    			<property name="type"/>
+    			<property name="type" column="itemType"/>
     			<property name="quantity"/>
     		</component>
     		<property name="costPerItem"/>
@@ -254,7 +254,7 @@
     		<key column="ENTITY_ID"/>
     		<many-to-one name="owner"/>
     		<many-to-one name="colony"/>
-    		<property name="type"/>
+    		<property name="type" column="facilityType"/>
     		<property name="powered"/>
     		<property name="serviceCharge"/>
     		<property name="transactionCount"/>
@@ -262,14 +262,14 @@
     		<set name="itemQueue" table="facility_queue" lazy="true">
     			<key column="ENTITY_ID"/>
     			<composite-element class="starcorp.common.types.Items">
-    				<property name="type"/>
+    				<property name="type" column="itemType"/>
     				<property name="quantity"/>
     			</composite-element>
     		</set>
     		<set name="itemsCreated" table="facility_created" lazy="true">
     			<key column="ENTITY_ID"/>
     			<composite-element class="starcorp.common.types.Items">
-    				<property name="type"/>
+    				<property name="type" column="itemType"/>
     				<property name="quantity"/>
     			</composite-element>
     		</set>

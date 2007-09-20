@@ -19,8 +19,10 @@ import starcorp.common.turns.OrderReport;
 import starcorp.common.turns.TurnError;
 import starcorp.common.turns.TurnOrder;
 import starcorp.common.types.AItemType;
+import starcorp.common.types.OrderType;
 import starcorp.common.types.StarshipHulls;
 import starcorp.server.ServerConfiguration;
+import starcorp.server.turns.AOrderProcessor;
 
 /**
  * starcorp.server.turns.DesignShip
@@ -74,6 +76,10 @@ public class DesignShip extends AOrderProcessor {
 		}
 		
 		return error;
+	}
+	@Override
+	public String getKey() {
+		return OrderType.DESIGN_SHIP;
 	}
 
 }

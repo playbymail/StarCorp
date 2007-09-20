@@ -101,4 +101,9 @@ public class CoordinatesPolar {
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		return "(" + quadrant + " , " + orbit + ")";
+	}
+
 }

@@ -24,10 +24,10 @@ import org.dom4j.io.XMLWriter;
 
 import starcorp.client.ClientConfiguration;
 import starcorp.common.entities.Corporation;
-import starcorp.common.mail.SendEmail;
 import starcorp.common.turns.Turn;
 import starcorp.common.turns.TurnOrder;
 import starcorp.common.types.OrderType;
+import starcorp.common.util.SendEmail;
 
 /**
  * starcorp.client.turns.TurnSubmitter

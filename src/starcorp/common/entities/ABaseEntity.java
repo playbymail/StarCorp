@@ -93,4 +93,9 @@ public abstract class ABaseEntity {
 			return false;
 		return true;
 	}
+
+	@Override
+	public String toString() {
+		return "(" + getClass().getSimpleName() + ": " + ID + ")";
+	}
 }
