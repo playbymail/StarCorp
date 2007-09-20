@@ -16,7 +16,6 @@ import java.util.Set;
 
 import org.dom4j.Element;
 
-import starcorp.common.types.Coordinates2D;
 import starcorp.common.types.GalacticDate;
 import starcorp.common.types.Items;
 import starcorp.common.types.StarshipHulls;

@@ -52,7 +52,7 @@ public abstract class ABaseEntity {
 	
 	public Element toBasicXML(Element parent) {
 		Element root = parent.addElement("entity");
-		root.addAttribute("ID", String.valueOf("ID"));
+		root.addAttribute("ID", String.valueOf(ID));
 		root.addAttribute("class", getClass().getSimpleName());
 		return root;
 	}

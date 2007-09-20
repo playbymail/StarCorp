@@ -65,11 +65,15 @@ public class Corporation extends ANamedEntity {
 		p.addAttribute("name", playerName);
 		p.addAttribute("password", playerPassword);
 		root.addAttribute("credits", String.valueOf(credits));
-		foundedDate.toXML(root.addElement("founded"));
-		lastTurnDate.toXML(root.addElement("last-turn"));
-		Element e = root.addElement("transactions");
-		for(Iterator<CashTransaction> i = transactions.iterator(); i.hasNext();) {
-			i.next().toXML(e);
+		if(foundedDate != null)
+			foundedDate.toXML(root.addElement("founded"));
+		if(lastTurnDate != null)
+			lastTurnDate.toXML(root.addElement("last-turn"));
+		if(transactions.size() > 0) {
+			Element e = root.addElement("transactions");
+			for(Iterator<CashTransaction> i = transactions.iterator(); i.hasNext();) {
+				i.next().toXML(e);
+			}
 		}
 		return root;
 	}

@@ -129,6 +129,36 @@ public class GalacticDate {
 	public void setMonth(int month) {
 		this.month = month;
 	}
+
+	@Override
+	public String toString() {
+		return month + "." + year;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + month;
+		result = prime * result + year;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		final GalacticDate other = (GalacticDate) obj;
+		if (month != other.month)
+			return false;
+		if (year != other.year)
+			return false;
+		return true;
+	}
 	
 	
 }

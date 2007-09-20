@@ -12,8 +12,6 @@ package starcorp.common.entities;
 
 import org.dom4j.Element;
 
-import starcorp.common.types.AEventType;
-
 
 /**
  * starcorp.common.entities.Worker

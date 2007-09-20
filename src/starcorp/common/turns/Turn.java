@@ -58,16 +58,21 @@ public class Turn {
 		Element root = parent.addElement("turn");
 		corporation.toFullXML(root.addElement("corporation"));
 		submittedDate.toXML(root.addElement("submitted"));
-		processedDate.toXML(root.addElement("processed"));
-		Element eOrders = root.addElement("orders");
-		eOrders.addAttribute("size", String.valueOf(orders.size()));
-		for(int i = 0; i < orders.size(); i++) {
-			orders.get(i).toXML(eOrders);
+		if(processedDate != null)
+			processedDate.toXML(root.addElement("processed"));
+		if(orders.size() > 0) {
+			Element eOrders = root.addElement("orders");
+			eOrders.addAttribute("size", String.valueOf(orders.size()));
+			for(int i = 0; i < orders.size(); i++) {
+				orders.get(i).toXML(eOrders);
+			}
 		}
-		Element eErrors = root.addElement("errors");
-		eErrors.addAttribute("size", String.valueOf(errors.size()));
-		for(int i = 0; i < errors.size(); i++) {
-			errors.get(i).toXML(eErrors);
+		if(errors.size() > 0) {
+			Element eErrors = root.addElement("errors");
+			eErrors.addAttribute("size", String.valueOf(errors.size()));
+			for(int i = 0; i < errors.size(); i++) {
+				errors.get(i).toXML(eErrors);
+			}
 		}
 		return root;
 	}

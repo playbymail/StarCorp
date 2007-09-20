@@ -13,7 +13,6 @@ package starcorp.common.entities;
 import org.dom4j.Element;
 
 import starcorp.common.types.AEventType;
-import starcorp.common.types.Coordinates3D;
 
 /**
  * starcorp.common.entities.StellarAnomoly

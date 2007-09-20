@@ -43,8 +43,6 @@ public class TurnOrder {
 	
 	public TurnOrder(Element e) {
 		this.type = OrderType.getType(e.attributeValue("type"));
-		this.corp = new Corporation();
-		this.corp.readXML(e.element("corp").element("entity"));
 		for(Iterator<?> i = e.elementIterator("order-arg"); i.hasNext();) {
 			Element arg = (Element) i.next();
 			args.set(Integer.parseInt(arg.attributeValue("position")), arg.getTextTrim());
@@ -57,7 +55,6 @@ public class TurnOrder {
 	
 	public Element toXML(Element parent) {
 		Element root = parent.addElement("order");
-		corp.toFullXML(root.addElement("corp"));
 		root.addAttribute("type", type.getKey());
 		for(int i = 0; i < args.size(); i++) {
 			Element e = root.addElement("order-arg");
