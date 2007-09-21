@@ -36,7 +36,7 @@ public class Echo extends ACommand {
 
 	@Override
 	public String getHelpText() {
-		return "Prints out whatever is provided as an argument.";
+		return "echo [text]\n\nPrints out whatever is provided as an argument.";
 	}
 
 }

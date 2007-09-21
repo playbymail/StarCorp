@@ -10,7 +10,6 @@
  */
 package starcorp.common.entities;
 
-import java.util.Iterator;
 import java.util.List;
 
 import org.dom4j.Element;
@@ -28,9 +27,8 @@ public abstract class AColonists extends ABaseEntity {
 
 	public static int countColonists(List<?> colonists) {
 		int totalQty = 0;
-		Iterator<?> i = colonists.iterator();
-		while(i.hasNext()) {
-			AColonists colonist = (AColonists) i.next();
+		for(Object o : colonists) {
+			AColonists colonist = (AColonists) o;
 			totalQty += colonist.getQuantity();
 		}
 		return totalQty;
@@ -39,9 +37,8 @@ public abstract class AColonists extends ABaseEntity {
 	public static double getAverageHappiness(List<?> colonists) {
 		int totalQty = 0;
 		double totalHappiness = 0.0;
-		Iterator<?> i = colonists.iterator();
-		while(i.hasNext()) {
-			AColonists colonist = (AColonists) i.next();
+		for(Object o : colonists) {
+			AColonists colonist = (AColonists) o;
 			totalQty += colonist.getQuantity();
 			totalHappiness += (colonist.getQuantity() * colonist.getHappiness());
 		}

@@ -27,9 +27,8 @@ public class ColonyItem extends ABaseEntity {
 
 	public static int count(List<?> items) {
 		int count = 0;
-		Iterator<?> i = items.iterator();
-		while(i.hasNext()) {
-			count += ((ColonyItem)i.next()).getQuantity();
+		for(Object o : items) {
+			count += ((ColonyItem)o).getQuantity();
 		}
 		return count;
 	}

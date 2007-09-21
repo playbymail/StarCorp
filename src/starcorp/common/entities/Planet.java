@@ -19,6 +19,7 @@ import org.dom4j.Element;
 import starcorp.common.types.AtmosphereType;
 import starcorp.common.types.Coordinates2D;
 import starcorp.common.types.PlanetMapSquare;
+import starcorp.common.types.TerrainType;
 
 /**
  * starcorp.common.entities.Planet
@@ -33,7 +34,20 @@ public class Planet extends AStarSystemEntity {
 	private int gravityRating;
 	private Set<PlanetMapSquare> map = new HashSet<PlanetMapSquare>();
 	
+	public void add(PlanetMapSquare sq) {
+		map.add(sq);
+	}
+	
+	public TerrainType getTerrain(Coordinates2D location) {
+		PlanetMapSquare sq = get(location);
+		if(sq == null) {
+			return null;
+		}
+		return sq.getTerrainType();
+	}
 	public PlanetMapSquare get(Coordinates2D location) {
+		if(location.getX() < 0 || location.getY() < 0)
+			return null;
 		Iterator<PlanetMapSquare> i = map.iterator();
 		while(i.hasNext()) {
 			PlanetMapSquare sq = i.next();
@@ -64,7 +78,7 @@ public class Planet extends AStarSystemEntity {
 	}
 	
 	public String getAtmosphereType() {
-		return atmosphereType.getKey();
+		return atmosphereType == null ? null : atmosphereType.getKey();
 	}
 	
 	public void setAtmosphereType(String key) {
@@ -132,7 +146,7 @@ public class Planet extends AStarSystemEntity {
 
 	@Override
 	public String toString() {
-		return super.toString() + (orbiting == null ? "" : " orbiting " + orbiting) + " " + atmosphereType.getKey() + " " + gravityRating;
+		return super.toString() + (orbiting == null ? "" : " orbiting " + orbiting.getName()) + " " + (atmosphereType == null ? "" : atmosphereType.getKey()) + " " + gravityRating;
 	}
 	
 }

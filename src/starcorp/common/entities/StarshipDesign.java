@@ -16,6 +16,7 @@ import java.util.Set;
 
 import org.dom4j.Element;
 
+import starcorp.common.types.AItemType;
 import starcorp.common.types.GalacticDate;
 import starcorp.common.types.Items;
 import starcorp.common.types.StarshipHulls;
@@ -296,6 +297,24 @@ public class StarshipDesign extends ANamedEntity {
 	}
 	public void setOwner(Corporation owner) {
 		this.owner = owner;
+	}
+	
+	public void addHulls(String hullType) {
+		Items items = getHulls(hullType);
+		if(items == null) {
+			items = new Items();
+			items.setType(hullType);
+			hulls.add(items);
+		}
+		items.add(1);
+	}
+	
+	public Items getHulls(String hullType) {
+		StarshipHulls type = (StarshipHulls) AItemType.getType(hullType);
+		if(type == null) {
+			return null;
+		}
+		return getHulls(type);
 	}
 	
 	public Items getHulls(StarshipHulls hullType) {

@@ -63,6 +63,8 @@ public class AtmosphereType extends ABaseType {
 	 * @return
 	 */
 	public static AtmosphereType getType(String key) {
+		if(key == null)
+			return null;
 		return types.get(key);
 	}
 	

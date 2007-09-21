@@ -10,17 +10,12 @@
  */
 package starcorp.server.turns.orders;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import starcorp.common.entities.Corporation;
 import starcorp.common.entities.StarshipDesign;
 import starcorp.common.turns.OrderReport;
 import starcorp.common.turns.TurnError;
 import starcorp.common.turns.TurnOrder;
-import starcorp.common.types.AItemType;
 import starcorp.common.types.OrderType;
-import starcorp.common.types.StarshipHulls;
 import starcorp.server.ServerConfiguration;
 import starcorp.server.turns.AOrderProcessor;
 
@@ -35,46 +30,28 @@ public class DesignShip extends AOrderProcessor {
 	@Override
 	public TurnError process(TurnOrder order) {
 		TurnError error = null;
-		Corporation corp = order.getCorp();
 		int max = order.size();
 		String name = order.get(0);
-		List<StarshipHulls> hullTypes = new ArrayList<StarshipHulls>(); 
+		Corporation corp = order.getCorp();
+		StarshipDesign design = new StarshipDesign();
+		design.setDesignDate(ServerConfiguration.getCurrentDate());
+		design.setName(name);
+		design.setOwner(corp);
 		for(int i = 1; i < max; i++) {
-			String s = order.get(i);
-			AItemType type = AItemType.getType(s);
-			if(type instanceof StarshipHulls) {
-				hullTypes.add((StarshipHulls)type);
-			}
+			design.addHulls(order.get(i));
 		}
 		
-		if(name == null || hullTypes.size() < 1) {
-			error = new TurnError(TurnError.INVALID_SHIP_DESIGN);
+		if(design.isValid()) {
+			entityStore.save(design);
+			
+			OrderReport report = new OrderReport(order);
+			report.add(name);
+			report.add(design.getID());
+			order.setReport(report);
 		}
 		else {
-			StarshipDesign design = new StarshipDesign();
-			design.setDesignDate(ServerConfiguration.getCurrentDate());
-			design.setName(name);
-			design.setOwner(corp);
-			Iterator<StarshipHulls> i = hullTypes.iterator();
-			while(i.hasNext()) {
-				StarshipHulls hull = i.next();
-				design.addHulls(hull, 1);
-			}
-			
-			if(design.isValid()) {
-				entityStore.save(design);
-				
-				OrderReport report = new OrderReport(order);
-				report.add(name);
-				report.add(design.getID());
-				order.setReport(report);
-			}
-			else {
-				error = new TurnError(TurnError.INVALID_SHIP_DESIGN);
-			}
-			
+			error = new TurnError(TurnError.INVALID_SHIP_DESIGN);
 		}
-		
 		return error;
 	}
 	@Override

@@ -8,36 +8,50 @@
  *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
  *  See the License for the specific language governing permissions and limitations under the License. 
  */
-package starcorp.server.shell.commands;
+package starcorp.server.setup.planets;
 
-import starcorp.server.shell.ACommand;
+import starcorp.common.types.TerrainType;
+import starcorp.server.setup.APlanetTemplate;
 
 /**
- * starcorp.server.shell.commands.Quit
+ * starcorp.server.setup.planets.Oceanic
  *
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 20 Sep 2007
  */
-public class Quit extends ACommand {
+public class Oceanic extends APlanetTemplate {
 
-	/* (non-Javadoc)
-	 * @see starcorp.server.shell.ACommand#process()
-	 */
+	private static final int[] atmospheresChance = {
+		70,
+		1,
+		10,
+		5,
+		15,
+		4,
+		0
+	};
 	@Override
-	public void process() throws Exception {
-		out.println("Bye!");
-		out.flush();
-		System.exit(0);
+	protected String getDefaultAtmosphere() {
+		return "green";
 	}
 
 	@Override
-	public String getName() {
-		return "quit";
+	protected int[] getAtmosphereChances() {
+		return atmospheresChance;
 	}
 
 	@Override
-	public String getHelpText() {
-		return "quit\n\nExits the server shell.";
+	protected int getTerrainChance(TerrainType terrain) {
+		String key = terrain.getKey();
+		if("water".equals(key)) {
+			return 100;
+		}
+		return 0;
+	}
+	
+	@Override
+	protected String getDefaultTerrain() {
+		return "water";
 	}
 
 }

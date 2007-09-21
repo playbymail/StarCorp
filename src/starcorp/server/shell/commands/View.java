@@ -10,24 +10,25 @@
  */
 package starcorp.server.shell.commands;
 
-import java.util.Iterator;
+import java.io.StringWriter;
 
+import starcorp.common.entities.ABaseEntity;
 import starcorp.server.shell.ACommand;
 
 /**
- * starcorp.server.shell.commands.Help
+ * starcorp.server.shell.commands.View
  *
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 20 Sep 2007
  */
-public class Help extends ACommand {
+public class View extends ACommand {
 
 	/* (non-Javadoc)
 	 * @see starcorp.server.shell.ACommand#getHelpText()
 	 */
 	@Override
 	public String getHelpText() {
-		return "help\nhelp [command]\n\nPrints command help or a list of commands if command is blank or not found.";
+		return "view (Entity Class) (ID) (xml?)\n\nPrints out the specified entity.  If the third parameter is supplied and is \"true\" then the output is done in xml format.";
 	}
 
 	/* (non-Javadoc)
@@ -35,7 +36,7 @@ public class Help extends ACommand {
 	 */
 	@Override
 	public String getName() {
-		return "help";
+		return "view";
 	}
 
 	/* (non-Javadoc)
@@ -43,33 +44,27 @@ public class Help extends ACommand {
 	 */
 	@Override
 	public void process() throws Exception {
-		ACommand command = null;
-		String arg = get(0);
-		if(arg != null) {
-			command = parser.getCommand(arg);
-		}
-		if(command == null) {
-			if(arg != null) {
-				out.println("Command " + arg + " not found.");
-			}
-			out.println("List of commands. Type help [command] for further help.");
-			Iterator<String> i = parser.listCommands();
-			int count = 0;
-			while(i.hasNext()) {
-				if(count % 5 == 4) {
-					out.println(i.next());
-				}
-				else {
-					out.print(i.next() + "   ");
-				}
-				count++;
-			}
-			out.println();
+		String entityClass = get(0);
+		int ID = getAsInt(1);
+		boolean xml = isTrue(2);
+		if(entityClass == null || ID == 0) {
+			out.print("Invalid arguments");
 		}
 		else {
-			out.println(command.getHelpText());
+			String className = "starcorp.common.entities." + entityClass;
+			Class clazz = Class.forName(className);
+			ABaseEntity entity = entityStore.load(clazz, ID);
+			if(xml) {
+				StringWriter sw = new StringWriter();
+				entity.printXML(sw);
+				out.println(sw.toString());
+			}
+			else {
+				out.println(entity);
+			}
+			out.flush();
 		}
-		out.flush();
+
 	}
 
 }

@@ -48,6 +48,10 @@ public abstract class ACommand {
 		this.entityStore = entityStore;
 	}
 	
+	protected int count() {
+		return args.length;
+	}
+	
 	protected String get(int index) {
 		if(index >= args.length)
 			return null;
@@ -55,7 +59,8 @@ public abstract class ACommand {
 	}
 	
 	protected int getAsInt(int index) {
-		if(index >= args.length)
+		String s = get(index);
+		if(s == null)
 			return 0;
 		try {
 			return Integer.parseInt(args[index]);
@@ -63,6 +68,13 @@ public abstract class ACommand {
 		catch(NumberFormatException e) {
 			return 0;
 		}
+	}
+	
+	protected boolean isTrue(int index) {
+		String s = get(index);
+		if(s == null)
+			return false;
+		return "true".equalsIgnoreCase(s);
 	}
 	
 	protected String concat(int begin) {

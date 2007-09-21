@@ -26,6 +26,11 @@ public class Coordinates2D {
 		
 	}
 	
+	public Coordinates2D(Coordinates2D other) {
+		this.x = other.x;
+		this.y = other.y;
+	}
+	
 	public Coordinates2D(int x, int y) {
 		this.x = x;
 		this.y = y;
@@ -36,6 +41,38 @@ public class Coordinates2D {
 		this.y = Integer.parseInt(e.attributeValue("y","0"));
 	}
 	
+	public Coordinates2D north() {
+		return new Coordinates2D(x,y+1);
+	}
+	
+	public Coordinates2D south() {
+		return new Coordinates2D(x,y-1);
+	}
+
+	public Coordinates2D east() {
+		return new Coordinates2D(x+1,y);
+	}
+
+	public Coordinates2D west() {
+		return new Coordinates2D(x-1,y);
+	}
+
+	public Coordinates2D northeast() {
+		return new Coordinates2D(x+1,y+1);
+	}
+
+	public Coordinates2D southeast() {
+		return new Coordinates2D(x+1,y-1);
+	}
+
+	public Coordinates2D northwest() {
+		return new Coordinates2D(x-1,y+1);
+	}
+
+	public Coordinates2D southwest() {
+		return new Coordinates2D(x-1,y-1);
+	}
+
 	public Element toXML(Element parent) {
 		parent.addAttribute("x", String.valueOf(x));
 		parent.addAttribute("y", String.valueOf(y));

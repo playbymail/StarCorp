@@ -77,7 +77,8 @@ public class Shell {
 		}
 		try {
 			command.process();
-		} catch (Exception e) {
+		} catch (Throwable e) {
+			System.out.println(e.getClass().getSimpleName() + ": " + e.getMessage());
 			log.error(e.getMessage(),e);
 		}
 	}

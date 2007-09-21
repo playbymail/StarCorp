@@ -31,7 +31,6 @@ import starcorp.common.types.GalacticDate;
 import starcorp.common.types.OrderType;
 import starcorp.common.util.SendEmail;
 import starcorp.server.ServerConfiguration;
-import starcorp.server.entitystore.HibernateStore;
 import starcorp.server.entitystore.IEntityStore;
 
 /**

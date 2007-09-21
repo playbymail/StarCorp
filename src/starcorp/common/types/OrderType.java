@@ -67,11 +67,11 @@ public class OrderType extends ABaseType {
 	}
 	
 	public static void main(String[] args) {
-		System.out.println("|| *Key* || *Name* ||");
+		System.out.println("|| *Key* || *Name* || *Arguments* ||");
 		Iterator<String> i = types.keySet().iterator();
 		while(i.hasNext()) {
 			OrderType type = types.get(i.next());
-			System.out.println("|| " + type.getKey() + " || " + type.getName() + " ||");
+			System.out.println("|| " + type.getKey() + " || " + type.getName() + " || " + type.getArgumentDescriptions() + " ||");
 		}
 	}
 	
@@ -92,6 +92,8 @@ public class OrderType extends ABaseType {
 	 * @return
 	 */
 	public static OrderType getType(String key) {
+		if(key == null)
+			return null;
 		return types.get(key);
 	}
 	
@@ -131,5 +133,9 @@ public class OrderType extends ABaseType {
 
 	public String getDescription(List<String> args) {
 		return MessageFormat.format(getResource(this,"desc"), args.toArray());
+	}
+	
+	public String getArgumentDescriptions() {
+		return getResource(this,"args");
 	}
 }

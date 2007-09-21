@@ -31,7 +31,7 @@ public class Turns extends ACommand {
 	 */
 	@Override
 	public String getHelpText() {
-		return "Fetches turns using the TurnFetcher and processes the turns using the TurnProcessor.";
+		return "turns\n\nFetches turns using the TurnFetcher and processes the turns using the TurnProcessor.";
 	}
 
 	/* (non-Javadoc)

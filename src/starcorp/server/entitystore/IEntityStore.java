@@ -65,6 +65,11 @@ public interface IEntityStore {
 	
 	public abstract ABaseEntity load(Class<?> entityClass, int ID);
 	public abstract ABaseEntity save(ABaseEntity entity);
+	public abstract void delete(Class<?> entityClass, int ID);
+	
+	public abstract List<?> query(String hql);
+	
+	public abstract List<?> list(Class<?> entityClass);
 	
 	public abstract List<?> listSystems(Coordinates3D origin, int range);
 	

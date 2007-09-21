@@ -56,6 +56,7 @@ public class TurnSubmitter {
 				turn.add(order);
 			}
 			submit(turn);
+			System.out.println("Done");
 		}
 		catch(Exception e) {
 			e.printStackTrace();

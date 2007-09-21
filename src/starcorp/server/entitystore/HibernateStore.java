@@ -659,4 +659,18 @@ public class HibernateStore implements IEntityStore {
 		return (Corporation) loadObject(prepareQuery(q, map));
 	}
 
+	public List<?> list(Class<?> entityClass) {
+		String q = "from " + entityClass.getSimpleName();
+		return listObject(prepareQuery(q, null));
+	}
+
+	public void delete(Class<?> entityClass, int ID) {
+		getSession().delete(loadObject(entityClass, ID));
+		commit();
+	}
+
+	public List<?> query(String hql) {
+		return listObject(prepareQuery(hql, null));
+	}
+
 }

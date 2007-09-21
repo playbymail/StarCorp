@@ -33,7 +33,7 @@
     		<key column="ENTITY_ID"/>
     		<property name="name"/>
     		
-    		<joined-subclass name="starcorp.common.entities.AStarSystemEntity" table="star_systems">
+    		<joined-subclass name="starcorp.common.entities.AStarSystemEntity" table="system_entities">
     			<key column="ENTITY_ID"/>
     			<many-to-one name="system"/>
     			<component name="location">
@@ -41,12 +41,14 @@
     				<property name="orbit"/>
     			</component>
     			
-    			<joined-subclass name="starcorp.common.entities.AsteroidField" table="asteroids">
+    			<joined-subclass name="starcorp.common.entities.AsteroidField" table="asteroid_fields">
     				<key column="ENTITY_ID"/>
+    				<property name="hazardLevel"/>
     			</joined-subclass> <!-- AsteroidField -->
     			
     			<joined-subclass name="starcorp.common.entities.GasField" table="gas_fields">
     				<key column="ENTITY_ID"/>
+    				<property name="hazardLevel"/>
     			</joined-subclass> <!-- GasField -->
     			
     			<joined-subclass name="starcorp.common.entities.Planet" table="planets">
@@ -54,7 +56,7 @@
 					<many-to-one name="orbiting"/>
 					<property name="atmosphereType"/>
 					<property name="gravityRating"/>
-					<set name="map" table="planet_map" lazy="true">
+					<set name="map" table="planet_map" lazy="false">
     					<key column="ENTITY_ID"/>
     					<composite-element class="starcorp.common.types.PlanetMapSquare">
     						<property name="x"/>
@@ -74,7 +76,7 @@
     					<property name="x"/>
     					<property name="y"/>
     				</component>
-    				<set name="cargo" table="cargo" lazy="true">
+    				<set name="cargo" table="cargo" lazy="false">
     					<key column="ENTITY_ID"/>
     					<composite-element class="starcorp.common.types.Items">
     						<property name="type" column="itemType"/>
@@ -88,9 +90,9 @@
     				<property name="timeUnitsUsed"/>
     			</joined-subclass> <!-- Starship -->
 				
-				<joined-subclass name="starcorp.common.entities.StellarAnomoly" table="anomolies">
+				<joined-subclass name="starcorp.common.entities.StellarAnomoly" table="stellar_anomolies">
     				<key column="ENTITY_ID"/>
-    				<property name="description"/>
+    				<property name="description" column="anomolyDescription"/>
     				<property name="event" column="eventType"/>
     			</joined-subclass> <!-- StellarAnomoly -->
     			
@@ -125,7 +127,7 @@
     				<property name="year" column="lastTurnYear"/>
     				<property name="month" column="lastTurnMonth"/>
     			</component>
-    			<set name="transactions" table="cash_transactions" lazy="true">
+    			<set name="transactions" table="cash_transactions" lazy="false">
     				<key column="ENTITY_ID"/>
     				<composite-element class="starcorp.common.types.CashTransaction">
     					<property name="amount"/>
@@ -136,14 +138,14 @@
     			</set>
     		</joined-subclass> <!-- Corporation -->
     		
-    		<joined-subclass name="starcorp.common.entities.StarshipDesign" table="ship_designs" lazy="true">
+    		<joined-subclass name="starcorp.common.entities.StarshipDesign" table="ship_designs" lazy="false">
     			<key column="ENTITY_ID"/>
     			<many-to-one name="owner"/>
     			<component name="designDate">
     				<property name="year" column="designYear"/>
     				<property name="month" column="designMonth"/>
     			</component>
-    			<set name="hulls" table="ship_design_hulls" lazy="true">
+    			<set name="hulls" table="ship_design_hulls" lazy="false">
     				<key column="ENTITY_ID"/>
     				<composite-element class="starcorp.common.types.Items">
     					<property name="type" column="itemType"/>
@@ -152,7 +154,7 @@
     			</set>
     		</joined-subclass> <!-- StarshipDesign -->
     		
-    		<joined-subclass name="starcorp.common.entities.StarSystem" table="star_system" lazy="true">
+    		<joined-subclass name="starcorp.common.entities.StarSystem" table="star_system" lazy="false">
     			<key column="ENTITY_ID"/>
     			<property name="type" column="systemType"/>
     			<component name="location">
@@ -259,14 +261,14 @@
     		<property name="serviceCharge"/>
     		<property name="transactionCount"/>
     		<property name="open"/>
-    		<set name="itemQueue" table="facility_queue" lazy="true">
+    		<set name="itemQueue" table="facility_queue" lazy="false">
     			<key column="ENTITY_ID"/>
     			<composite-element class="starcorp.common.types.Items">
     				<property name="type" column="itemType"/>
     				<property name="quantity"/>
     			</composite-element>
     		</set>
-    		<set name="itemsCreated" table="facility_created" lazy="true">
+    		<set name="itemsCreated" table="facility_created" lazy="false">
     			<key column="ENTITY_ID"/>
     			<composite-element class="starcorp.common.types.Items">
     				<property name="type" column="itemType"/>

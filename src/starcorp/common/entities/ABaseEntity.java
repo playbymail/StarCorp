@@ -10,9 +10,15 @@
  */
 package starcorp.common.entities;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.sql.Timestamp;
 
+import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
+import org.dom4j.io.OutputFormat;
+import org.dom4j.io.XMLWriter;
 
 /**
  * starcorp.common.entities.BaseEntity
@@ -97,5 +103,14 @@ public abstract class ABaseEntity {
 	@Override
 	public String toString() {
 		return "(" + getClass().getSimpleName() + ": " + ID + ")";
+	}
+	
+	public void printXML(Writer out) throws IOException {
+		OutputFormat format = OutputFormat.createPrettyPrint();
+		XMLWriter writer = new XMLWriter(out,format);
+		Document doc = DocumentHelper.createDocument();
+		Element root = doc.addElement("starcorp");
+		writer.write(toFullXML(root));
+		writer.close();
 	}
 }

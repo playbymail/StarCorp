@@ -13,31 +13,47 @@ package starcorp.server.shell.commands;
 import starcorp.server.shell.ACommand;
 
 /**
- * starcorp.server.shell.commands.Quit
+ * starcorp.server.shell.commands.Delete
  *
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 20 Sep 2007
  */
-public class Quit extends ACommand {
+public class Delete extends ACommand {
+
+	/* (non-Javadoc)
+	 * @see starcorp.server.shell.ACommand#getHelpText()
+	 */
+	@Override
+	public String getHelpText() {
+		return "del (Entity Class) (ID)\n\nDeletes the specified entity (and all child entities associated with it).";
+	}
+
+	/* (non-Javadoc)
+	 * @see starcorp.server.shell.ACommand#getName()
+	 */
+	@Override
+	public String getName() {
+		return "del";
+	}
 
 	/* (non-Javadoc)
 	 * @see starcorp.server.shell.ACommand#process()
 	 */
 	@Override
 	public void process() throws Exception {
-		out.println("Bye!");
-		out.flush();
-		System.exit(0);
-	}
+		String entityClass = get(0);
+		int ID = getAsInt(1);
+		if(entityClass == null || ID == 0) {
+			out.print("Invalid arguments");
+		}
+		else {
+			String className = "starcorp.common.entities." + entityClass;
+			Class clazz = Class.forName(className);
+			entityStore.delete(clazz, ID);
+			out.println("Entity "+ ID +" deleted.");
+			out.flush();
+		}
 
-	@Override
-	public String getName() {
-		return "quit";
-	}
-
-	@Override
-	public String getHelpText() {
-		return "quit\n\nExits the server shell.";
 	}
 
 }

@@ -10,34 +10,43 @@
  */
 package starcorp.server.shell.commands;
 
+import starcorp.common.types.PopulationClass;
 import starcorp.server.shell.ACommand;
 
 /**
- * starcorp.server.shell.commands.Quit
+ * starcorp.server.shell.commands.Population
  *
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 20 Sep 2007
  */
-public class Quit extends ACommand {
+public class Population extends ACommand {
+
+	/* (non-Javadoc)
+	 * @see starcorp.server.shell.ACommand#getHelpText()
+	 */
+	@Override
+	public String getHelpText() {
+		return "population\n\nPrints out PopulationClass names.";
+	}
+
+	/* (non-Javadoc)
+	 * @see starcorp.server.shell.ACommand#getName()
+	 */
+	@Override
+	public String getName() {
+		return "population";
+	}
 
 	/* (non-Javadoc)
 	 * @see starcorp.server.shell.ACommand#process()
 	 */
 	@Override
 	public void process() throws Exception {
-		out.println("Bye!");
+		out.println("List of population classes:");
+		for(PopulationClass popClass : PopulationClass.listTypes()) {
+			out.println(popClass);
+		}
 		out.flush();
-		System.exit(0);
-	}
-
-	@Override
-	public String getName() {
-		return "quit";
-	}
-
-	@Override
-	public String getHelpText() {
-		return "quit\n\nExits the server shell.";
 	}
 
 }

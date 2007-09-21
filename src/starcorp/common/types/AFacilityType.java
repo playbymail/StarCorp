@@ -74,6 +74,8 @@ public abstract class AFacilityType extends ABaseType {
 	 * @return
 	 */
 	public static AFacilityType getType(String key) {
+		if(key == null)
+			return null;
 		return types.get(key);
 	}
 	
@@ -89,6 +91,16 @@ public abstract class AFacilityType extends ABaseType {
 		return types;
 	}
 	
+	public static List<AFacilityType> listTypes() {
+		List<AFacilityType> types = new ArrayList<AFacilityType>();
+		Iterator<Map.Entry<String, AFacilityType>> i = AFacilityType.types.entrySet().iterator();
+		while(i.hasNext()) {
+			Map.Entry<String, AFacilityType> entry = i.next();
+			types.add(entry.getValue());
+		}
+		return types;
+	}
+
 	/**
 	 * @param type
 	 * @param resourceName
@@ -260,5 +272,10 @@ public abstract class AFacilityType extends ABaseType {
 		}
 		
 		return ((double) requiredTotal / (double) currentTotal); 
+	}
+
+	@Override
+	public String toString() {
+		return super.toString() + " [" + getKey() + "]";
 	}
 }

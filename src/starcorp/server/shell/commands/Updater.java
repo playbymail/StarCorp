@@ -53,7 +53,7 @@ public class Updater extends ACommand {
 
 	@Override
 	public String getHelpText() {
-		return "Runs the PopulationProcessor and the FacilityProcessor.";
+		return "update\n\nRuns the PopulationProcessor and the FacilityProcessor.";
 	}
 
 }

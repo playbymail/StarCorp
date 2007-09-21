@@ -105,6 +105,48 @@ public abstract class AItemType extends ABaseType {
 		return types;
 	}
 	
+	public static List<AItemType> listTypes(String filter) {
+		List<AItemType> types = new ArrayList<AItemType>();
+		
+		Iterator<Map.Entry<String, AItemType>> i = AItemType.types.entrySet().iterator();
+		filter = filter.toLowerCase();
+		while(i.hasNext()) {
+			Map.Entry<String, AItemType> entry = i.next();
+			AItemType type = entry.getValue();
+			if(type.getClass().getSimpleName().equalsIgnoreCase(filter)) {
+				types.add(entry.getValue());
+			}
+			else {
+				String s = type.getName().toLowerCase();
+				if(s.indexOf(filter) != -1) {
+					types.add(entry.getValue());
+				}
+				else {
+					s = type.getKey().toLowerCase();
+					if(s.indexOf(filter) != -1) {
+						types.add(entry.getValue());
+					}
+				}
+			}
+			
+		}
+		
+		return types;
+	}
+	
+	public static List<AItemType> listTypes() {
+		List<AItemType> types = new ArrayList<AItemType>();
+		
+		Iterator<Map.Entry<String, AItemType>> i = AItemType.types.entrySet().iterator();
+		
+		while(i.hasNext()) {
+			Map.Entry<String, AItemType> entry = i.next();
+			types.add(entry.getValue());
+		}
+		
+		return types;
+	}
+
 	/**
 	 * @param type
 	 * @param resourceName
@@ -176,5 +218,10 @@ public abstract class AItemType extends ABaseType {
 			}
 		}
 		System.out.print("\n");
+	}
+
+	@Override
+	public String toString() {
+		return super.toString() + " [" + getKey() + "] " + getMassUnits() + "mu";
 	}
 }

@@ -19,4 +19,13 @@ package starcorp.common.entities;
  */
 public class AsteroidField extends AStarSystemEntity {
 
+	private double hazardLevel;
+
+	public double getHazardLevel() {
+		return hazardLevel;
+	}
+
+	public void setHazardLevel(double hazardLevel) {
+		this.hazardLevel = hazardLevel;
+	}
 }

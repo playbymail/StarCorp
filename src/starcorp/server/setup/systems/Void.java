@@ -8,36 +8,20 @@
  *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
  *  See the License for the specific language governing permissions and limitations under the License. 
  */
-package starcorp.server.shell.commands;
+package starcorp.server.setup.systems;
 
-import starcorp.server.shell.ACommand;
+import starcorp.common.entities.StarSystem;
+import starcorp.common.types.Coordinates3D;
+import starcorp.common.types.CoordinatesPolar;
+import starcorp.server.setup.ASystemTemplate;
 
 /**
- * starcorp.server.shell.commands.Quit
+ * starcorp.server.setup.systems.Void
  *
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 20 Sep 2007
  */
-public class Quit extends ACommand {
+public class Void extends ASystemTemplate {
 
-	/* (non-Javadoc)
-	 * @see starcorp.server.shell.ACommand#process()
-	 */
-	@Override
-	public void process() throws Exception {
-		out.println("Bye!");
-		out.flush();
-		System.exit(0);
-	}
-
-	@Override
-	public String getName() {
-		return "quit";
-	}
-
-	@Override
-	public String getHelpText() {
-		return "quit\n\nExits the server shell.";
-	}
-
+	
 }

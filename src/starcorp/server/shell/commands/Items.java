@@ -10,24 +10,25 @@
  */
 package starcorp.server.shell.commands;
 
-import java.util.Iterator;
+import java.util.List;
 
+import starcorp.common.types.AItemType;
 import starcorp.server.shell.ACommand;
 
 /**
- * starcorp.server.shell.commands.Help
+ * starcorp.server.shell.commands.Items
  *
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 20 Sep 2007
  */
-public class Help extends ACommand {
+public class Items extends ACommand {
 
 	/* (non-Javadoc)
 	 * @see starcorp.server.shell.ACommand#getHelpText()
 	 */
 	@Override
 	public String getHelpText() {
-		return "help\nhelp [command]\n\nPrints command help or a list of commands if command is blank or not found.";
+		return "items\nitems [filter]\n\nPrints out item types. Filter is optional and filters items to contain the filter string.";
 	}
 
 	/* (non-Javadoc)
@@ -35,7 +36,7 @@ public class Help extends ACommand {
 	 */
 	@Override
 	public String getName() {
-		return "help";
+		return "items";
 	}
 
 	/* (non-Javadoc)
@@ -43,33 +44,24 @@ public class Help extends ACommand {
 	 */
 	@Override
 	public void process() throws Exception {
-		ACommand command = null;
-		String arg = get(0);
-		if(arg != null) {
-			command = parser.getCommand(arg);
-		}
-		if(command == null) {
-			if(arg != null) {
-				out.println("Command " + arg + " not found.");
-			}
-			out.println("List of commands. Type help [command] for further help.");
-			Iterator<String> i = parser.listCommands();
-			int count = 0;
-			while(i.hasNext()) {
-				if(count % 5 == 4) {
-					out.println(i.next());
-				}
-				else {
-					out.print(i.next() + "   ");
-				}
-				count++;
-			}
-			out.println();
+		String filter = get(0);
+		List<AItemType> types;
+		if(filter == null) {
+			types = AItemType.listTypes();
 		}
 		else {
-			out.println(command.getHelpText());
+			types = AItemType.listTypes(filter);
 		}
+		out.println("List of matching items:");
+		if(types.size() < 1) {
+			out.println("None");
+		}
+		for(AItemType type : types) {
+			out.println(type);
+		}
+		out.println();
 		out.flush();
+		
 	}
 
 }

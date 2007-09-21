@@ -61,6 +61,8 @@ public abstract class AEventType extends ABaseType {
 	 * @return
 	 */
 	public static AEventType getType(String key) {
+		if(key == null)
+			return null;
 		return types.get(key);
 	}
 	

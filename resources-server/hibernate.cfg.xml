@@ -22,7 +22,7 @@
 			org.hibernate.cache.NoCacheProvider
 		</property>
 		<property name="show_sql">false</property>
-		<property name="hbm2ddl.auto">auto</property>
+		<property name="hbm2ddl.auto">update</property>
 
 		<mapping resource="starcorp/common/entities/ABaseEntity.hbm.xml" />
 		

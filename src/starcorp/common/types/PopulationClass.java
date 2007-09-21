@@ -10,8 +10,10 @@
  */
 package starcorp.common.types;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -50,6 +52,14 @@ public class PopulationClass extends ABaseType {
 				types.put(k, type);
 			}
 		}
+	}
+	
+	public static List<PopulationClass> listTypes() {
+		ArrayList<PopulationClass> types = new ArrayList<PopulationClass>();
+		for(String key : PopulationClass.types.keySet()) {
+			types.add(PopulationClass.types.get(key));
+		}
+		return types;
 	}
 	
 	/**
@@ -123,5 +133,10 @@ public class PopulationClass extends ABaseType {
 	public void print() {
 		String s = "|| " + getKey() + " || [" + getName() + "] || " + getServiceQualityRequired() + " || " + getConsumerQualityRequired() + " ||";
 		System.out.println(s);
+	}
+
+	@Override
+	public String toString() {
+		return super.toString() + " [" + getKey() + "]";
 	}
 }

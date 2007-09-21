@@ -10,8 +10,11 @@
  */
 package starcorp.common.types;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -30,6 +33,33 @@ public class TerrainType extends ABaseType {
 
 	static {
 		loadTypes();
+	}
+	
+	public static List<TerrainType> listTypes() {
+		ArrayList<TerrainType> types = new ArrayList<TerrainType>();
+		for(String key : TerrainType.types.keySet()) {
+			types.add(TerrainType.types.get(key));
+		}
+		return types;
+	}
+	
+	public static int count(List<TerrainType> list, String key) {
+		int count = 0;
+		for(TerrainType terrain : list) {
+			if(terrain.getKey().equals(key)) {
+				count++;
+			}
+		}
+		return count;
+	}
+	
+	public static boolean contains(List<TerrainType> list, String key) {
+		for(TerrainType terrain : list) {
+			if(terrain.getKey().equals(key)) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	public static void main(String[] args) {
@@ -101,8 +131,41 @@ public class TerrainType extends ABaseType {
 		return Double.parseDouble(getResource(this,"hazard"));
 	}
 	
+	public Map<AItemType, Integer> getResourcesChances() {
+		HashMap<AItemType, Integer> resources = new HashMap<AItemType, Integer>();
+		Enumeration<String> keys = bundle.getKeys();
+		while(keys.hasMoreElements()) {
+			String key = keys.nextElement();
+			if(key.indexOf(getKey() + ".resource.type") != -1) {
+				String resourceNumber = key.substring(key.lastIndexOf(".") + 1);
+				AItemType type = AItemType.getType(bundle.getString(key));
+				int chance = 0;
+				try {
+					chance = Integer.parseInt(bundle.getString(getKey() + ".resource.chance." + resourceNumber));
+				}
+				catch(NumberFormatException e) {
+					// ignore
+				}
+				catch(MissingResourceException e) {
+					// ignore
+				}
+				resources.put(type, chance);
+			}
+		}
+		return resources;
+	}
+
 	public void print() {
-		System.out.println("|| " + getKey() + " || " + getName() + " || " + getHazardLevel() + " ||");
+		StringBuffer sb = new StringBuffer("|| " + getKey() + " || " + getName() + " || " + getHazardLevel() + " ||");
+		Map<AItemType, Integer> resources = getResourcesChances();
+		for(AItemType type : resources.keySet()) {
+			sb.append(" ");
+			sb.append(type.getKey());
+			sb.append(" ");
+			sb.append(resources.get(type));
+			sb.append("% ||");
+		}
+		System.out.println(sb);
 	}
 	
 }

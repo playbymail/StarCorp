@@ -10,8 +10,6 @@
  */
 package starcorp.server.shell;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -19,8 +17,6 @@ import java.util.Map;
 
 import starcorp.common.util.PackageExplorer;
 import starcorp.server.entitystore.IEntityStore;
-import starcorp.server.shell.commands.Echo;
-import starcorp.server.shell.commands.Quit;
 
 /**
  * starcorp.server.shell.CommandParser
@@ -54,9 +50,9 @@ public class CommandParser {
 			e.printStackTrace();
 			return;
 		}
-		for(int i = 0; i < classes.size(); i++) {
+		for(Class clazz : classes) {
 			try {
-				ACommand command = (ACommand) classes.get(i).newInstance();
+				ACommand command = (ACommand) clazz.newInstance();
 				command.setEntityStore(entityStore);
 				command.setOutputStream(System.out);
 				command.setParser(this);

@@ -13,31 +13,50 @@ package starcorp.server.shell.commands;
 import starcorp.server.shell.ACommand;
 
 /**
- * starcorp.server.shell.commands.Quit
+ * starcorp.server.shell.commands.List
  *
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 20 Sep 2007
  */
-public class Quit extends ACommand {
+public class List extends ACommand {
+
+	/* (non-Javadoc)
+	 * @see starcorp.server.shell.ACommand#getHelpText()
+	 */
+	@Override
+	public String getHelpText() {
+		return "list (Entity Class)\n\nLists entities of specified class.";
+	}
+
+	/* (non-Javadoc)
+	 * @see starcorp.server.shell.ACommand#getName()
+	 */
+	@Override
+	public String getName() {
+		return "list";
+	}
 
 	/* (non-Javadoc)
 	 * @see starcorp.server.shell.ACommand#process()
 	 */
 	@Override
 	public void process() throws Exception {
-		out.println("Bye!");
+		String entityClass = get(0);
+		if(entityClass == null) {
+			out.print("Invalid arguments");
+		}
+		else {
+			String className = "starcorp.common.entities." + entityClass;
+			Class clazz = Class.forName(className);
+			java.util.List<?> list = entityStore.list(clazz);
+			if(list.size() < 1) {
+				out.println("No entities found.");
+			}
+			for(Object o : list) {
+				out.println(o);
+			}
+		}
 		out.flush();
-		System.exit(0);
-	}
-
-	@Override
-	public String getName() {
-		return "quit";
-	}
-
-	@Override
-	public String getHelpText() {
-		return "quit\n\nExits the server shell.";
 	}
 
 }

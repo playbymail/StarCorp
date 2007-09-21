@@ -10,34 +10,46 @@
  */
 package starcorp.server.shell.commands;
 
+import java.util.List;
+
+import starcorp.common.types.AFacilityType;
 import starcorp.server.shell.ACommand;
 
 /**
- * starcorp.server.shell.commands.Quit
+ * starcorp.server.shell.commands.Facilities
  *
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 20 Sep 2007
  */
-public class Quit extends ACommand {
+public class Facilities extends ACommand {
+
+	/* (non-Javadoc)
+	 * @see starcorp.server.shell.ACommand#getHelpText()
+	 */
+	@Override
+	public String getHelpText() {
+		return "facilities\n\nPrints out facility types.";
+	}
+
+	/* (non-Javadoc)
+	 * @see starcorp.server.shell.ACommand#getName()
+	 */
+	@Override
+	public String getName() {
+		return "facilities";
+	}
 
 	/* (non-Javadoc)
 	 * @see starcorp.server.shell.ACommand#process()
 	 */
 	@Override
 	public void process() throws Exception {
-		out.println("Bye!");
+		out.println("List of facilities:");
+		List<AFacilityType> types = AFacilityType.listTypes();
+		for(AFacilityType type : types) {
+			out.println(type);
+		}
 		out.flush();
-		System.exit(0);
-	}
-
-	@Override
-	public String getName() {
-		return "quit";
-	}
-
-	@Override
-	public String getHelpText() {
-		return "quit\n\nExits the server shell.";
 	}
 
 }

@@ -18,5 +18,14 @@ package starcorp.common.entities;
  * @version 15 Sep 2007
  */
 public class GasField extends AStarSystemEntity {
+	private double hazardLevel;
+
+	public double getHazardLevel() {
+		return hazardLevel;
+	}
+
+	public void setHazardLevel(double hazardLevel) {
+		this.hazardLevel = hazardLevel;
+	}
 
 }
