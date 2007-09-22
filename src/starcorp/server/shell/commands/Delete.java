@@ -10,6 +10,7 @@
  */
 package starcorp.server.shell.commands;
 
+import starcorp.common.entities.ABaseEntity;
 import starcorp.server.shell.ACommand;
 
 /**
@@ -49,8 +50,14 @@ public class Delete extends ACommand {
 		else {
 			String className = "starcorp.common.entities." + entityClass;
 			Class clazz = Class.forName(className);
-			entityStore.delete(clazz, ID);
-			out.println("Entity "+ ID +" deleted.");
+			ABaseEntity o = entityStore.load(clazz, ID);
+			if(o == null) {
+				out.println("No such entity.");
+			}
+			else {
+				entityStore.delete(o);
+			}
+			out.println("Entity "+ o +" deleted.");
 			out.flush();
 		}
 

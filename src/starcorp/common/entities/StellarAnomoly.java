@@ -20,7 +20,7 @@ import starcorp.common.types.AEventType;
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 15 Sep 2007
  */
-public class StellarAnomoly extends AStarSystemEntity {
+public class StellarAnomoly extends StarSystemEntity {
 
 	private String description;
 	private AEventType investigationEvent;

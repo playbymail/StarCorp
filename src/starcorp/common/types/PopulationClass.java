@@ -35,7 +35,7 @@ public class PopulationClass extends ABaseType {
 	}
 	
 	public static void main(String[] args) {
-		System.out.println("|| *Key* || *Name* || *Service Quality* || *Consumer Quality* ||");
+		System.out.println("|| *Key* || *Name* || *Service Quality* || *Consumer Quality* || *NPC Salary* ||");
 		Iterator<String> i = types.keySet().iterator();
 		while(i.hasNext()) {
 			types.get(i.next()).print();
@@ -130,8 +130,17 @@ public class PopulationClass extends ABaseType {
 		}
 	}
 	
+	public int getNPCSalary() {
+		try {
+			return Integer.parseInt(getResource(this, "salary"));
+		}
+		catch(NumberFormatException e) {
+			return 0;
+		}
+	}
+	
 	public void print() {
-		String s = "|| " + getKey() + " || [" + getName() + "] || " + getServiceQualityRequired() + " || " + getConsumerQualityRequired() + " ||";
+		String s = "|| " + getKey() + " || [" + getName() + "] || " + getServiceQualityRequired() + " || " + getConsumerQualityRequired() + " || " + getNPCSalary() + " ||";
 		System.out.println(s);
 	}
 

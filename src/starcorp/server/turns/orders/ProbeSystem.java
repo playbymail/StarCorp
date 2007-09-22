@@ -13,7 +13,7 @@ package starcorp.server.turns.orders;
 import java.util.Iterator;
 import java.util.List;
 
-import starcorp.common.entities.AStarSystemEntity;
+import starcorp.common.entities.StarSystemEntity;
 import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Starship;
 import starcorp.common.turns.OrderReport;
@@ -52,7 +52,7 @@ public class ProbeSystem extends AOrderProcessor {
 			report.addScannedEntities(entities);
 			Iterator<?> i = entities.iterator();
 			while(i.hasNext()) {
-				AStarSystemEntity entity = (AStarSystemEntity) i.next();
+				StarSystemEntity entity = (StarSystemEntity) i.next();
 				report.addScannedEntities(entityStore.listDeposits(entity));
 			}
 			order.setReport(report);

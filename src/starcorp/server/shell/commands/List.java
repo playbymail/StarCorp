@@ -42,6 +42,8 @@ public class List extends ACommand {
 	@Override
 	public void process() throws Exception {
 		String entityClass = get(0);
+		int page = getAsInt(1);
+		
 		if(entityClass == null) {
 			out.print("Invalid arguments");
 		}
@@ -49,11 +51,29 @@ public class List extends ACommand {
 			String className = "starcorp.common.entities." + entityClass;
 			Class clazz = Class.forName(className);
 			java.util.List<?> list = entityStore.list(clazz);
-			if(list.size() < 1) {
+			int size = list.size();
+			if(size < 1) {
 				out.println("No entities found.");
 			}
-			for(Object o : list) {
-				out.println(o);
+			else {
+				if(page < 1)
+					page = 1;
+				int start = (page - 1) * 10;
+				if(start >= size) {
+					out.println("Invalid page");
+				}
+				else {
+					int totalPages = size / 10;
+					if(size % 10 > 0)
+						totalPages++;
+					int end = start + 10;
+					if(end > size)
+						end = size;
+					out.println(entityClass + " showing " + page + " of " + totalPages + ":");
+					for(int i = start; i < end; i++) {
+						out.println((i + 1) + ": " + list.get(i));
+					}
+				}
 			}
 		}
 		out.flush();

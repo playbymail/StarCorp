@@ -140,7 +140,7 @@ public class MarketItem extends ABaseEntity {
 	}
 	@Override
 	public String toString() {
-		return item + " \u20a1 " + costPerItem + "ea. " + super.toString() + " @ " + colony;
+		return item + " \u20a1 " + costPerItem + "ea. " + super.toString() + " @ " + colony.getName() + " (" + colony.getID() + ")";
 	}
 	
 }

@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import starcorp.common.entities.ABaseEntity;
-import starcorp.common.entities.AStarSystemEntity;
+import starcorp.common.entities.StarSystemEntity;
 import starcorp.common.entities.ColonistGrant;
 import starcorp.common.entities.Colony;
 import starcorp.common.entities.ColonyItem;
@@ -28,6 +28,7 @@ import starcorp.common.entities.Unemployed;
 import starcorp.common.entities.Workers;
 import starcorp.common.types.AFacilityType;
 import starcorp.common.types.AItemType;
+import starcorp.common.types.AtmosphereType;
 import starcorp.common.types.Coordinates2D;
 import starcorp.common.types.Coordinates3D;
 import starcorp.common.types.CoordinatesPolar;
@@ -41,31 +42,14 @@ import starcorp.common.types.PopulationClass;
  */
 public interface IEntityStore {
 
-	public static class EntityStoreException extends RuntimeException {
-
-		private static final long serialVersionUID = 5228171587307250006L;
-
-		public EntityStoreException() {
-			super();
-		}
-
-		public EntityStoreException(String msg, Throwable e) {
-			super(msg, e);
-		}
-
-		public EntityStoreException(String msg) {
-			super(msg);
-		}
-
-		public EntityStoreException(Throwable e) {
-			super(e);
-		}
-		
-	}
+	public abstract void commit();
+	public abstract void rollback();
+	public abstract void shutdown();
 	
 	public abstract ABaseEntity load(Class<?> entityClass, int ID);
 	public abstract ABaseEntity save(ABaseEntity entity);
-	public abstract void delete(Class<?> entityClass, int ID);
+	
+	public abstract void delete(ABaseEntity entity);
 	
 	public abstract List<?> query(String hql);
 	
@@ -76,10 +60,13 @@ public interface IEntityStore {
 	public abstract List<?> listSystemEntities(StarSystem star);
 	public abstract List<?> listSystemEntities(StarSystem star, CoordinatesPolar location);
 
+	public abstract List<?> listPlanets(StarSystem star, int maxGravity, List<AtmosphereType> atmospheres);
+	
 	public abstract List<?> listColonistGrants(Corporation owner, boolean openOnly);
 	public abstract ColonistGrant getColonistGrant(Colony colony, PopulationClass popClass, boolean openOnly);
 	
 	public abstract List<?> listColonies();
+	public abstract List<?> listColonies(Corporation govt);
 	public abstract List<?> listColonies(Planet planet);
 	public abstract List<?> listColonies(StarSystem system, CoordinatesPolar location, Planet excludePlanet);
 	public abstract List<?> listColonies(StarSystem system, CoordinatesPolar excludeLocation);
@@ -101,7 +88,7 @@ public interface IEntityStore {
 	public abstract List<?> listFacilities(Colony colony);
 	public abstract List<?> listFacilities(Corporation owner);
 	public abstract List<?> listFacilities(Colony colony, Class<?> type);
-	public abstract List<?> listFacilitiesBySalary(Colony colony, PopulationClass popClass);
+	public abstract List<?> listFacilitiesBySalary(PopulationClass popClass);
 	public abstract Map<Facility,List<?>> listFacilitiesWithWorkers(Colony colony, List<AFacilityType> types);
 	public abstract Facility getFacility(Colony colony, Corporation owner, Class<?> type);
 	public abstract Facility getFacility(Colony colony, Class<?> type);
@@ -120,6 +107,7 @@ public interface IEntityStore {
 	
 	public abstract List<?> listDesigns(Corporation owner);
 	
+	public abstract List<?> listColonists();
 	public abstract List<?> listColonists(Colony colony);
 	public abstract List<?> listColonists(Colony colony, PopulationClass popClass);
 	public abstract List<?> listWorkers(Facility facility);
@@ -128,7 +116,7 @@ public interface IEntityStore {
 	public abstract Workers getWorkers(Facility facility, PopulationClass popClass);
 	public abstract Unemployed getUnemployed(Colony colony, PopulationClass popClass);
 	
-	public abstract List<?> listDeposits(AStarSystemEntity systemEntity);
+	public abstract List<?> listDeposits(StarSystemEntity systemEntity);
 	public abstract List<?> listDeposits(Planet planet, Coordinates2D location);
-	
+	public abstract List<?> listDeposits(Planet planet, List<AItemType> types, int minTotal);
 }

@@ -10,9 +10,6 @@
  */
 package starcorp.server.setup.systems;
 
-import starcorp.common.entities.StarSystem;
-import starcorp.common.types.Coordinates3D;
-import starcorp.common.types.CoordinatesPolar;
 import starcorp.server.setup.ASystemTemplate;
 
 /**

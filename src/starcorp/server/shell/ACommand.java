@@ -74,7 +74,7 @@ public abstract class ACommand {
 		String s = get(index);
 		if(s == null)
 			return false;
-		return "true".equalsIgnoreCase(s);
+		return Boolean.parseBoolean(s);
 	}
 	
 	protected String concat(int begin) {

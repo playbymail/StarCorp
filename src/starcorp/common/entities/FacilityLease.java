@@ -112,7 +112,7 @@ public class FacilityLease extends ABaseEntity {
 	}
 	@Override
 	public String toString() {
-		return type.getKey() + " " + super.toString() + " @ " + colony;
+		return type.getKey() + " " + super.toString() + " @ " + colony.getName() + " (" + colony.getID() + ")";
 	}
 	
 }

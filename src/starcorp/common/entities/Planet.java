@@ -27,7 +27,7 @@ import starcorp.common.types.TerrainType;
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 15 Sep 2007
  */
-public class Planet extends AStarSystemEntity {
+public class Planet extends StarSystemEntity {
 
 	private Planet orbiting;
 	private AtmosphereType atmosphereType;
@@ -146,7 +146,10 @@ public class Planet extends AStarSystemEntity {
 
 	@Override
 	public String toString() {
-		return super.toString() + (orbiting == null ? "" : " orbiting " + orbiting.getName()) + " " + (atmosphereType == null ? "" : atmosphereType.getKey()) + " " + gravityRating;
+		return super.toString() + 
+		(orbiting == null ? "" : " orbiting " + orbiting.getName()) + 
+		" : " + (atmosphereType == null ? "" : atmosphereType.getKey()) + 
+		" : " + gravityRating + "g";
 	}
 	
 }

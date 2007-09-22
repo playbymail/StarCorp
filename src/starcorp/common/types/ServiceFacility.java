@@ -22,6 +22,8 @@ import java.util.List;
  */
 public class ServiceFacility extends AFacilityType {
 
+	public static final int MAX_COLONISTS_SERVICED = 10000;
+	
 	public static List<AFacilityType> listMedical(int quality) {
 		List<AFacilityType> types = new ArrayList<AFacilityType>();
 		Iterator<AFacilityType> i = AFacilityType.listTypes(ServiceFacility.class).iterator();
@@ -88,28 +90,7 @@ public class ServiceFacility extends AFacilityType {
 	
 	public int getTotalColonistsServiceable(List<?> currentWorkers) {
 		double efficiency = getEfficiency(currentWorkers);
-		
-		if(efficiency < 1) {
-			return 0;
-		}
-		else if(efficiency < 10) {
-			return 50;
-		}
-		else if (efficiency < 25) {
-			return 100;
-		}
-		else if (efficiency < 50) {
-			return 250;
-		}
-		else if (efficiency < 75) {
-			return 500;
-		}
-		else if (efficiency < 100) {
-			return 1000;
-		}
-		else {
-			return 2000;
-		}
+		return (int) (MAX_COLONISTS_SERVICED * (efficiency / 100.0));
 	}
 
 	public boolean isMedical() {

@@ -192,7 +192,7 @@ public abstract class APlanetTemplate {
 				deposit.setType(type);
 				deposit.setYield(yield);
 				entityStore.save(deposit);
-				log.info("Created " + deposit);
+				if(log.isDebugEnabled())log.debug("Created " + deposit);
 			}
 		}
 	}

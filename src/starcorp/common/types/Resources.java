@@ -10,6 +10,9 @@
  */
 package starcorp.common.types;
 
+import java.util.Iterator;
+import java.util.List;
+
 /**
  * starcorp.common.types.Resource
  *
@@ -18,11 +21,88 @@ package starcorp.common.types;
  */
 public class Resources extends AItemType {
 	
+	public static List<AItemType> listMetals() {
+		List<AItemType> list = AItemType.listTypes(Resources.class);
+		Iterator<AItemType> i = list.iterator();
+		while(i.hasNext()) {
+			Resources r = (Resources) i.next();
+			if(!r.isMetal())
+				i.remove();
+		}
+		return list;
+	}
+	
+	public static List<AItemType> listOrganics() {
+		List<AItemType> list = AItemType.listTypes(Resources.class);
+		Iterator<AItemType> i = list.iterator();
+		while(i.hasNext()) {
+			Resources r = (Resources) i.next();
+			if(!r.isOrganic())
+				i.remove();
+		}
+		return list;
+	}
+	
+	public static List<AItemType> listFuel() {
+		List<AItemType> list = AItemType.listTypes(Resources.class);
+		Iterator<AItemType> i = list.iterator();
+		while(i.hasNext()) {
+			Resources r = (Resources) i.next();
+			if(!r.isFuel())
+				i.remove();
+		}
+		return list;
+	}
+	
+	public static List<AItemType> listMinerals() {
+		List<AItemType> list = AItemType.listTypes(Resources.class);
+		Iterator<AItemType> i = list.iterator();
+		while(i.hasNext()) {
+			Resources r = (Resources) i.next();
+			if(!r.isMineral())
+				i.remove();
+		}
+		return list;
+	}
+	
+	public static List<AItemType> listFissile() {
+		List<AItemType> list = AItemType.listTypes(Resources.class);
+		Iterator<AItemType> i = list.iterator();
+		while(i.hasNext()) {
+			Resources r = (Resources) i.next();
+			if(!r.isFissile())
+				i.remove();
+		}
+		return list;
+	}
+	
+	public static List<AItemType> listGas() {
+		List<AItemType> list = AItemType.listTypes(Resources.class);
+		Iterator<AItemType> i = list.iterator();
+		while(i.hasNext()) {
+			Resources r = (Resources) i.next();
+			if(!r.isGas())
+				i.remove();
+		}
+		return list;
+	}
+	
+	public static List<AItemType> listLiquid() {
+		List<AItemType> list = AItemType.listTypes(Resources.class);
+		Iterator<AItemType> i = list.iterator();
+		while(i.hasNext()) {
+			Resources r = (Resources) i.next();
+			if(!r.isLiquid())
+				i.remove();
+		}
+		return list;
+	}
+	
 	public boolean isOrganic() {
 		return getResourceAsBoolean(this, "organic");
 	}
 
-	public boolean isMinerals() {
+	public boolean isMineral() {
 		return getResourceAsBoolean(this, "mineral");
 	}
 
@@ -50,7 +130,7 @@ public class Resources extends AItemType {
 	public String getSubCategory() {
 		if(isOrganic())
 			return "Organic";
-		if(isMinerals())
+		if(isMineral())
 			return "Mineral";
 		if(isMetal())
 			return "Metal";

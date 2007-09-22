@@ -26,7 +26,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
 import starcorp.common.entities.ABaseEntity;
-import starcorp.common.entities.AStarSystemEntity;
+import starcorp.common.entities.StarSystemEntity;
 import starcorp.common.entities.ColonistGrant;
 import starcorp.common.entities.Colony;
 import starcorp.common.entities.ColonyItem;
@@ -36,10 +36,12 @@ import starcorp.common.entities.Facility;
 import starcorp.common.entities.FacilityLease;
 import starcorp.common.entities.Planet;
 import starcorp.common.entities.StarSystem;
+import starcorp.common.entities.Starship;
 import starcorp.common.entities.Unemployed;
 import starcorp.common.entities.Workers;
 import starcorp.common.types.AFacilityType;
 import starcorp.common.types.AItemType;
+import starcorp.common.types.AtmosphereType;
 import starcorp.common.types.Coordinates2D;
 import starcorp.common.types.Coordinates3D;
 import starcorp.common.types.CoordinatesPolar;
@@ -82,17 +84,16 @@ public class HibernateStore implements IEntityStore {
     	return session;
     }
     
-    private void commit() {
+    public void commit() {
+    	getSession().flush();
     	getSession().getTransaction().commit();
-    	getSession().close();
     }
-
-    private void rollback() {
-    	getSession().getTransaction().rollback();
-    	getSession().close();
-    }
-
     
+    public void rollback() {
+		getSession().getTransaction().rollback();
+	}
+
+
     private Query prepareQuery(final String query, final Map<String,Object> parameters) {
     	Query q = getSession().createQuery(query);
     	if(parameters != null) {
@@ -106,10 +107,24 @@ public class HibernateStore implements IEntityStore {
     	return q;
     }
     
+    private Query prepareQuery(final String query, final String paramName, final Object paramValue) {
+    	Query q = getSession().createQuery(query);
+		q.setParameter(paramName, paramValue);
+    	return q;
+    }
+
+    private Query prepareQuery(final String query) {
+    	Query q = getSession().createQuery(query);
+    	return q;
+    }
+
     private List<?> listObject(final Query q) {
     	List<?> result = q.list();
-    	commit();
     	return result;
+    }
+    
+    private Map<String, Object> prepareParameters(String key, Object value) {
+    	return prepareParameters(null, key, value);
     }
     
     private Map<String, Object> prepareParameters(Map<String, Object> map, String key, Object value) {
@@ -136,11 +151,9 @@ public class HibernateStore implements IEntityStore {
 	private Object loadObject(Query q) {
 		try {
 			Object o = q.uniqueResult();
-			commit();
 			return o;
 		}
 		catch(ObjectNotFoundException e) {
-			rollback();
 			return null;
 		}
 	}
@@ -154,7 +167,7 @@ public class HibernateStore implements IEntityStore {
 		if(openOnly) {
 			q = q + " and available = true";
 		}
-		Map<String, Object> map = prepareParameters(null, "colony", colony);
+		Map<String, Object> map = prepareParameters("colony", colony);
 		prepareParameters(map, "popClass", popClass.getKey());
 		return (ColonistGrant) loadObject(prepareQuery(q, map));
 	}
@@ -164,7 +177,7 @@ public class HibernateStore implements IEntityStore {
 	 */
 	public Colony getColony(Planet planet, Coordinates2D location) {
 		String q = "from Colony where planet = :planet and location = :location";
-		Map<String, Object> map = prepareParameters(null, "planet", planet);
+		Map<String, Object> map = prepareParameters("planet", planet);
 		prepareParameters(map, "location", location);
 		return (Colony) loadObject(prepareQuery(q, map));
 	}
@@ -174,7 +187,7 @@ public class HibernateStore implements IEntityStore {
 	 */
 	public Corporation getCorporation(String email, String password) {
 		String q = "from Corporation where playerEmail = :email and playerPassword = :password";
-		Map<String, Object> map = prepareParameters(null, "email", email);
+		Map<String, Object> map = prepareParameters("email", email);
 		prepareParameters(map, "password", password);
 		return (Corporation) loadObject(prepareQuery(q, map));
 	}
@@ -188,7 +201,7 @@ public class HibernateStore implements IEntityStore {
 		if(openOnly) {
 			q = q + " and used = false";
 		}
-		Map<String, Object> map = prepareParameters(null, "colony", colony);
+		Map<String, Object> map = prepareParameters("colony", colony);
 		prepareParameters(map, "type", type.getKey());
 		return (DevelopmentGrant) loadObject(prepareQuery(q, map));
 	}
@@ -206,7 +219,7 @@ public class HibernateStore implements IEntityStore {
 				q += "'" + types.get(i).getKey() + "'";
 			}
 			q += ")";
-			Map<String, Object> map = prepareParameters(null, "colony", colony);
+			Map<String, Object> map = prepareParameters("colony", colony);
 			prepareParameters(map, "owner", owner);
 			
 			return (Facility) loadObject(prepareQuery(q, map));
@@ -227,9 +240,7 @@ public class HibernateStore implements IEntityStore {
 				q += "'" + types.get(i).getKey() + "'";
 			}
 			q += ")";
-			Map<String, Object> map = prepareParameters(null, "colony", colony);
-			
-			return (Facility) loadObject(prepareQuery(q, map));
+			return (Facility) loadObject(prepareQuery(q, "colony",colony));
 		}
 		return null;
 	}
@@ -239,7 +250,7 @@ public class HibernateStore implements IEntityStore {
 	 */
 	public ColonyItem getItem(Colony colony, AItemType type) {
 		String q = "from ColonyItem where colony = :colony and item.type = :type";
-		Map<String, Object> map = prepareParameters(null, "colony", colony);
+		Map<String, Object> map = prepareParameters("colony", colony);
 		prepareParameters(map, "type", type.getKey());
 		return (ColonyItem) loadObject(prepareQuery(q, map));
 	}
@@ -249,7 +260,7 @@ public class HibernateStore implements IEntityStore {
 	 */
 	public ColonyItem getItem(Colony colony, Corporation owner, AItemType type) {
 		String q = "from ColonyItem where colony = :colony and owner = :owner and item.type = :type";
-		Map<String, Object> map = prepareParameters(null, "colony", colony);
+		Map<String, Object> map = prepareParameters("colony", colony);
 		prepareParameters(map, "owner", owner);
 		prepareParameters(map, "type", type.getKey());
 		return (ColonyItem) loadObject(prepareQuery(q, map));
@@ -264,7 +275,7 @@ public class HibernateStore implements IEntityStore {
 		if(openOnly) {
 			q = q + " and used = false";
 		}
-		Map<String, Object> map = prepareParameters(null, "colony", colony);
+		Map<String, Object> map = prepareParameters("colony", colony);
 		prepareParameters(map, "owner", owner);
 		prepareParameters(map, "type", type.getKey());
 		return (FacilityLease) loadObject(prepareQuery(q, map));
@@ -275,7 +286,7 @@ public class HibernateStore implements IEntityStore {
 	 */
 	public Unemployed getUnemployed(Colony colony, PopulationClass popClass) {
 		String q = "from Unemployed where colony = :colony and population.popClassType = :popClass";
-		Map<String, Object> map = prepareParameters(null, "colony", colony);
+		Map<String, Object> map = prepareParameters("colony", colony);
 		prepareParameters(map, "popClass", popClass.getKey());
 		return (Unemployed) loadObject(prepareQuery(q, map));
 	}
@@ -285,7 +296,7 @@ public class HibernateStore implements IEntityStore {
 	 */
 	public Workers getWorkers(Facility facility, PopulationClass popClass) {
 		String q = "from Workers where facility = :facility and population.popClassType = :popClass";
-		Map<String, Object> map = prepareParameters(null, "facility", facility);
+		Map<String, Object> map = prepareParameters("facility", facility);
 		prepareParameters(map, "popClass", popClass.getKey());
 		return (Workers) loadObject(prepareQuery(q, map));
 	}
@@ -295,7 +306,7 @@ public class HibernateStore implements IEntityStore {
 	 */
 	public List<?> listColonies() {
 		String q = "from Colony";
-		return listObject(prepareQuery(q, null));
+		return listObject(prepareQuery(q));
 	}
 
 	/* (non-Javadoc)
@@ -303,8 +314,7 @@ public class HibernateStore implements IEntityStore {
 	 */
 	public List<?> listColonies(Planet planet) {
 		String q = "from Colony where planet = :planet";
-		Map<String,Object> map = prepareParameters(null, "planet", planet);
-		return listObject(prepareQuery(q, map));
+		return listObject(prepareQuery(q, "planet", planet));
 	}
 
 	/* (non-Javadoc)
@@ -313,7 +323,7 @@ public class HibernateStore implements IEntityStore {
 	public List<?> listColonies(StarSystem system,
 			CoordinatesPolar location, Planet excludePlanet) {
 		String q = "from Colony as col left join col.planet as p where p.ID <> :planetId and p.system = :system and p.location = :location";
-		Map<String,Object> map = prepareParameters(null, "planetId", excludePlanet.getID());
+		Map<String,Object> map = prepareParameters("planetId", excludePlanet.getID());
 		prepareParameters(map, "system", system);
 		prepareParameters(map, "location", location);
 		return listObject(prepareQuery(q, map));
@@ -325,7 +335,7 @@ public class HibernateStore implements IEntityStore {
 	public List<?> listColonies(StarSystem system,
 			CoordinatesPolar excludeLocation) {
 		String q = "from Colony as col left join col.planet as p where p.location <> :location and p.system = :system";
-		Map<String,Object> map = prepareParameters(null, "location", excludeLocation);
+		Map<String,Object> map = prepareParameters("location", excludeLocation);
 		prepareParameters(map, "system", system);
 		return listObject(prepareQuery(q, map));
 	}
@@ -335,8 +345,7 @@ public class HibernateStore implements IEntityStore {
 	 */
 	public List<?> listColonies(StarSystem excludeSystem) {
 		String q = "from Colony as col left join col.planet as p where p.system <> :system";
-		Map<String,Object> map = prepareParameters(null, "system", excludeSystem);
-		return listObject(prepareQuery(q, map));
+		return listObject(prepareQuery(q, "system", excludeSystem));
 	}
 
 	/* (non-Javadoc)
@@ -348,7 +357,7 @@ public class HibernateStore implements IEntityStore {
 		if(openOnly) {
 			q = q + " and available = true";
 		}
-		Map<String, Object> map = prepareParameters(null, "owner", owner);
+		Map<String, Object> map = prepareParameters("owner", owner);
 		return listObject(prepareQuery(q, map));
 	}
 
@@ -357,7 +366,7 @@ public class HibernateStore implements IEntityStore {
 	 */
 	public List<?> listColonists(Colony colony) {
 		String q= "from AColonists where colony = :colony";
-		return listObject(prepareQuery(q, prepareParameters(null, "colony", colony)));
+		return listObject(prepareQuery(q, "colony", colony));
 	}
 
 	/* (non-Javadoc)
@@ -366,15 +375,15 @@ public class HibernateStore implements IEntityStore {
 	public List<?> listColonists(Colony colony,
 			PopulationClass popClass) {
 		String q= "from AColonists where colony = :colony and population.popClassType = '" + popClass.getKey() + "'";
-		return listObject(prepareQuery(q, prepareParameters(null, "colony", colony)));
+		return listObject(prepareQuery(q, "colony", colony));
 	}
 
 	/* (non-Javadoc)
 	 * @see starcorp.server.entitystore.IEntityStore#listDeposits(starcorp.common.entities.AStarSystemEntity)
 	 */
-	public List<?> listDeposits(AStarSystemEntity systemEntity) {
+	public List<?> listDeposits(StarSystemEntity systemEntity) {
 		String q= "from ResourceDeposit where systemEntity = :systemEntity";
-		return listObject(prepareQuery(q, prepareParameters(null, "systemEntity", systemEntity)));
+		return listObject(prepareQuery(q, "systemEntity", systemEntity));
 	}
 
 	/* (non-Javadoc)
@@ -383,7 +392,7 @@ public class HibernateStore implements IEntityStore {
 	public List<?> listDeposits(Planet planet,
 			Coordinates2D location) {
 		String q= "from ResourceDeposit where systemEntity = :planet and location = :location";
-		Map<String,Object> map = prepareParameters(null, "planet", planet);
+		Map<String,Object> map = prepareParameters("planet", planet);
 		prepareParameters(map, "location", location);
 		return listObject(prepareQuery(q, map));
 	}
@@ -393,7 +402,7 @@ public class HibernateStore implements IEntityStore {
 	 */
 	public List<?> listDesigns(Corporation owner) {
 		String q= "from StarshipDesign where owner = :owner";
-		return listObject(prepareQuery(q, prepareParameters(null, "owner", owner)));
+		return listObject(prepareQuery(q, "owner", owner));
 	}
 
 	/* (non-Javadoc)
@@ -405,8 +414,7 @@ public class HibernateStore implements IEntityStore {
 		if(openOnly) {
 			q = q + " and used = false";
 		}
-		Map<String, Object> map = prepareParameters(null, "owner", owner);
-		return listObject(prepareQuery(q, map));
+		return listObject(prepareQuery(q, "owner", owner));
 	}
 
 	/* (non-Javadoc)
@@ -414,7 +422,7 @@ public class HibernateStore implements IEntityStore {
 	 */
 	public List<?> listFacilities() {
 		String q = "from Facility";
-		return listObject(prepareQuery(q, null));
+		return listObject(prepareQuery(q));
 	}
 
 	/* (non-Javadoc)
@@ -422,7 +430,7 @@ public class HibernateStore implements IEntityStore {
 	 */
 	public List<?> listFacilities(Colony colony) {
 		String q= "from Facility where colony = :colony";
-		return listObject(prepareQuery(q, prepareParameters(null, "colony", colony)));
+		return listObject(prepareQuery(q, "colony", colony));
 	}
 
 	/* (non-Javadoc)
@@ -430,7 +438,7 @@ public class HibernateStore implements IEntityStore {
 	 */
 	public List<?> listFacilities(Corporation owner) {
 		String q= "from Facility where owner = :owner";
-		return listObject(prepareQuery(q, prepareParameters(null, "owner", owner)));
+		return listObject(prepareQuery(q, "owner", owner));
 	}
 
 	/* (non-Javadoc)
@@ -445,16 +453,15 @@ public class HibernateStore implements IEntityStore {
 			q += "'" + types.get(i).getKey() + "'";
 		}
 		q += ")";
-		return listObject(prepareQuery(q, prepareParameters(null, "colony", colony)));
+		return listObject(prepareQuery(q, "colony", colony));
 	}
 
 	/* (non-Javadoc)
 	 * @see starcorp.server.entitystore.IEntityStore#listFacilitiesBySalary(starcorp.common.entities.Colony, starcorp.common.types.PopulationClass)
 	 */
-	public List<?> listFacilitiesBySalary(Colony colony,
-			PopulationClass popClass) {
-		String q= "select facility from Workers where colony = :colony and population.popClassType = '" + popClass.getKey() + "' order by salary desc";
-		return listObject(prepareQuery(q, prepareParameters(null, "colony", colony)));
+	public List<?> listFacilitiesBySalary(PopulationClass popClass) {
+		String q= "select facility from Workers as w where w.population.popClassType = '" + popClass.getKey() + "' order by salary desc";
+		return listObject(prepareQuery(q));
 		
 	}
 
@@ -470,7 +477,7 @@ public class HibernateStore implements IEntityStore {
 			q += "'" + types.get(i).getKey() + "'";
 		}
 		q += ")";
-		List<?> facilities = listObject(prepareQuery(q, prepareParameters(null, "colony", colony)));
+		List<?> facilities = listObject(prepareQuery(q, "colony", colony));
 		Map<Facility, List<?>> result = new HashMap<Facility, List<?>>();
 		Iterator<?> i = facilities.iterator();
 		while(i.hasNext()) {
@@ -486,7 +493,7 @@ public class HibernateStore implements IEntityStore {
 	 */
 	public List<?> listItems(Corporation owner) {
 		String q= "from ColonyItem where owner = :owner";
-		return listObject(prepareQuery(q, prepareParameters(null, "owner", owner)));
+		return listObject(prepareQuery(q, "owner", owner));
 	}
 
 	/* (non-Javadoc)
@@ -501,7 +508,7 @@ public class HibernateStore implements IEntityStore {
 			q += "'" + types.get(i).getKey() + "'";
 		}
 		q += ")";
-		return listObject(prepareQuery(q, prepareParameters(null, "owner", owner)));
+		return listObject(prepareQuery(q, "owner", owner));
 	}
 
 	/* (non-Javadoc)
@@ -512,7 +519,7 @@ public class HibernateStore implements IEntityStore {
 		if(openOnly) {
 			q += " and used = false";
 		}
-		return listObject(prepareQuery(q, prepareParameters(null, "corp", corp)));
+		return listObject(prepareQuery(q, "corp", corp));
 	}
 
 	/* (non-Javadoc)
@@ -520,7 +527,7 @@ public class HibernateStore implements IEntityStore {
 	 */
 	public List<?> listMarket(int minQty) {
 		String q= "from MarketItem where item.quantity >= :minQty";
-		return listObject(prepareQuery(q, prepareParameters(null, "minQty", minQty)));
+		return listObject(prepareQuery(q, "minQty", minQty));
 	}
 
 	/* (non-Javadoc)
@@ -528,7 +535,7 @@ public class HibernateStore implements IEntityStore {
 	 */
 	public List<?> listMarket(Colony colony, int minQty) {
 		String q= "from MarketItem where colony = :colony and item.quantity >= " + minQty;
-		return listObject(prepareQuery(q, prepareParameters(null, "colony", colony)));
+		return listObject(prepareQuery(q, "colony", colony));
 	}
 
 	/* (non-Javadoc)
@@ -543,7 +550,7 @@ public class HibernateStore implements IEntityStore {
 			q += "'" + types.get(i).getKey() + "'";
 		}
 		q += ")";
-		return listObject(prepareQuery(q, prepareParameters(null, "colony", colony)));
+		return listObject(prepareQuery(q, "colony", colony));
 	}
 
 	/* (non-Javadoc)
@@ -551,7 +558,7 @@ public class HibernateStore implements IEntityStore {
 	 */
 	public List<?> listShips(Corporation owner) {
 		String q= "from Starship where owner = :owner";
-		return listObject(prepareQuery(q, prepareParameters(null, "owner", owner)));
+		return listObject(prepareQuery(q, "owner", owner));
 	}
 
 	/* (non-Javadoc)
@@ -559,7 +566,7 @@ public class HibernateStore implements IEntityStore {
 	 */
 	public List<?> listShips(Planet orbiting) {
 		String q= "from Starship where planet = :orbiting and planetLocation.x < 1 and planetLocation.y < 1";
-		return listObject(prepareQuery(q, prepareParameters(null, "orbiting", orbiting)));
+		return listObject(prepareQuery(q, "orbiting", orbiting));
 	}
 
 	/* (non-Javadoc)
@@ -567,7 +574,7 @@ public class HibernateStore implements IEntityStore {
 	 */
 	public List<?> listShips(Planet planet, Coordinates2D location) {
 		String q= "from Starship where planet = :planet and planetLocation = :location";
-		Map<String,Object> map = prepareParameters(null, "planet", planet);
+		Map<String,Object> map = prepareParameters("planet", planet);
 		prepareParameters(map, "location", location);
 		return listObject(prepareQuery(q, map));
 	}
@@ -577,7 +584,7 @@ public class HibernateStore implements IEntityStore {
 	 */
 	public List<?> listShips(Colony docked) {
 		String q= "from Starship where colony = :docked";
-		return listObject(prepareQuery(q, prepareParameters(null, "docked", docked)));
+		return listObject(prepareQuery(q, "docked", docked));
 	}
 
 	/* (non-Javadoc)
@@ -585,7 +592,7 @@ public class HibernateStore implements IEntityStore {
 	 */
 	public List<?> listSystemEntities(StarSystem star) {
 		String q= "from AStarSystemEntity where system = :star";
-		return listObject(prepareQuery(q, prepareParameters(null, "star", star)));
+		return listObject(prepareQuery(q, "star", star));
 	}
 
 	/* (non-Javadoc)
@@ -594,7 +601,7 @@ public class HibernateStore implements IEntityStore {
 	public List<?> listSystemEntities(StarSystem star,
 			CoordinatesPolar location) {
 		String q= "from AStarSystemEntity where system = :star and location = :location";
-		Map<String,Object> map = prepareParameters(null, "star", star);
+		Map<String,Object> map = prepareParameters("star", star);
 		prepareParameters(map, "location", location);
 		return listObject(prepareQuery(q, map));
 	}
@@ -604,7 +611,7 @@ public class HibernateStore implements IEntityStore {
 	 */
 	public List<?> listSystems(Coordinates3D origin, int range) {
 		String q = "from StarSystem where location <> :location";
-		List<?> systems = listObject(prepareQuery(q, prepareParameters(null, "location", origin)));
+		List<?> systems = listObject(prepareQuery(q, "location", origin));
 		List<StarSystem> result = new ArrayList<StarSystem>();
 		Iterator<?> i = systems.iterator();
 		while(i.hasNext()) {
@@ -621,7 +628,7 @@ public class HibernateStore implements IEntityStore {
 	 */
 	public List<?> listWorkers(Facility facility) {
 		String q= "from Workers where facility = :facility";
-		return listObject(prepareQuery(q, prepareParameters(null, "facility", facility)));
+		return listObject(prepareQuery(q, "facility", facility));
 	}
 
 	/* (non-Javadoc)
@@ -629,7 +636,7 @@ public class HibernateStore implements IEntityStore {
 	 */
 	public List<?> listWorkers(Colony colony) {
 		String q= "from AColonists where colony = :colony";
-		return listObject(prepareQuery(q, prepareParameters(null, "colony", colony)));
+		return listObject(prepareQuery(q, "colony", colony));
 	}
 
 	/* (non-Javadoc)
@@ -637,7 +644,7 @@ public class HibernateStore implements IEntityStore {
 	 */
 	public List<?> listWorkers(Colony colony, PopulationClass popClass) {
 		String q= "from AColonists where colony = :colony and population.popClassType = '" + popClass.getKey() + "'";
-		return listObject(prepareQuery(q, prepareParameters(null, "colony", colony)));
+		return listObject(prepareQuery(q, "colony", colony));
 	}
 
 	/* (non-Javadoc)
@@ -645,7 +652,6 @@ public class HibernateStore implements IEntityStore {
 	 */
 	public ABaseEntity save(ABaseEntity entity) {
 		getSession().saveOrUpdate(entity);
-		commit();
 		return entity;
 	}
 
@@ -655,22 +661,193 @@ public class HibernateStore implements IEntityStore {
 
 	public Corporation getCorporation(String email) {
 		String q = "from Corporation where playerEmail = :email";
-		Map<String, Object> map = prepareParameters(null, "email", email);
-		return (Corporation) loadObject(prepareQuery(q, map));
+		return (Corporation) loadObject(prepareQuery(q, "email", email));
 	}
 
 	public List<?> list(Class<?> entityClass) {
 		String q = "from " + entityClass.getSimpleName();
-		return listObject(prepareQuery(q, null));
-	}
-
-	public void delete(Class<?> entityClass, int ID) {
-		getSession().delete(loadObject(entityClass, ID));
-		commit();
+		return listObject(prepareQuery(q));
 	}
 
 	public List<?> query(String hql) {
-		return listObject(prepareQuery(hql, null));
+		return listObject(prepareQuery(hql));
 	}
 
+	public List<?> listPlanets(StarSystem star, int maxGravity,
+			List<AtmosphereType> atmospheres) {
+		String q = "from Planet where system = :system and gravityRating <= :maxGravity";
+		int max = atmospheres == null ? 0 : atmospheres.size();
+		if(max > 0) {
+			q += " and atmosphereType in (";
+		}
+		for(int i = 0; i < max; i++) {
+			if(i > 0)
+				q += ", ";
+			q += "'" + atmospheres.get(i).getKey() + "'";
+		}
+		if(max > 0) {
+			q += ")";
+		}
+		Map<String,Object> map = prepareParameters("system", star);
+		map = prepareParameters(map, "maxGravity", maxGravity);
+		return listObject(prepareQuery(q, map));
+	}
+
+	public void shutdown() {
+		commit();
+		sessionFactory.close();
+	}
+
+	public List<?> listDeposits(Planet planet, List<AItemType> types,
+			int minTotal) {
+		String q = "from ResourceDeposit where systemEntity = :planet and totalQuantity >= " + minTotal;
+		int max = types == null ? 0 : types.size();
+		if(max > 0) {
+			q += " and type IN (";
+		}
+		for(int i = 0; i < max; i++) {
+			if(i > 0)
+				q += ", ";
+			q += "'" + types.get(i).getKey() + "'";
+		}
+		if(max > 0) {
+			q += ")";
+		}
+		q += " order by yield desc";
+		return listObject(prepareQuery(q, "planet", planet));
+	}
+	
+	public void delete(ABaseEntity entity) {
+		if(entity instanceof Colony) {
+			deleteColony((Colony)entity);
+		}
+		else if(entity instanceof Corporation) {
+			deleteCorp((Corporation)entity);
+		}
+		else if(entity instanceof Facility) {
+			deleteFacility((Facility)entity);
+		}
+		else if(entity instanceof Planet) {
+			deletePlanet((Planet)entity);
+		}
+		else if(entity instanceof StarSystem) {
+			deleteSystem((StarSystem)entity);
+		}
+		else if(entity instanceof StarSystemEntity) {
+			deleteSystemEntity((StarSystemEntity)entity);
+		}
+		else {
+			getSession().delete(entity);
+		}
+	}
+
+	private void deleteColony(Colony colony) {
+		String q = "delete from AColonists where colony = :colony";
+		Query query = prepareQuery(q,"colony",colony);
+		query.executeUpdate();
+		q = "delete from ColonistGrant where colony = :colony";
+		query = prepareQuery(q,"colony",colony);
+		query.executeUpdate();
+		q = "delete from ColonyItem where colony = :colony";
+		query = prepareQuery(q,"colony",colony);
+		query.executeUpdate();
+		q = "delete from DevelopmentGrant where colony = :colony";
+		query = prepareQuery(q,"colony",colony);
+		query.executeUpdate();
+		q = "delete from ColonyItem where colony = :colony";
+		query = prepareQuery(q,"colony",colony);
+		query.executeUpdate();
+		List<?> facilities = listFacilities(colony);
+		for(Object o : facilities) {
+			deleteFacility((Facility)o);
+		}
+		q = "delete from FacilityLease where colony = :colony";
+		query = prepareQuery(q,"colony",colony);
+		query.executeUpdate();
+		q = "delete from MarketItem where colony = :colony";
+		query = prepareQuery(q,"colony",colony);
+		query.executeUpdate();
+		getSession().delete(colony);
+	}
+
+	private void deleteCorp(Corporation corp) {
+		Session session = getSession();
+		List<?> colonies = listColonies(corp);
+		for(Object o : colonies) {
+			deleteColony((Colony)o);
+		}
+		List<?> ships = listShips(corp);
+		for(Object o : ships) {
+			deleteSystemEntity((Starship)o);
+		}
+		List<?> facilities = listFacilities(corp);
+		for(Object o : facilities) {
+			deleteFacility((Facility)o);
+		}
+		String q = "delete from MarketItem where seller = :corp";
+		Query query = prepareQuery(q,"corp",corp);
+		query.executeUpdate();
+		q = "delete from ColonyItem where owner = :corp";
+		query = prepareQuery(q,"corp",corp);
+		query.executeUpdate();
+		q = "delete from StarshipDesign where owner = :corp";
+		query = prepareQuery(q,"corp",corp);
+		query.executeUpdate();
+		session.delete(corp);
+	}
+
+	private void deleteFacility(Facility facility) {
+		Session session = getSession();
+		String q = "delete from Workers where facility = :facility";
+		Query query = prepareQuery(q, "facility", facility);
+		query.executeUpdate();
+		session.delete(facility);
+	}
+
+	private void deletePlanet(Planet planet) {
+		List<?> colonies = listColonies(planet);
+		for(Object o : colonies) {
+			Colony c = (Colony) o;
+			deleteColony(c);
+		}
+		Session session = getSession();
+		String q = "delete ResourceDeposit where systemEntity = :entity";
+		Query query = prepareQuery(q, "entity", planet);
+		query.executeUpdate();
+		session.delete(planet);
+	}
+
+	private void deleteSystem(StarSystem system) {
+		Session session = getSession();
+		List<?> entities = listSystemEntities(system);
+		for(Object o : entities) {
+			deleteSystemEntity((StarSystemEntity) o);
+		}
+		session.delete(system);
+	}
+
+	private void deleteSystemEntity(StarSystemEntity entity) {
+		if(entity instanceof Planet) {
+			deletePlanet((Planet)entity);
+		}
+		else {
+			Session session = getSession();
+			String q = "delete ResourceDeposit where systemEntity = :entity";
+			Query query = prepareQuery(q, "entity", entity);
+			query.executeUpdate();
+			session.delete(entity);
+		}
+	}
+
+	public List<?> listColonies(Corporation govt) {
+		String q = "from Colony where government = :govt";
+		return listObject(prepareQuery(q, "govt", govt));
+	}
+
+	public List<?> listColonists() {
+		String q = "from AColonists";
+		return listObject(prepareQuery(q));
+	}
+
+	
 }

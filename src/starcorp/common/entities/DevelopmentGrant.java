@@ -95,7 +95,7 @@ public class DevelopmentGrant extends ABaseEntity {
 	}
 	@Override
 	public String toString() {
-		return type.getKey() + " \u20a1 " + grant + " " + super.toString() + " @ " + colony;
+		return type.getKey() + " \u20a1 " + grant + " " + super.toString() + " @ " + colony.getName() + " (" + colony.getID() + ")";
 	}
 
 }

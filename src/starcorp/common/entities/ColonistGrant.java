@@ -89,6 +89,6 @@ public class ColonistGrant extends ABaseEntity {
 	}
 	@Override
 	public String toString() {
-		return popClass.getKey() + " \u20a1 " + credits + " " + super.toString() + " @ " + colony;
+		return popClass.getKey() + " \u20a1 " + credits + " " + super.toString() + " @ " + colony.getName() + " (" + colony.getID() + ")"; 
 	}
 }

@@ -57,7 +57,7 @@ public class Workers extends AColonists {
 	}
 	@Override
 	public String toString() {
-		return super.toString() + " [Employer: " + facility + "]";
+		return super.toString() + " [Employer: " + facility.getType() + "]";
 	}
 	
 }

@@ -38,7 +38,7 @@ public class ResourceGenerator extends AFacilityType {
 		if(resource.isMetal() && isMetal()) {
 			return true;
 		}
-		if(resource.isMinerals() && isMinerals()) {
+		if(resource.isMineral() && isMinerals()) {
 			return true;
 		}
 		if(resource.isOrganic() && isOrganic()) {

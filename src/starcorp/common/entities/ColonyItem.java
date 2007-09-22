@@ -109,6 +109,6 @@ public class ColonyItem extends ABaseEntity {
 
 	@Override
 	public String toString() {
-		return item + " for " + owner + " " + super.toString() + " @ " + colony;
+		return item + " for " + owner.getName() +" (" + owner.getID() + ") " + super.toString() + " @ " + colony.getName() + " (" + colony.getID() + ")";
 	}
 }

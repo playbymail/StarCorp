@@ -13,8 +13,8 @@ package starcorp.server.turns.orders;
 import java.util.Iterator;
 import java.util.List;
 import starcorp.common.entities.Corporation;
-import starcorp.common.entities.GasField;
 import starcorp.common.entities.ResourceDeposit;
+import starcorp.common.entities.StarSystemEntity;
 import starcorp.common.entities.Starship;
 import starcorp.common.turns.OrderReport;
 import starcorp.common.turns.TurnError;
@@ -39,7 +39,7 @@ public class MineGasField extends AOrderProcessor {
 		int gasFieldId = order.getAsInt(1);
 		
 		Starship ship = (Starship) entityStore.load(Starship.class, starshipId);
-		GasField gasfield = (GasField) entityStore.load(GasField.class, gasFieldId);
+		StarSystemEntity gasfield = (StarSystemEntity) entityStore.load(StarSystemEntity.class, gasFieldId);
 		
 		if(ship == null || !ship.getOwner().equals(corp)) {
 			error = new TurnError(TurnError.INVALID_SHIP);
@@ -47,7 +47,7 @@ public class MineGasField extends AOrderProcessor {
 		else if(!ship.enoughTimeUnits(TIME_UNITS)) {
 			error = new TurnError(TurnError.INSUFFICIENT_TIME);
 		}
-		else if(gasfield == null || !gasfield.getSystem().equals(ship.getSystem()) || !gasfield.getLocation().equals(ship.getLocation()) || ship.getPlanet() != null) {
+		else if(gasfield == null || !gasfield.isGasfield() || !gasfield.getSystem().equals(ship.getSystem()) || !gasfield.getLocation().equals(ship.getLocation()) || ship.getPlanet() != null) {
 			error = new TurnError(TurnError.INVALID_LOCATION);
 		}
 		else if(!ship.getDesign().canMineGasField()) {

@@ -46,8 +46,7 @@ public abstract class ABaseEntity {
 	}
 	
 	private int ID;
-	private Timestamp lastModified;
-	
+	private long version;
 	public ABaseEntity() {
 		
 	}
@@ -72,12 +71,6 @@ public abstract class ABaseEntity {
 	}
 	public void setID(int id) {
 		ID = id;
-	}
-	public Timestamp getLastModified() {
-		return lastModified;
-	}
-	public void setLastModified(Timestamp lastModified) {
-		this.lastModified = lastModified;
 	}
 	@Override
 	public int hashCode() {
@@ -112,5 +105,13 @@ public abstract class ABaseEntity {
 		Element root = doc.addElement("starcorp");
 		writer.write(toFullXML(root));
 		writer.close();
+	}
+
+	public long getVersion() {
+		return version;
+	}
+
+	public void setVersion(long version) {
+		this.version = version;
 	}
 }

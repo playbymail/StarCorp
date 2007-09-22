@@ -81,7 +81,7 @@ public class Colony extends ANamedEntity {
 	}
 	@Override
 	public String toString() {
-		return super.toString() + " @ " + planet + " " + location;
+		return super.toString() + " @ " + planet.getName() + " (" + planet.getID() + ") " + location;
 	}
 	
 }

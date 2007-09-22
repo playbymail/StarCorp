@@ -56,21 +56,21 @@ public class Standard extends ASystemTemplate {
 		if(orbit < 6 && Util.rnd.nextInt(100) <= 5) {
 			return APlanetTemplate.getTemplate("Rock");
 		}
-		if(orbit > 12 && Util.rnd.nextInt(100) <= 5) {
+		if(orbit > 8 && Util.rnd.nextInt(100) <= 5) {
 			return APlanetTemplate.getTemplate("Ice");
 		}
 		if(orbit > 3 && orbit < 12) {
 			int rand = Util.rnd.nextInt(100);
-			if(rand <= 5) {
+			if(rand <= 1) {
 				return APlanetTemplate.getTemplate("Green");
 			}
-			else if(rand <= 10) {
+			else if(rand <= 2) {
 				return APlanetTemplate.getTemplate("Oceanic");
 			}
-			else if(rand <= 15) {
+			else if(rand <= 3) {
 				return APlanetTemplate.getTemplate("Volcanic");
 			}
-			else if(rand <= 20) {
+			else if(rand <= 4) {
 				return APlanetTemplate.getTemplate("Tropical");
 			}
 		}

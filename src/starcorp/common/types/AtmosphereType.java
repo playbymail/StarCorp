@@ -10,8 +10,10 @@
  */
 package starcorp.common.types;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -38,6 +40,25 @@ public class AtmosphereType extends ABaseType {
 		while(i.hasNext()) {
 			types.get(i.next()).print();
 		}
+	}
+	
+	public static List<AtmosphereType> listTypes(double mazHazardLevel) {
+		ArrayList<AtmosphereType> list = new ArrayList<AtmosphereType>();
+		for(String key : types.keySet()) {
+			AtmosphereType type = types.get(key);
+			if(type.getHazardLevel() <= mazHazardLevel) {
+				list.add(type);
+			}
+		}
+		return list;
+	}
+
+	public static List<AtmosphereType> listTypes() {
+		ArrayList<AtmosphereType> list = new ArrayList<AtmosphereType>();
+		for(String key : types.keySet()) {
+			list.add(types.get(key));
+		}
+		return list;
 	}
 	
 	private static void loadTypes() {

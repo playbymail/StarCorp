@@ -23,7 +23,7 @@ import starcorp.common.types.Coordinates2D;
  */
 public class ResourceDeposit extends ABaseEntity {
 
-	private AStarSystemEntity systemEntity;
+	private StarSystemEntity systemEntity;
 	private Coordinates2D location;
 	private AItemType type;
 	private int totalQuantity;
@@ -127,11 +127,11 @@ public class ResourceDeposit extends ABaseEntity {
 		this.totalQuantity = totalQuantity;
 	}
 
-	public AStarSystemEntity getSystemEntity() {
+	public StarSystemEntity getSystemEntity() {
 		return systemEntity;
 	}
 
-	public void setSystemEntity(AStarSystemEntity systemEntity) {
+	public void setSystemEntity(StarSystemEntity systemEntity) {
 		this.systemEntity = systemEntity;
 	}
 
@@ -150,7 +150,7 @@ public class ResourceDeposit extends ABaseEntity {
 	@Override
 	public void readXML(Element e) {
 		super.readXML(e);
-		this.systemEntity = (AStarSystemEntity) ABaseEntity.fromXML(e.element("entity"));
+		this.systemEntity = (StarSystemEntity) ABaseEntity.fromXML(e.element("entity"));
 		this.location = new Coordinates2D(e);
 		this.type = AItemType.getType(e.attributeValue("type"));
 		this.totalQuantity = Integer.parseInt(e.attributeValue("total","0"));
@@ -170,6 +170,6 @@ public class ResourceDeposit extends ABaseEntity {
 
 	@Override
 	public String toString() {
-		return type.getKey() + " x " + totalQuantity + " " + super.toString() + " @ " + systemEntity + " " + location;
+		return type.getKey() + " x " + totalQuantity + " " + super.toString() + " @ " + systemEntity.getName() + " (" + systemEntity.getID() + ") " + location;
 	}
 }

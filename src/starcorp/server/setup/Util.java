@@ -13,6 +13,9 @@ package starcorp.server.setup;
 import java.util.Map;
 import java.util.Random;
 
+import starcorp.common.entities.Planet;
+import starcorp.common.types.Coordinates2D;
+
 /**
  * starcorp.server.setup.Util
  *
@@ -20,6 +23,49 @@ import java.util.Random;
  * @version 21 Sep 2007
  */
 public class Util {
+	public static class SuitableLocation implements Comparable<SuitableLocation> {
+		public Coordinates2D location;
+		public Planet planet;
+		public int rating;
+		
+		public int compareTo(SuitableLocation o) {
+			return o.rating - this.rating;
+		}
+	
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result
+					+ ((location == null) ? 0 : location.hashCode());
+			result = prime * result
+					+ ((planet == null) ? 0 : planet.hashCode());
+			return result;
+		}
+	
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			final SuitableLocation other = (SuitableLocation) obj;
+			if (location == null) {
+				if (other.location != null)
+					return false;
+			} else if (!location.equals(other.location))
+				return false;
+			if (planet == null) {
+				if (other.planet != null)
+					return false;
+			} else if (!planet.equals(other.planet))
+				return false;
+			return true;
+		} 
+	}
+
 	public static final Random rnd = new Random(System.currentTimeMillis());
 
 	public static Object pick(Map<?, Integer> mapOfChoices) {

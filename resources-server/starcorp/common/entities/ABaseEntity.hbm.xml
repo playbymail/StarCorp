@@ -3,11 +3,10 @@
         "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
         "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
-    <class name="starcorp.common.entities.ABaseEntity" table="entities">
+    <class name="starcorp.common.entities.ABaseEntity" table="ALL_ENTITIES">
     	<id name="ID"><generator class="native"/></id>
-    	<timestamp name="lastModified"/>
-    	
-    	<joined-subclass name="starcorp.common.entities.AColonists" table="colonists">
+    	<version name="version"/>
+    	<joined-subclass name="starcorp.common.entities.AColonists" table="COLONISTS">
     		<key column="ENTITY_ID"/>
     		<many-to-one name="colony"/>
     		<component name="population">
@@ -17,11 +16,11 @@
     		<property name="cash"/>
     		<property name="happiness"/>
     		
-    		<joined-subclass name="starcorp.common.entities.Unemployed" table="unemployed">
+    		<joined-subclass name="starcorp.common.entities.Unemployed" table="UNEMPLOYED">
     			<key column="ENTITY_ID"/>
     		</joined-subclass> <!-- Unemployed -->
 
-    		<joined-subclass name="starcorp.common.entities.Workers" table="employed">
+    		<joined-subclass name="starcorp.common.entities.Workers" table="WORKERS">
     			<key column="ENTITY_ID"/>
     			<many-to-one name="facility"/>
     			<property name="salary"/>
@@ -29,29 +28,21 @@
 
     	</joined-subclass> <!-- AColonists -->
     	
-    	<joined-subclass name="starcorp.common.entities.ANamedEntity" table="named_entities">
+    	<joined-subclass name="starcorp.common.entities.ANamedEntity" table="ALL_NAMED_ENTITIES">
     		<key column="ENTITY_ID"/>
     		<property name="name"/>
     		
-    		<joined-subclass name="starcorp.common.entities.AStarSystemEntity" table="system_entities">
+    		<joined-subclass name="starcorp.common.entities.StarSystemEntity" table="STAR_SYSTEM_ENTITIES">
     			<key column="ENTITY_ID"/>
+    			<property name="asteroid"/>
+    			<property name="gasfield"/>
     			<many-to-one name="system"/>
     			<component name="location">
     				<property name="quadrant"/>
     				<property name="orbit"/>
     			</component>
     			
-    			<joined-subclass name="starcorp.common.entities.AsteroidField" table="asteroid_fields">
-    				<key column="ENTITY_ID"/>
-    				<property name="hazardLevel"/>
-    			</joined-subclass> <!-- AsteroidField -->
-    			
-    			<joined-subclass name="starcorp.common.entities.GasField" table="gas_fields">
-    				<key column="ENTITY_ID"/>
-    				<property name="hazardLevel"/>
-    			</joined-subclass> <!-- GasField -->
-    			
-    			<joined-subclass name="starcorp.common.entities.Planet" table="planets">
+    			<joined-subclass name="starcorp.common.entities.Planet" table="PLANETS">
 					<key column="ENTITY_ID"/>
 					<many-to-one name="orbiting"/>
 					<property name="atmosphereType"/>
@@ -66,7 +57,7 @@
     				</set>
 				</joined-subclass> <!-- Planet -->
 				
-				<joined-subclass name="starcorp.common.entities.Starship" table="starships">
+				<joined-subclass name="starcorp.common.entities.Starship" table="STARSHIPS">
     				<key column="ENTITY_ID"/>
     				<many-to-one name="owner"/>
     				<many-to-one name="planet"/>
@@ -76,7 +67,7 @@
     					<property name="x"/>
     					<property name="y"/>
     				</component>
-    				<set name="cargo" table="cargo" lazy="false">
+    				<set name="cargo" table="SHIP_CARGO" lazy="false">
     					<key column="ENTITY_ID"/>
     					<composite-element class="starcorp.common.types.Items">
     						<property name="type" column="itemType"/>
@@ -90,7 +81,7 @@
     				<property name="timeUnitsUsed"/>
     			</joined-subclass> <!-- Starship -->
 				
-				<joined-subclass name="starcorp.common.entities.StellarAnomoly" table="stellar_anomolies">
+				<joined-subclass name="starcorp.common.entities.StellarAnomoly" table="STELLAR_ANOMOLIES">
     				<key column="ENTITY_ID"/>
     				<property name="description" column="anomolyDescription"/>
     				<property name="event" column="eventType"/>
@@ -98,7 +89,7 @@
     			
     		</joined-subclass> <!-- AStarSystemEntiy -->
     		
-    		<joined-subclass name="starcorp.common.entities.Colony" table="colonies">
+    		<joined-subclass name="starcorp.common.entities.Colony" table="COLONIES">
     			<key column="ENTITY_ID"/>
     			<many-to-one name="government"/>
     			<many-to-one name="planet"/>
@@ -113,7 +104,7 @@
     			</component>
     		</joined-subclass> <!-- Colony -->
     		
-    		<joined-subclass name="starcorp.common.entities.Corporation" table="corporations">
+    		<joined-subclass name="starcorp.common.entities.Corporation" table="CORPORATIONS">
     			<key column="ENTITY_ID"/>
     			<property name="playerName"/>
     			<property name="playerEmail"/>
@@ -127,25 +118,25 @@
     				<property name="year" column="lastTurnYear"/>
     				<property name="month" column="lastTurnMonth"/>
     			</component>
-    			<set name="transactions" table="cash_transactions" lazy="false">
+    			<set name="transactions" table="CORPORATE_LEDGER" lazy="false">
     				<key column="ENTITY_ID"/>
     				<composite-element class="starcorp.common.types.CashTransaction">
-    					<property name="amount"/>
-    					<property name="description"/>
-    					<property name="year"/>
-    					<property name="month"/>
+    					<property name="amount" column="ctAmount"/>
+    					<property name="description" column="ctDesc"/>
+    					<property name="year" column="ctYear"/>
+    					<property name="month" column="ctMonth"/>
     				</composite-element>
     			</set>
     		</joined-subclass> <!-- Corporation -->
     		
-    		<joined-subclass name="starcorp.common.entities.StarshipDesign" table="ship_designs" lazy="false">
+    		<joined-subclass name="starcorp.common.entities.StarshipDesign" table="SHIP_DESIGNS" lazy="false">
     			<key column="ENTITY_ID"/>
     			<many-to-one name="owner"/>
     			<component name="designDate">
     				<property name="year" column="designYear"/>
     				<property name="month" column="designMonth"/>
     			</component>
-    			<set name="hulls" table="ship_design_hulls" lazy="false">
+    			<set name="hulls" table="SHIP_DESIGN_HULLS" lazy="false">
     				<key column="ENTITY_ID"/>
     				<composite-element class="starcorp.common.types.Items">
     					<property name="type" column="itemType"/>
@@ -154,7 +145,7 @@
     			</set>
     		</joined-subclass> <!-- StarshipDesign -->
     		
-    		<joined-subclass name="starcorp.common.entities.StarSystem" table="star_system" lazy="false">
+    		<joined-subclass name="starcorp.common.entities.StarSystem" table="STAR_SYSTEM" lazy="false">
     			<key column="ENTITY_ID"/>
     			<property name="type" column="systemType"/>
     			<component name="location">
@@ -166,7 +157,7 @@
     	
     	</joined-subclass> <!-- ANamedEntity -->
     	
-    	<joined-subclass name="starcorp.common.entities.ColonistGrant" table="colonist_grants">
+    	<joined-subclass name="starcorp.common.entities.ColonistGrant" table="COLONIST_GRANTS">
     		<key column="ENTITY_ID"/>
     		<many-to-one name="colony"/>
     		<property name="popClassType"/>
@@ -178,7 +169,7 @@
     		</component>
     	</joined-subclass> <!-- ColonistGrant -->
     	
-    	<joined-subclass name="starcorp.common.entities.DevelopmentGrant" table="development_grants">
+    	<joined-subclass name="starcorp.common.entities.DevelopmentGrant" table="DEVELOPMENT_GRANTS">
     		<key column="ENTITY_ID"/>
     		<many-to-one name="colony"/>
     		<property name="type" column="facilityType"/>
@@ -194,7 +185,7 @@
     		</component>
     	</joined-subclass> <!-- DevelopmentGrant -->
 
-    	<joined-subclass name="starcorp.common.entities.FacilityLease" table="facility_leases">
+    	<joined-subclass name="starcorp.common.entities.FacilityLease" table="FACILITY_LEASES">
     		<key column="ENTITY_ID"/>
     		<many-to-one name="colony"/>
     		<property name="type" column="facilityType"/>
@@ -211,7 +202,7 @@
     		</component>
     	</joined-subclass> <!-- FacilityLease -->
     	
-    	<joined-subclass name="starcorp.common.entities.ColonyItem" table="colony_items">
+    	<joined-subclass name="starcorp.common.entities.ColonyItem" table="COLONY_ITEMS">
     		<key column="ENTITY_ID"/>
     		<many-to-one name="owner"/>
     		<many-to-one name="colony"/>
@@ -221,7 +212,7 @@
     		</component>
     	</joined-subclass> <!-- ColonyItem -->
     	
-    	<joined-subclass name="starcorp.common.entities.ResourceDeposit" table="resource_deposits">
+    	<joined-subclass name="starcorp.common.entities.ResourceDeposit" table="RESOURCE_DEPOSITS">
     		<key column="ENTITY_ID"/>
     		<many-to-one name="systemEntity"/>
     		<component name="location">
@@ -233,7 +224,7 @@
     		<property name="yield"/>
     	</joined-subclass> <!-- ResourceDeposit -->
     	
-    	<joined-subclass name="starcorp.common.entities.MarketItem" table="market_items">
+    	<joined-subclass name="starcorp.common.entities.MarketItem" table="MARKET_ITEMS">
     		<key column="ENTITY_ID"/>
     		<many-to-one name="seller"/>
     		<many-to-one name="colony"/>
@@ -252,7 +243,7 @@
     		</component>
     	</joined-subclass> <!-- MarketItem -->
     	
-    	<joined-subclass name="starcorp.common.entities.Facility" table="facilities">
+    	<joined-subclass name="starcorp.common.entities.Facility" table="FACILITIES">
     		<key column="ENTITY_ID"/>
     		<many-to-one name="owner"/>
     		<many-to-one name="colony"/>
@@ -261,14 +252,14 @@
     		<property name="serviceCharge"/>
     		<property name="transactionCount"/>
     		<property name="open"/>
-    		<set name="itemQueue" table="facility_queue" lazy="false">
+    		<set name="itemQueue" table="FACTORY_QUEUE" lazy="false">
     			<key column="ENTITY_ID"/>
     			<composite-element class="starcorp.common.types.Items">
     				<property name="type" column="itemType"/>
     				<property name="quantity"/>
     			</composite-element>
     		</set>
-    		<set name="itemsCreated" table="facility_created" lazy="false">
+    		<set name="itemsCreated" table="FACTORY_HISTORY" lazy="false">
     			<key column="ENTITY_ID"/>
     			<composite-element class="starcorp.common.types.Items">
     				<property name="type" column="itemType"/>

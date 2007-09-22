@@ -18,13 +18,10 @@ import java.util.Random;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import starcorp.common.entities.AStarSystemEntity;
-import starcorp.common.entities.AsteroidField;
-import starcorp.common.entities.GasField;
+import starcorp.common.entities.StarSystemEntity;
 import starcorp.common.entities.Planet;
 import starcorp.common.entities.ResourceDeposit;
 import starcorp.common.entities.StarSystem;
-import starcorp.common.types.AItemType;
 import starcorp.common.types.Coordinates3D;
 import starcorp.common.types.CoordinatesPolar;
 import starcorp.common.util.PackageExplorer;
@@ -107,6 +104,7 @@ public abstract class ASystemTemplate {
 		system.setType(randomType());
 		entityStore.save(system);
 		generateFeatures(system);
+		entityStore.save(system);
 		return system;
 	}
 	
@@ -143,53 +141,54 @@ public abstract class ASystemTemplate {
 	
 	private int planetCount = 0;
 	
-	protected ResourceDeposit createDeposit(AStarSystemEntity entity, String itemKey) {
+	protected ResourceDeposit createDeposit(StarSystemEntity entity, String itemKey) {
 		ResourceDeposit deposit = new ResourceDeposit();
 		deposit.setSystemEntity(entity);
 		deposit.setTotalQuantity(rnd.nextInt(10000000));
 		deposit.setType(itemKey);
 		deposit.setYield(rnd.nextInt(100) + 1);
 		entityStore.save(deposit);
-		log.info("Created " + deposit);
+		if(log.isDebugEnabled())log.debug("Created " + deposit);
 		return deposit;
 	}
 	
-	protected void generateResources(AsteroidField asteroid) {
-		if(Util.rnd.nextBoolean()) createDeposit(asteroid, "aluminium");
-		if(Util.rnd.nextBoolean())createDeposit(asteroid, "carbonite");
-		if(Util.rnd.nextBoolean())createDeposit(asteroid, "copper");
-		if(Util.rnd.nextBoolean())createDeposit(asteroid, "fissile");
-		if(Util.rnd.nextBoolean())createDeposit(asteroid, "iron");
-		if(Util.rnd.nextBoolean())createDeposit(asteroid, "precious");
-		if(Util.rnd.nextBoolean())createDeposit(asteroid, "silicon");
-	}
-	
-	protected void generateResources(GasField gasfield) {
-		if(Util.rnd.nextBoolean())createDeposit(gasfield, "noblegas");
-		if(Util.rnd.nextBoolean())createDeposit(gasfield, "hydrocarbon");
-		if(Util.rnd.nextBoolean())createDeposit(gasfield, "water");
-		if(Util.rnd.nextBoolean())createDeposit(gasfield, "rare-minerals");
+	protected void generateResources(StarSystemEntity entity) {
+		if(entity.isAsteroid()) {
+			if(Util.rnd.nextBoolean()) createDeposit(entity, "aluminium");
+			if(Util.rnd.nextBoolean())createDeposit(entity, "carbonite");
+			if(Util.rnd.nextBoolean())createDeposit(entity, "copper");
+			if(Util.rnd.nextBoolean())createDeposit(entity, "fissile");
+			if(Util.rnd.nextBoolean())createDeposit(entity, "iron");
+			if(Util.rnd.nextBoolean())createDeposit(entity, "precious");
+			if(Util.rnd.nextBoolean())createDeposit(entity, "silicon");
+		}
+		else if(entity.isGasfield()) {
+			if(Util.rnd.nextBoolean())createDeposit(entity, "noblegas");
+			if(Util.rnd.nextBoolean())createDeposit(entity, "hydrocarbon");
+			if(Util.rnd.nextBoolean())createDeposit(entity, "water");
+			if(Util.rnd.nextBoolean())createDeposit(entity, "rare-minerals");
+		}
 	}
 	
 	protected void generateFeatures(StarSystem system, CoordinatesPolar location) {
 		if(hasAsteroid(location.getOrbit())) {
-			AsteroidField field = new AsteroidField();
-			field.setHazardLevel(rnd.nextDouble());
+			StarSystemEntity field = new StarSystemEntity();
+			field.setAsteroid(true);
 			field.setLocation(location);
 			field.setName("Asteroid " + location);
 			field.setSystem(system);
 			entityStore.save(field);
-			log.info("Created " + field);
+			if(log.isDebugEnabled())log.debug("Created " + field);
 			generateResources(field);
 		}
 		else if(hasGasField(location.getOrbit())) {
-			GasField field = new GasField();
-			field.setHazardLevel(rnd.nextDouble());
+			StarSystemEntity field = new StarSystemEntity();
+			field.setGasfield(true);
 			field.setLocation(location);
 			field.setName("Gas Field " + location);
 			field.setSystem(system);
 			entityStore.save(field);
-			log.info("Created " + field);
+			if(log.isDebugEnabled())log.debug("Created " + field);
 			generateResources(field);
 		}
 		else {
@@ -198,13 +197,13 @@ public abstract class ASystemTemplate {
 				template.setEntityStore(entityStore);
 				planetCount++;
 				Planet planet = template.create(system, null, location, system.getName() + " " + planetCount);
-				log.info("Created " + planet);
+				if(log.isDebugEnabled())log.debug("Created " + planet);
 				int moons = countMoons(template,planet);
 				for(int i = 1; i <= moons; i++) {
 					APlanetTemplate moonTemplate = getMoonTemplate(template,planet);
 					moonTemplate.setEntityStore(entityStore);
 					Planet moon = moonTemplate.create(system, planet, location, planet.getName() + "." + i);
-					log.info("Created " + moon);
+					if(log.isDebugEnabled())log.debug("Created " + moon);
 				}
 				return;
 			}

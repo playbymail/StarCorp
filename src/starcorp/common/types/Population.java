@@ -75,4 +75,9 @@ public class Population {
 	public void setPopClassType(String key) {
 		popClass = PopulationClass.getType(key);
 	}
+
+	@Override
+	public String toString() {
+		return quantity + " x " + popClass;
+	}
 }

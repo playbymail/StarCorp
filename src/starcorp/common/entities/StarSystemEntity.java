@@ -4,12 +4,14 @@ import org.dom4j.Element;
 
 import starcorp.common.types.CoordinatesPolar;
 
-public abstract class AStarSystemEntity extends ANamedEntity {
+public class StarSystemEntity extends ANamedEntity {
 
 	protected StarSystem system;
 	protected CoordinatesPolar location;
-
-	public AStarSystemEntity() {
+	protected boolean asteroid;
+	protected boolean gasfield;
+	
+	public StarSystemEntity() {
 		super();
 	}
 
@@ -44,7 +46,23 @@ public abstract class AStarSystemEntity extends ANamedEntity {
 
 	@Override
 	public String toString() {
-		return super.toString() + " @ " + system + " " + location;
+		return super.toString() + " @ " + system.getName() + " [" + system.getID() + "] " + location;
+	}
+
+	public boolean isAsteroid() {
+		return asteroid;
+	}
+
+	public void setAsteroid(boolean asteroid) {
+		this.asteroid = asteroid;
+	}
+
+	public boolean isGasfield() {
+		return gasfield;
+	}
+
+	public void setGasfield(boolean gasfield) {
+		this.gasfield = gasfield;
 	}
 	
 }

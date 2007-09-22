@@ -32,7 +32,7 @@ import starcorp.common.types.StarshipHulls;
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 15 Sep 2007
  */
-public class Starship extends AStarSystemEntity {
+public class Starship extends StarSystemEntity {
 	public static final int TIME_UNITS_PER_TURN = 100;
 	
 	private Corporation owner;
@@ -66,7 +66,7 @@ public class Starship extends AStarSystemEntity {
 			}
 			else if(item.getTypeClass() instanceof Resources) {
 				Resources r = (Resources) item.getTypeClass();
-				if(r.isFissile() || r.isMetal() || r.isMinerals()) {
+				if(r.isFissile() || r.isMetal() || r.isMineral()) {
 					mass += (r.getMassUnits() * item.getQuantity()); 
 				}
 			}
@@ -150,7 +150,7 @@ public class Starship extends AStarSystemEntity {
 		}
 		else if(type instanceof Resources) {
 			Resources r = (Resources) type;
-			if(r.isFissile() || r.isMetal() || r.isMinerals()) {
+			if(r.isFissile() || r.isMetal() || r.isMineral()) {
 				cargoSpace = design.getIndustrialCapacity() - getCargoIndustrialGoodsMass();
 			}
 			else if(r.isGas() || r.isLiquid()) {
@@ -343,7 +343,7 @@ public class Starship extends AStarSystemEntity {
 
 	@Override
 	public String toString() {
-		return super.toString() + " [" + design + "}" + (planet == null ? "" : " " + planet) + (planetLocation == null ? "" : " " + planetLocation) + (colony == null ? "" : " " + colony);
+		return super.toString() + " [" + design.getName() + "}" + (planet == null ? "" : " " + planet.getName() + " (" + planet.getID() + ")") + (planetLocation == null ? "" : " " + planetLocation) + (colony == null ? "" : " " + colony.getName() + " (" + colony.getID() + ")");
 	} 
 
 }

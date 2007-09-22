@@ -12,6 +12,10 @@ package starcorp.server.facilities;
 
 import java.util.Iterator;
 import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import starcorp.common.entities.Colony;
 import starcorp.common.entities.ColonyItem;
 import starcorp.common.entities.Corporation;
@@ -37,6 +41,8 @@ import starcorp.server.entitystore.IEntityStore;
  */
 public class FacilityProcessor {
 
+	private Log log = LogFactory.getLog(FacilityProcessor.class);
+	
 	private IEntityStore entityStore;
 	
 	public FacilityProcessor(IEntityStore store) {
@@ -44,6 +50,7 @@ public class FacilityProcessor {
 	}
 	
 	public void process() {
+		log.info("Started facility processor");
 		List<?> facilities = entityStore.listFacilities();
 		Iterator<?> i = facilities.iterator();
 		while(i.hasNext()) {
@@ -51,9 +58,12 @@ public class FacilityProcessor {
 			List<?> workers = entityStore.listWorkers(facility);
 			process(facility,workers);
 		}
+		log.info("Finished facility processor");
 	}
 
 	private void process(Facility facility, List<?> workers) {
+		if(log.isDebugEnabled())
+			log.debug("Processing " + facility);
 		facility.setTransactionCount(0);
 		facility.setPowered(false);
 		usePower(facility);
@@ -63,10 +73,14 @@ public class FacilityProcessor {
 		else if(facility.getTypeClass() instanceof ResourceGenerator) {
 			processGenerator(facility, workers);
 		}
+		if(log.isDebugEnabled())
+			log.debug("Processed " + facility);
 	}
 	
 	private void usePower(Facility facility) {
 		int required = facility.getTypeClass().getPowerRequirement();
+		if(log.isDebugEnabled())
+			log.debug(facility + " requires " + required + " power");
 		Corporation owner = facility.getOwner();
 		Colony colony = facility.getColony();
 		List<AItemType> types = IndustrialGoods.listPower();
@@ -99,6 +113,8 @@ public class FacilityProcessor {
 			ColonyItem.use(items, required);
 			facility.setPowered(true);
 		}
+		if(log.isDebugEnabled())
+			log.debug(facility + (facility.isPowered() ? " is powered" : " isn't powered"));
 	}
 	
 	private int hasMaterials(Colony colony, Corporation owner, AFactoryItem type) {
@@ -148,11 +164,15 @@ public class FacilityProcessor {
 			entityStore.save(cItem);
 		}
 		cItem.add(qty);
+		if(log.isDebugEnabled())
+			log.debug(factory +" produced " + qty + " x " + type);
 		useMaterials(factory.getColony(),factory.getOwner(), type, qty); 
 		return new Items(item.getTypeClass(),qty);
 	}
 	
 	private void processFactory(Facility factory, List<?> workers) {
+		if(log.isDebugEnabled())
+			log.debug(factory + " beginning production.");
 		factory.clearCreated();
 		Factory type = (Factory) factory.getTypeClass();
 		int maxCapacity = factory.isPowered() ? type.getCapacity(workers) : 0;
@@ -165,9 +185,13 @@ public class FacilityProcessor {
 			}
 			capacityUsed = factory.getTransactionCount();
 		}
+		if(log.isDebugEnabled())
+			log.debug(factory + " production done.");
 	}
 	
 	private void processGenerator(Facility generator, List<?> workers) {
+		if(log.isDebugEnabled())
+			log.debug(generator + " started generating.");
 		Corporation owner = generator.getOwner();
 		Colony colony = generator.getColony();
 		Planet planet = colony.getPlanet();
@@ -197,6 +221,8 @@ public class FacilityProcessor {
 				}
 				item.add(qty);
 				deposit.remove(qty);
+				if(log.isDebugEnabled())
+					log.debug(generator + " generated " + qty + " x " + deposit.getType());
 			}
 			
 		}

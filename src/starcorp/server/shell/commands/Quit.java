@@ -27,6 +27,12 @@ public class Quit extends ACommand {
 	public void process() throws Exception {
 		out.println("Bye!");
 		out.flush();
+		try {
+			entityStore.shutdown();
+		}
+		catch(Throwable e) {
+			System.err.println(e.getMessage());
+		}
 		System.exit(0);
 	}
 

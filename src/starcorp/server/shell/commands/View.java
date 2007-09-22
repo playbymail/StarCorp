@@ -46,7 +46,7 @@ public class View extends ACommand {
 	public void process() throws Exception {
 		String entityClass = get(0);
 		int ID = getAsInt(1);
-		boolean xml = isTrue(2);
+		boolean xml = isTrue(2) || "xml".equalsIgnoreCase(get(2));
 		if(entityClass == null || ID == 0) {
 			out.print("Invalid arguments");
 		}
