@@ -24,7 +24,7 @@ import starcorp.common.types.Items;
  * @version 16 Sep 2007
  */
 public class ColonyItem extends ABaseEntity {
-
+	// TODO remove from ABaseEntity hierarchy
 	public static int count(List<?> items) {
 		int count = 0;
 		for(Object o : items) {

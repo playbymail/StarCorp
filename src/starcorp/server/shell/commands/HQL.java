@@ -47,6 +47,10 @@ public class HQL extends ACommand {
 
 	public AServerTask task(final Arguments args, final PrintWriter out) {
 		return new AServerTask() {
+			@Override
+			public boolean isHighPriority() {
+				return true;
+			}
 			protected String getName() {
 				return "hql";
 			}
@@ -54,6 +58,7 @@ public class HQL extends ACommand {
 				return log;
 			}
 			protected void doJob() throws Exception {
+				beginTransaction();
 				String hql = args.concat(0);
 				if(hql == null || hql.length() < 1) {
 					out.println();
@@ -71,6 +76,7 @@ public class HQL extends ACommand {
 						}
 					}
 				}
+				commit();
 				out.print(Shell.PROMPT);
 				out.flush();
 			}

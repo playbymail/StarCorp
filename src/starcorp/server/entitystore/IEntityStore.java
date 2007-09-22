@@ -41,13 +41,19 @@ import starcorp.common.types.PopulationClass;
  * @version 16 Sep 2007
  */
 public interface IEntityStore {
-
+	public abstract void beginTransaction();
 	public abstract void commit();
 	public abstract void rollback();
 	public abstract void shutdown();
+
+	public abstract int getCredits(ABaseEntity entity);
+	public abstract int removeCredits(ABaseEntity entity, int credits, String reason);
+	public abstract int addCredits(ABaseEntity entity, int credits, String reason);
+	public abstract int transferCredits(ABaseEntity from, ABaseEntity to, int credits, String reason);
+	public abstract List<?> listAccounts();
 	
 	public abstract ABaseEntity load(Class<?> entityClass, long ID);
-	public abstract ABaseEntity save(ABaseEntity entity);
+	public abstract ABaseEntity save(ABaseEntity entity); // TODO remove and replace with update to force creation of new entities using supplied create methods (to be added)
 	
 	public abstract void delete(ABaseEntity entity);
 	
@@ -63,6 +69,7 @@ public interface IEntityStore {
 	public abstract List<?> listPlanets(StarSystem star, int maxGravity, List<AtmosphereType> atmospheres);
 	
 	public abstract List<?> listColonistGrants(Corporation owner, boolean openOnly);
+	public abstract List<?> listColonistGrants(Colony colony, boolean openOnly);
 	public abstract ColonistGrant getColonistGrant(Colony colony, PopulationClass popClass, boolean openOnly);
 	
 	public abstract List<?> listColonies();
@@ -114,6 +121,7 @@ public interface IEntityStore {
 	public abstract List<?> listWorkers(Colony colony);
 	public abstract List<?> listWorkers(Colony colony, PopulationClass popClass);
 	public abstract Workers getWorkers(Facility facility, PopulationClass popClass);
+	public abstract List<?> listUnemployed();
 	public abstract Unemployed getUnemployed(Colony colony, PopulationClass popClass);
 	
 	public abstract List<?> listDeposits(StarSystemEntity systemEntity);

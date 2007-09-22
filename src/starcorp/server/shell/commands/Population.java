@@ -47,6 +47,10 @@ public class Population extends ACommand {
 
 	public AServerTask task(final Arguments args, final PrintWriter out) {
 		return new AServerTask() {
+			@Override
+			public boolean isHighPriority() {
+				return true;
+			}
 			protected String getName() {
 				return "population";
 			}

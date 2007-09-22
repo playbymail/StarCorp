@@ -46,6 +46,10 @@ public class List extends ACommand {
 
 	public AServerTask task(final Arguments args, final PrintWriter out) {
 		return new AServerTask() {
+			@Override
+			public boolean isHighPriority() {
+				return true;
+			}
 			protected String getName() {
 				return "list";
 			}
@@ -53,6 +57,7 @@ public class List extends ACommand {
 				return log;
 			}
 			protected void doJob() throws Exception {
+				beginTransaction();
 				String entityClass = args.get(0);
 				int page = args.getAsInt(1);
 				
@@ -91,6 +96,7 @@ public class List extends ACommand {
 						}
 					}
 				}
+				commit();
 				out.print(Shell.PROMPT);
 				out.flush();
 			}

@@ -48,6 +48,10 @@ public class Facilities extends ACommand {
 
 	public AServerTask task(final Arguments args, final PrintWriter out) {
 		return new AServerTask() {
+			@Override
+			public boolean isHighPriority() {
+				return true;
+			}
 			protected String getName() {
 				return "facilities";
 			}
@@ -55,6 +59,7 @@ public class Facilities extends ACommand {
 				return log;
 			}
 			protected void doJob() throws Exception {
+				beginTransaction();
 				out.println();
 				out.println("List of facilities:");
 				List<AFacilityType> types = AFacilityType.listTypes();
@@ -63,6 +68,7 @@ public class Facilities extends ACommand {
 				}
 				out.print(Shell.PROMPT);
 				out.flush();
+				commit();
 			}
 		};
 	}

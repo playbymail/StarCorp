@@ -22,7 +22,7 @@ import starcorp.common.types.Coordinates2D;
  * @version 15 Sep 2007
  */
 public class ResourceDeposit extends ABaseEntity {
-
+	// TODO remove from ABaseEntity hierarchy
 	private StarSystemEntity systemEntity;
 	private Coordinates2D location;
 	private AItemType type;

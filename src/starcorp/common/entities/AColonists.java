@@ -24,7 +24,7 @@ import starcorp.common.types.PopulationClass;
  * @version 18 Sep 2007
  */
 public abstract class AColonists extends ABaseEntity {
-
+// TODO remove from ABaseEntity hierarchy
 	public static int countColonists(List<?> colonists) {
 		int totalQty = 0;
 		for(Object o : colonists) {
@@ -47,7 +47,6 @@ public abstract class AColonists extends ABaseEntity {
 	
 	private Colony colony;
 	private Population population;
-	private int cash;
 	private double happiness;
 
 	public AColonists() {
@@ -72,18 +71,6 @@ public abstract class AColonists extends ABaseEntity {
 		return population.getQuantity();
 	}
 	
-	public int getCashPerPerson() {
-		return cash / population.getQuantity();
-	}
-	
-	public void addCash(int cash) {
-		this.cash += cash;
-	}
-	
-	public void removeCash(int cash) {
-		this.cash -= cash;
-	}
-
 	public void addPopulation(int qty) {
 		if(population != null) {
 			population.add(qty);
@@ -121,21 +108,12 @@ public abstract class AColonists extends ABaseEntity {
 		this.happiness = happiness;
 	}
 
-	public int getCash() {
-		return cash;
-	}
-
-	public void setCash(int cash) {
-		this.cash = cash;
-	}
-
 	@Override
 	public void readXML(Element e) {
 		super.readXML(e);
 		this.colony = new Colony();
 		colony.readXML(e.element("colony").element("entity"));
 		this.population = new Population(e.element("population"));
-		this.cash = Integer.parseInt(e.attributeValue("cash","0"));
 		this.happiness = Double.parseDouble(e.attributeValue("happiness","0.0"));
 	}
 
@@ -150,7 +128,6 @@ public abstract class AColonists extends ABaseEntity {
 	@Override
 	public Element toFullXML(Element parent) {
 		Element e = super.toFullXML(parent);
-		e.addAttribute("cash", String.valueOf(cash));
 		e.addAttribute("happiness", String.valueOf(happiness));
 		return e;
 	}

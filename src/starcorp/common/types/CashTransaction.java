@@ -24,7 +24,6 @@ import org.dom4j.Element;
  */
 public class CashTransaction {
 
-	public static final String GRANT_RECEIVED = "grant.received";
 	public static final String GRANT_PAID = "grant.paid";
 	public static final String ITEM_BOUGHT = "item.bought";
 	public static final String ITEM_SOLD = "item.sold";

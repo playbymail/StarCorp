@@ -27,6 +27,7 @@ public class ServerEngine {
 	private static final int THREAD_POOL = 10;
 	
 	private int taskNumber = 1;
+	private ExecutorService highPriority = Executors.newCachedThreadPool();
 	private ExecutorService execService = Executors.newFixedThreadPool(THREAD_POOL);
 	private final IEntityStore entityStore;
 	private Vector<AServerTask> tasks = new Vector<AServerTask>();
@@ -40,7 +41,12 @@ public class ServerEngine {
 		task.setTaskNumber(taskNumber);
 		task.setEntityStore(entityStore);
 		tasks.add(task);
-		execService.submit(task);
+		if(task.isHighPriority()) {
+			highPriority.execute(task);
+		}
+		else {
+			execService.execute(task);
+		}
 		taskNumber++;
 	}
 	

@@ -24,7 +24,7 @@ public class IndustrialGoods extends TradeGoods {
 
 	public static List<AItemType> listPower() {
 		List<AItemType> types = new ArrayList<AItemType>();
-		Iterator<AItemType> i = AItemType.listTypes(ConsumerGoods.class).iterator();
+		Iterator<AItemType> i = AItemType.listTypes(IndustrialGoods.class).iterator();
 		while(i.hasNext()) {
 			IndustrialGoods goods = (IndustrialGoods) i.next();
 			if(goods.isPower()) {

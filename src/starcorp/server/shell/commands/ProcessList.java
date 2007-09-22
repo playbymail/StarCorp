@@ -52,6 +52,7 @@ public class ProcessList extends ACommand {
 	@Override
 	public AServerTask task(final Arguments args, final PrintWriter out) {
 		return new AServerTask() {
+			
 			protected String getName() {
 				return "ps";
 			}
@@ -65,6 +66,10 @@ public class ProcessList extends ACommand {
 				}
 				out.print(Shell.PROMPT);
 				out.flush();
+			}
+			@Override
+			public boolean isHighPriority() {
+				return true;
 			}
 		};
 		

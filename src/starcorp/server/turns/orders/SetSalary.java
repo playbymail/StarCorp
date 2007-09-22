@@ -51,7 +51,6 @@ public class SetSalary extends AOrderProcessor {
 			Workers workers = entityStore.getWorkers(facility, popClass);
 			if(workers == null) {
 				workers = new Workers();
-				workers.setCash(0);
 				workers.setColony(colony);
 				workers.setFacility(facility);
 				workers.setHappiness(0.0);
@@ -64,16 +63,17 @@ public class SetSalary extends AOrderProcessor {
 				Unemployed unemployed = entityStore.getUnemployed(colony, popClass);
 				if(unemployed == null) {
 					unemployed = new Unemployed();
-					unemployed.setCash(0);
 					unemployed.setColony(colony);
 					unemployed.setHappiness(0.0);
 					unemployed.setPopulation(new Population(popClass));
 					entityStore.save(unemployed);
 				}
+				int credits = entityStore.getCredits(workers);
 				unemployed.addPopulation(workers.getQuantity());
-				unemployed.addCash(workers.getCash());
 				workers.getPopulation().setQuantity(0);
-				workers.setCash(0);
+				entityStore.save(unemployed);
+				entityStore.save(workers);
+				entityStore.transferCredits(workers, unemployed, credits, "");
 			}
 			
 			workers.setSalary(salary);

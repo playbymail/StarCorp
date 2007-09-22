@@ -22,7 +22,7 @@ import starcorp.common.types.GalacticDate;
  * @version 16 Sep 2007
  */
 public class DevelopmentGrant extends ABaseEntity {
-
+	// TODO remove from ABaseEntity hierarchy
 	private Colony colony;
 	private AFacilityType type;
 	private int grant;

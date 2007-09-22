@@ -22,7 +22,7 @@ import starcorp.common.types.PopulationClass;
  * @version 16 Sep 2007
  */
 public class ColonistGrant extends ABaseEntity {
-
+	// TODO remove from ABaseEntity hierarchy
 	private Colony colony;
 	private PopulationClass popClass;
 	private int credits;

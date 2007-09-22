@@ -48,6 +48,10 @@ public class View extends ACommand {
 
 	public AServerTask task(final Arguments args, final PrintWriter out) {
 		return new AServerTask() {
+			@Override
+			public boolean isHighPriority() {
+				return true;
+			}
 			protected String getName() {
 				return "view";
 			}
@@ -55,6 +59,7 @@ public class View extends ACommand {
 				return log;
 			}
 			protected void doJob() throws Exception {
+				beginTransaction();
 				String entityClass = args.get(0);
 				int ID = args.getAsInt(1);
 				boolean xml = args.isTrue(2) || "xml".equalsIgnoreCase(args.get(2));
@@ -79,6 +84,7 @@ public class View extends ACommand {
 					out.print(Shell.PROMPT);
 					out.flush();
 				}
+				commit();
 			}
 		};
 

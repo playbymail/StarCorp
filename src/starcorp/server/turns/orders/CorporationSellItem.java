@@ -81,7 +81,7 @@ public class CorporationSellItem extends AOrderProcessor {
 			
 			Object[] args2 = {colonyHub.getTypeClass().getName(), colony.getName(), String.valueOf(colony.getID())};
 			String desc = CashTransaction.getDescription(CashTransaction.MARKET_FEES, args2);
-			corp.remove(colonyHub.getServiceCharge(),ServerConfiguration.getCurrentDate(),desc);
+			entityStore.removeCredits(corp, colonyHub.getServiceCharge(), desc);
 			colonyHub.incTransactionCount();
 			
 			report = new OrderReport(order);

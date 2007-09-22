@@ -13,13 +13,11 @@ package starcorp.common.entities;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.dom4j.Element;
 
 import starcorp.common.types.AFacilityType;
-import starcorp.common.types.CashTransaction;
 import starcorp.common.types.ColonyHub;
 import starcorp.common.types.Factory;
 import starcorp.common.types.GalacticDate;
@@ -51,37 +49,6 @@ public class Facility extends ABaseEntity {
 	private Set<Items> itemQueue = new HashSet<Items>();
 	private Set<Items> itemsCreated = new HashSet<Items>();
 	private GalacticDate builtDate;
-	
-	public static ServiceResult service(GalacticDate date, Map<Facility, List<?>> facilities, int quantity, int cashAvailable) {
-		ServiceResult result = new ServiceResult();
-		
-		Iterator<Facility> i = facilities.keySet().iterator();
-		while(i.hasNext() && result.quantityServiced < quantity) {
-			Facility facility = i.next();
-			List<?> workers = facilities.get(facility);
-			int avail = facility.getTransactionsRemaining(workers);
-			int qty = quantity - result.quantityServiced;
-			int afford = cashAvailable / facility.getServiceCharge();
-			if(afford < qty) {
-				qty = afford;
-			}
-			if(avail < qty) {
-				qty = avail;
-			}
-			AFacilityType type = facility.getTypeClass();
-			int price = qty * facility.getServiceCharge();
-			Colony colony = facility.getColony();
-			Object[] args = {type.getName(), String.valueOf(qty), colony.getName(), String.valueOf(colony.getID())};
-			String desc = CashTransaction.getDescription(CashTransaction.SERVICE_CHARGE, args);
-			facility.getOwner().add(price, date, desc);
-			facility.incTransactionCount();
-			
-			result.quantityServiced += qty;
-			result.totalCost += price;
-			cashAvailable -= price;
-		}
-		return result;
-	}
 	
 	public double getEfficiency(List<?> currentWorkers) {
 		return isPowered() ?  type.getEfficiency(currentWorkers) : 0.0;

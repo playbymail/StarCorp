@@ -27,7 +27,7 @@ import starcorp.server.shell.Shell;
  * @version 20 Sep 2007
  */
 public class Delete extends ACommand {
-	private static Log log = LogFactory.getLog(Delete.class); 
+	private static Log log = LogFactory.getLog(Delete.class);
 
 	/*
 	 * (non-Javadoc)
@@ -54,34 +54,37 @@ public class Delete extends ACommand {
 			protected String getName() {
 				return "del";
 			}
+
 			protected Log getLog() {
 				return log;
 			}
-			protected void doJob() throws Exception {
-		String entityClass = args.get(0);
-		int ID = args.getAsInt(1);
-		if(entityClass == null || ID == 0) {
-			out.println();
-			out.print("Invalid arguments");
-		}
-		else {
-			String className = "starcorp.common.entities." + entityClass;
-			Class clazz = Class.forName(className);
-			ABaseEntity o = entityStore.load(clazz, ID);
-			if(o == null) {
-				out.println();
-				out.println("No such entity.");
-			}
-			else {
-				entityStore.delete(o);
-			}
-			out.println();
-			out.println("Entity "+ o +" deleted.");
-			out.print(Shell.PROMPT);
-			out.flush();
-		}
 
-	}
+			protected void doJob() throws Exception {
+				beginTransaction();
+				String entityClass = args.get(0);
+				int ID = args.getAsInt(1);
+				if (entityClass == null || ID == 0) {
+					out.println();
+					out.print("Invalid arguments");
+				} else {
+					String className = "starcorp.common.entities."
+							+ entityClass;
+					Class clazz = Class.forName(className);
+					ABaseEntity o = entityStore.load(clazz, ID);
+					if (o == null) {
+						out.println();
+						out.println("No such entity.");
+					} else {
+						entityStore.delete(o);
+					}
+					out.println();
+					out.println("Entity " + o + " deleted.");
+					out.print(Shell.PROMPT);
+					out.flush();
+				}
+				commit();
+
+			}
 		};
 	}
 }

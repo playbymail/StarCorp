@@ -17,6 +17,7 @@ import starcorp.common.entities.Corporation;
 import starcorp.common.entities.DevelopmentGrant;
 import starcorp.common.entities.Facility;
 import starcorp.common.entities.FacilityLease;
+import starcorp.common.entities.Workers;
 import starcorp.common.turns.OrderReport;
 import starcorp.common.turns.TurnError;
 import starcorp.common.turns.TurnOrder;
@@ -26,6 +27,8 @@ import starcorp.common.types.ColonyHub;
 import starcorp.common.types.Items;
 import starcorp.common.types.OrbitalDock;
 import starcorp.common.types.OrderType;
+import starcorp.common.types.Population;
+import starcorp.common.types.PopulationClass;
 import starcorp.server.ServerConfiguration;
 import starcorp.server.turns.AOrderProcessor;
 
@@ -108,13 +111,22 @@ public class BuildFacility extends AOrderProcessor {
 					
 					if(grant != null) {
 						Object[] args = {facilityType.getName(), colony.getName(), String.valueOf(colony.getID())};
-						String govtDesc = CashTransaction.getDescription(CashTransaction.GRANT_PAID, args);
-						String corpDesc = CashTransaction.getDescription(CashTransaction.GRANT_RECEIVED, args);
-						grant.getColony().getGovernment().remove(grant.getGrant(), ServerConfiguration.getCurrentDate(), govtDesc);
-						corp.add(grant.getGrant(), ServerConfiguration.getCurrentDate(), corpDesc);
+						String desc = CashTransaction.getDescription(CashTransaction.GRANT_PAID, args);
+						entityStore.transferCredits(grant.getColony().getGovernment(), corp, grant.getGrant(), desc);
 					}
 					
 					entityStore.save(facility);
+					
+					// need to create workers with zero quantity otherwise population updater will not hire any new workers!
+					for(PopulationClass popClass : facilityType.getWorkerRequirement().keySet()) {
+						Workers w = new Workers();
+						w.setColony(colony);
+						w.setFacility(facility);
+						w.setHappiness(0.0);
+						w.setPopulation(new Population(popClass));
+						w.setSalary(popClass.getNPCSalary());
+						entityStore.save(w);
+					}
 					
 					OrderReport report = new OrderReport(order);
 					report.add(facilityType.getName());

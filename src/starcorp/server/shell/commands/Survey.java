@@ -111,6 +111,7 @@ public class Survey extends ACommand {
 				return log;
 			}
 			protected void doJob() throws Exception {
+				beginTransaction();
 				String surveyType = args.get(0);
 				List<AItemType> types;
 				String typeParam = args.get(2);
@@ -198,6 +199,7 @@ public class Survey extends ACommand {
 					out.println();
 					out.println("Invalid argument");
 				}
+				commit();
 				out.print(Shell.PROMPT);
 				out.flush();
 			}

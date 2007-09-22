@@ -25,6 +25,6 @@
 		<property name="hbm2ddl.auto">update</property>
 
 		<mapping resource="starcorp/common/entities/ABaseEntity.hbm.xml" />
-		
+		<mapping resource="starcorp/common/entities/CreditAccount.hbm.xml" />
 	</session-factory>
 </hibernate-configuration>

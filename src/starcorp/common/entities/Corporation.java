@@ -10,13 +10,8 @@
  */
 package starcorp.common.entities;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-
 import org.dom4j.Element;
 
-import starcorp.common.types.CashTransaction;
 import starcorp.common.types.GalacticDate;
 
 /**
@@ -30,10 +25,8 @@ public class Corporation extends ANamedEntity {
 	private String playerName;
 	private String playerEmail;
 	private String playerPassword;
-	private int credits;
 	private GalacticDate foundedDate;
 	private GalacticDate lastTurnDate;
-	private Set<CashTransaction> transactions = new HashSet<CashTransaction>();
 	
 	public Corporation() {
 		
@@ -51,7 +44,6 @@ public class Corporation extends ANamedEntity {
 		this.playerEmail = player.attributeValue("email");
 		this.playerName = player.attributeValue("name");
 		this.playerPassword = player.attributeValue("password");
-		this.credits = Integer.parseInt(e.attributeValue("credits", "0"));
 		Element eDate = e.element("founded");
 		if(eDate != null) {
 			this.foundedDate = new GalacticDate(eDate.element("date"));
@@ -59,9 +51,6 @@ public class Corporation extends ANamedEntity {
 		eDate = e.element("last-turn");
 		if(eDate != null) {
 			this.lastTurnDate = new GalacticDate(eDate.element("date"));
-		}
-		for(Iterator<?> i = e.elementIterator("transaction"); i.hasNext();) {
-			this.transactions.add(new CashTransaction((Element)i.next()));
 		}
 	}
 	
@@ -71,33 +60,11 @@ public class Corporation extends ANamedEntity {
 		p.addAttribute("email", playerEmail);
 		p.addAttribute("name", playerName);
 		p.addAttribute("password", playerPassword);
-		root.addAttribute("credits", String.valueOf(credits));
 		if(foundedDate != null)
 			foundedDate.toXML(root.addElement("founded"));
 		if(lastTurnDate != null)
 			lastTurnDate.toXML(root.addElement("last-turn"));
-		if(transactions.size() > 0) {
-			Element e = root.addElement("transactions");
-			for(Iterator<CashTransaction> i = transactions.iterator(); i.hasNext();) {
-				i.next().toXML(e);
-			}
-		}
 		return root;
-	}
-	
-	public int add(int credits, GalacticDate date, String description) {
-		this.credits += credits;
-		transactions.add(new CashTransaction(date, credits,description));
-		return this.credits;
-	}
-	
-	public void remove(int credits, GalacticDate date, String description) {
-		this.credits -= credits;
-		transactions.add(new CashTransaction(date, (0 - credits),description));
-	}
-	
-	public boolean hasCredits(int credits) {
-		return this.credits >= credits;
 	}
 	
 	public String getPlayerName() {
@@ -111,12 +78,6 @@ public class Corporation extends ANamedEntity {
 	}
 	public void setPlayerEmail(String playerEmail) {
 		this.playerEmail = playerEmail;
-	}
-	public int getCredits() {
-		return credits;
-	}
-	public void setCredits(int credits) {
-		this.credits = credits;
 	}
 	public GalacticDate getFoundedDate() {
 		return foundedDate;
@@ -141,11 +102,4 @@ public class Corporation extends ANamedEntity {
 		this.lastTurnDate = lastTurnDate;
 	}
 
-	public Set<CashTransaction> getTransactions() {
-		return transactions;
-	}
-
-	public void setTransactions(Set<CashTransaction> transactions) {
-		this.transactions = transactions;
-	}
 }

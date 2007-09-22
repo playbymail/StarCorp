@@ -85,20 +85,24 @@ public abstract class APlanetTemplate {
 	}
 	
 	public Planet create(int systemID, int quadrant, int orbit, String name) {
+		entityStore.beginTransaction();
 		StarSystem system = (StarSystem) entityStore.load(StarSystem.class,systemID);
 		if(system == null) {
 			return null;
 		}
 		CoordinatesPolar location = new CoordinatesPolar(quadrant,orbit);
+		entityStore.commit();
 		return create(system,null,location,name);
 
 	}
 	
 	public Planet create(int orbitingPlanetID, String name) {
+		entityStore.beginTransaction();
 		Planet p = (Planet) entityStore.load(Planet.class, orbitingPlanetID);
 		if(p == null) {
 			return null;
 		}
+		entityStore.commit();
 		return create(p.getSystem(),p,p.getLocation(),name);
 	}
 	
@@ -110,7 +114,9 @@ public abstract class APlanetTemplate {
 		planet.setName(name);
 		planet.setOrbiting(orbiting);
 		planet.setSystem(system);
+		entityStore.beginTransaction();
 		entityStore.save(planet);
+		entityStore.commit();
 		generateMap(planet, getWidth(), getHeight());
 		return planet;
 	}
@@ -184,14 +190,16 @@ public abstract class APlanetTemplate {
 			int chance = chances.get(type);
 			if(chance <= Util.rnd.nextInt(100)) {
 				int totalQuantity = Util.rnd.nextInt(1000000) + 1;
-				int yield = Util.rnd.nextInt(20);
+				int yield = Util.rnd.nextInt(20) + 1;
 				ResourceDeposit deposit = new ResourceDeposit();
 				deposit.setLocation(location);
 				deposit.setSystemEntity(planet);
 				deposit.setTotalQuantity(totalQuantity);
 				deposit.setType(type);
 				deposit.setYield(yield);
+				entityStore.beginTransaction();
 				entityStore.save(deposit);
+				entityStore.commit();
 				if(log.isDebugEnabled())log.debug("Created " + deposit);
 			}
 		}
@@ -214,6 +222,8 @@ public abstract class APlanetTemplate {
 				generateResources(planet, location, terrain);
 			}
 		}
+		entityStore.beginTransaction();
 		entityStore.save(planet);
+		entityStore.commit();
 	}
 }

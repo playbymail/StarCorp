@@ -162,18 +162,22 @@ public class Populated extends Standard {
 	@Override
 	public StarSystem create(Coordinates3D location, String name) {
 		StarSystem system = super.create(location, name);
+		entityStore.beginTransaction();
 		Corporation govt = new Corporation();
-		govt.setCredits(10000000);
 		govt.setFoundedDate(ServerConfiguration.getCurrentDate());
 		govt.setName(name + " Federation");
 		entityStore.save(govt);
+		entityStore.commit();
+		entityStore.addCredits(govt, 1000000, "NPC Setup");
 		if(log.isDebugEnabled())
 			log.debug("Created " + govt);
+		entityStore.beginTransaction();
 		Set<Util.SuitableLocation> suitableLocations = Survey.findSuitableLocations(system, entityStore, AItemType.listTypes(Resources.class));
 		boolean capitol = false;
 		int cities = 0;
 		int towns = 0;
 		int outposts = 0;
+		entityStore.commit();
 		for(SuitableLocation loc : suitableLocations) {
 			if(!capitol) {
 				createColony(govt,loc.planet,loc.location,"Capitol");

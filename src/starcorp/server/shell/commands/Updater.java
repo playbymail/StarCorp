@@ -40,15 +40,21 @@ public class Updater extends ACommand {
 				return log;
 			}
 			protected void doJob() throws Exception {
-				PopulationProcessor popUpdate = new PopulationProcessor(entityStore);
+				PopulationProcessor popUpdate = new PopulationProcessor();
 				FacilityProcessor facUpdate = new FacilityProcessor(entityStore);
 				
-				popUpdate.process();
+				engine.schedule(popUpdate);
+				while(!popUpdate.isDone()) {
+					Thread.yield();
+				}
 				out.println();
 				out.println("Population updated.");
 				out.println(Shell.PROMPT);
 				out.flush();
-				facUpdate.process();
+				engine.schedule(facUpdate);
+				while(!facUpdate.isDone()) {
+					Thread.yield();
+				}
 				out.println();
 				out.println("Facilities updated.");
 				out.print(Shell.PROMPT);

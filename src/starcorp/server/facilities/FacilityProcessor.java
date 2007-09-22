@@ -10,6 +10,7 @@
  */
 package starcorp.server.facilities;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -31,6 +32,8 @@ import starcorp.common.types.IndustrialGoods;
 import starcorp.common.types.Items;
 import starcorp.common.types.ResourceGenerator;
 import starcorp.server.ServerConfiguration;
+import starcorp.server.Util;
+import starcorp.server.engine.AServerTask;
 import starcorp.server.entitystore.IEntityStore;
 
 /**
@@ -39,9 +42,9 @@ import starcorp.server.entitystore.IEntityStore;
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 18 Sep 2007
  */
-public class FacilityProcessor {
+public class FacilityProcessor extends AServerTask {
 
-	private Log log = LogFactory.getLog(FacilityProcessor.class);
+	private static final Log log = LogFactory.getLog(FacilityProcessor.class);
 	
 	private IEntityStore entityStore;
 	
@@ -49,16 +52,28 @@ public class FacilityProcessor {
 		this.entityStore = store;
 	}
 	
-	public void process() {
-		log.info("Started facility processor");
-		List<?> facilities = entityStore.listFacilities();
-		Iterator<?> i = facilities.iterator();
-		while(i.hasNext()) {
-			Facility facility = (Facility) i.next();
+	@Override
+	protected void doJob() throws Exception {
+		log.info(this + ": Started facility processor");
+		beginTransaction();
+		List<Facility> facilities = new ArrayList<Facility>();
+		for(Object o : entityStore.listFacilities()) {
+			facilities.add((Facility)o);
+		}
+		commit();
+		log.info(this + ": " + facilities.size() + " facilities to process");
+		for(Facility facility : facilities) {
+			beginTransaction();
 			List<?> workers = entityStore.listWorkers(facility);
 			process(facility,workers);
+			commit();
 		}
 		log.info("Finished facility processor");
+	}
+
+	@Override
+	protected Log getLog() {
+		return log;
 	}
 
 	private void process(Facility facility, List<?> workers) {
@@ -73,6 +88,7 @@ public class FacilityProcessor {
 		else if(facility.getTypeClass() instanceof ResourceGenerator) {
 			processGenerator(facility, workers);
 		}
+		entityStore.save(facility);
 		if(log.isDebugEnabled())
 			log.debug("Processed " + facility);
 	}
@@ -87,8 +103,11 @@ public class FacilityProcessor {
 		List<?> items = entityStore.listItems(owner, colony, types);
 		if(ColonyItem.count(items) < required) {
 			// attempt to buy from market
-			List<?> market = entityStore.listMarket(colony, types, 1);
-			MarketItem.BuyResult result = MarketItem.buy(ServerConfiguration.getCurrentDate(), market, required, owner.getCredits());
+			List<MarketItem> market = new ArrayList<MarketItem>();
+			for(Object o : entityStore.listMarket(colony, types, 1)) {
+				market.add((MarketItem)o);
+			}
+			MarketItem.BuyResult result = Util.buy(ServerConfiguration.getCurrentDate(), market, required, entityStore.getCredits(owner),entityStore);
 			if(result.quantityBought < required) {
 				// not enough - just add this to the colonies stockpile
 				Iterator<Items> i = result.bought.iterator();
@@ -103,6 +122,7 @@ public class FacilityProcessor {
 						entityStore.save(cItem);
 					}
 					cItem.add(item.getQuantity());
+					entityStore.save(cItem);
 				}
 			}
 			else {
@@ -138,6 +158,7 @@ public class FacilityProcessor {
 			ColonyItem cItem = entityStore.getItem(colony, owner, item.getTypeClass());
 			int qty = item.getQuantity() * quantity;
 			cItem.remove(qty);
+			entityStore.save(cItem);
 		}
 	}
 	
@@ -164,6 +185,7 @@ public class FacilityProcessor {
 			entityStore.save(cItem);
 		}
 		cItem.add(qty);
+		entityStore.save(cItem);
 		if(log.isDebugEnabled())
 			log.debug(factory +" produced " + qty + " x " + type);
 		useMaterials(factory.getColony(),factory.getOwner(), type, qty); 
@@ -221,10 +243,13 @@ public class FacilityProcessor {
 				}
 				item.add(qty);
 				deposit.remove(qty);
+				entityStore.save(item);
+				entityStore.save(deposit);
 				if(log.isDebugEnabled())
 					log.debug(generator + " generated " + qty + " x " + deposit.getType());
 			}
 			
 		}
 	}
+
 }

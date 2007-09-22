@@ -11,13 +11,10 @@
 package starcorp.common.entities;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.dom4j.Element;
 
-import starcorp.common.types.AItemType;
-import starcorp.common.types.CashTransaction;
 import starcorp.common.types.GalacticDate;
 import starcorp.common.types.Items;
 
@@ -28,7 +25,7 @@ import starcorp.common.types.Items;
  * @version 16 Sep 2007
  */
 public class MarketItem extends ABaseEntity {
-
+	// TODO remove from ABaseEntity hierarchy
 	private Colony colony;
 	private Corporation seller;
 	private Items item;
@@ -40,41 +37,6 @@ public class MarketItem extends ABaseEntity {
 		public int quantityBought;
 		public int totalPrice;
 		public List<Items> bought = new ArrayList<Items>();
-	}
-	
-	public static BuyResult buy(GalacticDate date, List<?> items, int quantity, int cashAvailable) {
-		BuyResult result = new BuyResult();
-		
-		Iterator<?> i = items.iterator();
-		while(i.hasNext() && result.quantityBought < quantity) {
-			MarketItem item = (MarketItem) i.next();
-			Colony colony = item.getColony();
-			AItemType type = item.getItem().getTypeClass();
-			int qty = quantity - result.quantityBought;
-			int avail = item.getItem().getQuantity();
-			int afford = cashAvailable / item.getCostPerItem();
-			if(afford < qty) {
-				qty = afford;
-			}
-			if(avail < qty) {
-				qty = avail;
-			}
-			int price = qty * item.getCostPerItem();
-			
-			Object[] args = {String.valueOf(qty), type.getName(),colony.getName(),String.valueOf(colony.getID())};
-			String desc = CashTransaction.getDescription(CashTransaction.ITEM_SOLD, args);
-			item.getSeller().add(price, date, desc);
-			item.getItem().remove(qty);
-			if(item.getItem().getQuantity() < 1) {
-				item.setSoldDate(date);
-			}
-			result.quantityBought += qty;
-			result.totalPrice += price;
-			cashAvailable -= price;
-			result.bought.add(new Items(type,qty));
-		}
-		
-		return result;
 	}
 	
 	public Colony getColony() {

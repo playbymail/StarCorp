@@ -10,6 +10,7 @@
  */
 package starcorp.server.turns.orders;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import starcorp.common.entities.Colony;
@@ -26,6 +27,7 @@ import starcorp.common.types.ColonyHub;
 import starcorp.common.types.Items;
 import starcorp.common.types.OrderType;
 import starcorp.server.ServerConfiguration;
+import starcorp.server.Util;
 import starcorp.server.turns.AOrderProcessor;
 
 /**
@@ -50,7 +52,11 @@ public class CorporationBuyItem extends AOrderProcessor {
 		
 		Colony colony = (Colony) entityStore.load(Colony.class, colonyId);
 		AItemType type = AItemType.getType(itemTypeKey);
-		List<?> marketItems = entityStore.listMarket(colony, 1);
+		List<MarketItem> marketItems = new ArrayList<MarketItem>();
+		for(Object o : entityStore.listMarket(colony, 1)) {
+			marketItems.add((MarketItem)o);
+		}
+		
 		Facility colonyHub = entityStore.getFacility(colony, colony.getGovernment(), ColonyHub.class);
 		
 		List<?> workers = entityStore.listWorkers(colonyHub);
@@ -74,16 +80,16 @@ public class CorporationBuyItem extends AOrderProcessor {
 				colonyItem.setItem(item);
 				colonyItem.setOwner(corp);
 			}
-			MarketItem.BuyResult result = MarketItem.buy(ServerConfiguration.getCurrentDate(), marketItems, quantity, corp.getCredits());
+			MarketItem.BuyResult result = Util.buy(ServerConfiguration.getCurrentDate(), marketItems, quantity, entityStore.getCredits(corp),entityStore);
 			Object[] args = {String.valueOf(result.quantityBought), type.getName(),colony.getName(),String.valueOf(colony.getID())};
 			String desc = CashTransaction.getDescription(CashTransaction.ITEM_BOUGHT, args);
 			colonyItem.getItem().add(result.quantityBought);
-			corp.remove(result.totalPrice, ServerConfiguration.getCurrentDate(), desc);
+			entityStore.removeCredits(corp, result.totalPrice, desc);
 			
 			entityStore.save(colonyItem);
 			Object[] args2 = {colonyHub.getTypeClass().getName(), colony.getName(), String.valueOf(colony.getID())};
 			desc = CashTransaction.getDescription(CashTransaction.MARKET_FEES, args2);
-			corp.remove(colonyHub.getServiceCharge(),ServerConfiguration.getCurrentDate(), desc);
+			entityStore.removeCredits(corp, colonyHub.getServiceCharge(), desc);
 			colonyHub.incTransactionCount();
 			
 			report = new OrderReport(order);

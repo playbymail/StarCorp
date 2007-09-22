@@ -79,16 +79,19 @@ public abstract class AColonyTemplate {
 	}
 	
 	public Colony create(int govtID, int planetID, int x, int y, String name) {
+		entityStore.beginTransaction();
 		Corporation govt = (Corporation) entityStore.load(Corporation.class, govtID);
 		Planet planet = (Planet) entityStore.load(Planet.class, planetID);
 		if(govt == null || planet == null) {
 			return null;
 		}
 		Coordinates2D location = new Coordinates2D(x,y);
+		entityStore.commit();		
 		return create(govt,planet,location,name);
 	}
 	
 	public Colony create(Corporation govt, Planet planet, Coordinates2D location, String name) {
+		entityStore.beginTransaction();
 		PlanetMapSquare sq = planet.get(location);
 		if(sq == null) {
 			System.out.println("Invalid location");
@@ -106,6 +109,7 @@ public abstract class AColonyTemplate {
 		colony.setName(name);
 		colony.setPlanet(planet);
 		entityStore.save(colony);
+		entityStore.commit();
 		log.info("Created " + colony);
 		List<Facility> facilities = createFacilities(colony);
 		List<AColonists> population = populate(colony, facilities);
@@ -143,17 +147,20 @@ public abstract class AColonyTemplate {
 	}
 	
 	protected MarketItem createItem(Colony colony, AItemType type, int quantity, int price) {
+		entityStore.beginTransaction();
 		MarketItem item = new MarketItem();
 		item.setColony(colony);
 		item.setCostPerItem(price);
 		item.setItem(new Items(type,quantity));
 		item.setSeller(colony.getGovernment());
 		entityStore.save(item);
+		entityStore.commit();
 		if(log.isDebugEnabled())log.debug("Created " + item);
 		return item;
 	}
 	
 	protected ColonyItem addItem(Colony colony, String type, int quantity) {
+		entityStore.beginTransaction();
 		ColonyItem item = entityStore.getItem(colony, colony.getGovernment(), AItemType.getType(type)); 
 		if(item == null) {
 			item = new ColonyItem();
@@ -164,6 +171,7 @@ public abstract class AColonyTemplate {
 		}
 		item.add(quantity);
 		entityStore.save(item);
+		entityStore.commit();
 		if(log.isDebugEnabled())log.debug("Created " + item);
 		return item;
 	}
@@ -222,19 +230,23 @@ public abstract class AColonyTemplate {
 			for(int i = 0; i <total; i++) {
 				Facility f = createFacility(colony, type.getKey());
 				populate(f, population);
+				entityStore.beginTransaction();
 				f.setServiceCharge(100 * ((ServiceFacility)type).getQuality());
 				entityStore.save(f);
+				entityStore.commit();
 			}
 		}
 	}
 	
 	protected Workers createWorker(Facility facility, Population pop) {
+		entityStore.beginTransaction();
 		Workers worker = new Workers();
 		worker.setColony(facility.getColony());
 		worker.setFacility(facility);
 		worker.setSalary(pop.getPopClass().getNPCSalary());
 		worker.setPopulation(pop);
 		entityStore.save(worker);
+		entityStore.commit();
 		if(log.isDebugEnabled())log.debug("Created " + worker);
 		return worker;
 	}
@@ -298,6 +310,7 @@ public abstract class AColonyTemplate {
 	}
 	
 	protected Facility createFacility(Colony colony, String type) {
+		entityStore.beginTransaction();
 		Facility facility = new Facility();
 		facility.setBuiltDate(ServerConfiguration.getCurrentDate());
 		facility.setColony(colony);
@@ -305,6 +318,7 @@ public abstract class AColonyTemplate {
 		facility.setOwner(colony.getGovernment());
 		facility.setType(type);
 		entityStore.save(facility);
+		entityStore.commit();
 		if(log.isDebugEnabled())log.debug("Created " + facility);
 		return facility;
 	}

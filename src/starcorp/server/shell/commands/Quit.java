@@ -17,7 +17,6 @@ import org.apache.commons.logging.LogFactory;
 
 import starcorp.server.engine.AServerTask;
 import starcorp.server.shell.ACommand;
-import starcorp.server.shell.Shell;
 
 /**
  * starcorp.server.shell.commands.Quit
@@ -30,6 +29,10 @@ public class Quit extends ACommand {
 
 	public AServerTask task(final Arguments args, final PrintWriter out) {
 		return new AServerTask() {
+			@Override
+			public boolean isHighPriority() {
+				return true;
+			}
 			protected Log getLog() {
 				return log;
 			}

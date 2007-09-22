@@ -43,6 +43,7 @@ public abstract class AServerTask implements Runnable {
 	protected ServerEngine engine;
 	protected IEntityStore entityStore;
 	protected int taskNumber;
+	private boolean done = false;
 	
 	public AServerTask() {
 	}
@@ -58,6 +59,18 @@ public abstract class AServerTask implements Runnable {
 	public void setTaskNumber(int number) {
 		this.taskNumber = number;
 	}
+	
+	protected void beginTransaction() {
+		entityStore.beginTransaction();
+	}
+	
+	protected void rollback() {
+		entityStore.rollback();
+	}
+	
+	protected void commit() {
+		entityStore.commit();
+	}
 
 	public void run() {
 		try {
@@ -66,16 +79,29 @@ public abstract class AServerTask implements Runnable {
 				getLog().debug("[Task: " + taskNumber +"] started.");
 			doJob();
 			
-			entityStore.commit();
 			long time = System.currentTimeMillis() - start;
 			if(getLog().isDebugEnabled())
 				getLog().debug("[Task: " + taskNumber +"] done in " + getDisplayDuration(time) + ".");
 		}
 		catch(Exception e) {
 			getLog().error("[Task: " + taskNumber +"] "+ e.getMessage(),e);
-			entityStore.rollback();
+			rollback();
+			onException(e);
 		}
 		engine.done(this);
+		done = true;
+	}
+	
+	protected void onException(Exception e) {
+		// do nothing
+	}
+	
+	public boolean isDone() {
+		return this.done;
+	}
+	
+	public boolean isHighPriority() {
+		return false;
 	}
 	
 	protected abstract void doJob() throws Exception;
