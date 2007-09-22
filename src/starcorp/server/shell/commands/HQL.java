@@ -10,9 +10,15 @@
  */
 package starcorp.server.shell.commands;
 
+import java.io.PrintWriter;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import starcorp.server.engine.AServerTask;
 import starcorp.server.shell.ACommand;
+import starcorp.server.shell.Shell;
 
 /**
  * starcorp.server.shell.commands.HQL
@@ -21,6 +27,7 @@ import starcorp.server.shell.ACommand;
  * @version 20 Sep 2007
  */
 public class HQL extends ACommand {
+	private static Log log = LogFactory.getLog(HQL.class); 
 
 	/* (non-Javadoc)
 	 * @see starcorp.server.shell.ACommand#getHelpText()
@@ -38,27 +45,36 @@ public class HQL extends ACommand {
 		return "hql";
 	}
 
-	/* (non-Javadoc)
-	 * @see starcorp.server.shell.ACommand#process()
-	 */
-	@Override
-	public void process() throws Exception {
-		String hql = concat(0);
-		if(hql == null || hql.length() < 1) {
-			out.println("Invalid argument.");
-		}
-		else {
-			List<?> list = entityStore.query(hql);
-			if(list == null || list.size() < 1) {
-				out.println("0 results.");
+	public AServerTask task(final Arguments args, final PrintWriter out) {
+		return new AServerTask() {
+			protected String getName() {
+				return "hql";
 			}
-			else {
-				for(Object o : list) {
-					out.println(o);
+			protected Log getLog() {
+				return log;
+			}
+			protected void doJob() throws Exception {
+				String hql = args.concat(0);
+				if(hql == null || hql.length() < 1) {
+					out.println();
+					out.println("Invalid argument.");
 				}
+				else {
+					List<?> list = entityStore.query(hql);
+					if(list == null || list.size() < 1) {
+						out.println();
+						out.println("0 results.");
+					}
+					else {
+						for(Object o : list) {
+							out.println(o);
+						}
+					}
+				}
+				out.print(Shell.PROMPT);
+				out.flush();
 			}
-		}
-		out.flush();
+		};
 	}
 
 }

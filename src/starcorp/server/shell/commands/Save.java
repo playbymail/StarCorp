@@ -10,7 +10,14 @@
  */
 package starcorp.server.shell.commands;
 
+import java.io.PrintWriter;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import starcorp.server.engine.AServerTask;
 import starcorp.server.shell.ACommand;
+import starcorp.server.shell.Shell;
 
 /**
  * starcorp.server.shell.commands.Save
@@ -19,6 +26,7 @@ import starcorp.server.shell.ACommand;
  * @version 21 Sep 2007
  */
 public class Save extends ACommand {
+	private static Log log = LogFactory.getLog(Save.class); 
 
 	/* (non-Javadoc)
 	 * @see starcorp.server.shell.ACommand#getHelpText()
@@ -36,12 +44,22 @@ public class Save extends ACommand {
 		return "save";
 	}
 
-	/* (non-Javadoc)
-	 * @see starcorp.server.shell.ACommand#process()
-	 */
-	@Override
-	public void process() throws Exception {
-		entityStore.commit();
+	public AServerTask task(final Arguments args, final PrintWriter out) {
+		return new AServerTask() {
+			protected String getName() {
+				return "save";
+			}
+			protected Log getLog() {
+				return log;
+			}
+			protected void doJob() throws Exception {
+				entityStore.commit();
+				out.println();
+				out.println("Saved.");
+				out.print(Shell.PROMPT);
+				out.flush();
+			}
+		};
 
 	}
 

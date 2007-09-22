@@ -10,10 +10,16 @@
  */
 package starcorp.server.shell.commands;
 
+import java.io.PrintWriter;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import starcorp.common.types.AItemType;
+import starcorp.server.engine.AServerTask;
 import starcorp.server.shell.ACommand;
+import starcorp.server.shell.Shell;
 
 /**
  * starcorp.server.shell.commands.Items
@@ -22,6 +28,7 @@ import starcorp.server.shell.ACommand;
  * @version 20 Sep 2007
  */
 public class Items extends ACommand {
+	private static Log log = LogFactory.getLog(Items.class); 
 
 	/* (non-Javadoc)
 	 * @see starcorp.server.shell.ACommand#getHelpText()
@@ -39,28 +46,37 @@ public class Items extends ACommand {
 		return "items";
 	}
 
-	/* (non-Javadoc)
-	 * @see starcorp.server.shell.ACommand#process()
-	 */
-	@Override
-	public void process() throws Exception {
-		String filter = get(0);
-		List<AItemType> types;
-		if(filter == null) {
-			types = AItemType.listTypes();
-		}
-		else {
-			types = AItemType.listTypes(filter);
-		}
-		out.println("List of matching items:");
-		if(types.size() < 1) {
-			out.println("None");
-		}
-		for(AItemType type : types) {
-			out.println(type);
-		}
-		out.println();
-		out.flush();
+	public AServerTask task(final Arguments args, final PrintWriter out) {
+		return new AServerTask() {
+			protected String getName() {
+				return "items";
+			}
+			protected Log getLog() {
+				return log;
+			}
+			protected void doJob() throws Exception {
+				String filter = args.get(0);
+				List<AItemType> types;
+				if(filter == null) {
+					types = AItemType.listTypes();
+				}
+				else {
+					types = AItemType.listTypes(filter);
+				}
+				out.println();
+				out.println("List of matching items:");
+				if(types.size() < 1) {
+					out.println();
+					out.println("None");
+				}
+				for(AItemType type : types) {
+					out.println(type);
+				}
+				out.println();
+				out.print(Shell.PROMPT);
+				out.flush();
+			}
+		};
 		
 	}
 

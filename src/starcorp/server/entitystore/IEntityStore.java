@@ -46,7 +46,7 @@ public interface IEntityStore {
 	public abstract void rollback();
 	public abstract void shutdown();
 	
-	public abstract ABaseEntity load(Class<?> entityClass, int ID);
+	public abstract ABaseEntity load(Class<?> entityClass, long ID);
 	public abstract ABaseEntity save(ABaseEntity entity);
 	
 	public abstract void delete(ABaseEntity entity);

@@ -10,10 +10,9 @@
  */
 package starcorp.server.shell;
 
-import java.io.OutputStream;
 import java.io.PrintWriter;
 
-import starcorp.server.entitystore.IEntityStore;
+import starcorp.server.engine.AServerTask;
 
 /**
  * starcorp.server.shell.ACommand
@@ -23,74 +22,68 @@ import starcorp.server.entitystore.IEntityStore;
  */
 public abstract class ACommand {
 
-	private String[] args;
+	public static class Arguments {
+		private String[] args;
+
+		public Arguments(String[] args) {
+			this.args = args;
+		}
+		public int count() {
+			return args.length;
+		}
+		
+		public String get(int index) {
+			if(index >= args.length)
+				return null;
+			return args[index];
+		}
+		
+		public int getAsInt(int index) {
+			String s = get(index);
+			if(s == null)
+				return 0;
+			try {
+				return Integer.parseInt(args[index]);
+			}
+			catch(NumberFormatException e) {
+				return 0;
+			}
+		}
+		
+		public boolean isTrue(int index) {
+			String s = get(index);
+			if(s == null)
+				return false;
+			return Boolean.parseBoolean(s);
+		}
+		
+		public String concat(int begin) {
+			return concat(begin, args.length - 1);
+		}
+		
+		public String concat(int begin, int end) {
+			if(begin > args.length)
+				return null;
+			if(end > args.length)
+				end = args.length - 1;
+			StringBuffer sb = new StringBuffer();
+			for(int i = begin; i <= end; i++) {
+				sb.append(args[i]);
+				sb.append(" ");
+			}
+			return sb.toString().trim();
+		}
+	}
+	
 	protected CommandParser parser;
-	protected PrintWriter out;
-	protected IEntityStore entityStore;
 	
 	public abstract String getName();
 	public abstract String getHelpText();
-	public abstract void process() throws Exception;
+	
+	public abstract AServerTask task(final Arguments args, final PrintWriter out);
 	
 	public void setParser(CommandParser parser) {
 		this.parser = parser;
 	}
 	
-	public void setArguments(String[] args) {
-		this.args = args;
-	}
-	
-	public void setOutputStream(OutputStream out) {
-		this.out = new PrintWriter(out);
-	}
-	
-	public void setEntityStore(IEntityStore entityStore) {
-		this.entityStore = entityStore;
-	}
-	
-	protected int count() {
-		return args.length;
-	}
-	
-	protected String get(int index) {
-		if(index >= args.length)
-			return null;
-		return args[index];
-	}
-	
-	protected int getAsInt(int index) {
-		String s = get(index);
-		if(s == null)
-			return 0;
-		try {
-			return Integer.parseInt(args[index]);
-		}
-		catch(NumberFormatException e) {
-			return 0;
-		}
-	}
-	
-	protected boolean isTrue(int index) {
-		String s = get(index);
-		if(s == null)
-			return false;
-		return Boolean.parseBoolean(s);
-	}
-	
-	protected String concat(int begin) {
-		return concat(begin, args.length - 1);
-	}
-	
-	protected String concat(int begin, int end) {
-		if(begin > args.length)
-			return null;
-		if(end > args.length)
-			end = args.length - 1;
-		StringBuffer sb = new StringBuffer();
-		for(int i = begin; i <= end; i++) {
-			sb.append(args[i]);
-			sb.append(" ");
-		}
-		return sb.toString().trim();
-	}
 }

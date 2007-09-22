@@ -12,8 +12,6 @@ package starcorp.common.entities;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.sql.Timestamp;
-
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
@@ -45,8 +43,8 @@ public abstract class ABaseEntity {
 		return null;
 	}
 	
-	private int ID;
-	private long version;
+	private long ID;
+	private int version;
 	public ABaseEntity() {
 		
 	}
@@ -66,33 +64,12 @@ public abstract class ABaseEntity {
 		return toBasicXML(parent);
 	}
 	
-	public int getID() {
+	public long getID() {
 		return ID;
 	}
-	public void setID(int id) {
+	public void setID(long id) {
 		ID = id;
 	}
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ID;
-		return result;
-	}
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		final ABaseEntity other = (ABaseEntity) obj;
-		if (ID != other.ID)
-			return false;
-		return true;
-	}
-
 	@Override
 	public String toString() {
 		return "(" + getClass().getSimpleName() + ": " + ID + ")";
@@ -107,11 +84,36 @@ public abstract class ABaseEntity {
 		writer.close();
 	}
 
-	public long getVersion() {
+	public int getVersion() {
 		return version;
 	}
 
-	public void setVersion(long version) {
+	public void setVersion(int version) {
 		this.version = version;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (int) (ID ^ (ID >>> 32));
+		result = prime * result + (int) (version ^ (version >>> 32));
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		final ABaseEntity other = (ABaseEntity) obj;
+		if (ID != other.ID)
+			return false;
+		if (version != other.version)
+			return false;
+		return true;
 	}
 }

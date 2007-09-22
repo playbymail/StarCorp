@@ -19,6 +19,8 @@ import org.apache.commons.logging.LogFactory;
 
 import starcorp.common.types.GalacticDate;
 import starcorp.server.ServerConfiguration;
+import starcorp.server.engine.AServerTask;
+import starcorp.server.engine.ServerEngine;
 import starcorp.server.entitystore.HibernateStore;
 import starcorp.server.entitystore.IEntityStore;
 
@@ -38,35 +40,19 @@ public class Shell {
 		new Shell();
 		
 	}
-	public static final String getDisplayDuration(long milliseconds) {
-		int seconds = (int) milliseconds / 1000;
-		if(seconds < 60) { // less than a minute
-			return seconds + "s";
-		}
-		else if(seconds < 3600){ // less than an hour
-			int minutes = (int) (seconds / 60);
-			int secs = seconds % (minutes * 60);
-			return minutes +"m "+secs+"s";
-		}
-		else {
-			int hours = (int) (seconds / 3600);
-			int secs = seconds % (hours * 3600);
-			int minutes = (int) (secs / 60);
-			secs = seconds % (minutes * 60);
-			return hours + "h "+minutes +"m "+secs+"s";
-		}
-	}
+	private static final GalacticDate date = ServerConfiguration.getCurrentDate();
+	public static final String PROMPT = date + ">";
+
+	private final ServerEngine engine;
 	private final CommandParser parser;
-	private final GalacticDate date = ServerConfiguration.getCurrentDate();
 	private final Log log = LogFactory.getLog(Shell.class);
 	private final IEntityStore entityStore;
 	private final BufferedReader input;
-	private String prompt;
 	
 	public Shell() {
-		prompt = date + ">";
 		entityStore = new HibernateStore();
-		parser = new CommandParser(entityStore);
+		engine = new ServerEngine(entityStore);
+		parser = new CommandParser();
 		input = new BufferedReader(new InputStreamReader(System.in));
 		System.out.println("Welcome to Starcorp server!");
 		System.out.flush();
@@ -87,16 +73,13 @@ public class Shell {
 	}
 	
 	private void processCommandLine(String text) {
-		ACommand command = parser.parse(text);
-		if(command == null) {
+		AServerTask task = parser.parse(text);
+		if(task == null) {
 			System.out.println("Unknown command");
 			return;
 		}
 		try {
-			long start = System.currentTimeMillis();
-			command.process();
-			long time = System.currentTimeMillis() - start;
-			System.out.println("Done " + getDisplayDuration(time));
+			engine.schedule(task);
 			
 		} catch (Throwable e) {
 			System.out.println(e.getClass().getSimpleName() + ": " + e.getMessage());
@@ -105,7 +88,7 @@ public class Shell {
 	}
 	
 	private String readCommandLine() {
-		System.out.print(getPrompt());
+		System.out.print(PROMPT);
 		System.out.flush();
 		String line = null;
 		do {
@@ -117,10 +100,6 @@ public class Shell {
 		}
 		while(line == null || line.trim().length() == 0);
 		return line;
-	}
-	
-	private String getPrompt() {
-		return prompt;
 	}
 	
 }

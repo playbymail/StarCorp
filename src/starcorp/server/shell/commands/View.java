@@ -10,10 +10,16 @@
  */
 package starcorp.server.shell.commands;
 
+import java.io.PrintWriter;
 import java.io.StringWriter;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import starcorp.common.entities.ABaseEntity;
+import starcorp.server.engine.AServerTask;
 import starcorp.server.shell.ACommand;
+import starcorp.server.shell.Shell;
 
 /**
  * starcorp.server.shell.commands.View
@@ -22,6 +28,7 @@ import starcorp.server.shell.ACommand;
  * @version 20 Sep 2007
  */
 public class View extends ACommand {
+	private static Log log = LogFactory.getLog(View.class); 
 
 	/* (non-Javadoc)
 	 * @see starcorp.server.shell.ACommand#getHelpText()
@@ -39,31 +46,41 @@ public class View extends ACommand {
 		return "view";
 	}
 
-	/* (non-Javadoc)
-	 * @see starcorp.server.shell.ACommand#process()
-	 */
-	@Override
-	public void process() throws Exception {
-		String entityClass = get(0);
-		int ID = getAsInt(1);
-		boolean xml = isTrue(2) || "xml".equalsIgnoreCase(get(2));
-		if(entityClass == null || ID == 0) {
-			out.print("Invalid arguments");
-		}
-		else {
-			String className = "starcorp.common.entities." + entityClass;
-			Class clazz = Class.forName(className);
-			ABaseEntity entity = entityStore.load(clazz, ID);
-			if(xml) {
-				StringWriter sw = new StringWriter();
-				entity.printXML(sw);
-				out.println(sw.toString());
+	public AServerTask task(final Arguments args, final PrintWriter out) {
+		return new AServerTask() {
+			protected String getName() {
+				return "view";
 			}
-			else {
-				out.println(entity);
+			protected Log getLog() {
+				return log;
 			}
-			out.flush();
-		}
+			protected void doJob() throws Exception {
+				String entityClass = args.get(0);
+				int ID = args.getAsInt(1);
+				boolean xml = args.isTrue(2) || "xml".equalsIgnoreCase(args.get(2));
+				if(entityClass == null || ID == 0) {
+					out.println();
+					out.print("Invalid arguments");
+				}
+				else {
+					String className = "starcorp.common.entities." + entityClass;
+					Class clazz = Class.forName(className);
+					ABaseEntity entity = entityStore.load(clazz, ID);
+					if(xml) {
+						StringWriter sw = new StringWriter();
+						entity.printXML(sw);
+						out.println();
+						out.println(sw.toString());
+					}
+					else {
+						out.println();
+						out.println(entity);
+					}
+					out.print(Shell.PROMPT);
+					out.flush();
+				}
+			}
+		};
 
 	}
 

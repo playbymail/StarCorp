@@ -655,7 +655,7 @@ public class HibernateStore implements IEntityStore {
 		return entity;
 	}
 
-	public ABaseEntity load(Class<?> entityClass, int ID) {
+	public ABaseEntity load(Class<?> entityClass, long ID) {
 		return (ABaseEntity) loadObject(entityClass, ID);
 	}
 

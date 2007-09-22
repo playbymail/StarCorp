@@ -10,9 +10,15 @@
  */
 package starcorp.server.shell.commands;
 
+import java.io.PrintWriter;
 import java.util.Iterator;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import starcorp.server.engine.AServerTask;
 import starcorp.server.shell.ACommand;
+import starcorp.server.shell.Shell;
 
 /**
  * starcorp.server.shell.commands.Help
@@ -21,6 +27,7 @@ import starcorp.server.shell.ACommand;
  * @version 20 Sep 2007
  */
 public class Help extends ACommand {
+	private static Log log = LogFactory.getLog(Help.class); 
 
 	/* (non-Javadoc)
 	 * @see starcorp.server.shell.ACommand#getHelpText()
@@ -38,38 +45,47 @@ public class Help extends ACommand {
 		return "help";
 	}
 
-	/* (non-Javadoc)
-	 * @see starcorp.server.shell.ACommand#process()
-	 */
-	@Override
-	public void process() throws Exception {
-		ACommand command = null;
-		String arg = get(0);
-		if(arg != null) {
-			command = parser.getCommand(arg);
-		}
-		if(command == null) {
-			if(arg != null) {
-				out.println("Command " + arg + " not found.");
+	public AServerTask task(final Arguments args, final PrintWriter out) {
+		return new AServerTask() {
+			protected String getName() {
+				return "help";
 			}
-			out.println("List of commands. Type help [command] for further help.");
-			Iterator<String> i = parser.listCommands();
-			int count = 0;
-			while(i.hasNext()) {
-				if(count % 5 == 4) {
-					out.println(i.next());
+			protected Log getLog() {
+				return log;
+			}
+			protected void doJob() throws Exception {
+				ACommand command = null;
+				String arg = args.get(0);
+				if(arg != null) {
+					command = parser.getCommand(arg);
+				}
+				if(command == null) {
+					if(arg != null) {
+						out.println();
+						out.println("Command " + arg + " not found.");
+					}
+					out.println();
+					out.println("List of commands. Type help [command] for further help.");
+					Iterator<String> i = parser.listCommands();
+					int count = 0;
+					while(i.hasNext()) {
+						if(count % 5 == 4) {
+							out.println(i.next());
+						}
+						else {
+							out.print(i.next() + "   ");
+						}
+						count++;
+					}
+					out.println();
 				}
 				else {
-					out.print(i.next() + "   ");
+					out.println(command.getHelpText());
 				}
-				count++;
+				out.print(Shell.PROMPT);
+				out.flush();
 			}
-			out.println();
-		}
-		else {
-			out.println(command.getHelpText());
-		}
-		out.flush();
+		};
 	}
 
 }

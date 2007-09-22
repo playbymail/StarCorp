@@ -10,10 +10,16 @@
  */
 package starcorp.server.shell.commands;
 
-import starcorp.server.entitystore.IEntityStore;
+import java.io.PrintWriter;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import starcorp.server.engine.AServerTask;
 import starcorp.server.facilities.FacilityProcessor;
 import starcorp.server.population.PopulationProcessor;
 import starcorp.server.shell.ACommand;
+import starcorp.server.shell.Shell;
 
 /**
  * starcorp.server.shell.commands.Updater
@@ -22,28 +28,33 @@ import starcorp.server.shell.ACommand;
  * @version 20 Sep 2007
  */
 public class Updater extends ACommand {
+	private static Log log = LogFactory.getLog(Updater.class); 
 
-	private PopulationProcessor popUpdate;
-	private FacilityProcessor facUpdate;
 	
-	/* (non-Javadoc)
-	 * @see starcorp.server.shell.ACommand#process()
-	 */
-	@Override
-	public void process() throws Exception {
-		popUpdate.process();
-		out.println("Population updated.");
-		out.flush();
-		facUpdate.process();
-		out.println("Facilities updated.");
-		out.flush();
-	}
-
-	@Override
-	public void setEntityStore(IEntityStore entityStore) {
-		super.setEntityStore(entityStore);
-		popUpdate = new PopulationProcessor(entityStore);
-		facUpdate = new FacilityProcessor(entityStore);
+	public AServerTask task(final Arguments args, final PrintWriter out) {
+		return new AServerTask() {
+			protected String getName() {
+				return "updater";
+			}
+			protected Log getLog() {
+				return log;
+			}
+			protected void doJob() throws Exception {
+				PopulationProcessor popUpdate = new PopulationProcessor(entityStore);
+				FacilityProcessor facUpdate = new FacilityProcessor(entityStore);
+				
+				popUpdate.process();
+				out.println();
+				out.println("Population updated.");
+				out.println(Shell.PROMPT);
+				out.flush();
+				facUpdate.process();
+				out.println();
+				out.println("Facilities updated.");
+				out.print(Shell.PROMPT);
+				out.flush();
+			}
+		};
 	}
 
 	@Override

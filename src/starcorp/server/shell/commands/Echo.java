@@ -10,7 +10,14 @@
  */
 package starcorp.server.shell.commands;
 
+import java.io.PrintWriter;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import starcorp.server.engine.AServerTask;
 import starcorp.server.shell.ACommand;
+import starcorp.server.shell.Shell;
 
 /**
  * starcorp.server.shell.commands.Echo
@@ -19,14 +26,23 @@ import starcorp.server.shell.ACommand;
  * @version 20 Sep 2007
  */
 public class Echo extends ACommand {
+	private static Log log = LogFactory.getLog(Echo.class); 
 
-	/* (non-Javadoc)
-	 * @see starcorp.server.shell.ACommand#process()
-	 */
-	@Override
-	public void process() throws Exception {
-		out.println(concat(0));
-		out.flush();
+	public AServerTask task(final Arguments args, final PrintWriter out) {
+		return new AServerTask() {
+			protected String getName() {
+				return "echo";
+			}
+			protected Log getLog() {
+				return log;
+			}
+			protected void doJob() throws Exception {
+				out.println();
+				out.println(args.concat(0));
+				out.print(Shell.PROMPT);
+				out.flush();
+			}
+		};
 	}
 
 	@Override

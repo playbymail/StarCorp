@@ -10,7 +10,14 @@
  */
 package starcorp.server.shell.commands;
 
+import java.io.PrintWriter;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import starcorp.server.engine.AServerTask;
 import starcorp.server.shell.ACommand;
+import starcorp.server.shell.Shell;
 
 /**
  * starcorp.server.shell.commands.List
@@ -19,6 +26,7 @@ import starcorp.server.shell.ACommand;
  * @version 20 Sep 2007
  */
 public class List extends ACommand {
+	private static Log log = LogFactory.getLog(List.class); 
 
 	/* (non-Javadoc)
 	 * @see starcorp.server.shell.ACommand#getHelpText()
@@ -36,47 +44,57 @@ public class List extends ACommand {
 		return "list";
 	}
 
-	/* (non-Javadoc)
-	 * @see starcorp.server.shell.ACommand#process()
-	 */
-	@Override
-	public void process() throws Exception {
-		String entityClass = get(0);
-		int page = getAsInt(1);
-		
-		if(entityClass == null) {
-			out.print("Invalid arguments");
-		}
-		else {
-			String className = "starcorp.common.entities." + entityClass;
-			Class clazz = Class.forName(className);
-			java.util.List<?> list = entityStore.list(clazz);
-			int size = list.size();
-			if(size < 1) {
-				out.println("No entities found.");
+	public AServerTask task(final Arguments args, final PrintWriter out) {
+		return new AServerTask() {
+			protected String getName() {
+				return "list";
 			}
-			else {
-				if(page < 1)
-					page = 1;
-				int start = (page - 1) * 10;
-				if(start >= size) {
-					out.println("Invalid page");
+			protected Log getLog() {
+				return log;
+			}
+			protected void doJob() throws Exception {
+				String entityClass = args.get(0);
+				int page = args.getAsInt(1);
+				
+				if(entityClass == null) {
+					out.print("Invalid arguments");
 				}
 				else {
-					int totalPages = size / 10;
-					if(size % 10 > 0)
-						totalPages++;
-					int end = start + 10;
-					if(end > size)
-						end = size;
-					out.println(entityClass + " showing " + page + " of " + totalPages + ":");
-					for(int i = start; i < end; i++) {
-						out.println((i + 1) + ": " + list.get(i));
+					String className = "starcorp.common.entities." + entityClass;
+					Class clazz = Class.forName(className);
+					java.util.List<?> list = entityStore.list(clazz);
+					int size = list.size();
+					if(size < 1) {
+						out.println();
+						out.println("No entities found.");
+					}
+					else {
+						if(page < 1)
+							page = 1;
+						int start = (page - 1) * 10;
+						if(start >= size) {
+							out.println();
+							out.println("Invalid page");
+						}
+						else {
+							int totalPages = size / 10;
+							if(size % 10 > 0)
+								totalPages++;
+							int end = start + 10;
+							if(end > size)
+								end = size;
+							out.println();
+							out.println(entityClass + " showing " + page + " of " + totalPages + ":");
+							for(int i = start; i < end; i++) {
+								out.println((i + 1) + ": " + list.get(i));
+							}
+						}
 					}
 				}
+				out.print(Shell.PROMPT);
+				out.flush();
 			}
-		}
-		out.flush();
+		};
 	}
 
 }

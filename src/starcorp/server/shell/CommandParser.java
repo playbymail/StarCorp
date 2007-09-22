@@ -10,13 +10,14 @@
  */
 package starcorp.server.shell;
 
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import starcorp.common.util.PackageExplorer;
-import starcorp.server.entitystore.IEntityStore;
+import starcorp.server.engine.AServerTask;
 
 /**
  * starcorp.server.shell.CommandParser
@@ -26,11 +27,10 @@ import starcorp.server.entitystore.IEntityStore;
  */
 public class CommandParser {
 
-	private final IEntityStore entityStore;
 	private Map<String, ACommand> commands = new HashMap<String, ACommand>();
+	private PrintWriter out = new PrintWriter(System.out);
 	
-	public CommandParser(IEntityStore entityStore) {
-		this.entityStore = entityStore;
+	public CommandParser() {
 		initializeCommands();
 	}
 	
@@ -53,8 +53,6 @@ public class CommandParser {
 		for(Class clazz : classes) {
 			try {
 				ACommand command = (ACommand) clazz.newInstance();
-				command.setEntityStore(entityStore);
-				command.setOutputStream(System.out);
 				command.setParser(this);
 				commands.put(command.getName(), command);
 			} catch (InstantiationException e) {
@@ -65,7 +63,7 @@ public class CommandParser {
 		}
 	}
 	
-	public ACommand parse(String text) {
+	public AServerTask parse(String text) {
 		if(text == null || (text = text.trim()).length() == 0) {
 			return null;
 		}
@@ -80,9 +78,7 @@ public class CommandParser {
 		
 		String[] commandArgs = new String[args.length - 1];
 		System.arraycopy(args, 1, commandArgs, 0, commandArgs.length);
-		command.setArguments(commandArgs);
-		
-		return command;
+		return command.task(new ACommand.Arguments(commandArgs), out);
 	}
 	
 }

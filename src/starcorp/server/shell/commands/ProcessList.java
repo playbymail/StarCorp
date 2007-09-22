@@ -11,77 +11,63 @@
 package starcorp.server.shell.commands;
 
 import java.io.PrintWriter;
+import java.util.Enumeration;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import starcorp.common.entities.ABaseEntity;
 import starcorp.server.engine.AServerTask;
 import starcorp.server.shell.ACommand;
 import starcorp.server.shell.Shell;
 
 /**
- * starcorp.server.shell.commands.Delete
- * 
+ * starcorp.server.shell.commands.ProcessList
+ *
  * @author Seyed Razavi <monkeyx@gmail.com>
- * @version 20 Sep 2007
+ * @version 22 Sep 2007
  */
-public class Delete extends ACommand {
-	private static Log log = LogFactory.getLog(Delete.class); 
+public class ProcessList extends ACommand {
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	private static final Log log = LogFactory.getLog(ProcessList.class);
+	
+	/* (non-Javadoc)
 	 * @see starcorp.server.shell.ACommand#getHelpText()
 	 */
 	@Override
 	public String getHelpText() {
-		return "del (Entity Class) (ID)\n\nDeletes the specified entity (and all child entities associated with it).";
+		return "ps\n\nDisplays currently running server tasks.";
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see starcorp.server.shell.ACommand#getName()
 	 */
 	@Override
 	public String getName() {
-		return "del";
+		return "ps";
 	}
 
+	/* (non-Javadoc)
+	 * @see starcorp.server.shell.ACommand#task(starcorp.server.shell.ACommand.Arguments, java.io.PrintWriter)
+	 */
+	@Override
 	public AServerTask task(final Arguments args, final PrintWriter out) {
 		return new AServerTask() {
 			protected String getName() {
-				return "del";
+				return "ps";
 			}
 			protected Log getLog() {
 				return log;
 			}
 			protected void doJob() throws Exception {
-		String entityClass = args.get(0);
-		int ID = args.getAsInt(1);
-		if(entityClass == null || ID == 0) {
-			out.println();
-			out.print("Invalid arguments");
-		}
-		else {
-			String className = "starcorp.common.entities." + entityClass;
-			Class clazz = Class.forName(className);
-			ABaseEntity o = entityStore.load(clazz, ID);
-			if(o == null) {
 				out.println();
-				out.println("No such entity.");
+				for(Enumeration<AServerTask> e= engine.runningTasks(); e.hasMoreElements();) {
+					out.println(e.nextElement());
+				}
+				out.print(Shell.PROMPT);
+				out.flush();
 			}
-			else {
-				entityStore.delete(o);
-			}
-			out.println();
-			out.println("Entity "+ o +" deleted.");
-			out.print(Shell.PROMPT);
-			out.flush();
-		}
-
-	}
 		};
+		
 	}
+
 }

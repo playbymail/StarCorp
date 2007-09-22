@@ -10,8 +10,14 @@
  */
 package starcorp.server.shell.commands;
 
-import starcorp.server.entitystore.IEntityStore;
+import java.io.PrintWriter;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import starcorp.server.engine.AServerTask;
 import starcorp.server.shell.ACommand;
+import starcorp.server.shell.Shell;
 import starcorp.server.turns.TurnFetcher;
 import starcorp.server.turns.TurnProcessor;
 
@@ -22,10 +28,8 @@ import starcorp.server.turns.TurnProcessor;
  * @version 20 Sep 2007
  */
 public class Turns extends ACommand {
+	private static Log log = LogFactory.getLog(Turns.class); 
 
-	private TurnProcessor turns;
-	private TurnFetcher fetcher = new TurnFetcher();
-	
 	/* (non-Javadoc)
 	 * @see starcorp.server.shell.ACommand#getHelpText()
 	 */
@@ -42,23 +46,27 @@ public class Turns extends ACommand {
 		return "turns";
 	}
 
-	/* (non-Javadoc)
-	 * @see starcorp.server.shell.ACommand#process()
-	 */
-	@Override
-	public void process() throws Exception {
-		fetcher.fetchTurns();
-		out.println(fetcher.getFetched() + " turns fetched.");
-		out.flush();
-		turns.processTurns();
-		out.println(turns.getProcessed() +  " turns processed.");
-		out.flush();
+	public AServerTask task(final Arguments args, final PrintWriter out) {
+		return new AServerTask() {
+			protected String getName() {
+				return "turns";
+			}
+			protected Log getLog() {
+				return log;
+			}
+			protected void doJob() throws Exception {
+				TurnFetcher fetcher = new TurnFetcher();
+				TurnProcessor turns = new TurnProcessor(entityStore);
+				fetcher.fetchTurns();
+				out.println();
+				out.println(fetcher.getFetched() + " turns fetched.");
+				out.flush();
+				turns.processTurns();
+				out.println();
+				out.println(turns.getProcessed() +  " turns processed.");
+				out.print(Shell.PROMPT);
+				out.flush();
+			}
+		};
 	}
-
-	@Override
-	public void setEntityStore(IEntityStore entityStore) {
-		super.setEntityStore(entityStore);
-		turns = new TurnProcessor(entityStore);
-	}
-
 }

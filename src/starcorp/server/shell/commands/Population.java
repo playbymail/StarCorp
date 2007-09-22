@@ -10,8 +10,15 @@
  */
 package starcorp.server.shell.commands;
 
+import java.io.PrintWriter;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import starcorp.common.types.PopulationClass;
+import starcorp.server.engine.AServerTask;
 import starcorp.server.shell.ACommand;
+import starcorp.server.shell.Shell;
 
 /**
  * starcorp.server.shell.commands.Population
@@ -20,6 +27,7 @@ import starcorp.server.shell.ACommand;
  * @version 20 Sep 2007
  */
 public class Population extends ACommand {
+	private static Log log = LogFactory.getLog(Population.class); 
 
 	/* (non-Javadoc)
 	 * @see starcorp.server.shell.ACommand#getHelpText()
@@ -37,16 +45,24 @@ public class Population extends ACommand {
 		return "population";
 	}
 
-	/* (non-Javadoc)
-	 * @see starcorp.server.shell.ACommand#process()
-	 */
-	@Override
-	public void process() throws Exception {
-		out.println("List of population classes:");
-		for(PopulationClass popClass : PopulationClass.listTypes()) {
-			out.println(popClass);
-		}
-		out.flush();
+	public AServerTask task(final Arguments args, final PrintWriter out) {
+		return new AServerTask() {
+			protected String getName() {
+				return "population";
+			}
+			protected Log getLog() {
+				return log;
+			}
+			protected void doJob() throws Exception {
+				out.println();
+				out.println("List of population classes:");
+				for(PopulationClass popClass : PopulationClass.listTypes()) {
+					out.println(popClass);
+				}
+				out.print(Shell.PROMPT);
+				out.flush();
+			}
+		};
 	}
 
 }

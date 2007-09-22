@@ -68,7 +68,8 @@ public class PackageExplorer {
                 String[] files = directory.list();
                 for (String file : files) {
                     // we are only interested in .class files
-                    if (file.endsWith(".class")) {
+                	// also ignore inner and anonymous classes
+                    if (file.endsWith(".class") && file.indexOf("$") == -1) {
                         // removes the .class extension
                         classes.add(Class.forName(pckgname + '.' + file.substring(0, file.length() - 6)));
                     }

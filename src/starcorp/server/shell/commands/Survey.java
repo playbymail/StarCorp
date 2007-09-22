@@ -10,12 +10,16 @@
  */
 package starcorp.server.shell.commands;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import starcorp.common.entities.Planet;
 import starcorp.common.entities.ResourceDeposit;
@@ -24,9 +28,11 @@ import starcorp.common.types.AItemType;
 import starcorp.common.types.AtmosphereType;
 import starcorp.common.types.Coordinates2D;
 import starcorp.common.types.Resources;
+import starcorp.server.engine.AServerTask;
 import starcorp.server.entitystore.IEntityStore;
 import starcorp.server.setup.Util;
 import starcorp.server.shell.ACommand;
+import starcorp.server.shell.Shell;
 
 /**
  * starcorp.server.shell.commands.Survey
@@ -35,6 +41,7 @@ import starcorp.server.shell.ACommand;
  * @version 21 Sep 2007
  */
 public class Survey extends ACommand {
+	private static Log log = LogFactory.getLog(Survey.class); 
 	public static Set<Util.SuitableLocation> findSuitableLocations(StarSystem system, IEntityStore entityStore, List<AItemType> types) {
 		List<AtmosphereType> atmospheres = AtmosphereType.listTypes(1.0);
 		TreeSet<Util.SuitableLocation> sorted = new TreeSet<Util.SuitableLocation>();
@@ -95,90 +102,106 @@ public class Survey extends ACommand {
 		return "survey";
 	}
 
-	/* (non-Javadoc)
-	 * @see starcorp.server.shell.ACommand#process()
-	 */
-	@Override
-	public void process() throws Exception {
-		String surveyType = get(0);
-		List<AItemType> types;
-		String typeParam = get(2);
-		if("metal".equalsIgnoreCase(typeParam)) {
-			types = Resources.listMetals();
-		}
-		else if("organic".equalsIgnoreCase(typeParam)) {
-			types = Resources.listOrganics();
-		}
-		else if("fuel".equalsIgnoreCase(typeParam)) {
-			types = Resources.listFuel();
-		}
-		else if("gas".equalsIgnoreCase(typeParam)) {
-			types = Resources.listGas();
-		}
-		else if("fissile".equalsIgnoreCase(typeParam)) {
-			types = Resources.listFissile();
-		}
-		else if("liquid".equalsIgnoreCase(typeParam)) {
-			types = Resources.listLiquid();
-		}
-		else if("mineral".equalsIgnoreCase(typeParam)) {
-			types = Resources.listMinerals();
-		}
-		else {
-			types = AItemType.listTypes(Resources.class);
-		}
-		if("planet".equalsIgnoreCase(surveyType)) {
-			int planetId = getAsInt(1);
-			Planet planet = (Planet) entityStore.load(Planet.class, planetId);
-			if(planet == null) {
-				out.println("Invalid planet");
+	public AServerTask task(final Arguments args, final PrintWriter out) {
+		return new AServerTask() {
+			protected String getName() {
+				return "survey";
 			}
-			else {
-				Set<Util.SuitableLocation> sorted = findSuitableLocations(planet, entityStore, types);
-				int size = sorted.size();
-				if(size > 0) {
-					out.println("Found " + size + " suitable locations:");
-					int i = 0;
-					for(Util.SuitableLocation location : sorted) {
-						if(i >= 10)
-							break;
-						out.println((i + 1) + ": " + location.location + " rating " + location.rating);
-						i++;
+			protected Log getLog() {
+				return log;
+			}
+			protected void doJob() throws Exception {
+				String surveyType = args.get(0);
+				List<AItemType> types;
+				String typeParam = args.get(2);
+				if("metal".equalsIgnoreCase(typeParam)) {
+					types = Resources.listMetals();
+				}
+				else if("organic".equalsIgnoreCase(typeParam)) {
+					types = Resources.listOrganics();
+				}
+				else if("fuel".equalsIgnoreCase(typeParam)) {
+					types = Resources.listFuel();
+				}
+				else if("gas".equalsIgnoreCase(typeParam)) {
+					types = Resources.listGas();
+				}
+				else if("fissile".equalsIgnoreCase(typeParam)) {
+					types = Resources.listFissile();
+				}
+				else if("liquid".equalsIgnoreCase(typeParam)) {
+					types = Resources.listLiquid();
+				}
+				else if("mineral".equalsIgnoreCase(typeParam)) {
+					types = Resources.listMinerals();
+				}
+				else {
+					types = AItemType.listTypes(Resources.class);
+				}
+				if("planet".equalsIgnoreCase(surveyType)) {
+					int planetId = args.getAsInt(1);
+					Planet planet = (Planet) entityStore.load(Planet.class, planetId);
+					if(planet == null) {
+						out.println();
+						out.println("Invalid planet");
+					}
+					else {
+						Set<Util.SuitableLocation> sorted = findSuitableLocations(planet, entityStore, types);
+						int size = sorted.size();
+						if(size > 0) {
+							out.println();
+							out.println("Found " + size + " suitable locations:");
+							int i = 0;
+							for(Util.SuitableLocation location : sorted) {
+								if(i >= 10)
+									break;
+								out.println();
+								out.println((i + 1) + ": " + location.location + " rating " + location.rating);
+								i++;
+							}
+						}
+						else {
+							out.println();
+							out.println("No suitable locations found.");
+						}
+					}
+				}
+				else if("system".equalsIgnoreCase(surveyType)) {
+					int systemId = args.getAsInt(1);
+					StarSystem system = (StarSystem) entityStore.load(StarSystem.class, systemId);
+					if(system == null) {
+						out.println();
+						out.println("Invalid system");
+					}
+					else {
+						Set<Util.SuitableLocation> sorted = findSuitableLocations(system, entityStore, types);
+						int size = sorted.size();
+						if(size > 0) {
+							out.println();
+							out.println("Found " + size + " suitable locations:");
+							int i = 0;
+							for(Util.SuitableLocation location : sorted) {
+								if(i >= 10)
+									break;
+								out.println();
+								out.println((i + 1) + ": " + location.location + " @ " + location.planet.getName() + " (" +  location.planet.getID() + ") rating " + location.rating);
+								i++;
+							}
+						}
+						else {
+							out.println();
+							out.println("No suitable locations found.");
+						}
 					}
 				}
 				else {
-					out.println("No suitable locations found.");
+					out.println();
+					out.println("Invalid argument");
 				}
+				out.print(Shell.PROMPT);
+				out.flush();
 			}
-		}
-		else if("system".equalsIgnoreCase(surveyType)) {
-			int systemId = getAsInt(1);
-			StarSystem system = (StarSystem) entityStore.load(StarSystem.class, systemId);
-			if(system == null) {
-				out.println("Invalid system");
-			}
-			else {
-				Set<Util.SuitableLocation> sorted = findSuitableLocations(system, entityStore, types);
-				int size = sorted.size();
-				if(size > 0) {
-					out.println("Found " + size + " suitable locations:");
-					int i = 0;
-					for(Util.SuitableLocation location : sorted) {
-						if(i >= 10)
-							break;
-						out.println((i + 1) + ": " + location.location + " @ " + location.planet.getName() + " (" +  location.planet.getID() + ") rating " + location.rating);
-						i++;
-					}
-				}
-				else {
-					out.println("No suitable locations found.");
-				}
-			}
-		}
-		else {
-			out.println("Invalid argument");
-		}
-		out.flush();
+		};
 
 	}
 
