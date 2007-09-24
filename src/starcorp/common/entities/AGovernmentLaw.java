@@ -1,10 +1,17 @@
 package starcorp.common.entities;
 
+import java.io.IOException;
+import java.io.Writer;
+
+import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
+import org.dom4j.io.OutputFormat;
+import org.dom4j.io.XMLWriter;
 
 import starcorp.common.types.GalacticDate;
 
-public abstract class AGovernmentLaw {
+public abstract class AGovernmentLaw implements IEntity {
 
 	private long ID;
 	private int version;
@@ -115,6 +122,15 @@ public abstract class AGovernmentLaw {
 
 	public void setClosedDate(GalacticDate closedDate) {
 		this.closedDate = closedDate;
+	}
+
+	public void printXML(Writer out) throws IOException {
+		OutputFormat format = OutputFormat.createPrettyPrint();
+		XMLWriter writer = new XMLWriter(out,format);
+		Document doc = DocumentHelper.createDocument();
+		Element root = doc.addElement("starcorp");
+		writer.write(toFullXML(root));
+		writer.close();
 	}
 
 }

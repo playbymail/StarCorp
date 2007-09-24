@@ -73,6 +73,15 @@ public abstract class ACommand {
 			}
 			return sb.toString().trim();
 		}
+		
+		public String toString() {
+			StringBuffer sb = new StringBuffer();
+			for(String arg : args) {
+				sb.append(arg);
+				sb.append(" ");
+			}
+			return sb.toString();
+		}
 	}
 	
 	protected CommandParser parser;

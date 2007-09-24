@@ -16,7 +16,7 @@ import java.io.StringWriter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import starcorp.common.entities.ABaseEntity;
+import starcorp.common.entities.IEntity;
 import starcorp.server.engine.AServerTask;
 import starcorp.server.shell.ACommand;
 import starcorp.server.shell.Shell;
@@ -48,6 +48,9 @@ public class View extends ACommand {
 
 	public AServerTask task(final Arguments args, final PrintWriter out) {
 		return new AServerTask() {
+			public String toString() {
+				return super.toString() + (args.count() > 0 ?  " [" + args + "]" : "");
+			}
 			@Override
 			public boolean isHighPriority() {
 				return true;
@@ -69,7 +72,7 @@ public class View extends ACommand {
 				else {
 					String className = "starcorp.common.entities." + entityClass;
 					Class clazz = Class.forName(className);
-					ABaseEntity entity = entityStore.load(clazz, ID);
+					IEntity entity = entityStore.load(clazz, ID);
 					if(xml) {
 						StringWriter sw = new StringWriter();
 						entity.printXML(sw);

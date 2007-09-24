@@ -15,7 +15,7 @@ import java.io.PrintWriter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import starcorp.common.entities.ABaseEntity;
+import starcorp.common.entities.IEntity;
 import starcorp.server.engine.AServerTask;
 import starcorp.server.shell.ACommand;
 import starcorp.server.shell.Shell;
@@ -51,6 +51,9 @@ public class Delete extends ACommand {
 
 	public AServerTask task(final Arguments args, final PrintWriter out) {
 		return new AServerTask() {
+			public String toString() {
+				return super.toString() + (args.count() > 0 ?  " [" + args + "]" : "");
+			}
 			protected String getName() {
 				return "del";
 			}
@@ -69,7 +72,7 @@ public class Delete extends ACommand {
 					String className = "starcorp.common.entities."
 							+ entityClass;
 					Class clazz = Class.forName(className);
-					ABaseEntity o = entityStore.load(clazz, ID);
+					IEntity o = entityStore.load(clazz, ID);
 					if (o == null) {
 						out.println();
 						out.println("No such entity.");

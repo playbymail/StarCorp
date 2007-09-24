@@ -15,10 +15,11 @@ import java.util.Iterator;
 import java.util.List;
 import org.dom4j.Element;
 
-import starcorp.common.entities.ABaseEntity;
+import starcorp.common.entities.IEntity;
 import starcorp.common.entities.Planet;
 import starcorp.common.types.OrderType;
 import starcorp.common.types.PlanetMapSquare;
+import starcorp.common.util.Util;
 
 /**
  * starcorp.client.turns.TurnReport
@@ -52,7 +53,7 @@ public class OrderReport {
 		}
 		Element scanned = e.element("scanned");
 		for(Iterator<?> i = scanned.elementIterator("entity"); i.hasNext();) {
-			ABaseEntity entity = ABaseEntity.fromXML((Element) i.next());
+			IEntity entity = Util.fromXML((Element) i.next());
 			if(entity != null)
 				scannedEntities.add(entity);
 		}
@@ -78,7 +79,7 @@ public class OrderReport {
 		Element scanned = root.addElement("scanned");
 		Iterator<?> i = scannedEntities.iterator();
 		while(i.hasNext()) {
-			ABaseEntity entity = (ABaseEntity) i.next();
+			IEntity entity = (IEntity) i.next();
 			entity.toBasicXML(scanned);
 		}
 		if(scannedLocation != null) {
@@ -125,7 +126,7 @@ public class OrderReport {
 		scannedEntities.addAll(scanned);
 	}
 	@SuppressWarnings("unchecked")
-	public void addScannedEntity(ABaseEntity entity) {
+	public void addScannedEntity(IEntity entity) {
 		scannedEntities.add(entity);
 	}
 

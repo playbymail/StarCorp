@@ -10,11 +10,17 @@
  */
 package starcorp.common.entities;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
+import org.dom4j.io.OutputFormat;
+import org.dom4j.io.XMLWriter;
 
 import starcorp.common.types.GalacticDate;
 
@@ -24,7 +30,7 @@ import starcorp.common.types.GalacticDate;
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 18 Sep 2007
  */
-public class CashTransaction {
+public class CashTransaction implements IEntity {
 
 	public static final String GRANT_PAID = "grant.paid";
 	public static final String ITEM_BOUGHT = "item.bought";
@@ -164,6 +170,38 @@ public class CashTransaction {
 
 	public void setAccountID(long accountID) {
 		this.accountID = accountID;
+	}
+
+	public void printXML(Writer out) throws IOException {
+		OutputFormat format = OutputFormat.createPrettyPrint();
+		XMLWriter writer = new XMLWriter(out,format);
+		Document doc = DocumentHelper.createDocument();
+		Element root = doc.addElement("starcorp");
+		writer.write(toFullXML(root));
+		writer.close();
+	}
+
+	public void readXML(Element e) {
+		this.ID = Long.parseLong(e.attributeValue("ID"));
+		this.accountID = Long.parseLong(e.attributeValue("account"));
+		this.amount = Integer.parseInt(e.attributeValue("amount"));
+		this.description = e.element("description").getTextTrim();
+		this.date = new GalacticDate(e.element("date"));
+	}
+
+	public Element toBasicXML(Element parent) {
+		Element e = parent.addElement("cash-transaction");
+		e.addAttribute("class", getClass().getSimpleName());
+		e.addAttribute("ID", String.valueOf(ID));
+		e.addAttribute("account", String.valueOf(accountID));
+		e.addAttribute("amount", String.valueOf(amount));
+		e.addElement("description").addText(description);
+		date.toXML(e);
+		return e;
+	}
+
+	public Element toFullXML(Element parent) {
+		return toBasicXML(parent);
 	}
 	
 }

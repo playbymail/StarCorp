@@ -13,12 +13,12 @@ package starcorp.server.entitystore;
 import java.util.List;
 import java.util.Map;
 
-import starcorp.common.entities.ABaseEntity;
 import starcorp.common.entities.AColonists;
 import starcorp.common.entities.ACorporateItem;
 import starcorp.common.entities.AGovernmentLaw;
 import starcorp.common.entities.CreditAccount;
 import starcorp.common.entities.FactoryQueueItem;
+import starcorp.common.entities.IEntity;
 import starcorp.common.entities.MarketItem;
 import starcorp.common.entities.ResourceDeposit;
 import starcorp.common.entities.StarSystemEntity;
@@ -52,17 +52,18 @@ import starcorp.common.types.PopulationClass;
 public interface IEntityStore {
 	public abstract void shutdown();
 
+	public abstract double getAveragePrice(Colony colony, AItemType type);
 	public abstract double getAverageHappiness(Colony colony, PopulationClass popClass);
 	
-	public abstract long getCredits(ABaseEntity entity);
-	public abstract long removeCredits(ABaseEntity entity, long credits, String reason);
-	public abstract long addCredits(ABaseEntity entity, long credits, String reason);
-	public abstract long transferCredits(ABaseEntity from, ABaseEntity to, long credits, String reason);
+	public abstract long getCredits(IEntity entity);
+	public abstract long removeCredits(IEntity entity, long credits, String reason);
+	public abstract long addCredits(IEntity entity, long credits, String reason);
+	public abstract long transferCredits(IEntity from, IEntity to, long credits, String reason);
 	public abstract List<CreditAccount> listAccounts();
 	
-	public abstract ABaseEntity load(Class<?> entityClass, long ID);
-	public abstract ABaseEntity create(ABaseEntity entity);
-	public abstract ABaseEntity update(ABaseEntity entity);
+	public abstract IEntity load(Class<?> entityClass, long ID);
+	public abstract IEntity create(IEntity entity);
+	public abstract IEntity update(IEntity entity);
 	public abstract AGovernmentLaw create(AGovernmentLaw law);
 	public abstract AGovernmentLaw update(AGovernmentLaw law);
 	public abstract ACorporateItem create(ACorporateItem item);
@@ -70,7 +71,7 @@ public interface IEntityStore {
 	public abstract ResourceDeposit create(ResourceDeposit deposit);
 	public abstract ResourceDeposit update(ResourceDeposit deposit);
 	
-	public abstract void delete(ABaseEntity entity);
+	public abstract void delete(IEntity entity);
 	public abstract void delete(ACorporateItem item);
 	
 	public abstract List<Object> query(String hql);

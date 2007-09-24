@@ -64,6 +64,9 @@ public class Updater extends ACommand {
 		}
 		else if("all".equalsIgnoreCase(type)) {
 			return new AServerTask() {
+				public String toString() {
+					return super.toString() + (args.count() > 0 ?  " [" + args + "]" : "");
+				}
 				protected String getName() {
 					return "batch-updater";
 				}

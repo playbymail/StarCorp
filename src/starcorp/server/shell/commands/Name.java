@@ -46,6 +46,9 @@ public class Name extends ACommand {
 
 	public AServerTask task(final Arguments args, final PrintWriter out) {
 		return new AServerTask() {
+			public String toString() {
+				return super.toString() + (args.count() > 0 ?  " [" + args + "]" : "");
+			}
 			@Override
 			public boolean isHighPriority() {
 				return true;
@@ -59,7 +62,7 @@ public class Name extends ACommand {
 			protected void doJob() throws Exception {
 				String entityClass = args.get(0);
 				int ID = args.getAsInt(1);
-				String name = args.get(2);
+				String name = args.concat(2);
 				if(entityClass == null || ID == 0 || name == null) {
 					out.println();
 					out.print("Invalid arguments");
@@ -70,6 +73,7 @@ public class Name extends ACommand {
 					ANamedEntity entity = (ANamedEntity) entityStore.load(clazz, ID);
 					entity.setName(name);
 					entityStore.update(entity);
+					out.println();
 					out.println(entity);
 					out.print(Shell.PROMPT);
 					out.flush();

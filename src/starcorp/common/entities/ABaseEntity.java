@@ -24,24 +24,7 @@ import org.dom4j.io.XMLWriter;
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 15 Sep 2007
  */
-public abstract class ABaseEntity {
-	
-	public static ABaseEntity fromXML(Element e) {
-		String className = "starcorp.common.entities." + e.attributeValue("class");
-		ABaseEntity entity;
-		try {
-			entity = (ABaseEntity) Class.forName(className).newInstance();
-			entity.readXML(e);
-			return entity;
-		} catch (InstantiationException e1) {
-			e1.printStackTrace();
-		} catch (IllegalAccessException e1) {
-			e1.printStackTrace();
-		} catch (ClassNotFoundException e1) {
-			e1.printStackTrace();
-		}
-		return null;
-	}
+public abstract class ABaseEntity implements IEntity {
 	
 	private long ID;
 	private int version;
@@ -49,10 +32,16 @@ public abstract class ABaseEntity {
 		
 	}
 	
+	/* (non-Javadoc)
+	 * @see starcorp.common.entities.IEntity#readXML(org.dom4j.Element)
+	 */
 	public void readXML(Element e) {
 		this.ID = Integer.parseInt(e.attributeValue("ID","0"));
 	}
 	
+	/* (non-Javadoc)
+	 * @see starcorp.common.entities.IEntity#toBasicXML(org.dom4j.Element)
+	 */
 	public Element toBasicXML(Element parent) {
 		Element root = parent.addElement("entity");
 		root.addAttribute("ID", String.valueOf(ID));
@@ -60,13 +49,22 @@ public abstract class ABaseEntity {
 		return root;
 	}
 	
+	/* (non-Javadoc)
+	 * @see starcorp.common.entities.IEntity#toFullXML(org.dom4j.Element)
+	 */
 	public Element toFullXML(Element parent) {
 		return toBasicXML(parent);
 	}
 	
+	/* (non-Javadoc)
+	 * @see starcorp.common.entities.IEntity#getID()
+	 */
 	public long getID() {
 		return ID;
 	}
+	/* (non-Javadoc)
+	 * @see starcorp.common.entities.IEntity#setID(long)
+	 */
 	public void setID(long id) {
 		ID = id;
 	}
@@ -75,6 +73,9 @@ public abstract class ABaseEntity {
 		return "(" + getClass().getSimpleName() + ": " + ID + ")";
 	}
 	
+	/* (non-Javadoc)
+	 * @see starcorp.common.entities.IEntity#printXML(java.io.Writer)
+	 */
 	public void printXML(Writer out) throws IOException {
 		OutputFormat format = OutputFormat.createPrettyPrint();
 		XMLWriter writer = new XMLWriter(out,format);
@@ -84,10 +85,16 @@ public abstract class ABaseEntity {
 		writer.close();
 	}
 
+	/* (non-Javadoc)
+	 * @see starcorp.common.entities.IEntity#getVersion()
+	 */
 	public int getVersion() {
 		return version;
 	}
 
+	/* (non-Javadoc)
+	 * @see starcorp.common.entities.IEntity#setVersion(int)
+	 */
 	public void setVersion(int version) {
 		this.version = version;
 	}

@@ -25,13 +25,13 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
-import starcorp.common.entities.ABaseEntity;
 import starcorp.common.entities.AColonists;
 import starcorp.common.entities.ACorporateItem;
 import starcorp.common.entities.AGovernmentLaw;
 import starcorp.common.entities.CashTransaction;
 import starcorp.common.entities.CreditAccount;
 import starcorp.common.entities.FactoryQueueItem;
+import starcorp.common.entities.IEntity;
 import starcorp.common.entities.MarketItem;
 import starcorp.common.entities.ResourceDeposit;
 import starcorp.common.entities.StarSystemEntity;
@@ -438,7 +438,7 @@ public class HibernateStore implements IEntityStore {
 			return createQuery(q, "colony", colony);
 	}
 
-	public long addCredits(ABaseEntity entity, long credits, String reason) {
+	public long addCredits(IEntity entity, long credits, String reason) {
 		String q = "update versioned CreditAccount set credits = credits + " + 
 		credits + " where ID = " + entity.getID();
 		beginTransaction();
@@ -460,7 +460,7 @@ public class HibernateStore implements IEntityStore {
 		return getCredits(entity);
 	}
 
-	public ABaseEntity create(ABaseEntity entity) {
+	public IEntity create(IEntity entity) {
 		beginTransaction();
 		getSession().saveOrUpdate(entity);
 		commit();
@@ -493,7 +493,7 @@ public class HibernateStore implements IEntityStore {
 		getSession().delete(item);
 		commit();
 	}
-	public void delete(ABaseEntity entity) {
+	public void delete(IEntity entity) {
 		if (entity instanceof Colony) {
 			deleteColony((Colony) entity);
 		} else if (entity instanceof Corporation) {
@@ -571,7 +571,7 @@ public class HibernateStore implements IEntityStore {
 		return c;
 	}
 
-	public long getCredits(ABaseEntity entity) {
+	public long getCredits(IEntity entity) {
 		beginTransaction();
 		String q = "from CreditAccount where ID = " + entity.getID();
 		long credits = 0;
@@ -1263,9 +1263,9 @@ public class HibernateStore implements IEntityStore {
 		return copyColonists((listObject(createQuery(q, "facility", facility))));
 	}
 
-	public ABaseEntity load(Class<?> entityClass, long ID) {
+	public IEntity load(Class<?> entityClass, long ID) {
 		beginTransaction();
-		ABaseEntity entity = (ABaseEntity) loadObject(entityClass, ID);
+		IEntity entity = (IEntity) loadObject(entityClass, ID);
 		commit();
 		return entity;
 	}
@@ -1356,7 +1356,7 @@ public class HibernateStore implements IEntityStore {
 		return copyObjects(listObject(createQuery(hql)));
 	}
 
-	public long removeCredits(ABaseEntity entity, long credits, String reason) {
+	public long removeCredits(IEntity entity, long credits, String reason) {
 		addCredits(entity, (0 - credits), reason);
 		return getCredits(entity);
 	}
@@ -1365,16 +1365,16 @@ public class HibernateStore implements IEntityStore {
 		sessionFactory.close();
 	}
 
-	public long transferCredits(ABaseEntity from, ABaseEntity to, long credits,
+	public long transferCredits(IEntity from, IEntity to, long credits,
 			String reason) {
 		long total = addCredits(to, credits, reason);
 		removeCredits(from, credits, reason);
 		return total;
 	}
 
-	public ABaseEntity update(ABaseEntity entity) {
+	public IEntity update(IEntity entity) {
 		beginTransaction();
-		entity = (ABaseEntity) getSession().merge(entity);
+		entity = (IEntity) getSession().merge(entity);
 		commit();
 		return entity;
 	}
@@ -1444,6 +1444,23 @@ public class HibernateStore implements IEntityStore {
 		String q = "from FactoryQueueItem where factory = :facility order by position";
 		beginTransaction();
 		return copyQueue(listObject(createQuery(q, "facility", facility)));
+	}
+
+	public double getAveragePrice(Colony colony, AItemType type) {
+		if(type == null || colony == null)
+			return 0.0;
+		String q = "select avg(costPerItem) from MarketItem where item.type = '" + type.getKey() +"' and colony = :colony";
+		beginTransaction();
+		Query query = createQuery(q, "colony", colony);
+		double avg = 0.0;
+		try {
+			avg = (Double) query.uniqueResult();
+		}
+		catch(Throwable e) {
+			log.error(e.getMessage(),e);
+		}
+		commit();
+		return avg;
 	}
 
 }

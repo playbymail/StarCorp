@@ -10,31 +10,31 @@
  */
 package starcorp.server.shell.commands;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.PrintWriter;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import starcorp.common.types.PopulationClass;
 import starcorp.server.engine.AServerTask;
 import starcorp.server.shell.ACommand;
-import starcorp.server.shell.Shell;
 
 /**
- * starcorp.server.shell.commands.Population
+ * starcorp.server.shell.commands.Script
  *
  * @author Seyed Razavi <monkeyx@gmail.com>
- * @version 20 Sep 2007
+ * @version 24 Sep 2007
  */
-public class Population extends ACommand {
-	private static Log log = LogFactory.getLog(Population.class); 
-
+public class Script extends ACommand {
+	private static final Log log = LogFactory.getLog(Script.class);
+	
 	/* (non-Javadoc)
 	 * @see starcorp.server.shell.ACommand#getHelpText()
 	 */
 	@Override
 	public String getHelpText() {
-		return "population\n\nPrints out PopulationClass names.";
+		return "script (Script File)\n\nRuns the specified script file.";
 	}
 
 	/* (non-Javadoc)
@@ -42,33 +42,46 @@ public class Population extends ACommand {
 	 */
 	@Override
 	public String getName() {
-		return "population";
+		return "script";
 	}
 
+	/* (non-Javadoc)
+	 * @see starcorp.server.shell.ACommand#task(starcorp.server.shell.ACommand.Arguments, java.io.PrintWriter)
+	 */
+	@Override
 	public AServerTask task(final Arguments args, final PrintWriter out) {
 		return new AServerTask() {
 			public String toString() {
 				return super.toString() + (args.count() > 0 ?  " [" + args + "]" : "");
 			}
-			@Override
-			public boolean isHighPriority() {
-				return true;
-			}
-			protected String getName() {
-				return "population";
-			}
 			protected Log getLog() {
 				return log;
 			}
-			protected void doJob() throws Exception {
-				out.println();
-				out.println("List of population classes:");
-				for(PopulationClass popClass : PopulationClass.listTypes()) {
-					out.println(popClass);
-				}
-				out.print(Shell.PROMPT);
-				out.flush();
+			protected String getName() {
+				return "script";
 			}
+			protected void doJob() throws Exception {
+				String scriptFile = args.concat(0);
+				BufferedReader reader = new BufferedReader(new FileReader(scriptFile));
+				String line;
+				int lineCount = 1;
+				while((line = reader.readLine()) != null) {
+					int i = line.indexOf('#');
+					if(i != -1)
+						line = line.substring(0,i);
+					AServerTask task = parser.parse(line);
+					if(task == null) {
+						out.println("script [" + scriptFile + "] error on line " + lineCount);
+						out.flush();
+					}
+					else {
+						engine.scheduleAndWait(task);
+					}
+					lineCount++;
+					Thread.yield();
+				}
+			}
+			
 		};
 	}
 

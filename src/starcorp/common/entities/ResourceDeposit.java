@@ -10,7 +10,14 @@
  */
 package starcorp.common.entities;
 
+import java.io.IOException;
+import java.io.Writer;
+
+import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
+import org.dom4j.io.OutputFormat;
+import org.dom4j.io.XMLWriter;
 
 import starcorp.common.types.AItemType;
 import starcorp.common.types.Coordinates2D;
@@ -21,7 +28,7 @@ import starcorp.common.types.Coordinates2D;
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 15 Sep 2007
  */
-public class ResourceDeposit {
+public class ResourceDeposit implements IEntity {
 	private long ID;
 	private int version;
 	private long systemEntityID;
@@ -185,5 +192,18 @@ public class ResourceDeposit {
 
 	public void setVersion(int version) {
 		this.version = version;
+	}
+
+	public void printXML(Writer out) throws IOException {
+		OutputFormat format = OutputFormat.createPrettyPrint();
+		XMLWriter writer = new XMLWriter(out,format);
+		Document doc = DocumentHelper.createDocument();
+		Element root = doc.addElement("starcorp");
+		writer.write(toFullXML(root));
+		writer.close();
+	}
+
+	public Element toFullXML(Element parent) {
+		return toBasicXML(parent);
 	}
 }

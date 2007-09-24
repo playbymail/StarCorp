@@ -67,6 +67,16 @@ public class TurnProcessor extends AServerTask {
 				try {
 					Document doc = reader.read(turns[i]);
 					turn = new Turn(doc.getRootElement().element("turn"));
+					Corporation corp = authorize(turn.getCorporation());
+					if(corp == null) {
+						corp = register(turn.getCorporation());
+						if(corp == null) {
+							turn.add(TurnError.ERROR_AUTHORIZATION_FAILED);
+						}
+					}
+					if(corp != null){
+						turn.setCorporation(corp);
+					}
 				}
 				catch(Exception e) {
 					log.warn(this + ": Error reading turn file " + turns[i].getName() + " because " + e.getMessage());
@@ -119,16 +129,9 @@ public class TurnProcessor extends AServerTask {
 	}
 	
 	public TurnReport process(Turn turn) {
-		Corporation corp = authorize(turn.getCorporation());
+		Corporation corp = turn.getCorporation();
 		TurnReport report = new TurnReport(turn);
-		if(corp == null) {
-			corp = register(turn.getCorporation());
-			if(corp == null) {
-				turn.add(TurnError.ERROR_AUTHORIZATION_FAILED);
-			}
-		}
 		if(corp != null){
-			turn.setCorporation(corp);
 			GalacticDate lastTurn = corp.getLastTurnDate();
 			GalacticDate currentDate = ServerConfiguration.getCurrentDate();
 			if(lastTurn != null && !lastTurn.before(currentDate)) {

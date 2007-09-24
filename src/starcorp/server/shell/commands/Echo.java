@@ -30,6 +30,9 @@ public class Echo extends ACommand {
 
 	public AServerTask task(final Arguments args, final PrintWriter out) {
 		return new AServerTask() {
+			public String toString() {
+				return super.toString() + (args.count() > 0 ?  " [" + args + "]" : "");
+			}
 			@Override
 			public boolean isHighPriority() {
 				return true;

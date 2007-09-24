@@ -62,8 +62,8 @@ public class MarketItem extends ACorporateItem {
 	public Element toBasicXML(Element parent) {
 		Element e = super.toBasicXML(parent);
 		e.addAttribute("price",String.valueOf(costPerItem));
-		issuedDate.toXML(e.addElement("issued"));
-		soldDate.toXML(e.addElement("sold"));
+		if(issuedDate != null) issuedDate.toXML(e.addElement("issued"));
+		if(soldDate != null) soldDate.toXML(e.addElement("sold"));
 		return e;
 	}
 	@Override

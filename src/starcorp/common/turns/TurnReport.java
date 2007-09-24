@@ -16,7 +16,8 @@ import java.util.List;
 
 import org.dom4j.Element;
 
-import starcorp.common.entities.ABaseEntity;
+import starcorp.common.entities.IEntity;
+import starcorp.common.util.Util;
 
 /**
  * starcorp.client.turns.TurnReport
@@ -38,7 +39,7 @@ public class TurnReport {
 	public TurnReport(Element e) {
 		this.turn = new Turn(e.element("turn"));
 		for(Iterator<?> i = e.element("player-entities").elementIterator("entity"); i.hasNext();) {
-			ABaseEntity entity = ABaseEntity.fromXML((Element)i.next());
+			IEntity entity = Util.fromXML((Element)i.next());
 			if(entity != null)
 				playerEntities.add(entity);
 		}
@@ -49,7 +50,7 @@ public class TurnReport {
 		turn.toXML(root);
 		Element e = root.addElement("player-entities");
 		for(Iterator<?> i = playerEntities.iterator(); i.hasNext();) {
-			ABaseEntity entity = (ABaseEntity) i.next();
+			IEntity entity = (IEntity) i.next();
 			entity.toFullXML(e);
 		}
 		return root;
@@ -69,7 +70,7 @@ public class TurnReport {
 		playerEntities.addAll(entities);
 	}
 	@SuppressWarnings("unchecked")
-	public void addPlayerEntity(ABaseEntity entity) {
+	public void addPlayerEntity(IEntity entity) {
 		playerEntities.add(entity);
 	}
 }

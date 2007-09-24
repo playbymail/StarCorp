@@ -11,23 +11,17 @@
 package starcorp.server.facilities;
 
 import java.util.List;
-import java.util.Vector;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import starcorp.common.entities.AColonists;
 import starcorp.common.entities.Colony;
 import starcorp.common.entities.ColonyItem;
 import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Facility;
 import starcorp.common.entities.MarketItem;
-import starcorp.common.types.AFacilityType;
 import starcorp.common.types.AItemType;
-import starcorp.common.types.Factory;
 import starcorp.common.types.IndustrialGoods;
 import starcorp.common.types.Items;
-import starcorp.common.types.ResourceGenerator;
 import starcorp.server.ServerConfiguration;
 import starcorp.server.Util;
 import starcorp.server.engine.AServerTask;
