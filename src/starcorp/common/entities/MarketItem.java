@@ -10,13 +10,9 @@
  */
 package starcorp.common.entities;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.dom4j.Element;
 
 import starcorp.common.types.GalacticDate;
-import starcorp.common.types.Items;
 
 /**
  * starcorp.common.entities.MarketItem
@@ -24,16 +20,10 @@ import starcorp.common.types.Items;
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 16 Sep 2007
  */
-public class MarketItem extends ColonyItem {
+public class MarketItem extends ACorporateItem {
 	private int costPerItem;
 	private GalacticDate issuedDate;
 	private GalacticDate soldDate;
-	
-	public static class BuyResult {
-		public int quantityBought;
-		public int totalPrice;
-		public List<Items> bought = new ArrayList<Items>();
-	}
 	
 	public Corporation getSeller() {
 		return getOwner();

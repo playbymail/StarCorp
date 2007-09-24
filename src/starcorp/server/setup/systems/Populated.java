@@ -41,6 +41,7 @@ public class Populated extends Standard {
 		govt.setFoundedDate(ServerConfiguration.getCurrentDate());
 		govt.setName(name + " Federation");
 		entityStore.create(govt);
+		log.info("Created " + govt);
 		entityStore.addCredits(govt, STARTING_NPC_CREDITS, "NPC Setup");
 		int otherCorps = Util.rnd.nextInt(10) + 5;
 		List<Corporation> tradingCompanies = new ArrayList<Corporation>();
@@ -49,11 +50,10 @@ public class Populated extends Standard {
 			Corporation corp = new Corporation();
 			corp.setFoundedDate(ServerConfiguration.getCurrentDate());
 			corp.setName(Util.getRandomCorporationName());
-			entityStore.create(corp);
+			corp = (Corporation) entityStore.create(corp);
+			log.info("Created " + corp);
 			entityStore.addCredits(corp, STARTING_NPC_CREDITS, "NPC Setup");
 		}
-		if(log.isDebugEnabled())
-			log.debug("Created " + govt);
 		Set<starcorp.server.Util.SuitableLocation> suitableLocations = Survey.findSuitableLocations(system, entityStore, AItemType.listTypes(Resources.class));
 		boolean capitol = false;
 		int cities = 0;
@@ -88,8 +88,6 @@ public class Populated extends Standard {
 		AColonyTemplate template = AColonyTemplate.getTemplate(templateName);
 		template.setEntityStore(entityStore);
 		Colony colony = template.create(govt, tradingCompanies, planet, location, Util.getRandomColonyName());
-		if(log.isDebugEnabled())
-			log.debug("Created " + colony);
 		return colony;
 	}
 

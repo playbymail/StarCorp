@@ -10,8 +10,6 @@
  */
 package starcorp.common.entities;
 
-import java.util.List;
-
 import org.dom4j.Element;
 
 import starcorp.common.types.Population;
@@ -24,26 +22,6 @@ import starcorp.common.types.PopulationClass;
  * @version 18 Sep 2007
  */
 public abstract class AColonists extends ABaseEntity {
-	public static int countColonists(List<?> colonists) {
-		int totalQty = 0;
-		for(Object o : colonists) {
-			AColonists colonist = (AColonists) o;
-			totalQty += colonist.getQuantity();
-		}
-		return totalQty;
-	}
-	
-	public static double getAverageHappiness(List<?> colonists) {
-		int totalQty = 0;
-		double totalHappiness = 0.0;
-		for(Object o : colonists) {
-			AColonists colonist = (AColonists) o;
-			totalQty += colonist.getQuantity();
-			totalHappiness += (colonist.getQuantity() * colonist.getHappiness());
-		}
-		return totalHappiness / totalQty;
-	}
-	
 	private Colony colony;
 	private Population population;
 	private double happiness;

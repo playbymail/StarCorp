@@ -10,7 +10,9 @@
  */
 package starcorp.server.population;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,6 +23,7 @@ import starcorp.common.entities.Planet;
 import starcorp.common.entities.StarSystem;
 import starcorp.common.entities.Unemployed;
 import starcorp.common.types.CoordinatesPolar;
+import starcorp.common.types.PopulationClass;
 import starcorp.server.engine.AServerTask;
 
 /**
@@ -38,6 +41,8 @@ public class UnemployedMigration extends AServerTask {
 	public static final double MIGRATION_DISTANCE_SAME_PLANET = 2.0;
 	public static final double MIGRATION_DISTANCE_SAME_SYSTEM = 0.5;
 
+	private Map<Colony, Map<PopulationClass,Unemployed>> all_unemployed = new HashMap<Colony, Map<PopulationClass,Unemployed>>();
+	
 	private void doMigration(Unemployed unemployed) {
 		if (unemployed.getQuantity() < 1)
 			return;
@@ -60,35 +65,49 @@ public class UnemployedMigration extends AServerTask {
 			double distanceModifier) {
 		if (unemployed.getQuantity() < 1)
 			return;
-		List<AColonists> colonists = entityStore.listColonists(colony, unemployed
-				.getPopClass());
-		double happiness = AColonists.getAverageHappiness(colonists);
-		double migrationRate = unemployed.getHappiness() - happiness;
+		double happiness = entityStore.getAverageHappiness(colony, unemployed.getPopClass());
+//		if(log.isDebugEnabled()) {
+//			log.debug(this + ": " + colony + " has avg happiness " + happiness +". Unemployed happiness " + unemployed.getHappiness());
+//		}
+		double migrationRate = happiness - unemployed.getHappiness();
 		migrationRate *= distanceModifier;
+		if(migrationRate > 100.0) {
+			migrationRate = 100.0;
+		}
 
-		int migrate = (int) (unemployed.getQuantity() * migrationRate);
+		if(log.isDebugEnabled()) {
+			log.debug(this + ": Migration Rate = " + migrationRate + " to " + colony +" for "+ unemployed);
+		}
+		int migrate = (int) (unemployed.getQuantity() * (migrationRate / 100.0));
 
 		if (migrate > 0) {
 			long creditsPerPerson = entityStore.getCredits(unemployed) / unemployed.getQuantity();
 			long credits = migrate * creditsPerPerson;
-			Unemployed other = entityStore.getUnemployed(colony, unemployed
-					.getPopClass());
-			if (other == null) {
-				other = new Unemployed();
-				other.setColony(colony);
-				other.setHappiness(0.0);
-				other.setPopClass(unemployed.getPopClass());
-				entityStore.create(other);
-			}
+			Unemployed other = getUnemployed(colony, unemployed.getPopClass());
 			other.addPopulation(migrate);
 			unemployed.removePopulation(migrate);
-			entityStore.update(other);
-			entityStore.update(unemployed);
 			entityStore.removeCredits(unemployed, credits, "");
 			if (log.isDebugEnabled())
 				log.debug(migrate + " of " + unemployed.getPopClass()
 						+ " migrated to " + other);
 		}
+	}
+	
+	private Unemployed getUnemployed(Colony colony, PopulationClass popClass) {
+		Map<PopulationClass, Unemployed> map = all_unemployed.get(colony);
+		if(map == null) {
+			map = new HashMap<PopulationClass, Unemployed>();
+			all_unemployed.put(colony,map);
+		}
+		Unemployed u = map.get(popClass);
+		if(u == null) {
+			u = new Unemployed();
+			u.setColony(colony);
+			u.setPopClass(popClass);
+			u = (Unemployed) entityStore.create(u);
+			map.put(popClass,u);
+		}
+		return u;
 	}
 
 	private void doMigration(Unemployed unemployed, List<Colony> colonies,
@@ -106,15 +125,37 @@ public class UnemployedMigration extends AServerTask {
 	@Override
 	protected void doJob() throws Exception {
 		List<AColonists> unemployed = entityStore.listUnemployed();
+		for(AColonists col : unemployed) {
+			Colony colony = col.getColony();
+			PopulationClass popClass = col.getPopClass();
+			Unemployed u = (Unemployed) col;
+			Map<PopulationClass, Unemployed> entry =
+				all_unemployed.get(colony);
+			if(entry == null) {
+				entry = new HashMap<PopulationClass,Unemployed>();
+			}
+			entry.put(popClass,u);
+			all_unemployed.put(colony,entry);
+		}
 		int size = unemployed.size();
 		int i = 1;
 		log.info(this + ": " + size + " unemployed to process");
-		for(AColonists colonist : unemployed) {
-			if(log.isDebugEnabled())
-				log.debug(this + ": " + i + " of " + size + " unemployed processing.");
-			doMigration((Unemployed)colonist);
-			Thread.yield();
-			i++;
+		for(Colony colony : all_unemployed.keySet()) {
+			Map<PopulationClass, Unemployed> map = all_unemployed.get(colony);
+			for(PopulationClass popClass : map.keySet()) {
+				Unemployed col = map.get(popClass);
+				if(log.isDebugEnabled())
+					log.debug(this + ": " + i + " of " + size + ": " + col);
+				doMigration(col);
+				Thread.yield();
+			}
+		}
+		for(Colony colony : all_unemployed.keySet()) {
+			Map<PopulationClass, Unemployed> map = all_unemployed.get(colony);
+			for(PopulationClass popClass : map.keySet()) {
+				Unemployed col = map.get(popClass);
+				entityStore.update(col);
+			}
 		}
 	}
 

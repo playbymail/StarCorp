@@ -24,7 +24,6 @@ import starcorp.common.types.GalacticDate;
 public class Colony extends ANamedEntity {
 
 	private Corporation government;
-//	private Planet planet; removed as causes locking issues!
 	private long planetID;
 	private Coordinates2D location;
 	private double hazardLevel;
@@ -36,12 +35,6 @@ public class Colony extends ANamedEntity {
 	public void setGovernment(Corporation government) {
 		this.government = government;
 	}
-//	public Planet getPlanet() {
-//		return planet;
-//	}
-//	public void setPlanet(Planet planet) {
-//		this.planet = planet;
-//	}
 	public Coordinates2D getLocation() {
 		return location;
 	}

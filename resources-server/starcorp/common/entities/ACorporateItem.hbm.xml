@@ -3,7 +3,7 @@
         "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
         "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
-    <class name="starcorp.common.entities.ColonyItem" table="COLONY_ITEMS">
+    <class name="starcorp.common.entities.ACorporateItem" table="CORPORATE_ITEMS" lazy="false">
     	<id name="ID"><generator class="native"/></id>
     	<version name="version"/>
    		<many-to-one name="owner" lazy="false"/>
@@ -13,7 +13,21 @@
    			<property name="quantity"/>
    		</component>
 
-    	<joined-subclass name="starcorp.common.entities.MarketItem" table="MARKET_ITEMS">
+    	<joined-subclass name="starcorp.common.entities.ColonyItem" table="COLONY_ITEMS" lazy="false">
+    		<key column="ITEM_ID"/>
+		</joined-subclass> <!-- ColonyItem -->
+		
+    	<joined-subclass name="starcorp.common.entities.FactoryQueueItem" table="FACTORY_QUEUE" lazy="false">
+    		<key column="ITEM_ID"/>
+    		<many-to-one name="factory" lazy="false"/>
+    		<property name="position"/>
+    		<component name="queuedDate">
+    			<property name="year" column="queuedYear"/>
+    			<property name="month" column="queuedMonth"/>
+    		</component>
+		</joined-subclass> <!-- FactoryQueueItem -->
+		
+    	<joined-subclass name="starcorp.common.entities.MarketItem" table="MARKET_ITEMS" lazy="false">
     		<key column="ITEM_ID"/>
     		<many-to-one name="seller" lazy="false"/>
     		<property name="costPerItem"/>
@@ -27,5 +41,5 @@
     		</component>
     	</joined-subclass> <!-- MarketItem -->
     	
-    </class> <!-- ColonyItem -->
+    </class> <!-- ACorporateItem -->
 </hibernate-mapping>

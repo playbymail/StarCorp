@@ -3,7 +3,7 @@
         "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
         "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
-    <class name="starcorp.common.entities.AGovernmentLaw" table="ALL_LAWS">
+    <class name="starcorp.common.entities.AGovernmentLaw" table="ALL_LAWS" lazy="false">
     	<id name="ID"><generator class="native"/></id>
     	<version name="version"/>
    		<many-to-one name="colony" lazy="false"/>
@@ -17,20 +17,20 @@
    			<property name="month" column="usedMonth"/>
    		</component>
 
-    	<joined-subclass name="starcorp.common.entities.ColonistGrant" table="COLONIST_GRANTS">
+    	<joined-subclass name="starcorp.common.entities.ColonistGrant" table="COLONIST_GRANTS" lazy="false">
     		<key column="LAW_ID"/>
     		<property name="popClassType"/>
     		<property name="credits"/>
     	</joined-subclass> <!-- ColonistGrant -->
     	
      	
-    	<joined-subclass name="starcorp.common.entities.DevelopmentGrant" table="DEVELOPMENT_GRANTS">
+    	<joined-subclass name="starcorp.common.entities.DevelopmentGrant" table="DEVELOPMENT_GRANTS" lazy="false">
     		<key column="LAW_ID"/>
     		<property name="type" column="facilityType"/>
     		<property name="grant" column="credits"/>
     	</joined-subclass> <!-- DevelopmentGrant -->
 
-    	<joined-subclass name="starcorp.common.entities.FacilityLease" table="FACILITY_LEASES">
+    	<joined-subclass name="starcorp.common.entities.FacilityLease" table="FACILITY_LEASES" lazy="false">
     		<key column="LAW_ID"/>
     		<property name="type" column="facilityType"/>
     		<many-to-one name="licensee" lazy="false"/>

@@ -27,9 +27,11 @@ import org.hibernate.cfg.Configuration;
 
 import starcorp.common.entities.ABaseEntity;
 import starcorp.common.entities.AColonists;
+import starcorp.common.entities.ACorporateItem;
 import starcorp.common.entities.AGovernmentLaw;
 import starcorp.common.entities.CashTransaction;
 import starcorp.common.entities.CreditAccount;
+import starcorp.common.entities.FactoryQueueItem;
 import starcorp.common.entities.MarketItem;
 import starcorp.common.entities.ResourceDeposit;
 import starcorp.common.entities.StarSystemEntity;
@@ -325,8 +327,8 @@ public class HibernateStore implements IEntityStore {
 			deleteColony(c);
 		}
 		beginTransaction();
-		String q = "delete ResourceDeposit where systemEntity = :entity";
-		Query query = createQuery(q, "entity", planet);
+		String q = "delete ResourceDeposit where systemEntityID = " + planet.getID();
+		Query query = createQuery(q);
 		query.executeUpdate();
 		getSession().delete(planet);
 		commit();
@@ -347,8 +349,8 @@ public class HibernateStore implements IEntityStore {
 			deletePlanet((Planet) entity);
 		} else {
 			beginTransaction();
-			String q = "delete ResourceDeposit where systemEntity = :entity";
-			Query query = createQuery(q, "entity", entity);
+			String q = "delete ResourceDeposit where systemEntityID = " + entity.getID();
+			Query query = createQuery(q);
 			query.executeUpdate();
 			getSession().delete(entity);
 			commit();
@@ -472,7 +474,7 @@ public class HibernateStore implements IEntityStore {
 		return law;
 	}
 
-	public ColonyItem create(ColonyItem item) {
+	public ACorporateItem create(ACorporateItem item) {
 		beginTransaction();
 		getSession().saveOrUpdate(item);
 		commit();
@@ -486,6 +488,11 @@ public class HibernateStore implements IEntityStore {
 		return deposit;
 	}
 
+	public void delete(ACorporateItem item) {
+		beginTransaction();
+		getSession().delete(item);
+		commit();
+	}
 	public void delete(ABaseEntity entity) {
 		if (entity instanceof Colony) {
 			deleteColony((Colony) entity);
@@ -778,9 +785,9 @@ public class HibernateStore implements IEntityStore {
 	 * @see starcorp.server.entitystore.IEntityStore#listColonies(starcorp.common.entities.StarSystem)
 	 */
 	public List<Colony> listColonies(StarSystem excludeSystem) {
-		String q = "from Colony as col where col.planetID = (select ID from Planet as p where p.system <> :system)";
+		String q = "from Colony as col where col.planetID IN (select ID from Planet as p where p.systemID <> :systemID)";
 		beginTransaction();
-		return copyColonies(listObject(createQuery(q, "system", excludeSystem)));
+		return copyColonies(listObject(createQuery(q, "systemID", excludeSystem.getID())));
 	}
 
 	/*
@@ -791,7 +798,7 @@ public class HibernateStore implements IEntityStore {
 	 */
 	public List<Colony> listColonies(StarSystem system,
 			CoordinatesPolar excludeLocation) {
-		String q = "from Colony as col where col.planetID = (select ID from Planet as p where p.location <> :location and p.systemID = " + system.getID() +")";
+		String q = "from Colony as col where col.planetID IN (select ID from Planet as p where p.location <> :location and p.systemID = " + system.getID() +")";
 		beginTransaction();
 		return copyColonies(listObject(createQuery(q, "location", excludeLocation)));
 	}
@@ -805,7 +812,8 @@ public class HibernateStore implements IEntityStore {
 	 */
 	public List<Colony> listColonies(StarSystem system,
 			CoordinatesPolar location, Planet excludePlanet) {
-		String q = "from Colony as col where col.planetID = (select ID from Planet as p where p.ID <> :planetId and p.location <> :location and p.systemID = " + system.getID() + ")";
+		String q = "from Colony as col where col.planetID IN " + 
+		"(select ID from Planet as p where p.ID <> :planetId and p.location <> :location and p.systemID = " + system.getID() + ")";
 		Map<String, Object> map = prepareParameters("planetId", excludePlanet
 				.getID());
 		prepareParameters(map, "location", location);
@@ -878,15 +886,15 @@ public class HibernateStore implements IEntityStore {
 
 	public List<ResourceDeposit> listDeposits(long planetID,
 			Coordinates2D location) {
-		String q = "select res from ResourceDeposit as res left join res.systemEntity as sysentity where sysentity.ID = " +
-		planetID + " and res.location = :location";
+		String q = "from ResourceDeposit where systemEntityID = " +
+		planetID + " and location = :location";
 		beginTransaction();
 		return copyDeposits(listObject(createQuery(q, "location", location)));
 	}
 	
 	public List<ResourceDeposit> listDeposits(Planet planet,
 			List<AItemType> types, int minTotal) {
-		String q = "from ResourceDeposit where systemEntity = :planet and totalQuantity >= "
+		String q = "from ResourceDeposit where systemEntityID = " + planet.getID() + " and totalQuantity >= "
 				+ minTotal;
 		int max = types == null ? 0 : types.size();
 		if (max > 0) {
@@ -902,7 +910,7 @@ public class HibernateStore implements IEntityStore {
 		}
 		q += " order by yield desc";
 		beginTransaction();
-		return copyDeposits(listObject(createQuery(q, "planet", planet)));
+		return copyDeposits(listObject(createQuery(q)));
 	}
 	
 	/*
@@ -911,10 +919,9 @@ public class HibernateStore implements IEntityStore {
 	 * @see starcorp.server.entitystore.IEntityStore#listDeposits(starcorp.common.entities.StarSystemEntity)
 	 */
 	public List<ResourceDeposit> listDeposits(StarSystemEntity systemEntity) {
-		String q = "from ResourceDeposit where systemEntity = :systemEntity";
+		String q = "from ResourceDeposit where systemEntityID = " + systemEntity.getID();
 		beginTransaction();
-		return copyDeposits(listObject(createQuery(q, "systemEntity",
-				systemEntity)));
+		return copyDeposits(listObject(createQuery(q)));
 	}
 	
 	/*
@@ -1379,7 +1386,7 @@ public class HibernateStore implements IEntityStore {
 		return law;
 	}
 
-	public ColonyItem update(ColonyItem item) {
+	public ACorporateItem update(ACorporateItem item) {
 		beginTransaction();
 		getSession().merge(item);
 		commit();
@@ -1391,6 +1398,52 @@ public class HibernateStore implements IEntityStore {
 		getSession().merge(deposit);
 		commit();
 		return deposit;
+	}
+
+	public List<Facility> listFacilitiesPowered(List<AFacilityType> types) {
+		String q = "from Facility where powered = true";
+		if(types != null && types.size() > 0) {
+			q += " and type IN (";
+			int i = 0;
+			for(AFacilityType type : types) {
+				if(i > 0)
+					q += ", ";
+				q += "'" + type.getKey() + "'";
+				i++;
+			}
+			q += ")";
+		}
+		beginTransaction();
+		return copyFacilities(listObject(createQuery(q)));
+	}
+
+	public double getAverageHappiness(Colony colony, PopulationClass popClass) {
+		String q = "select avg(col.happiness) from AColonists as col where col.colony = :colony and col.popClassType = '" + popClass.getKey() + "'";
+		beginTransaction();
+		Query query = createQuery(q, "colony", colony);
+		double avg = 0.0;
+		try {
+			avg = (Double) query.uniqueResult();
+		}
+		catch(Throwable e) {
+			log.error(e.getMessage(),e);
+		}
+		commit();
+		return avg;
+	}
+	
+	private List<FactoryQueueItem> copyQueue(List<?> objects) {
+		List<FactoryQueueItem> list = new ArrayList<FactoryQueueItem>();
+		for(Object o : objects) {
+			list.add((FactoryQueueItem)o);
+		}
+		return list;
+	}
+
+	public List<FactoryQueueItem> listQueue(Facility facility) {
+		String q = "from FactoryQueueItem where factory = :facility order by position";
+		beginTransaction();
+		return copyQueue(listObject(createQuery(q, "facility", facility)));
 	}
 
 }

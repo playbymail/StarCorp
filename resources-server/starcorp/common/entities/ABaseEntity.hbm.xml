@@ -3,21 +3,21 @@
         "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
         "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
-    <class name="starcorp.common.entities.ABaseEntity" table="ALL_ENTITIES">
+    <class name="starcorp.common.entities.ABaseEntity" table="ALL_ENTITIES" lazy="false">
     	<id name="ID"><generator class="native"/></id>
     	<version name="version"/>
-    	<joined-subclass name="starcorp.common.entities.AColonists" table="COLONISTS">
+    	<joined-subclass name="starcorp.common.entities.AColonists" table="COLONISTS" lazy="false">
     		<key column="ENTITY_ID"/>
     		<many-to-one name="colony" lazy="false"/>
    			<property name="quantity"/>
    			<property name="popClassType"/>
     		<property name="happiness"/>
     		
-    		<joined-subclass name="starcorp.common.entities.Unemployed" table="UNEMPLOYED">
+    		<joined-subclass name="starcorp.common.entities.Unemployed" table="UNEMPLOYED" lazy="false">
     			<key column="ENTITY_ID"/>
     		</joined-subclass> <!-- Unemployed -->
 
-    		<joined-subclass name="starcorp.common.entities.Workers" table="WORKERS">
+    		<joined-subclass name="starcorp.common.entities.Workers" table="WORKERS" lazy="false">
     			<key column="ENTITY_ID"/>
     			<many-to-one name="facility" lazy="false"/>
     			<property name="salary"/>
@@ -25,11 +25,11 @@
 
     	</joined-subclass> <!-- AColonists -->
     	
-    	<joined-subclass name="starcorp.common.entities.ANamedEntity" table="ALL_NAMED_ENTITIES">
+    	<joined-subclass name="starcorp.common.entities.ANamedEntity" table="ALL_NAMED_ENTITIES" lazy="false">
     		<key column="ENTITY_ID"/>
     		<property name="name"/>
     		
-    		<joined-subclass name="starcorp.common.entities.StarSystemEntity" table="STAR_SYSTEM_ENTITIES">
+    		<joined-subclass name="starcorp.common.entities.StarSystemEntity" table="STAR_SYSTEM_ENTITIES" lazy="false">
     			<key column="ENTITY_ID"/>
     			<property name="asteroid"/>
     			<property name="gasfield"/>
@@ -39,7 +39,7 @@
     				<property name="orbit"/>
     			</component>
     			
-    			<joined-subclass name="starcorp.common.entities.Planet" table="PLANETS">
+    			<joined-subclass name="starcorp.common.entities.Planet" table="PLANETS" lazy="false">
 					<key column="ENTITY_ID"/>
 					<property name="orbitingID"/>
 					<property name="atmosphereType"/>
@@ -54,7 +54,7 @@
     				</set>
 				</joined-subclass> <!-- Planet -->
 				
-				<joined-subclass name="starcorp.common.entities.Starship" table="STARSHIPS">
+				<joined-subclass name="starcorp.common.entities.Starship" table="STARSHIPS" lazy="false">
     				<key column="ENTITY_ID"/>
     				<many-to-one name="owner" lazy="false"/>
     				<many-to-one name="planet" lazy="false"/>
@@ -78,7 +78,7 @@
     				<property name="timeUnitsUsed"/>
     			</joined-subclass> <!-- Starship -->
 				
-				<joined-subclass name="starcorp.common.entities.StellarAnomoly" table="STELLAR_ANOMOLIES">
+				<joined-subclass name="starcorp.common.entities.StellarAnomoly" table="STELLAR_ANOMOLIES" lazy="false">
     				<key column="ENTITY_ID"/>
     				<property name="description" column="anomolyDescription"/>
     				<property name="event" column="eventType"/>
@@ -86,7 +86,7 @@
     			
     		</joined-subclass> <!-- AStarSystemEntiy -->
     		
-    		<joined-subclass name="starcorp.common.entities.Colony" table="COLONIES">
+    		<joined-subclass name="starcorp.common.entities.Colony" table="COLONIES" lazy="false">
     			<key column="ENTITY_ID"/>
     			<many-to-one name="government" lazy="false"/>
     			<property name="planetID"/>
@@ -101,7 +101,7 @@
     			</component>
     		</joined-subclass> <!-- Colony -->
     		
-    		<joined-subclass name="starcorp.common.entities.Corporation" table="CORPORATIONS">
+    		<joined-subclass name="starcorp.common.entities.Corporation" table="CORPORATIONS" lazy="false">
     			<key column="ENTITY_ID"/>
     			<property name="playerName"/>
     			<property name="playerEmail"/>
@@ -144,7 +144,7 @@
     	
     	</joined-subclass> <!-- ANamedEntity -->
     	
-    	<joined-subclass name="starcorp.common.entities.Facility" table="FACILITIES">
+    	<joined-subclass name="starcorp.common.entities.Facility" table="FACILITIES" lazy="false">
     		<key column="ENTITY_ID"/>
     		<many-to-one name="owner" lazy="false"/>
     		<many-to-one name="colony" lazy="false"/>
@@ -153,20 +153,6 @@
     		<property name="serviceCharge"/>
     		<property name="transactionCount"/>
     		<property name="open"/>
-    		<set name="itemQueue" table="FACTORY_QUEUE" lazy="false">
-    			<key column="ENTITY_ID"/>
-    			<composite-element class="starcorp.common.types.Items">
-    				<property name="type" column="itemType"/>
-    				<property name="quantity"/>
-    			</composite-element>
-    		</set>
-    		<set name="itemsCreated" table="FACTORY_HISTORY" lazy="false">
-    			<key column="ENTITY_ID"/>
-    			<composite-element class="starcorp.common.types.Items">
-    				<property name="type" column="itemType"/>
-    				<property name="quantity"/>
-    			</composite-element>
-    		</set>
     		<component name="builtDate">
     			<property name="year" column="builtYear"/>
     			<property name="month" column="builtMonth"/>

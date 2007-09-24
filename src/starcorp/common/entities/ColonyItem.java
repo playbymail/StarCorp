@@ -13,30 +13,26 @@ package starcorp.common.entities;
 import java.util.Iterator;
 import java.util.List;
 
-import org.dom4j.Element;
-
-import starcorp.common.types.Items;
-
 /**
  * starcorp.common.entities.ColonyItem
  *
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 16 Sep 2007
  */
-public class ColonyItem {
-	public static int count(List<?> items) {
+public class ColonyItem extends ACorporateItem {
+	public static int count(List<ColonyItem> items) {
 		int count = 0;
-		for(Object o : items) {
-			count += ((ColonyItem)o).getQuantity();
+		for(ColonyItem o : items) {
+			count += o.getQuantity();
 		}
 		return count;
 	}
 	
-	public static int use(List<?> items, int quantity) {
+	public static int use(List<ColonyItem> items, int quantity) {
 		int used = 0;
-		Iterator<?> i = items.iterator();
+		Iterator<ColonyItem> i = items.iterator();
 		while(i.hasNext() && used < quantity) {
-			ColonyItem item = (ColonyItem) i.next();
+			ColonyItem item = i.next();
 			int qty = quantity - used;
 			if(qty > item.getQuantity()) {
 				qty = item.getQuantity();
@@ -46,86 +42,4 @@ public class ColonyItem {
 		return used;
 	}
 	
-	private long ID;
-	private int version;
-	private Corporation owner;
-	private Colony colony;
-	private Items item;
-	
-	public int getQuantity() {
-		return item == null ? 0 : item.getQuantity();
-	}
-	
-	public int add(int qty) {
-		if(item == null) {
-			return 0;
-		}
-		return item.add(qty);
-	}
-	
-	public int remove(int qty) {
-		if(item == null) {
-			return 0;
-		}
-		return item.remove(qty);
-	}
-	
-	public Corporation getOwner() {
-		return owner;
-	}
-	public void setOwner(Corporation owner) {
-		this.owner = owner;
-	}
-	public Colony getColony() {
-		return colony;
-	}
-	public void setColony(Colony colony) {
-		this.colony = colony;
-	}
-	public Items getItem() {
-		return item;
-	}
-	public void setItem(Items item) {
-		this.item = item;
-	}
-
-	public void readXML(Element e) {
-		this.ID = Integer.parseInt(e.attributeValue("ID","0"));
-		this.owner = new Corporation();
-		this.owner.readXML(e.element("owner").element("entity"));
-		this.colony = new Colony();
-		this.colony.readXML(e.element("colony").element("entity"));
-		this.item = new Items(e);
-	}
-
-	public Element toBasicXML(Element parent) {
-		Element root = parent.addElement("entity");
-		root.addAttribute("ID", String.valueOf(ID));
-		root.addAttribute("class", getClass().getSimpleName());
-		owner.toBasicXML(root.addElement("owner"));
-		colony.toBasicXML(root.addElement("colony"));
-		item.toXML(root);
-		return root;
-	}
-
-	@Override
-	public String toString() {
-		return item + " for " + owner.getName() +" (" + owner.getID() + ") " + super.toString() + " @ " + colony.getName() + " (" + colony.getID() + ")";
-	}
-
-	public long getID() {
-		return ID;
-	}
-
-	public void setID(long id) {
-		ID = id;
-	}
-
-	public int getVersion() {
-		return version;
-	}
-
-	public void setVersion(int version) {
-		this.version = version;
-	}
 }

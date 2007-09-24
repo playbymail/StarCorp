@@ -47,6 +47,11 @@ public class Items {
 		return parent;
 	}
 	
+	
+	public int getTotalMass() {
+		return quantity * (type == null ? 0 : type.getMassUnits());
+	}
+	
 	/**
 	 * @return
 	 */

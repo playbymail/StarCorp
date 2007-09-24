@@ -75,7 +75,6 @@ public class Shell {
 	private void processCommandLine(String text) {
 		AServerTask task = parser.parse(text);
 		if(task == null) {
-			System.out.println("Unknown command");
 			return;
 		}
 		try {
@@ -98,7 +97,7 @@ public class Shell {
 				log.error(e.getMessage(),e);
 			}
 		}
-		while(line == null || line.trim().length() == 0);
+		while(line == null);
 		return line;
 	}
 	

@@ -111,7 +111,8 @@ public abstract class APlanetTemplate {
 		planet.setName(name);
 		planet.setOrbiting(orbiting);
 		planet.setSystemID(system.getID());
-		entityStore.create(planet);
+		planet = (Planet) entityStore.create(planet);
+		log.info("Created " + planet);
 		generateMap(planet, getWidth(), getHeight());
 		return planet;
 	}
@@ -188,7 +189,7 @@ public abstract class APlanetTemplate {
 				int yield = Util.rnd.nextInt(20) + 1;
 				ResourceDeposit deposit = new ResourceDeposit();
 				deposit.setLocation(location);
-				deposit.setSystemEntity(planet);
+				deposit.setSystemEntityID(planet.getID());
 				deposit.setTotalQuantity(totalQuantity);
 				deposit.setType(type);
 				deposit.setYield(yield);

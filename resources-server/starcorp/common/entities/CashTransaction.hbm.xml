@@ -3,7 +3,7 @@
         "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
         "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
-    <class name="starcorp.common.entities.CashTransaction" table="ACCOUNT_LEDGER">
+    <class name="starcorp.common.entities.CashTransaction" table="ACCOUNT_LEDGER" lazy="false">
     	<id name="ID"><generator class="native"/></id>
     	<version name="version"/>
     	<property name="accountID"/>

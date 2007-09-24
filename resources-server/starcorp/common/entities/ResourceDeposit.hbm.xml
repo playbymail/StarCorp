@@ -3,10 +3,10 @@
         "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
         "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
-    <class name="starcorp.common.entities.ResourceDeposit" table="RESOURCE_DEPOSITS">
+    <class name="starcorp.common.entities.ResourceDeposit" table="RESOURCE_DEPOSITS" lazy="false">
     	<id name="ID"><generator class="native"/></id>
     	<version name="version"/>
-   		<many-to-one name="systemEntity" lazy="false"/>
+   		<property name="systemEntityID"/>
    		<component name="location">
    			<property name="x"/>
    			<property name="y"/>

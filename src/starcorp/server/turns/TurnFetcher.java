@@ -34,6 +34,7 @@ import starcorp.common.util.FetchEmail.Attachment;
 import starcorp.common.util.FetchEmail.IEmail;
 import starcorp.common.util.FetchEmail.PlainTextEmail;
 import starcorp.server.ServerConfiguration;
+import starcorp.server.engine.AServerTask;
 
 
 /**
@@ -42,7 +43,7 @@ import starcorp.server.ServerConfiguration;
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 20 Sep 2007
  */
-public class TurnFetcher {
+public class TurnFetcher extends AServerTask {
 
 	private final Log log = LogFactory.getLog(TurnFetcher.class);
 	
@@ -62,7 +63,11 @@ public class TurnFetcher {
 		
 	}
 	
-	public void fetchTurns() {
+	public Log getLog() {
+		return log;
+	}
+	
+	public void doJob() {
 		fetched = 0;
 		try {
 			List<IEmail> emails = fetcher.fetch();

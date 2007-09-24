@@ -18,8 +18,11 @@ import org.apache.commons.logging.LogFactory;
 import starcorp.server.engine.AServerTask;
 import starcorp.server.facilities.FacilityProcessor;
 import starcorp.server.population.PopulationProcessor;
+import starcorp.server.population.UnemployedMigration;
 import starcorp.server.shell.ACommand;
 import starcorp.server.shell.Shell;
+import starcorp.server.turns.TurnFetcher;
+import starcorp.server.turns.TurnProcessor;
 
 /**
  * starcorp.server.shell.commands.Updater
@@ -32,35 +35,60 @@ public class Updater extends ACommand {
 
 	
 	public AServerTask task(final Arguments args, final PrintWriter out) {
-		return new AServerTask() {
-			protected String getName() {
-				return "updater";
-			}
-			protected Log getLog() {
-				return log;
-			}
-			protected void doJob() throws Exception {
-				PopulationProcessor popUpdate = new PopulationProcessor();
-				FacilityProcessor facUpdate = new FacilityProcessor(entityStore);
-				
-				engine.schedule(popUpdate);
-				while(!popUpdate.isDone()) {
-					Thread.yield();
+		String type = args.get(0);
+		if(type == null || type.length() < 1) {
+			out.println("Invalid type");
+			out.print(Shell.PROMPT);
+			out.flush();
+		}
+		else if("pop".equalsIgnoreCase(type)) {
+			return new PopulationProcessor();
+		}
+		else if("migrate".equalsIgnoreCase(type)) {
+			return new UnemployedMigration();
+		}
+		else if("npc".equalsIgnoreCase(type)) {
+			out.println("NPC not implemented yet!");
+			out.print(Shell.PROMPT);
+			out.flush();
+			// TODO
+		}
+		else if("fac".equalsIgnoreCase(type)) {
+			return new FacilityProcessor();
+		}
+		else if("fetch".equalsIgnoreCase(type)) {
+			return new TurnFetcher();
+		}
+		else if("turns".equalsIgnoreCase(type)) {
+			return new TurnProcessor();
+		}
+		else if("all".equalsIgnoreCase(type)) {
+			return new AServerTask() {
+				protected String getName() {
+					return "batch-updater";
 				}
-				out.println();
-				out.println("Population updated.");
-				out.println(Shell.PROMPT);
-				out.flush();
-				engine.schedule(facUpdate);
-				while(!facUpdate.isDone()) {
-					Thread.yield();
+				protected Log getLog() {
+					return log;
 				}
-				out.println();
-				out.println("Facilities updated.");
-				out.print(Shell.PROMPT);
-				out.flush();
-			}
-		};
+				protected void doJob() throws Exception {
+					engine.scheduleAndWait(new PopulationProcessor());
+					engine.scheduleAndWait(new FacilityProcessor());
+					// TODO add npc proc
+					engine.scheduleAndWait(new TurnFetcher());
+					engine.scheduleAndWait(new TurnProcessor());
+					out.println();
+					out.println("Updates done.");
+					out.println(Shell.PROMPT);
+					out.flush();
+				}
+			};
+		}
+		else {
+			out.println("Invalid type");
+			out.print(Shell.PROMPT);
+			out.flush();
+		}
+		return null;
 	}
 
 	@Override
@@ -70,7 +98,7 @@ public class Updater extends ACommand {
 
 	@Override
 	public String getHelpText() {
-		return "update\n\nRuns the PopulationProcessor and the FacilityProcessor.";
+		return "update (Type)\n\nRuns one of the game processor based on type argument.";
 	}
 
 }

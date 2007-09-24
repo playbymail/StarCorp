@@ -24,7 +24,7 @@ import starcorp.common.types.Coordinates2D;
 public class ResourceDeposit {
 	private long ID;
 	private int version;
-	private StarSystemEntity systemEntity;
+	private long systemEntityID;
 	private Coordinates2D location;
 	private AItemType type;
 	private int totalQuantity;
@@ -125,12 +125,12 @@ public class ResourceDeposit {
 		this.totalQuantity = totalQuantity;
 	}
 
-	public StarSystemEntity getSystemEntity() {
-		return systemEntity;
+	public long getSystemEntityID() {
+		return systemEntityID;
 	}
 
-	public void setSystemEntity(StarSystemEntity systemEntity) {
-		this.systemEntity = systemEntity;
+	public void setSystemEntityID(long systemEntity) {
+		this.systemEntityID = systemEntity;
 	}
 
 	public Coordinates2D getLocation() {
@@ -147,7 +147,7 @@ public class ResourceDeposit {
 
 	public void readXML(Element e) {
 		this.ID = Integer.parseInt(e.attributeValue("ID","0"));
-		this.systemEntity = (StarSystemEntity) ABaseEntity.fromXML(e.element("entity"));
+		this.systemEntityID = Long.parseLong(e.attributeValue("entity","0"));
 		this.location = new Coordinates2D(e);
 		this.type = AItemType.getType(e.attributeValue("type"));
 		this.totalQuantity = Integer.parseInt(e.attributeValue("total","0"));
@@ -158,7 +158,7 @@ public class ResourceDeposit {
 		Element root = parent.addElement("entity");
 		root.addAttribute("ID", String.valueOf(ID));
 		root.addAttribute("class", getClass().getSimpleName());
-		systemEntity.toBasicXML(root);
+		root.addAttribute("entity",String.valueOf(systemEntityID));
 		location.toXML(root);
 		root.addAttribute("type", type.getKey());
 		root.addAttribute("total", String.valueOf(totalQuantity));
@@ -168,7 +168,7 @@ public class ResourceDeposit {
 
 	@Override
 	public String toString() {
-		return type.getKey() + " x " + totalQuantity + " [" + getID() + "] @ " + systemEntity.getName() + " (" + systemEntity.getID() + ") " + location;
+		return type.getKey() + " x " + totalQuantity + " [" + getID() + "] @ " + systemEntityID + ") " + location;
 	}
 
 	public long getID() {

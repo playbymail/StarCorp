@@ -108,17 +108,17 @@ public abstract class AColonyTemplate {
 		colony.setLocation(location);
 		colony.setName(name);
 		colony.setPlanetID(planet.getID());
-		entityStore.create(colony);
+		colony = (Colony) entityStore.create(colony);
 		log.info("Created " + colony);
 		List<Facility> facilities = createFacilities(colony, corporations);
 		facilities.add(createFacility(colony, govt, "hub"));
 		List<AColonists> population = populate(colony, facilities);
 		createServiceFacilities(colony, corporations, facilities, population);
-		createConsumerGoods(colony, population);
+		createConsumerGoods(colony, population, corporations);
 		return colony;
 	}
 	
-	protected void createConsumerGoods(Colony colony, List<AColonists> population) {
+	protected void createConsumerGoods(Colony colony, List<AColonists> population, List<Corporation> corporations) {
 		Map<PopulationClass,Integer> count = count(population);
 		for(PopulationClass popClass : count.keySet()) {
 			int n = count.get(popClass) * 100;
@@ -129,42 +129,39 @@ public abstract class AColonyTemplate {
 			AItemType intoxicant = ConsumerGoods.listIntoxicant(quality).get(0);
 			AItemType clothes = ConsumerGoods.listClothes(quality).get(0);
 			
-			createItem(colony, food, n, charge);
-			createItem(colony, drink, n, charge);
-			createItem(colony, intoxicant, n, charge);
-			createItem(colony, clothes, n, charge);
+			createItem(colony, corporations.get(Util.rnd.nextInt(corporations.size())), food, n, charge);
+			createItem(colony, corporations.get(Util.rnd.nextInt(corporations.size())),drink, n, charge);
+			createItem(colony, corporations.get(Util.rnd.nextInt(corporations.size())),intoxicant, n, charge);
+			createItem(colony, corporations.get(Util.rnd.nextInt(corporations.size())),clothes, n, charge);
 		}
 	}
 	
-	protected void createPower(Colony colony, List<Facility> facilities) {
-		int required = 0;
-		for(Facility facility : facilities) {
-			AFacilityType type = facility.getTypeClass();
-			required += type.getPowerRequirement();
-		}
+	private void createPower(Colony colony, Facility facility) {
+		int required = facility.getTypeClass().getPowerRequirement();
 		required *= 100;
-		addItem(colony,"nuclear-power",required);
+//		log.info("CREATE POWER x " + required);
+		addItem(colony,facility.getOwner(),"nuclear-power",required);
 	}
 	
-	protected MarketItem createItem(Colony colony, AItemType type, int quantity, int price) {
+	protected MarketItem createItem(Colony colony, Corporation corp, AItemType type, int quantity, int price) {
 		MarketItem item = new MarketItem();
 		item.setColony(colony);
 		item.setCostPerItem(price);
 		item.setItem(new Items(type,quantity));
-		item.setSeller(colony.getGovernment());
+		item.setSeller(corp);
 		entityStore.create(item);
 		if(log.isDebugEnabled())log.debug("Created " + item);
 		return item;
 	}
 	
-	protected ColonyItem addItem(Colony colony, String type, int quantity) {
-		ColonyItem item = entityStore.getItem(colony, colony.getGovernment(), AItemType.getType(type)); 
+	protected ColonyItem addItem(Colony colony, Corporation owner, String type, int quantity) {
+		ColonyItem item = entityStore.getItem(colony, owner, AItemType.getType(type)); 
 		if(item == null) {
 			item = new ColonyItem();
 			item.setColony(colony);
 			item.setItem(new Items());
 			item.getItem().setType(type);
-			item.setOwner(colony.getGovernment());
+			item.setOwner(owner);
 			entityStore.create(item);
 		}
 		item.add(quantity);
@@ -240,7 +237,7 @@ public abstract class AColonyTemplate {
 		worker.setSalary(pop.getPopClass().getNPCSalary());
 		worker.setPopClass(pop.getPopClass());
 		worker.setQuantity(pop.getQuantity());
-		entityStore.create(worker);
+		worker = (Workers) entityStore.create(worker);
 		if(log.isDebugEnabled())log.debug("Created " + worker);
 		return worker;
 	}
@@ -309,7 +306,9 @@ public abstract class AColonyTemplate {
 		facility.setOpen(true);
 		facility.setOwner(corp);
 		facility.setType(type);
-		entityStore.create(facility);
+		facility.setPowered(true);
+		facility = (Facility) entityStore.create(facility);
+		createPower(colony, facility);
 		if(log.isDebugEnabled())log.debug("Created " + facility);
 		return facility;
 	}

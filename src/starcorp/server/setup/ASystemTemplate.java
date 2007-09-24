@@ -103,7 +103,8 @@ public abstract class ASystemTemplate {
 		system.setLocation(location);
 		system.setName(name);
 		system.setType(randomType());
-		entityStore.create(system);
+		system = (StarSystem) entityStore.create(system);
+		log.info("Created " + system);
 		generateFeatures(system);
 		entityStore.update(system);
 		return system;
@@ -144,7 +145,7 @@ public abstract class ASystemTemplate {
 	
 	protected ResourceDeposit createDeposit(StarSystemEntity entity, String itemKey) {
 		ResourceDeposit deposit = new ResourceDeposit();
-		deposit.setSystemEntity(entity);
+		deposit.setSystemEntityID(entity.getID());
 		deposit.setTotalQuantity(rnd.nextInt(10000000));
 		deposit.setType(itemKey);
 		deposit.setYield(rnd.nextInt(100) + 1);
@@ -178,8 +179,8 @@ public abstract class ASystemTemplate {
 			field.setLocation(location);
 			field.setName("Asteroid " + location);
 			field.setSystemID(system.getID());
-			entityStore.create(field);
-			if(log.isDebugEnabled())log.debug("Created " + field);
+			field = (StarSystemEntity) entityStore.create(field);
+			log.info("Created " + field);
 			generateResources(field);
 		}
 		else if(hasGasField(location.getOrbit())) {
@@ -188,8 +189,8 @@ public abstract class ASystemTemplate {
 			field.setLocation(location);
 			field.setName("Gas Field " + location);
 			field.setSystemID(system.getID());
-			entityStore.create(field);
-			if(log.isDebugEnabled())log.debug("Created " + field);
+			field = (StarSystemEntity) entityStore.create(field);
+			log.info("Created " + field);
 			generateResources(field);
 		}
 		else {
@@ -198,13 +199,11 @@ public abstract class ASystemTemplate {
 				template.setEntityStore(entityStore);
 				planetCount++;
 				Planet planet = template.create(system, null, location, system.getName() + " " + planetCount);
-				if(log.isDebugEnabled())log.debug("Created " + planet);
 				int moons = countMoons(template,planet);
 				for(int i = 1; i <= moons; i++) {
 					APlanetTemplate moonTemplate = getMoonTemplate(template,planet);
 					moonTemplate.setEntityStore(entityStore);
-					Planet moon = moonTemplate.create(system, planet, location, planet.getName() + "." + i);
-					if(log.isDebugEnabled())log.debug("Created " + moon);
+					moonTemplate.create(system, planet, location, planet.getName() + "." + i);
 				}
 				return;
 			}

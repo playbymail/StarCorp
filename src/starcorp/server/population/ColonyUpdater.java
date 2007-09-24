@@ -10,7 +10,6 @@
  */
 package starcorp.server.population;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +24,6 @@ import starcorp.common.entities.ColonistGrant;
 import starcorp.common.entities.Colony;
 import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Facility;
-import starcorp.common.entities.MarketItem;
 import starcorp.common.entities.Unemployed;
 import starcorp.common.entities.Workers;
 import starcorp.common.types.AFacilityType;
@@ -61,9 +59,7 @@ public class ColonyUpdater extends AServerTask {
 	
 	private final Colony colony;
 	private Map<PopulationClass, ColonistGrant> grants = new HashMap<PopulationClass, ColonistGrant>();
-	private Map<AItemType, List<MarketItem>> market = new HashMap<AItemType, List<MarketItem>>();
 	private final PopulationProcessor processor;
-	private Map<AFacilityType, Map<Facility, List<AColonists>>> services = new HashMap<AFacilityType, Map<Facility, List<AColonists>>>();
 	
 	public ColonyUpdater(PopulationProcessor processor, Colony colony) {
 		this.colony = colony;
@@ -79,7 +75,7 @@ public class ColonyUpdater extends AServerTask {
 			unemployed.addPopulation(births);
 			entityStore.update(unemployed);
 			if (log.isDebugEnabled())
-				log.debug(this + ": " + births + " of " + colonist.getPopClass() + " born.");
+				log.debug(this + ": BIRTHS : " + births + " of " + colonist.getPopClass() + " born.");
 		}
 
 	}
@@ -101,8 +97,10 @@ public class ColonyUpdater extends AServerTask {
 	private void doConsumerNeeds(AColonists colonists, List<AItemType> types,
 			double happinessRating) {
 		int qty = colonists.getQuantity();
-		MarketItem.BuyResult result = Util.buy(ServerConfiguration
-				.getCurrentDate(), getMarketItems(types), qty, 
+		Util.BuyResult result = Util.buy(ServerConfiguration
+				.getCurrentDate(), 
+				entityStore.listMarket(colony, types, 1),
+				qty, 
 				entityStore.getCredits(colonists),entityStore);
 		double ratio = qty > 0 ?
 				(double) result.quantityBought / (double) qty
@@ -112,13 +110,13 @@ public class ColonyUpdater extends AServerTask {
 		entityStore.update(colonists);
 		entityStore.removeCredits(colonists, result.totalPrice, "");
 		if (log.isDebugEnabled())
-			log.debug(this + ": " + colonists + " bought " + result.quantityBought
+			log.debug(this + ": CONSUME : " + colonists + " bought " + result.quantityBought
 					+ " consumer goods");
 	}
 	
 	private void doConsumerNeeds(List<AColonists> colonists, List<AItemType> types,double happiness) {
 		if(log.isDebugEnabled())
-			log.debug("Doing consumer needs for " + colonists.size() + " using " + types + " giving " + happiness + " happiness");
+			log.debug(this + ": CONSUME : Doing consumer needs for " + colonists.size() + " using " + types + " giving " + happiness + " happiness");
 		for(AColonists col : colonists) {
 			doConsumerNeeds(col,types,happiness);
 		}
@@ -144,7 +142,7 @@ public class ColonyUpdater extends AServerTask {
 			colonist.removePopulation(deaths);
 			entityStore.update(colonist);
 			if (log.isDebugEnabled())
-				log.debug(this + ": " + deaths + " of " + colonist.getPopClass() + " died.");
+				log.debug(this + ": DEATHS : " + deaths + " of " + colonist.getPopClass() + " died.");
 		}
 	}
 
@@ -169,8 +167,10 @@ public class ColonyUpdater extends AServerTask {
 	private void doServiceNeeds(AColonists colonists,
 			List<AFacilityType> types, double happinessRating) {
 		int qty = colonists.getQuantity();
-		Facility.ServiceResult result = Util.service(ServerConfiguration
-				.getCurrentDate(), getFacilities(types), qty,
+		Util.ServiceResult result = Util.service(ServerConfiguration
+				.getCurrentDate(), 
+				entityStore.mapFacilitiesWithWorkers(colony, types),
+				qty,
 				entityStore.getCredits(colonists),entityStore);
 		double ratio = qty > 0 ? 
 					(double) result.quantityServiced / (double) qty 
@@ -180,36 +180,16 @@ public class ColonyUpdater extends AServerTask {
 		entityStore.update(colonists);
 		entityStore.removeCredits(colonists, result.totalCost, "");
 		if (log.isDebugEnabled())
-			log.debug(this + ": " + colonists + " used " + result.quantityServiced
+			log.debug(this + ": SERVICE : " + colonists + " used " + result.quantityServiced
 					+ " services");
 	}
 	
 	private void doServiceNeeds(List<AColonists> colonists, List<AFacilityType> types,double happiness) {
 		if(log.isDebugEnabled())
-			log.debug("Doing service needs for " + colonists.size() + " using " + types + " giving " + happiness + " happiness");
+			log.debug(this + ": SERVICE : Doing service needs for " + colonists.size() + " using " + types + " giving " + happiness + " happiness");
 		for(AColonists col : colonists) {
 			doServiceNeeds(col,types,happiness);
 		}
-	}
-
-	private Map<Facility, List<AColonists>> getFacilities(List<AFacilityType> types) {
-		HashMap<Facility,List<AColonists>> map = new HashMap<Facility, List<AColonists>>();
-		for(AFacilityType type : types) {
-			Map<Facility, List<AColonists>> m = services.get(type);
-			if(m != null)
-				map.putAll(m);
-		}
-		return map;
-	}
-	
-	private List<MarketItem> getMarketItems(List<AItemType> types) {
-		List<MarketItem> list = new ArrayList<MarketItem>();
-		for(AItemType type : types) {
-			List<MarketItem> list2 = market.get(type);
-			if(list2 != null)
-				list.addAll(list2);
-		}
-		return list;
 	}
 
 	private Unemployed getUnemployed(PopulationClass popClass) {
@@ -218,7 +198,7 @@ public class ColonyUpdater extends AServerTask {
 			unemployed = new Unemployed();
 			unemployed.setPopClass(popClass);
 			unemployed.setColony(colony);
-			entityStore.create(unemployed);
+			unemployed = (Unemployed) entityStore.create(unemployed);
 		}
 		return unemployed;
 	}
@@ -238,7 +218,7 @@ public class ColonyUpdater extends AServerTask {
 		if (workerQuantity < required
 						.getQuantity()) {
 			if (log.isDebugEnabled())
-				log.debug(this + ": Hiring workers for " + facility + " of " + popClass);
+				log.debug(this + ": HIRING: Hiring workers for " + facility + " of " + popClass);
 			// more needed so hire any unemployed
 			Unemployed unemployed = getUnemployed(workers.getPopClass());
 			int qty = required.getQuantity()
@@ -256,7 +236,7 @@ public class ColonyUpdater extends AServerTask {
 				entityStore.update(unemployed);
 				entityStore.transferCredits(unemployed, workers, cash, "");
 				if (log.isDebugEnabled())
-					log.debug(this + ": " + facility + " hired " + qty + " of "
+					log.debug(this + ": HIRING : " + facility + " hired " + qty + " of "
 							+ popClass);
 			
 			}
@@ -343,7 +323,7 @@ public class ColonyUpdater extends AServerTask {
 		int total = workers.getQuantity();
 		int quitters = (int) (total * (quitChance / 100.0));
 		if (log.isDebugEnabled())
-			log.debug(this + ": " + facility + " had " + quitters + " x "
+			log.debug(this + ": QUITTING : " + facility + " had " + quitters + " x "
 					+ workers.getPopClass() + " quitters. Chance: "
 					+ quitChance);
 		if (quitters > 0) {
@@ -365,11 +345,6 @@ public class ColonyUpdater extends AServerTask {
 	 */
 	@Override
 	protected void doJob() throws Exception {
-		market = 
-			entityStore.mapMarketByItemType(colony, AItemType.listTypes(ConsumerGoods.class));
-		services =
-			entityStore.mapFacilitiesWithWorkersByType(colony, AFacilityType.listTypes(ServiceFacility.class));
-			new HashMap<AFacilityType, Map<Facility, List<AColonists>>>();
 		grants =
 			entityStore.mapColonistGrantsByPopClass(colony, true);
 		List<AColonists> colonists = entityStore.listWorkers(colony);
@@ -391,7 +366,7 @@ public class ColonyUpdater extends AServerTask {
 		
 		colonists = entityStore.listWorkers(colony);
 		size = colonists.size();
-		log.info(this + ": QUIT : " + size + " workers to check for quitting @ " + colony);
+		log.info(this + ": QUITTING : " + size + " workers to check for quitting @ " + colony);
 		quitWorkers(colonists);
 		
 		colonists = entityStore.listColonists(colony);
@@ -412,6 +387,11 @@ public class ColonyUpdater extends AServerTask {
 	@Override
 	protected Log getLog() {
 		return log;
+	}
+
+	@Override
+	protected void onException(Exception e) {
+		processor.done(this);
 	}
 
 }

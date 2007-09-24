@@ -45,6 +45,14 @@ public abstract class AServerTask implements Runnable {
 		this.taskNumber = number;
 	}
 	
+	protected Object getProperty(String name) {
+		return engine.getProperty(name);
+	}
+	
+	protected void setProperty(String name, Object value) {
+		engine.setProperty(name, value);
+	}
+	
 	public void run() {
 		try {
 			startTime = System.currentTimeMillis();
@@ -94,11 +102,11 @@ public abstract class AServerTask implements Runnable {
 	@Override
 	public String toString() {
 		long running = timeTaken;
-		if(timeTaken == 0) {
+		if(timeTaken < 1 && startTime > 0) {
 			running = System.currentTimeMillis() - startTime;
 		}
 		String s = Util.getDisplayDuration(running);
-		return "[" + taskNumber + " : " + s + " ] " + getName();
+		return "[" + taskNumber + " : " + s + "] " + getName();
 	}
 
 	@Override

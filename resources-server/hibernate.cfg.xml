@@ -27,7 +27,7 @@
 
 		<mapping resource="starcorp/common/entities/ABaseEntity.hbm.xml" />
 		<mapping resource="starcorp/common/entities/AGovernmentLaw.hbm.xml" />
-		<mapping resource="starcorp/common/entities/ColonyItem.hbm.xml" />
+		<mapping resource="starcorp/common/entities/ACorporateItem.hbm.xml" />
 		<mapping resource="starcorp/common/entities/ResourceDeposit.hbm.xml" />
 		<mapping resource="starcorp/common/entities/CreditAccount.hbm.xml" />
 		<mapping resource="starcorp/common/entities/CashTransaction.hbm.xml" />

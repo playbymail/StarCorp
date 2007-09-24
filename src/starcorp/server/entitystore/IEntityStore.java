@@ -15,8 +15,10 @@ import java.util.Map;
 
 import starcorp.common.entities.ABaseEntity;
 import starcorp.common.entities.AColonists;
+import starcorp.common.entities.ACorporateItem;
 import starcorp.common.entities.AGovernmentLaw;
 import starcorp.common.entities.CreditAccount;
+import starcorp.common.entities.FactoryQueueItem;
 import starcorp.common.entities.MarketItem;
 import starcorp.common.entities.ResourceDeposit;
 import starcorp.common.entities.StarSystemEntity;
@@ -50,6 +52,8 @@ import starcorp.common.types.PopulationClass;
 public interface IEntityStore {
 	public abstract void shutdown();
 
+	public abstract double getAverageHappiness(Colony colony, PopulationClass popClass);
+	
 	public abstract long getCredits(ABaseEntity entity);
 	public abstract long removeCredits(ABaseEntity entity, long credits, String reason);
 	public abstract long addCredits(ABaseEntity entity, long credits, String reason);
@@ -61,12 +65,13 @@ public interface IEntityStore {
 	public abstract ABaseEntity update(ABaseEntity entity);
 	public abstract AGovernmentLaw create(AGovernmentLaw law);
 	public abstract AGovernmentLaw update(AGovernmentLaw law);
-	public abstract ColonyItem create(ColonyItem item);
-	public abstract ColonyItem update(ColonyItem item);
+	public abstract ACorporateItem create(ACorporateItem item);
+	public abstract ACorporateItem update(ACorporateItem item);
 	public abstract ResourceDeposit create(ResourceDeposit deposit);
 	public abstract ResourceDeposit update(ResourceDeposit deposit);
 	
 	public abstract void delete(ABaseEntity entity);
+	public abstract void delete(ACorporateItem item);
 	
 	public abstract List<Object> query(String hql);
 	
@@ -96,6 +101,8 @@ public interface IEntityStore {
 	public abstract ColonyItem getItem(Colony colony, AItemType type);
 	public abstract ColonyItem getItem(Colony colony, Corporation owner, AItemType type);
 	
+	public abstract List<FactoryQueueItem> listQueue(Facility facility);
+	
 	public abstract Corporation getCorporation(String email);
 	public abstract Corporation getCorporation(String email, String password);
 
@@ -103,6 +110,7 @@ public interface IEntityStore {
 	public abstract DevelopmentGrant getDevelopmentGrant(Colony colony, AFacilityType type, boolean openOnly);
 	
 	public abstract List<Facility> listFacilities();
+	public abstract List<Facility> listFacilitiesPowered(List<AFacilityType> types);
 	public abstract List<Facility> listFacilities(Colony colony);
 	public abstract List<Facility> listFacilities(Corporation owner);
 	public abstract List<Facility> listFacilities(Colony colony, Class<?> type);

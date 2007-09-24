@@ -10,18 +10,12 @@
  */
 package starcorp.common.entities;
 
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-
 import org.dom4j.Element;
 
 import starcorp.common.types.AFacilityType;
 import starcorp.common.types.ColonyHub;
-import starcorp.common.types.Factory;
 import starcorp.common.types.GalacticDate;
-import starcorp.common.types.Items;
 import starcorp.common.types.OrbitalDock;
 import starcorp.common.types.ServiceFacility;
 
@@ -33,11 +27,6 @@ import starcorp.common.types.ServiceFacility;
  */
 public class Facility extends ABaseEntity {
 
-	public static class ServiceResult {
-		public int quantityServiced;
-		public int totalCost;
-	}
-	
 	private Corporation owner;
 	private Colony colony;
 	private AFacilityType type;
@@ -46,51 +35,14 @@ public class Facility extends ABaseEntity {
 	private int transactionCount;
 	private boolean open;
 	
-	private Set<Items> itemQueue = new HashSet<Items>();
-	private Set<Items> itemsCreated = new HashSet<Items>();
 	private GalacticDate builtDate;
 	
 	public double getEfficiency(List<?> currentWorkers) {
 		return isPowered() ?  type.getEfficiency(currentWorkers) : 0.0;
 	}
 	
-	public void createdItem(Items item) {
-		itemsCreated.add(item);
-	}
-	
-	public boolean queueItem(Items item) {
-		if(type instanceof Factory) {
-			Factory factory = (Factory) type;
-			if(factory.canBuild(item.getTypeClass())) {
-				itemQueue.add(item);
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	public Iterator<Items> created() {
-		return itemsCreated.iterator();
-	}
-	
-	public Iterator<Items> queue() {
-		return itemQueue.iterator();
-	}
-	
-	public void clearQueue() {
-		itemQueue.clear();
-	}
-	
-	public void clearCreated() {
-		itemsCreated.clear();
-	}
-	
 	public int getTransactionsRemaining(List<?> workers) {
-		if(type instanceof Factory) {
-			Factory factory = (Factory) type;
-			return factory.getCapacity(workers) - transactionCount;
-		}
-		else if(type instanceof ServiceFacility) {
+		if(type instanceof ServiceFacility) {
 			ServiceFacility facility = (ServiceFacility) type;
 			return facility.getTotalColonistsServiceable(workers) - transactionCount;
 		}
@@ -158,12 +110,6 @@ public class Facility extends ABaseEntity {
 	public void setOpen(boolean open) {
 		this.open = open;
 	}
-	public Set<Items> getItemQueue() {
-		return itemQueue;
-	}
-	public void setItemQueue(Set<Items> itemQueue) {
-		this.itemQueue = itemQueue;
-	}
 	public GalacticDate getBuiltDate() {
 		return builtDate;
 	}
@@ -180,14 +126,6 @@ public class Facility extends ABaseEntity {
 		this.powered = powered;
 	}
 
-	public Set<Items> getItemsCreated() {
-		return itemsCreated;
-	}
-
-	public void setItemsCreated(Set<Items> itemsCreated) {
-		this.itemsCreated = itemsCreated;
-	}
-
 	@Override
 	public void readXML(Element e) {
 		super.readXML(e);
@@ -200,13 +138,6 @@ public class Facility extends ABaseEntity {
 		this.serviceCharge =Integer.parseInt(e.attributeValue("charge","0"));
 		this.open = Boolean.parseBoolean(e.attributeValue("open","false"));
 		this.builtDate = new GalacticDate(e.element("built").element("date"));
-		
-		for(Iterator i = e.element("production-queue").elementIterator("item"); i.hasNext();) {
-			itemQueue.add(new Items((Element)i.next()));
-		}
-		for(Iterator i = e.element("items-created").elementIterator("item"); i.hasNext();) {
-			itemsCreated.add(new Items((Element)i.next()));
-		}
 	}
 
 	@Override
@@ -219,22 +150,6 @@ public class Facility extends ABaseEntity {
 		e.addAttribute("charge", String.valueOf(serviceCharge));
 		e.addAttribute("open", open ? "true" : "false");
 		builtDate.toXML(e.addElement("built"));
-		return e;
-	}
-
-	@Override
-	public Element toFullXML(Element parent) {
-		Element e = super.toFullXML(parent);
-		Element queue = e.addElement("production-queue");
-		Iterator<Items> i = itemQueue.iterator();
-		while(i.hasNext()) {
-			i.next().toXML(queue.addElement("item"));
-		}
-		Element created = e.addElement("items-created");
-		i = itemsCreated.iterator();
-		while(i.hasNext()) {
-			i.next().toXML(created.addElement("item"));
-		}
 		return e;
 	}
 

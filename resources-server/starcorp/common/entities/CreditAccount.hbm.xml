@@ -3,7 +3,7 @@
         "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
         "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
-    <class name="starcorp.common.entities.CreditAccount" table="CREDIT_ACCOUNT">
+    <class name="starcorp.common.entities.CreditAccount" table="CREDIT_ACCOUNT" lazy="false">
     	<id name="ID"><generator class="assigned"/></id>
     	<version name="version"/>
     	<property name="credits"/>

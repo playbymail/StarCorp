@@ -10,7 +10,7 @@
  */
 package starcorp.server;
 
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -21,8 +21,6 @@ import starcorp.common.entities.Colony;
 import starcorp.common.entities.Facility;
 import starcorp.common.entities.MarketItem;
 import starcorp.common.entities.Planet;
-import starcorp.common.entities.Facility.ServiceResult;
-import starcorp.common.entities.MarketItem.BuyResult;
 import starcorp.common.types.AFacilityType;
 import starcorp.common.types.AItemType;
 import starcorp.common.types.Coordinates2D;
@@ -79,15 +77,30 @@ public class Util {
 			return true;
 		} 
 	}
-
+	public static class ServiceResult {
+		public int quantityServiced;
+		public int totalCost;
+	}
+	public static class BuyResult {
+		public int quantityBought;
+		public int totalPrice;
+		public List<Items> bought = new ArrayList<Items>();
+	}
+	
 	public static ServiceResult service(GalacticDate date, Map<Facility, List<AColonists>> facilities, int quantity, long cashAvailable, IEntityStore entityStore) {
 		ServiceResult result = new ServiceResult();
 		
-		Iterator<Facility> i = facilities.keySet().iterator();
-		while(i.hasNext() && result.quantityServiced < quantity) {
-			Facility facility = i.next();
-			List<?> workers = facilities.get(facility);
+		for(Facility facility : facilities.keySet()) {
+			if(result.quantityServiced >= quantity) {
+				break;
+			}
+			if(!facility.isPowered()) {
+				continue;
+			}
+			List<AColonists> workers = facilities.get(facility);
 			int avail = facility.getTransactionsRemaining(workers);
+			if(avail < 1)
+				continue;
 			int qty = quantity - result.quantityServiced;
 			long afford = cashAvailable / facility.getServiceCharge();
 			if(afford < qty) {
@@ -103,7 +116,7 @@ public class Util {
 			String desc = CashTransaction.getDescription(CashTransaction.SERVICE_CHARGE, args);
 			entityStore.addCredits(facility.getOwner(), price, desc);
 			facility.incTransactionCount();
-			
+			entityStore.update(facility);
 			result.quantityServiced += qty;
 			result.totalCost += price;
 			cashAvailable -= price;
@@ -114,13 +127,16 @@ public class Util {
 	public static BuyResult buy(GalacticDate date, List<MarketItem> items, int quantity, long cashAvailable, IEntityStore entityStore) {
 		BuyResult result = new BuyResult();
 		
-		Iterator<MarketItem> i = items.iterator();
-		while(i.hasNext() && result.quantityBought < quantity) {
-			MarketItem item = i.next();
+		for(MarketItem item : items) {
+			if(result.quantityBought >= quantity) {
+				break;
+			}
+			int avail = item.getQuantity();
+			if(avail < 1)
+				continue;
 			Colony colony = item.getColony();
 			AItemType type = item.getItem().getTypeClass();
 			int qty = quantity - result.quantityBought;
-			int avail = item.getItem().getQuantity();
 			long afford = cashAvailable / item.getCostPerItem();
 			if(afford < qty) {
 				qty = (int) afford;
@@ -133,10 +149,11 @@ public class Util {
 			Object[] args = {String.valueOf(qty), type.getName(),colony.getName(),String.valueOf(colony.getID())};
 			String desc = CashTransaction.getDescription(CashTransaction.ITEM_SOLD, args);
 			entityStore.addCredits(item.getSeller(), price, desc);
-			item.getItem().remove(qty);
+			item.remove(qty);
 			if(item.getItem().getQuantity() < 1) {
 				item.setSoldDate(date);
 			}
+			entityStore.update(item);
 			result.quantityBought += qty;
 			result.totalPrice += price;
 			cashAvailable -= price;

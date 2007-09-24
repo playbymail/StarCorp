@@ -149,7 +149,7 @@ public class Create extends ACommand {
 					int credits = args.getAsInt(1);
 					corp.setFoundedDate(ServerConfiguration.getCurrentDate());
 					corp.setName(args.concat(2));
-					entityStore.create(corp);
+					corp = (Corporation) entityStore.create(corp);
 					entityStore.addCredits(corp, credits, "NPC Setup");
 					out.println("Created " + corp);
 				} else if ("colony".equalsIgnoreCase(function)) {

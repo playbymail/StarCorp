@@ -94,7 +94,7 @@ public class ShipBuyItem extends AOrderProcessor {
 			if(quantity > quantitySpaceFor) {
 				quantity = quantitySpaceFor;
 			}
-			MarketItem.BuyResult result = Util.buy(ServerConfiguration.getCurrentDate(), marketItems, quantity, entityStore.getCredits(corp),entityStore);
+			Util.BuyResult result = Util.buy(ServerConfiguration.getCurrentDate(), marketItems, quantity, entityStore.getCredits(corp),entityStore);
 			
 			Object[] args = {String.valueOf(result.quantityBought), type.getName(),colony.getName(),String.valueOf(colony.getID())};
 			String desc = CashTransaction.getDescription(CashTransaction.ITEM_BOUGHT, args);

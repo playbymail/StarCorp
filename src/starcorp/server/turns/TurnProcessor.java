@@ -31,7 +31,7 @@ import starcorp.common.types.GalacticDate;
 import starcorp.common.types.OrderType;
 import starcorp.common.util.SendEmail;
 import starcorp.server.ServerConfiguration;
-import starcorp.server.entitystore.IEntityStore;
+import starcorp.server.engine.AServerTask;
 
 /**
  * starcorp.server.turns.TurnProcessor
@@ -39,17 +39,15 @@ import starcorp.server.entitystore.IEntityStore;
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 16 Sep 2007
  */
-public class TurnProcessor {
+public class TurnProcessor extends AServerTask {
 	
-	private final Log log = LogFactory.getLog(TurnProcessor.class);
-	private final IEntityStore entityStore;
+	private static final Log log = LogFactory.getLog(TurnProcessor.class);
 	private final SendEmail sendEmail;
 	private final File reportsFolder;
 	
 	private int processed;
 	
-	public TurnProcessor(IEntityStore entityStore) {
-		this.entityStore = entityStore;
+	public TurnProcessor() {
 		this.sendEmail = new SendEmail(ServerConfiguration.SMTP_HOST_NAME,ServerConfiguration.SMTP_PORT,ServerConfiguration.SMTP_AUTH_USER,ServerConfiguration.SMTP_AUTH_PASSWORD);
 		this.reportsFolder = new File(ServerConfiguration.REPORTS_FOLDER);
 		if(!reportsFolder.exists()) {
@@ -71,7 +69,7 @@ public class TurnProcessor {
 					turn = new Turn(doc.getRootElement().element("turn"));
 				}
 				catch(Exception e) {
-					log.warn("Error reading turn file " + turns[i].getName() + " because " + e.getMessage());
+					log.warn(this + ": Error reading turn file " + turns[i].getName() + " because " + e.getMessage());
 				}
 				if(turn != null) {
 					try {
@@ -99,21 +97,25 @@ public class TurnProcessor {
 						turns[i].deleteOnExit();
 					}
 					catch(Exception e) {
-						log.error("Error sending report for " + turn + " because " + e.getMessage(),e);
+						log.error(this + ": Error sending report for " + turn + " because " + e.getMessage(),e);
 					}
 				}
 			}
 		}
 	}
 	
-	public void processTurns() {
-		log.info("Started processing turns.");
+	public Log getLog() {
+		return log;
+	}
+	
+	public void doJob() {
+		log.info(this + ": Started processing turns.");
 		processed = 0;
 		File turnFolder = new File(ServerConfiguration.TURNS_FOLDER);
 		if(turnFolder.exists()) {
 			processFolder(turnFolder);
 		}
-		log.info("Finished processing turns.");
+		log.info(this + ": Finished processing turns.");
 	}
 	
 	public TurnReport process(Turn turn) {
@@ -152,7 +154,7 @@ public class TurnProcessor {
 				report.addPlayerEntities(entityStore.listShips(corp));
 			}
 		}
-		log.info("Processed turn from " + turn.getCorporation() + ". Order: " + turn.getOrders().size() + ". Errors: " + turn.getErrors().size());
+		log.info(this + ": Processed turn from " + turn.getCorporation() + ". Order: " + turn.getOrders().size() + ". Errors: " + turn.getErrors().size());
 		processed++;
 		return report;
 	}

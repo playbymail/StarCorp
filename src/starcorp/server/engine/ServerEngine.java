@@ -13,6 +13,7 @@ package starcorp.server.engine;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.Properties;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -37,7 +38,7 @@ public class ServerEngine {
 	private ExecutorService execService = Executors.newFixedThreadPool(THREAD_POOL);
 	private final IEntityStore entityStore;
 	private Vector<AServerTask> tasks = new Vector<AServerTask>();
-
+	private Properties props = System.getProperties();
 	private long serverStarted = System.currentTimeMillis();
 	private Date serverStartedDate = new Date(serverStarted);
 	private String serverStartedString = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(serverStartedDate);
@@ -49,6 +50,13 @@ public class ServerEngine {
 	public ServerEngine(IEntityStore entityStore) {
 		this.entityStore = entityStore;
 		log.info("Server Engine started " + serverStartedString);
+	}
+	
+	public void scheduleAndWait(AServerTask task) {
+		schedule(task);
+		while(!task.isDone()) {
+			Thread.yield();
+		}
 	}
 	
 	public void schedule(AServerTask task) {
@@ -113,24 +121,30 @@ public class ServerEngine {
 			return totalTaskTime / tasksCompled;
 		return 0;
 	}
+	
+	void setProperty(String name, Object value) {
+		props.put(name, value);
+	}
+	
+	Object getProperty(String name) {
+		return props.get(name);
+	}
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer("Engine [Started: ");
+		StringBuffer sb = new StringBuffer("Started: ");
 		sb.append(serverStartedString);
-		sb.append(" : ");
-		sb.append(THREAD_POOL);
-		sb.append(" threads ");
+		sb.append("\nTasks: ");
 		sb.append(taskNumber = tasksCompled);
 		sb.append(" scheduled ");
 		sb.append(tasksCompled);
-		sb.append(" completed ");
+		sb.append(" completed\nTime: ");
 		sb.append(Util.getDisplayDuration(getAverageTime()));
 		sb.append(" average ");
 		sb.append(Util.getDisplayDuration(getLongestTaskTime()));
 		sb.append(" (");
 		sb.append(getLongestTaskName());
-		sb.append(") longest]");
+		sb.append(") longest");
 		return sb.toString();
 	}
 	
