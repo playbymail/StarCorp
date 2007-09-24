@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import starcorp.common.entities.Corporation;
+import starcorp.common.entities.StarSystem;
 import starcorp.common.entities.Starship;
 import starcorp.common.turns.OrderReport;
 import starcorp.common.turns.TurnError;
@@ -55,6 +56,7 @@ public class Move extends AOrderProcessor {
 				error = new TurnError(TurnError.INVALID_LOCATION);
 			}
 			else {
+				StarSystem system = (StarSystem) entityStore.load(StarSystem.class, ship.getSystemID());
 				CoordinatesPolar shipLocation = ship.getLocation();
 				double timeUnits = ship.getTimeUnitsRemaining();
 				double speed = ship.getDesign().getImpulseSpeed();
@@ -73,7 +75,7 @@ public class Move extends AOrderProcessor {
 						shipLocation.setOrbit(shipLocation.getOrbit() - 1);
 					}
 					timeUnits -= speed;
-					List<?> scan = entityStore.listSystemEntities(ship.getSystem(), shipLocation);
+					List<?> scan = entityStore.listSystemEntities(system, shipLocation);
 					entities.addAll(scan);
 				}
 				ship.setLocation(shipLocation);
@@ -83,8 +85,8 @@ public class Move extends AOrderProcessor {
 				report.add(ship.getID());
 				report.add(shipLocation.getQuadrant());
 				report.add(shipLocation.getOrbit());
-				report.add(ship.getSystem().getName());
-				report.add(ship.getSystem().getID());
+				report.add(system.getName());
+				report.add(system.getID());
 				report.addScannedEntities(entities);
 				order.setReport(report);
 			}

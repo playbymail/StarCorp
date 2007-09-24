@@ -11,7 +11,6 @@
 package starcorp.server.setup.colonies;
 
 import starcorp.server.setup.AColonyTemplate;
-import starcorp.server.setup.Util;
 
 /**
  * starcorp.server.setup.colonies.MetalOutpost
@@ -50,7 +49,7 @@ public class MetalOutpost extends AColonyTemplate {
 	 */
 	@Override
 	protected int countMines() {
-		return (Util.rnd.nextInt(10) + 1) * 30;
+		return (starcorp.server.Util.rnd.nextInt(10) + 1) * 30;
 	}
 
 	/* (non-Javadoc)

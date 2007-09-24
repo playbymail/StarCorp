@@ -29,7 +29,7 @@ import starcorp.common.types.TerrainType;
  */
 public class Planet extends StarSystemEntity {
 
-	private Planet orbiting;
+	private long orbitingID;
 	private AtmosphereType atmosphereType;
 	private int gravityRating;
 	private Set<PlanetMapSquare> map = new HashSet<PlanetMapSquare>();
@@ -70,11 +70,14 @@ public class Planet extends StarSystemEntity {
 		return this;
 	}
 	
-	public Planet getOrbiting() {
-		return orbiting;
+	public long getOrbitingID() {
+		return orbitingID;
+	}
+	public void setOrbitingID(long orbiting) {
+		this.orbitingID = orbiting;
 	}
 	public void setOrbiting(Planet orbiting) {
-		this.orbiting = orbiting;
+		this.orbitingID = orbiting == null ? 0 : orbiting.getID();
 	}
 	
 	public String getAtmosphereType() {
@@ -107,11 +110,10 @@ public class Planet extends StarSystemEntity {
 	@Override
 	public void readXML(Element e) {
 		super.readXML(e);
-		Element eOrbiting = e.element("orbiting");
-		if(eOrbiting != null) {
-			this.orbiting = new Planet();
-			this.orbiting.readXML(eOrbiting.element("entity"));
+		try {
+			this.orbitingID = Long.parseLong(e.attributeValue("orbiting"));
 		}
+		catch(NumberFormatException ex) { }
 		this.atmosphereType = AtmosphereType.getType(e.attributeValue("atmosphere"));
 		this.gravityRating = Integer.parseInt(e.attributeValue("gravity","0"));
 		Element eMap = e.element("map");
@@ -125,9 +127,7 @@ public class Planet extends StarSystemEntity {
 	@Override
 	public Element toBasicXML(Element parent) {
 		Element e = super.toBasicXML(parent);
-		if(orbiting != null) {
-			orbiting.toBasicXML(e.addElement("orbiting"));
-		}
+		e.addAttribute("orbiting", String.valueOf(orbitingID));
 		e.addAttribute("atmosphere", atmosphereType.getKey());
 		e.addAttribute("gravity", String.valueOf(gravityRating));
 		return e;
@@ -147,7 +147,7 @@ public class Planet extends StarSystemEntity {
 	@Override
 	public String toString() {
 		return super.toString() + 
-		(orbiting == null ? "" : " orbiting " + orbiting.getName()) + 
+		" orbiting " + getOrbitingID() + 
 		" : " + (atmosphereType == null ? "" : atmosphereType.getKey()) + 
 		" : " + gravityRating + "g";
 	}

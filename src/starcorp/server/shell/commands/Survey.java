@@ -30,7 +30,6 @@ import starcorp.common.types.Coordinates2D;
 import starcorp.common.types.Resources;
 import starcorp.server.engine.AServerTask;
 import starcorp.server.entitystore.IEntityStore;
-import starcorp.server.setup.Util;
 import starcorp.server.shell.ACommand;
 import starcorp.server.shell.Shell;
 
@@ -42,9 +41,9 @@ import starcorp.server.shell.Shell;
  */
 public class Survey extends ACommand {
 	private static Log log = LogFactory.getLog(Survey.class); 
-	public static Set<Util.SuitableLocation> findSuitableLocations(StarSystem system, IEntityStore entityStore, List<AItemType> types) {
+	public static Set<starcorp.server.Util.SuitableLocation> findSuitableLocations(StarSystem system, IEntityStore entityStore, List<AItemType> types) {
 		List<AtmosphereType> atmospheres = AtmosphereType.listTypes(1.0);
-		TreeSet<Util.SuitableLocation> sorted = new TreeSet<Util.SuitableLocation>();
+		TreeSet<starcorp.server.Util.SuitableLocation> sorted = new TreeSet<starcorp.server.Util.SuitableLocation>();
 		List<?> planets = entityStore.listPlanets(system, 5, atmospheres);
 		for(Object o : planets) {
 			Planet planet = (Planet) o;
@@ -53,11 +52,11 @@ public class Survey extends ACommand {
 		return sorted;
 	}
 	
-	public static Set<Util.SuitableLocation> findSuitableLocations(Planet planet, IEntityStore entityStore, List<AItemType> types) {
-		return findSuitableLocations(planet, entityStore, types, new TreeSet<Util.SuitableLocation>());
+	public static Set<starcorp.server.Util.SuitableLocation> findSuitableLocations(Planet planet, IEntityStore entityStore, List<AItemType> types) {
+		return findSuitableLocations(planet, entityStore, types, new TreeSet<starcorp.server.Util.SuitableLocation>());
 	}
 
-	private static Set<Util.SuitableLocation> findSuitableLocations(Planet planet, IEntityStore entityStore, List<AItemType> types, TreeSet<Util.SuitableLocation> sorted) {
+	private static Set<starcorp.server.Util.SuitableLocation> findSuitableLocations(Planet planet, IEntityStore entityStore, List<AItemType> types, TreeSet<starcorp.server.Util.SuitableLocation> sorted) {
 		Map<Coordinates2D, List<ResourceDeposit>> map = new HashMap<Coordinates2D, List<ResourceDeposit>>();
 		List<?> list = entityStore.listDeposits(planet, types, 10000);
 		for(Object o : list) {
@@ -77,7 +76,7 @@ public class Survey extends ACommand {
 			for(ResourceDeposit deposit : deposits) {
 				total += deposit.getYield();
 			}
-			Util.SuitableLocation sl = new Util.SuitableLocation();
+			starcorp.server.Util.SuitableLocation sl = new starcorp.server.Util.SuitableLocation();
 			sl.location=loc;
 			sl.planet=planet;
 			sl.rating=total;
@@ -111,7 +110,6 @@ public class Survey extends ACommand {
 				return log;
 			}
 			protected void doJob() throws Exception {
-				beginTransaction();
 				String surveyType = args.get(0);
 				List<AItemType> types;
 				String typeParam = args.get(2);
@@ -147,13 +145,13 @@ public class Survey extends ACommand {
 						out.println("Invalid planet");
 					}
 					else {
-						Set<Util.SuitableLocation> sorted = findSuitableLocations(planet, entityStore, types);
+						Set<starcorp.server.Util.SuitableLocation> sorted = findSuitableLocations(planet, entityStore, types);
 						int size = sorted.size();
 						if(size > 0) {
 							out.println();
 							out.println("Found " + size + " suitable locations:");
 							int i = 0;
-							for(Util.SuitableLocation location : sorted) {
+							for(starcorp.server.Util.SuitableLocation location : sorted) {
 								if(i >= 10)
 									break;
 								out.println();
@@ -175,13 +173,13 @@ public class Survey extends ACommand {
 						out.println("Invalid system");
 					}
 					else {
-						Set<Util.SuitableLocation> sorted = findSuitableLocations(system, entityStore, types);
+						Set<starcorp.server.Util.SuitableLocation> sorted = findSuitableLocations(system, entityStore, types);
 						int size = sorted.size();
 						if(size > 0) {
 							out.println();
 							out.println("Found " + size + " suitable locations:");
 							int i = 0;
-							for(Util.SuitableLocation location : sorted) {
+							for(starcorp.server.Util.SuitableLocation location : sorted) {
 								if(i >= 10)
 									break;
 								out.println();
@@ -199,7 +197,6 @@ public class Survey extends ACommand {
 					out.println();
 					out.println("Invalid argument");
 				}
-				commit();
 				out.print(Shell.PROMPT);
 				out.flush();
 			}

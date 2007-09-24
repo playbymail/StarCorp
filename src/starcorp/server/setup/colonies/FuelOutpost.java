@@ -11,7 +11,6 @@
 package starcorp.server.setup.colonies;
 
 import starcorp.server.setup.AColonyTemplate;
-import starcorp.server.setup.Util;
 
 /**
  * starcorp.server.setup.colonies.FuelOutpost
@@ -58,7 +57,7 @@ public class FuelOutpost extends AColonyTemplate {
 	 */
 	@Override
 	protected int countPlants() {
-		return (Util.rnd.nextInt(15) + 1) * 10;
+		return (starcorp.server.Util.rnd.nextInt(15) + 1) * 10;
 	}
 
 	/* (non-Javadoc)
@@ -66,7 +65,7 @@ public class FuelOutpost extends AColonyTemplate {
 	 */
 	@Override
 	protected int countRefineries() {
-		return (Util.rnd.nextInt(5) + 1) + 10;
+		return (starcorp.server.Util.rnd.nextInt(5) + 1) + 10;
 	}
 
 	/* (non-Javadoc)
@@ -95,6 +94,6 @@ public class FuelOutpost extends AColonyTemplate {
 
 	@Override
 	protected int countPumps() {
-		return (Util.rnd.nextInt(15) + 1) * 10;
+		return (starcorp.server.Util.rnd.nextInt(15) + 1) * 10;
 	}
 }

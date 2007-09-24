@@ -24,7 +24,6 @@ import starcorp.common.types.PopulationClass;
  * @version 18 Sep 2007
  */
 public abstract class AColonists extends ABaseEntity {
-// TODO remove from ABaseEntity hierarchy
 	public static int countColonists(List<?> colonists) {
 		int totalQty = 0;
 		for(Object o : colonists) {
@@ -55,20 +54,23 @@ public abstract class AColonists extends ABaseEntity {
 	
 	public abstract Corporation getEmployer();
 	
+	public String getPopClassType() {
+		return population == null ? null : population.getPopClassType();
+	}
+	
 	public void addHappiness(double happiness) {
 		this.happiness += happiness;
 	}
 	
-	public void removeHappiness(double happiness) {
-		this.happiness -= happiness;
-	}
-	
 	public PopulationClass getPopClass() {
-		return population.getPopClass();
+		return population == null ? null : population.getPopClass();
 	}
 	
-	public int getQuantity() {
-		return population.getQuantity();
+	public void setPopClassType(String type) {
+		if(population == null) {
+			population = new Population();
+		}
+		population.setPopClassType(type);
 	}
 	
 	public void addPopulation(int qty) {
@@ -76,28 +78,37 @@ public abstract class AColonists extends ABaseEntity {
 			population.add(qty);
 		}
 	}
-
+	
+	public void setPopClass(PopulationClass popClass) {
+		if(population == null) {
+			population = new Population();
+		}
+		population.setPopClass(popClass);
+	}
+	
 	public int removePopulation(int qty) {
 		if(population != null) {
 			return population.remove(qty);
 		}
 		return 0;
 	}
-
+	public int getQuantity() {
+		return population == null ? 0 : population.getQuantity();
+	}
+	
+	public void setQuantity(int qty) {
+		if(population == null) {
+			population = new Population();
+		}
+		population.setQuantity(qty);
+	}
+	
 	public Colony getColony() {
 		return colony;
 	}
 
 	public void setColony(Colony colony) {
 		this.colony = colony;
-	}
-
-	public Population getPopulation() {
-		return population;
-	}
-
-	public void setPopulation(Population colonists) {
-		this.population = colonists;
 	}
 
 	public double getHappiness() {

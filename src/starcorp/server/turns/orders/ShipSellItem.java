@@ -12,16 +12,17 @@ package starcorp.server.turns.orders;
 
 import java.util.List;
 
+import starcorp.common.entities.CashTransaction;
 import starcorp.common.entities.Colony;
 import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Facility;
 import starcorp.common.entities.MarketItem;
+import starcorp.common.entities.Planet;
 import starcorp.common.entities.Starship;
 import starcorp.common.turns.OrderReport;
 import starcorp.common.turns.TurnError;
 import starcorp.common.turns.TurnOrder;
 import starcorp.common.types.AItemType;
-import starcorp.common.types.CashTransaction;
 import starcorp.common.types.ColonyHub;
 import starcorp.common.types.Items;
 import starcorp.common.types.OrbitalDock;
@@ -49,6 +50,10 @@ public class ShipSellItem extends AOrderProcessor {
 		
 		Starship ship = (Starship) entityStore.load(Starship.class, starshipId);
 		Colony colony = (Colony) entityStore.load(Colony.class, colonyId);
+		Planet colonyPlanet = null;
+		if(colony != null)
+			colonyPlanet = ((Planet) entityStore.load(Planet.class, colony.getPlanetID()));
+		
 		AItemType type = AItemType.getType(itemTypeKey);
 		
 		Facility colonyHub = entityStore.getFacility(colony, colony.getGovernment(), ColonyHub.class);
@@ -62,7 +67,7 @@ public class ShipSellItem extends AOrderProcessor {
 		else if(colony == null) {
 			error = new TurnError(TurnError.INVALID_COLONY);
 		}
-		else if(ship.getPlanet() == null || !ship.getPlanet().equals(colony.getPlanet())) {
+		else if(ship.getPlanet() == null || !ship.getPlanet().equals(colonyPlanet)) {
 			error = new TurnError(TurnError.INVALID_LOCATION);
 		}
 		else if(ship.getColony() != null && !ship.getColony().equals(colony)) {
@@ -90,7 +95,7 @@ public class ShipSellItem extends AOrderProcessor {
 			item.setCostPerItem(price);
 			item.setIssuedDate(ServerConfiguration.getCurrentDate());
 			item.setSeller(corp);
-			entityStore.save(item);
+			entityStore.create(item);
 			
 			ship.removeCargo(type, quantity);
 			Object[] args2 = {colonyHub.getTypeClass().getName(), colony.getName(), String.valueOf(colony.getID())};

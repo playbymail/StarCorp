@@ -13,7 +13,6 @@ package starcorp.server.setup.systems;
 import starcorp.common.entities.Planet;
 import starcorp.server.setup.APlanetTemplate;
 import starcorp.server.setup.ASystemTemplate;
-import starcorp.server.setup.Util;
 
 /**
  * starcorp.server.setup.systems.Standard
@@ -25,12 +24,12 @@ public class Standard extends ASystemTemplate {
 
 	@Override
 	protected int countMoons(APlanetTemplate template,Planet planet) {
-		return Util.rnd.nextInt(planet.getGravityRating());
+		return starcorp.server.Util.rnd.nextInt(planet.getGravityRating());
 	}
 
 	@Override
 	protected APlanetTemplate getMoonTemplate(APlanetTemplate planetTemplate,Planet planet) {
-		int rand = Util.rnd.nextInt(10);
+		int rand = starcorp.server.Util.rnd.nextInt(10);
 		switch(rand) {
 		case 1:
 		case 2:
@@ -50,17 +49,17 @@ public class Standard extends ASystemTemplate {
 
 	@Override
 	protected APlanetTemplate hasPlanet(int orbit) {
-		if(orbit > 8 && orbit < 12 && Util.rnd.nextInt(100) <= 25) {
+		if(orbit > 8 && orbit < 12 && starcorp.server.Util.rnd.nextInt(100) <= 25) {
 			return APlanetTemplate.getTemplate("GasGiant");
 		}
-		if(orbit < 6 && Util.rnd.nextInt(100) <= 5) {
+		if(orbit < 6 && starcorp.server.Util.rnd.nextInt(100) <= 5) {
 			return APlanetTemplate.getTemplate("Rock");
 		}
-		if(orbit > 8 && Util.rnd.nextInt(100) <= 5) {
+		if(orbit > 8 && starcorp.server.Util.rnd.nextInt(100) <= 5) {
 			return APlanetTemplate.getTemplate("Ice");
 		}
 		if(orbit > 3 && orbit < 12) {
-			int rand = Util.rnd.nextInt(100);
+			int rand = starcorp.server.Util.rnd.nextInt(100);
 			if(rand <= 1) {
 				return APlanetTemplate.getTemplate("Green");
 			}

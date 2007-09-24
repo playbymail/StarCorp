@@ -13,6 +13,7 @@ package starcorp.server.turns.orders;
 import java.util.Iterator;
 import java.util.List;
 
+import starcorp.common.entities.StarSystem;
 import starcorp.common.entities.StarSystemEntity;
 import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Starship;
@@ -48,7 +49,8 @@ public class ProbeSystem extends AOrderProcessor {
 		else {
 			ship.incrementTimeUnitsUsed(TIME_UNITS);
 			OrderReport report = new OrderReport(order);
-			List<?> entities = entityStore.listSystemEntities(ship.getSystem(),ship.getLocation());
+			StarSystem system = (StarSystem) entityStore.load(StarSystem.class, ship.getSystemID());
+			List<?> entities = entityStore.listSystemEntities(system,ship.getLocation());
 			report.addScannedEntities(entities);
 			Iterator<?> i = entities.iterator();
 			while(i.hasNext()) {

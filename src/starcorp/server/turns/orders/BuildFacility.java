@@ -11,6 +11,8 @@
 package starcorp.server.turns.orders;
 
 import java.util.Iterator;
+
+import starcorp.common.entities.CashTransaction;
 import starcorp.common.entities.Colony;
 import starcorp.common.entities.ColonyItem;
 import starcorp.common.entities.Corporation;
@@ -22,12 +24,10 @@ import starcorp.common.turns.OrderReport;
 import starcorp.common.turns.TurnError;
 import starcorp.common.turns.TurnOrder;
 import starcorp.common.types.AFacilityType;
-import starcorp.common.types.CashTransaction;
 import starcorp.common.types.ColonyHub;
 import starcorp.common.types.Items;
 import starcorp.common.types.OrbitalDock;
 import starcorp.common.types.OrderType;
-import starcorp.common.types.Population;
 import starcorp.common.types.PopulationClass;
 import starcorp.server.ServerConfiguration;
 import starcorp.server.turns.AOrderProcessor;
@@ -106,8 +106,8 @@ public class BuildFacility extends AOrderProcessor {
 						}
 					}
 					
-					lease.setUsed(true);
-					lease.setUsedDate(ServerConfiguration.getCurrentDate());
+					lease.setAvailable(false);
+					lease.setClosedDate(ServerConfiguration.getCurrentDate());
 					
 					if(grant != null) {
 						Object[] args = {facilityType.getName(), colony.getName(), String.valueOf(colony.getID())};
@@ -115,7 +115,7 @@ public class BuildFacility extends AOrderProcessor {
 						entityStore.transferCredits(grant.getColony().getGovernment(), corp, grant.getGrant(), desc);
 					}
 					
-					entityStore.save(facility);
+					entityStore.create(facility);
 					
 					// need to create workers with zero quantity otherwise population updater will not hire any new workers!
 					for(PopulationClass popClass : facilityType.getWorkerRequirement().keySet()) {
@@ -123,9 +123,9 @@ public class BuildFacility extends AOrderProcessor {
 						w.setColony(colony);
 						w.setFacility(facility);
 						w.setHappiness(0.0);
-						w.setPopulation(new Population(popClass));
+						w.setPopClass(popClass);
 						w.setSalary(popClass.getNPCSalary());
-						entityStore.save(w);
+						entityStore.create(w);
 					}
 					
 					OrderReport report = new OrderReport(order);

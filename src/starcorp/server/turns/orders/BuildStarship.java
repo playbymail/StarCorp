@@ -14,6 +14,7 @@ import java.util.Iterator;
 import starcorp.common.entities.Colony;
 import starcorp.common.entities.ColonyItem;
 import starcorp.common.entities.Corporation;
+import starcorp.common.entities.Planet;
 import starcorp.common.entities.Starship;
 import starcorp.common.entities.StarshipDesign;
 import starcorp.common.turns.OrderReport;
@@ -56,12 +57,13 @@ public class BuildStarship extends AOrderProcessor {
 			Starship ship = new Starship();
 			ship.setBuiltDate(ServerConfiguration.getCurrentDate());
 			ship.setDesign(design);
-			ship.setPlanet(colony.getPlanet());
+			Planet planet = ((Planet) entityStore.load(Planet.class, colony.getPlanetID()));
+			ship.setPlanet(planet);
 			ship.setName(name);
 			ship.setOwner(corp);
 			ship.setPlanetLocation(colony.getLocation());
 			ship.setColony(colony);
-			ship.setSystem(colony.getPlanet().getSystem());
+			ship.setSystemID(planet.getSystemID());
 			
 			boolean hasNeededHulls = true;
 			Iterator<Items> i = design.getHulls().iterator();
@@ -87,7 +89,7 @@ public class BuildStarship extends AOrderProcessor {
 					}
 				}
 				
-				entityStore.save(ship);
+				entityStore.create(ship);
 				
 				OrderReport report = new OrderReport(order);
 				report.add(name);

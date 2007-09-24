@@ -8,7 +8,7 @@
  *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
  *  See the License for the specific language governing permissions and limitations under the License. 
  */
-package starcorp.common.types;
+package starcorp.common.entities;
 
 import java.text.MessageFormat;
 import java.util.MissingResourceException;
@@ -16,8 +16,10 @@ import java.util.ResourceBundle;
 
 import org.dom4j.Element;
 
+import starcorp.common.types.GalacticDate;
+
 /**
- * starcorp.common.types.CashTransaction
+ * starcorp.common.entities.CashTransaction
  *
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 18 Sep 2007
@@ -32,7 +34,7 @@ public class CashTransaction {
 	public static final String REDUNDANCY_PAY = "salary.redundancy";
 	public static final String SERVICE_CHARGE = "service.charge";
 	
-	protected static final ResourceBundle bundle = ResourceBundle.getBundle("starcorp.common.types.cash");
+	private static final ResourceBundle bundle = ResourceBundle.getBundle("starcorp.common.types.cash");
 	
 	public static String getDescription(String key, Object[] args) {
 		try {
@@ -51,7 +53,10 @@ public class CashTransaction {
 		}
 	}
 	
-	private int amount;
+	private long ID;
+	private int version;
+	private long accountID;
+	private long amount;
 	private String description;
 	private GalacticDate date;
 	
@@ -102,10 +107,10 @@ public class CashTransaction {
 		date.setMonth(month);
 	}
 	
-	public int getAmount() {
+	public long getAmount() {
 		return amount;
 	}
-	public void setAmount(int amount) {
+	public void setAmount(long amount) {
 		this.amount = amount;
 	}
 	public String getDescription() {
@@ -135,6 +140,30 @@ public class CashTransaction {
 	        + " )";
 	
 	    return retValue;
+	}
+
+	public long getID() {
+		return ID;
+	}
+
+	public void setID(long id) {
+		ID = id;
+	}
+
+	public int getVersion() {
+		return version;
+	}
+
+	public void setVersion(int version) {
+		this.version = version;
+	}
+
+	public long getAccountID() {
+		return accountID;
+	}
+
+	public void setAccountID(long accountID) {
+		this.accountID = accountID;
 	}
 	
 }

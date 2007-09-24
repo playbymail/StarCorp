@@ -117,7 +117,6 @@ public class TurnProcessor {
 	}
 	
 	public TurnReport process(Turn turn) {
-		entityStore.beginTransaction();
 		Corporation corp = authorize(turn.getCorporation());
 		TurnReport report = new TurnReport(turn);
 		if(corp == null) {
@@ -153,7 +152,6 @@ public class TurnProcessor {
 				report.addPlayerEntities(entityStore.listShips(corp));
 			}
 		}
-		entityStore.commit();
 		log.info("Processed turn from " + turn.getCorporation() + ". Order: " + turn.getOrders().size() + ". Errors: " + turn.getErrors().size());
 		processed++;
 		return report;
@@ -163,7 +161,7 @@ public class TurnProcessor {
 		Corporation existing = entityStore.getCorporation(corp.getPlayerEmail());
 		if(existing == null) {
 			corp.setFoundedDate(ServerConfiguration.getCurrentDate());
-			entityStore.save(corp);
+			entityStore.create(corp);
 			entityStore.addCredits(corp, ServerConfiguration.SETUP_INITIAL_CREDITS, ServerConfiguration.SETUP_DESCRIPTION);
 			return corp;
 		}

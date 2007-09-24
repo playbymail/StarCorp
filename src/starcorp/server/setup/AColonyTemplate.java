@@ -37,6 +37,7 @@ import starcorp.common.types.PopulationClass;
 import starcorp.common.types.ServiceFacility;
 import starcorp.common.util.PackageExplorer;
 import starcorp.server.ServerConfiguration;
+import starcorp.server.Util;
 import starcorp.server.entitystore.IEntityStore;
 
 /**
@@ -79,19 +80,18 @@ public abstract class AColonyTemplate {
 	}
 	
 	public Colony create(int govtID, int planetID, int x, int y, String name) {
-		entityStore.beginTransaction();
 		Corporation govt = (Corporation) entityStore.load(Corporation.class, govtID);
 		Planet planet = (Planet) entityStore.load(Planet.class, planetID);
 		if(govt == null || planet == null) {
 			return null;
 		}
 		Coordinates2D location = new Coordinates2D(x,y);
-		entityStore.commit();		
-		return create(govt,planet,location,name);
+		List<Corporation> corps = new ArrayList<Corporation>();
+		corps.add(govt);
+		return create(govt,corps, planet,location,name);
 	}
 	
-	public Colony create(Corporation govt, Planet planet, Coordinates2D location, String name) {
-		entityStore.beginTransaction();
+	public Colony create(Corporation govt, List<Corporation> corporations, Planet planet, Coordinates2D location, String name) {
 		PlanetMapSquare sq = planet.get(location);
 		if(sq == null) {
 			System.out.println("Invalid location");
@@ -107,13 +107,13 @@ public abstract class AColonyTemplate {
 		colony.setHazardLevel(planet.getAtmosphereTypeClass().getHazardLevel() + sq.getTerrainType().getHazardLevel());
 		colony.setLocation(location);
 		colony.setName(name);
-		colony.setPlanet(planet);
-		entityStore.save(colony);
-		entityStore.commit();
+		colony.setPlanetID(planet.getID());
+		entityStore.create(colony);
 		log.info("Created " + colony);
-		List<Facility> facilities = createFacilities(colony);
+		List<Facility> facilities = createFacilities(colony, corporations);
+		facilities.add(createFacility(colony, govt, "hub"));
 		List<AColonists> population = populate(colony, facilities);
-		createServiceFacilities(colony, facilities, population);
+		createServiceFacilities(colony, corporations, facilities, population);
 		createConsumerGoods(colony, population);
 		return colony;
 	}
@@ -147,20 +147,17 @@ public abstract class AColonyTemplate {
 	}
 	
 	protected MarketItem createItem(Colony colony, AItemType type, int quantity, int price) {
-		entityStore.beginTransaction();
 		MarketItem item = new MarketItem();
 		item.setColony(colony);
 		item.setCostPerItem(price);
 		item.setItem(new Items(type,quantity));
 		item.setSeller(colony.getGovernment());
-		entityStore.save(item);
-		entityStore.commit();
+		entityStore.create(item);
 		if(log.isDebugEnabled())log.debug("Created " + item);
 		return item;
 	}
 	
 	protected ColonyItem addItem(Colony colony, String type, int quantity) {
-		entityStore.beginTransaction();
 		ColonyItem item = entityStore.getItem(colony, colony.getGovernment(), AItemType.getType(type)); 
 		if(item == null) {
 			item = new ColonyItem();
@@ -168,10 +165,10 @@ public abstract class AColonyTemplate {
 			item.setItem(new Items());
 			item.getItem().setType(type);
 			item.setOwner(colony.getGovernment());
+			entityStore.create(item);
 		}
 		item.add(quantity);
-		entityStore.save(item);
-		entityStore.commit();
+		entityStore.update(item);
 		if(log.isDebugEnabled())log.debug("Created " + item);
 		return item;
 	}
@@ -187,7 +184,7 @@ public abstract class AColonyTemplate {
 		return count;
 	}
 	
-	protected void createServiceFacilities(Colony colony, List<Facility> facilities, List<AColonists> population) {
+	protected void createServiceFacilities(Colony colony, List<Corporation> corporations, List<Facility> facilities, List<AColonists> population) {
 		Map<PopulationClass,Integer> count = count(population);
 		Map<AFacilityType, Integer> required = new HashMap<AFacilityType, Integer>();
 		for(PopulationClass popClass : count.keySet()) {
@@ -228,25 +225,22 @@ public abstract class AColonyTemplate {
 			if(totalPop % ServiceFacility.MAX_COLONISTS_SERVICED > 0)
 				total++;
 			for(int i = 0; i <total; i++) {
-				Facility f = createFacility(colony, type.getKey());
+				Facility f = createFacility(colony, corporations.get(Util.rnd.nextInt(corporations.size())), type.getKey());
 				populate(f, population);
-				entityStore.beginTransaction();
 				f.setServiceCharge(100 * ((ServiceFacility)type).getQuality());
-				entityStore.save(f);
-				entityStore.commit();
+				entityStore.update(f);
 			}
 		}
 	}
 	
 	protected Workers createWorker(Facility facility, Population pop) {
-		entityStore.beginTransaction();
 		Workers worker = new Workers();
 		worker.setColony(facility.getColony());
 		worker.setFacility(facility);
 		worker.setSalary(pop.getPopClass().getNPCSalary());
-		worker.setPopulation(pop);
-		entityStore.save(worker);
-		entityStore.commit();
+		worker.setPopClass(pop.getPopClass());
+		worker.setQuantity(pop.getQuantity());
+		entityStore.create(worker);
 		if(log.isDebugEnabled())log.debug("Created " + worker);
 		return worker;
 	}
@@ -268,7 +262,7 @@ public abstract class AColonyTemplate {
 		return colonists;
 	}
 	
-	protected List<Facility> createFacilities(Colony colony) {
+	protected List<Facility> createFacilities(Colony colony, List<Corporation> corporations) {
 		List<Facility> facilities = new ArrayList<Facility>();
 		int farms = countFarms();
 		int pumps = countPumps();
@@ -278,47 +272,44 @@ public abstract class AColonyTemplate {
 		int hfact = countHeavyFactories();
 		int shfact = countSuperHeavyFactories();
 		int shipyards = countShipyards();
-		facilities.add(createFacility(colony,"hub"));
 		for(int i = 0; i < farms; i++) {
-			facilities.add(createFacility(colony, "farm"));
+			facilities.add(createFacility(colony,corporations.get(Util.rnd.nextInt(corporations.size())),  "farm"));
 		}
 		for(int i = 0; i < mines; i++) {
-			facilities.add(createFacility(colony, "mine"));
+			facilities.add(createFacility(colony, corporations.get(Util.rnd.nextInt(corporations.size())), "mine"));
 		}
 		for(int i = 0; i < pumps; i++) {
-			facilities.add(createFacility(colony, "pump"));
+			facilities.add(createFacility(colony, corporations.get(Util.rnd.nextInt(corporations.size())), "pump"));
 		}
 		for(int i = 0; i < refineries; i++) {
-			facilities.add(createFacility(colony, "refinery"));
+			facilities.add(createFacility(colony,corporations.get(Util.rnd.nextInt(corporations.size())),  "refinery"));
 		}
 		for(int i = 0; i < lfact; i++) {
-			facilities.add(createFacility(colony, "light-factory"));
+			facilities.add(createFacility(colony, corporations.get(Util.rnd.nextInt(corporations.size())), "light-factory"));
 		}
 		for(int i = 0; i < hfact; i++) {
-			facilities.add(createFacility(colony, "heavy-factory"));
+			facilities.add(createFacility(colony, corporations.get(Util.rnd.nextInt(corporations.size())), "heavy-factory"));
 		}
 		for(int i = 0; i < shfact; i++) {
-			facilities.add(createFacility(colony, "super-heavy-factory"));
+			facilities.add(createFacility(colony, corporations.get(Util.rnd.nextInt(corporations.size())), "super-heavy-factory"));
 		}
 		for(int i = 0; i < shipyards; i++) {
-			facilities.add(createFacility(colony, "shipyard"));
+			facilities.add(createFacility(colony, corporations.get(Util.rnd.nextInt(corporations.size())), "shipyard"));
 		}
 		if(hasOrbitalDock()) {
-			facilities.add(createFacility(colony, "dock"));
+			facilities.add(createFacility(colony, corporations.get(Util.rnd.nextInt(corporations.size())), "dock"));
 		}
 		return facilities;
 	}
 	
-	protected Facility createFacility(Colony colony, String type) {
-		entityStore.beginTransaction();
+	protected Facility createFacility(Colony colony, Corporation corp, String type) {
 		Facility facility = new Facility();
 		facility.setBuiltDate(ServerConfiguration.getCurrentDate());
 		facility.setColony(colony);
 		facility.setOpen(true);
-		facility.setOwner(colony.getGovernment());
+		facility.setOwner(corp);
 		facility.setType(type);
-		entityStore.save(facility);
-		entityStore.commit();
+		entityStore.create(facility);
 		if(log.isDebugEnabled())log.debug("Created " + facility);
 		return facility;
 	}

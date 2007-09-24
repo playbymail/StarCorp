@@ -56,21 +56,22 @@ public class Jump extends AOrderProcessor {
 				error = new TurnError(TurnError.INVALID_LOCATION);
 			}
 			else {
-				Coordinates3D currentLocation = ship.getSystem().getLocation();
+				StarSystem currentSystem = (StarSystem) entityStore.load(StarSystem.class, ship.getSystemID());
+				Coordinates3D currentLocation = currentSystem.getLocation();
 				Coordinates3D targetLocation = system.getLocation();
 				int distance = targetLocation.getDistance(currentLocation);
 				if(distance > ship.getDesign().getJumpRange()) {
 					error = new TurnError(TurnError.OUT_OF_RANGE);
 				}
 				else {
-					ship.setSystem(system);
+					ship.setSystemID(system.getID());
 					ship.incrementTimeUnitsUsed(TIME_UNITS);
 					OrderReport report = new OrderReport(order);
 					report.add(ship.getName());
 					report.add(ship.getID());
 					report.add(system.getName());
 					report.add(system.getID());
-					report.addScannedEntities(entityStore.listSystemEntities(ship.getSystem(), ship.getLocation()));
+					report.addScannedEntities(entityStore.listSystemEntities(system, ship.getLocation()));
 					order.setReport(report);
 				}
 			}

@@ -259,15 +259,13 @@ public abstract class AFacilityType extends ABaseType {
 		
 		while(n.hasNext()) {
 			AColonists w = (AColonists) n.next();
-			Population c1 = w.getPopulation();
-			Population c2 = requiredWorkers.get(c1.getPopClass());
-			if(c2 != null) {
-				if(c1.getQuantity() <= c2.getQuantity()) {
-					currentTotal += c1.getQuantity();
-				}
-				else {
-					currentTotal += c2.getQuantity();
-				}
+			int qty1 = w.getQuantity();
+			int qty2 = requiredWorkers.get(w.getPopClass()).getQuantity();
+			if(qty1 <= qty2) {
+				currentTotal += qty1;
+			}
+			else {
+				currentTotal += qty2;
 			}
 		}
 		

@@ -4,19 +4,8 @@
         "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
     <class name="starcorp.common.entities.CreditAccount" table="CREDIT_ACCOUNT">
-    	<id name="ID"><generator class="native"/></id>
+    	<id name="ID"><generator class="assigned"/></id>
     	<version name="version"/>
-    	<many-to-one name="accountHolder" lazy="false"/>
     	<property name="credits"/>
-		<set name="transactions" table="ACCOUNT_LEDGER" lazy="false">
-			<key column="ENTITY_ID"/>
-    		<composite-element class="starcorp.common.types.CashTransaction">
-    			<property name="amount" column="ctAmount"/>
-    			<property name="description" column="ctDesc"/>
-    			<property name="year" column="ctYear"/>
-    			<property name="month" column="ctMonth"/>
-    		</composite-element>
-    	</set>
-
     </class>
 </hibernate-mapping>

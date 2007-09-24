@@ -145,15 +145,12 @@ public class Create extends ACommand {
 						}
 					}
 				} else if ("corp".equalsIgnoreCase(function)) {
-					beginTransaction();
 					Corporation corp = new Corporation();
 					int credits = args.getAsInt(1);
 					corp.setFoundedDate(ServerConfiguration.getCurrentDate());
 					corp.setName(args.concat(2));
-					entityStore.save(corp);
-					commit();
+					entityStore.create(corp);
 					entityStore.addCredits(corp, credits, "NPC Setup");
-					commit();
 					out.println("Created " + corp);
 				} else if ("colony".equalsIgnoreCase(function)) {
 					String templateName = args.get(1);
@@ -181,7 +178,6 @@ public class Create extends ACommand {
 					}
 				} else if ("design".equalsIgnoreCase(function)) {
 					int corpId = args.getAsInt(1);
-					beginTransaction();
 					Corporation corp = (Corporation) entityStore.load(
 							Corporation.class, corpId);
 					if (corp != null) {
@@ -195,7 +191,7 @@ public class Create extends ACommand {
 							design.addHulls(args.get(i));
 						}
 						if (design.isValid()) {
-							entityStore.save(design);
+							entityStore.create(design);
 							out.println();
 							out.println("Created " + design);
 						} else {
@@ -206,13 +202,11 @@ public class Create extends ACommand {
 						out.println();
 						out.println("Invalid corporation");
 					}
-					commit();
 				} else if ("ship".equalsIgnoreCase(function)) {
 					int corpId = args.getAsInt(1);
 					int designId = args.getAsInt(2);
 					int colonyId = args.getAsInt(3);
 					String name = args.get(4);
-					beginTransaction();
 					Corporation corp = (Corporation) entityStore.load(
 							Corporation.class, corpId);
 					StarshipDesign design = (StarshipDesign) entityStore.load(
@@ -227,23 +221,22 @@ public class Create extends ACommand {
 						Starship ship = new Starship();
 						ship.setBuiltDate(ServerConfiguration.getCurrentDate());
 						ship.setDesign(design);
-						ship.setLocation(colony.getPlanet().getLocation());
+						Planet planet = ((Planet) entityStore.load(Planet.class, colony.getPlanetID()));
+						ship.setLocation(planet.getLocation());
 						ship.setName(name);
 						ship.setOwner(corp);
-						ship.setPlanet(colony.getPlanet());
-						ship.setSystem(colony.getPlanet().getSystem());
+						ship.setPlanet(planet);
+						ship.setSystemID(planet.getSystemID());
 						ship.setColony(colony);
-						entityStore.save(ship);
+						entityStore.create(ship);
 						out.println();
 						out.println("Created " + ship);
 					}
-					commit();
 				} else if ("facility".equalsIgnoreCase(function)) {
 					int corpId = args.getAsInt(1);
 					int colonyId = args.getAsInt(2);
 					String typeName = args.get(3);
 
-					beginTransaction();
 					Corporation corp = (Corporation) entityStore.load(
 							Corporation.class, corpId);
 					Colony colony = (Colony) entityStore.load(Colony.class,
@@ -261,11 +254,10 @@ public class Create extends ACommand {
 						facility.setOpen(true);
 						facility.setOwner(corp);
 						facility.setTypeClass(type);
-						entityStore.save(facility);
+						entityStore.create(facility);
 						out.println();
 						out.println("Created " + facility);
 					}
-					commit();
 				} else {
 					out.println();
 					out.println("Invalid arguments.");

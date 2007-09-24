@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import starcorp.common.entities.AColonists;
+import starcorp.common.entities.CashTransaction;
 import starcorp.common.entities.ColonistGrant;
 import starcorp.common.entities.Colony;
 import starcorp.common.entities.Corporation;
@@ -29,7 +30,6 @@ import starcorp.common.entities.Unemployed;
 import starcorp.common.entities.Workers;
 import starcorp.common.types.AFacilityType;
 import starcorp.common.types.AItemType;
-import starcorp.common.types.CashTransaction;
 import starcorp.common.types.ConsumerGoods;
 import starcorp.common.types.Population;
 import starcorp.common.types.PopulationClass;
@@ -54,244 +54,152 @@ public class ColonyUpdater extends AServerTask {
 	private static final double HAPPINESS_FOOD = 10.0;
 	private static final double HAPPINESS_INTOXICANT = 15.0;
 	private static final double HAPPINESS_MEDICAL = 10.0;
-	private static final int MAX_BIRTH_PERCENT = 10;
-
-	private static final Random rnd = new Random(System.currentTimeMillis());
 	private static final Log log = LogFactory.getLog(ColonyUpdater.class);
+
+	private static final int MAX_BIRTH_PERCENT = 10;
+	private static final Random rnd = new Random(System.currentTimeMillis());
 	
-	private Colony colony;
-	private Map<AItemType, List<MarketItem>> market = new HashMap<AItemType, List<MarketItem>>();
-	private Map<AFacilityType, Map<Facility, List<Workers>>> services = new HashMap<AFacilityType, Map<Facility, List<Workers>>>();
+	private final Colony colony;
 	private Map<PopulationClass, ColonistGrant> grants = new HashMap<PopulationClass, ColonistGrant>();
-	private List<AColonists> colonists = new ArrayList<AColonists>();
+	private Map<AItemType, List<MarketItem>> market = new HashMap<AItemType, List<MarketItem>>();
+	private final PopulationProcessor processor;
+	private Map<AFacilityType, Map<Facility, List<AColonists>>> services = new HashMap<AFacilityType, Map<Facility, List<AColonists>>>();
 	
-	private PopulationProcessor processor;
-	
-	public ColonyUpdater(Colony colony,
-			Map<AItemType, List<MarketItem>> market,
-			Map<AFacilityType, Map<Facility, List<Workers>>> services,
-			Map<PopulationClass, ColonistGrant> grants,
-			List<AColonists> colonists, PopulationProcessor processor) {
-		super();
+	public ColonyUpdater(PopulationProcessor processor, Colony colony) {
 		this.colony = colony;
-		this.market = market;
-		this.services = services;
-		this.grants = grants;
-		this.colonists = colonists;
 		this.processor = processor;
 	}
-
-	/* (non-Javadoc)
-	 * @see starcorp.server.engine.AServerTask#doJob()
-	 */
-	@Override
-	protected void doJob() throws Exception {
-		int size = colonists.size();
-		log.info(this + ": " + size + " colonists to update for " + colony);
-		int i = 1;
-		for(Object o : colonists) {
-			if(log.isDebugEnabled())
-				log.debug(this + ": " + i + " of " + size + " processing.");
-			AColonists pop = (AColonists) o;
-			if (pop instanceof Workers) {
-				Workers workers = (Workers) pop;
-				hireWorkers(workers);
-				payWorkers(workers);
-			}
-			payGrants(pop);
-			doConsumerNeeds(pop);
-			doServiceNeeds(pop);
-			if (pop instanceof Workers) {
-				Workers workers = (Workers) pop;
-				quitWorkers(workers);
-			}
-			doBirths(pop);
-			doDeaths(pop);
+	
+	private void doBirths(AColonists colonist) {
+		double birthRate = rnd.nextInt(MAX_BIRTH_PERCENT + 1) / 100.0;
+		int qty = colonist.getQuantity();
+		int births = (int) (qty * birthRate);
+		if (births > 0) {
+			Unemployed unemployed = getUnemployed(colonist.getPopClass());
+			unemployed.addPopulation(births);
+			entityStore.update(unemployed);
+			if (log.isDebugEnabled())
+				log.debug(this + ": " + births + " of " + colonist.getPopClass() + " born.");
 		}
-		processor.done(this);
+
 	}
 	
-	private void payGrants(AColonists colonists) {
-		ColonistGrant grant = grants.get(colonists.getPopClass());
-		if (grant != null) {
-			Corporation govt = grant.getColony().getGovernment();
-			int cash = grant.getCredits() * colonists.getQuantity();
-			int avail = entityStore.getCredits(govt);
-			if (cash < avail) {
-				cash = avail;
-			}
-			Object[] args = { colonists.getPopClass().getName(),
-					String.valueOf(colonists.getQuantity()) };
-			String desc = CashTransaction.getDescription(
-					CashTransaction.GRANT_PAID, args);
-			entityStore.transferCredits(govt, colonists, cash, desc);
-			if (log.isDebugEnabled())
-				log.debug(this + ": " + colonists + " paid grant of " + cash);
+	private void doBirths(List<AColonists> colonists) {
+		for(AColonists col : colonists) {
+			doBirths(col);
 		}
 	}
 	
-	private Unemployed getUnemployed(PopulationClass popClass) {
-		Unemployed unemployed = entityStore.getUnemployed(colony, popClass);
-		if(unemployed == null) {
-			unemployed = new Unemployed();
-			unemployed.setPopulation(new Population(popClass));
-			unemployed.setColony(colony);
-			entityStore.save(unemployed);
-		}
-		return unemployed;
-	}
-
-	private void payWorkers(Workers workers) {
-		beginTransaction();
-		Corporation employer = workers.getFacility().getOwner();
-		int salaryAvail = entityStore.getCredits(employer) / workers.getSalary();
-		int qty = workers.getPopulation().getQuantity();
-		if (salaryAvail < qty) {
-			int quit = qty - salaryAvail;
-			int redundancy = (quit * workers.getSalary());
-			Unemployed unemployed = getUnemployed(workers.getPopClass());
-			unemployed.addPopulation(quit);
-			workers.removePopulation(quit);
-			entityStore.save(unemployed);
-			entityStore.save(workers);
-			commit();
-			if (log.isDebugEnabled())
-				log.debug(this + ": " + workers.getFacility() + " had " + quit + " x "
-						+ workers.getPopClass()
-						+ " quitters due to unpaid salary.");
-			Object[] args = { workers.getPopulation().getPopClass().getName(),
-					String.valueOf(quit) };
-			String desc = CashTransaction.getDescription(
-					CashTransaction.REDUNDANCY_PAY, args);
-			entityStore.transferCredits(employer, unemployed, redundancy, desc);
-			qty -= quit;
-		}
-		int salaryPaid = (qty * workers.getSalary());
-		Object[] args = { workers.getPopulation().getPopClass().getName(),
-				String.valueOf(qty) };
-		String desc = CashTransaction.getDescription(
-				CashTransaction.SALARY_PAID, args);
-		entityStore.transferCredits(employer, workers, salaryPaid, desc);
-		if (log.isDebugEnabled())
-			log.debug(this + ": " + workers + " paid " + salaryPaid);
-	}
-
-	private void quitWorkers(Workers workers) {
-		beginTransaction();
-		Facility facility = workers.getFacility();
-		double quitChance = 100.0 - workers.getHappiness();
-		if(quitChance < 0.0)
-			quitChance = 0.0;
-		int total = workers.getPopulation().getQuantity();
-		int quitters = (int) (total * (quitChance / 100.0));
-		if (log.isDebugEnabled())
-			log.debug(this + ": " + facility + " had " + quitters + " x "
-					+ workers.getPopClass() + " quitters. Chance: "
-					+ quitChance);
-		if (quitters > 0) {
-			Unemployed unemployed = getUnemployed(workers.getPopClass());
-			int cashPerPerson = entityStore.getCredits(workers) / workers.getQuantity();
-			int cash = quitters * cashPerPerson;
-			workers.removePopulation(quitters);
-			unemployed.addPopulation(quitters);
-			entityStore.save(workers);
-			entityStore.save(unemployed);
-			commit();
-			if (cash > 0) {
-				entityStore.transferCredits(workers, unemployed, cash, "");
-			}
-		}
-	}
-
-	private void hireWorkers(Workers workers) {
-		beginTransaction();
-		Facility facility = workers.getFacility();
-		PopulationClass popClass = workers.getPopClass();
-		Population required = facility.getTypeClass().getWorkerRequirement(
-				popClass);
-		if (workers.getPopulation().getQuantity() < required
-						.getQuantity()) {
-			if (log.isDebugEnabled())
-				log.debug(this + ": Hiring workers for " + facility + " of " + popClass);
-			// more needed so hire any unemployed
-			Unemployed unemployed = getUnemployed(workers.getPopClass());
-			int qty = required.getQuantity()
-					- workers.getPopulation().getQuantity();
-			if (qty < unemployed.getQuantity()) {
-				qty = unemployed.getQuantity();
-			}
-			if (qty > 0) {
-				int cashPerPerson = entityStore.getCredits(unemployed) / unemployed.getQuantity();
-				int cash = qty * cashPerPerson;
-				workers.addPopulation(qty);
-				unemployed.removePopulation(qty);
-				entityStore.save(workers);
-				entityStore.save(unemployed);
-				commit();
-				entityStore.transferCredits(unemployed, workers, cash, "");
-				if (log.isDebugEnabled())
-					log.debug(this + ": " + facility + " hired " + qty + " of "
-							+ popClass);
-			
-			}
+	private void doNeeds() {
+		List<PopulationClass> types = PopulationClass.listTypes();
+		for(PopulationClass type : types) {
+			doConsumerNeeds(type);
+			doServiceNeeds(type);
 		}
 	}
 	
-	private Map<Facility, List<Workers>> getFacilities(List<AFacilityType> types) {
-		HashMap<Facility,List<Workers>> map = new HashMap<Facility, List<Workers>>();
-		for(AFacilityType type : types) {
-			Map<Facility, List<Workers>> m = services.get(type);
-			if(m != null)
-				map.putAll(m);
-		}
-		return map;
-	}
-
-	private void doServiceNeeds(AColonists colonists,
-			List<AFacilityType> types, double happinessRating) {
-		beginTransaction();
-		Facility.ServiceResult result = Util.service(ServerConfiguration
-				.getCurrentDate(), getFacilities(types), colonists.getQuantity(),
+	private void doConsumerNeeds(AColonists colonists, List<AItemType> types,
+			double happinessRating) {
+		int qty = colonists.getQuantity();
+		MarketItem.BuyResult result = Util.buy(ServerConfiguration
+				.getCurrentDate(), getMarketItems(types), qty, 
 				entityStore.getCredits(colonists),entityStore);
-		commit();
-		beginTransaction();
-		double ratio = (double) colonists.getQuantity()
-				/ (double) result.quantityServiced;
+		double ratio = qty > 0 ?
+				(double) result.quantityBought / (double) qty
+				: 0.0;
 		double happiness = ratio * happinessRating;
 		colonists.addHappiness(happiness);
-		entityStore.save(colonists);
-		commit();
+		entityStore.update(colonists);
+		entityStore.removeCredits(colonists, result.totalPrice, "");
+		if (log.isDebugEnabled())
+			log.debug(this + ": " + colonists + " bought " + result.quantityBought
+					+ " consumer goods");
+	}
+	
+	private void doConsumerNeeds(List<AColonists> colonists, List<AItemType> types,double happiness) {
+		if(log.isDebugEnabled())
+			log.debug("Doing consumer needs for " + colonists.size() + " using " + types + " giving " + happiness + " happiness");
+		for(AColonists col : colonists) {
+			doConsumerNeeds(col,types,happiness);
+		}
+	}
+
+	private void doConsumerNeeds(PopulationClass popClass) {
+		int quality = popClass.getConsumerQualityRequired();
+		List<AItemType> foodTypes = ConsumerGoods.listFood(quality);
+		doConsumerNeeds(entityStore.listColonists(colony, popClass), foodTypes, HAPPINESS_FOOD);
+		List<AItemType> drinkTypes = ConsumerGoods.listDrink(quality);
+		doConsumerNeeds(entityStore.listColonists(colony, popClass), drinkTypes, HAPPINESS_DRINK);
+		List<AItemType> intoxicantTypes = ConsumerGoods.listIntoxicant(quality);
+		doConsumerNeeds(entityStore.listColonists(colony, popClass), intoxicantTypes, HAPPINESS_INTOXICANT);
+		List<AItemType> clothesTypes = ConsumerGoods.listClothes(quality);
+		doConsumerNeeds(entityStore.listColonists(colony, popClass), clothesTypes, HAPPINESS_CLOTHES);
+	}
+	
+	private void doDeaths(AColonists colonist) {
+		double deathRate = colonist.getColony().getHazardLevel();
+		int qty = colonist.getQuantity();
+		int deaths = (int) (qty * deathRate);
+		if (deaths > 0) {
+			colonist.removePopulation(deaths);
+			entityStore.update(colonist);
+			if (log.isDebugEnabled())
+				log.debug(this + ": " + deaths + " of " + colonist.getPopClass() + " died.");
+		}
+	}
+
+	private void doDeaths(List<AColonists> colonists) {
+		for(AColonists col : colonists) {
+			doDeaths(col);
+		}
+	}
+
+	private void doServiceNeeds(PopulationClass popClass) {
+		int quality = popClass.getServiceQualityRequired();
+		List<AFacilityType> medicalTypes = ServiceFacility.listMedical(quality);
+		doServiceNeeds(entityStore.listColonists(colony, popClass), medicalTypes, HAPPINESS_MEDICAL);
+		List<AFacilityType> fitnessTypes = ServiceFacility.listFitness(quality);
+		doServiceNeeds(entityStore.listColonists(colony, popClass), fitnessTypes, HAPPINESS_FITNESS);
+		List<AFacilityType> entTypes = ServiceFacility
+				.listEntertainment(quality);
+		doServiceNeeds(entityStore.listColonists(colony, popClass), entTypes, HAPPINESS_ENTERTAINMENT);
+		List<AFacilityType> eduTypes = ServiceFacility.listEducation(quality);
+		doServiceNeeds(entityStore.listColonists(colony, popClass), eduTypes, HAPPINESS_EDUCATION);
+	}
+	private void doServiceNeeds(AColonists colonists,
+			List<AFacilityType> types, double happinessRating) {
+		int qty = colonists.getQuantity();
+		Facility.ServiceResult result = Util.service(ServerConfiguration
+				.getCurrentDate(), getFacilities(types), qty,
+				entityStore.getCredits(colonists),entityStore);
+		double ratio = qty > 0 ? 
+					(double) result.quantityServiced / (double) qty 
+					: 0.0;
+		double happiness = ratio * happinessRating;
+		colonists.addHappiness(happiness);
+		entityStore.update(colonists);
 		entityStore.removeCredits(colonists, result.totalCost, "");
 		if (log.isDebugEnabled())
 			log.debug(this + ": " + colonists + " used " + result.quantityServiced
 					+ " services");
 	}
-
-	private void doServiceNeeds(AColonists colonists) {
-		int quality = colonists.getPopClass().getServiceQualityRequired();
-		List<AFacilityType> medicalTypes = ServiceFacility.listMedical(quality);
-		doServiceNeeds(colonists, medicalTypes, HAPPINESS_MEDICAL);
-		List<AFacilityType> fitnessTypes = ServiceFacility.listFitness(quality);
-		doServiceNeeds(colonists, fitnessTypes, HAPPINESS_FITNESS);
-		List<AFacilityType> entTypes = ServiceFacility
-				.listEntertainment(quality);
-		doServiceNeeds(colonists, entTypes, HAPPINESS_ENTERTAINMENT);
-		List<AFacilityType> eduTypes = ServiceFacility.listEducation(quality);
-		doServiceNeeds(colonists, eduTypes, HAPPINESS_EDUCATION);
+	
+	private void doServiceNeeds(List<AColonists> colonists, List<AFacilityType> types,double happiness) {
+		if(log.isDebugEnabled())
+			log.debug("Doing service needs for " + colonists.size() + " using " + types + " giving " + happiness + " happiness");
+		for(AColonists col : colonists) {
+			doServiceNeeds(col,types,happiness);
+		}
 	}
 
-	private void doDeaths(AColonists colonist) {
-		beginTransaction();
-		double deathRate = colonist.getColony().getHazardLevel();
-		int deaths = (int) (colonist.getQuantity() * deathRate);
-		if (deaths > 0) {
-			colonist.removePopulation(deaths);
-			entityStore.save(colonist);
-			if (log.isDebugEnabled())
-				log.debug(this + ": " + deaths + " of " + colonist.getPopClass() + " died.");
+	private Map<Facility, List<AColonists>> getFacilities(List<AFacilityType> types) {
+		HashMap<Facility,List<AColonists>> map = new HashMap<Facility, List<AColonists>>();
+		for(AFacilityType type : types) {
+			Map<Facility, List<AColonists>> m = services.get(type);
+			if(m != null)
+				map.putAll(m);
 		}
-		commit();
-
+		return map;
 	}
 	
 	private List<MarketItem> getMarketItems(List<AItemType> types) {
@@ -304,51 +212,198 @@ public class ColonyUpdater extends AServerTask {
 		return list;
 	}
 
-	private void doConsumerNeeds(AColonists colonists, List<AItemType> types,
-			double happinessRating) {
-		beginTransaction();
-		MarketItem.BuyResult result = Util.buy(ServerConfiguration
-				.getCurrentDate(), getMarketItems(types), colonists.getQuantity(), 
-				entityStore.getCredits(colonists),entityStore);
-		commit();
-		beginTransaction();
-		double ratio = (double) colonists.getQuantity()
-				/ (double) result.quantityBought;
-		double happiness = ratio * happinessRating;
-		colonists.addHappiness(happiness);
-		entityStore.save(colonists);
-		commit();
-		entityStore.removeCredits(colonists, result.totalPrice, "");
-		if (log.isDebugEnabled())
-			log.debug(this + ": " + colonists + " bought " + result.quantityBought
-					+ " consumer goods");
-	}
-
-	private void doConsumerNeeds(AColonists colonists) {
-		int quality = colonists.getPopClass().getConsumerQualityRequired();
-		List<AItemType> foodTypes = ConsumerGoods.listFood(quality);
-		doConsumerNeeds(colonists, foodTypes, HAPPINESS_FOOD);
-		List<AItemType> drinkTypes = ConsumerGoods.listDrink(quality);
-		doConsumerNeeds(colonists, drinkTypes, HAPPINESS_DRINK);
-		List<AItemType> intoxicantTypes = ConsumerGoods.listIntoxicant(quality);
-		doConsumerNeeds(colonists, intoxicantTypes, HAPPINESS_INTOXICANT);
-		List<AItemType> clothesTypes = ConsumerGoods.listClothes(quality);
-		doConsumerNeeds(colonists, clothesTypes, HAPPINESS_CLOTHES);
-	}
-
-	private void doBirths(AColonists colonist) {
-		beginTransaction();
-		double birthRate = rnd.nextInt(MAX_BIRTH_PERCENT + 1) / 100.0;
-		int births = (int) (colonist.getQuantity() * birthRate);
-		if (births > 0) {
-			Unemployed unemployed = getUnemployed(colonist.getPopClass());
-			unemployed.addPopulation(births);
-			entityStore.save(unemployed);
-			if (log.isDebugEnabled())
-				log.debug(this + ": " + births + " of " + colonist.getPopClass() + " born.");
+	private Unemployed getUnemployed(PopulationClass popClass) {
+		Unemployed unemployed = entityStore.getUnemployed(colony, popClass);
+		if(unemployed == null) {
+			unemployed = new Unemployed();
+			unemployed.setPopClass(popClass);
+			unemployed.setColony(colony);
+			entityStore.create(unemployed);
 		}
-		commit();
+		return unemployed;
+	}
+	
+	private void hireWorkers(List<AColonists> workers) {
+		for(AColonists col : workers) {
+			hireWorkers((Workers)col);
+		}
+	}
 
+	private void hireWorkers(Workers workers) {
+		Facility facility = workers.getFacility();
+		PopulationClass popClass = workers.getPopClass();
+		Population required = facility.getTypeClass().getWorkerRequirement(
+				popClass);
+		int workerQuantity = workers.getQuantity();
+		if (workerQuantity < required
+						.getQuantity()) {
+			if (log.isDebugEnabled())
+				log.debug(this + ": Hiring workers for " + facility + " of " + popClass);
+			// more needed so hire any unemployed
+			Unemployed unemployed = getUnemployed(workers.getPopClass());
+			int qty = required.getQuantity()
+					- workerQuantity;
+			if (qty < unemployed.getQuantity()) {
+				qty = unemployed.getQuantity();
+			}
+			if (qty > 0) {
+				int colonistCount = unemployed.getQuantity();
+				long cashPerPerson = colonistCount == 0 ? 0 : entityStore.getCredits(unemployed) / colonistCount;
+				long cash = qty * cashPerPerson;
+				workers.addPopulation(qty);
+				unemployed.removePopulation(qty);
+				entityStore.update(workers);
+				entityStore.update(unemployed);
+				entityStore.transferCredits(unemployed, workers, cash, "");
+				if (log.isDebugEnabled())
+					log.debug(this + ": " + facility + " hired " + qty + " of "
+							+ popClass);
+			
+			}
+		}
+	}
+	
+	private void payGrants(AColonists colonists) {
+		ColonistGrant grant = grants.get(colonists.getPopClass());
+		if (grant != null) {
+			Corporation govt = grant.getColony().getGovernment();
+			int qty = colonists.getQuantity();
+			int cash = grant.getCredits() * qty;
+			long avail = entityStore.getCredits(govt);
+			if (cash < avail) {
+				cash = (int) avail;
+			}
+			Object[] args = { colonists.getPopClass().getName(),
+					String.valueOf(qty) };
+			String desc = CashTransaction.getDescription(
+					CashTransaction.GRANT_PAID, args);
+			entityStore.transferCredits(govt, colonists, cash, desc);
+			if (log.isDebugEnabled())
+				log.debug(this + ": GRANTS : " + colonists + " paid grant of " + cash);
+		}
+	}
+
+	private void payGrants(List<AColonists> colonists) {
+		for(AColonists col : colonists) {
+			payGrants(col);
+		}
+	}
+
+	private void payWorkers(List<AColonists> workers) {
+		for(AColonists col : workers) {
+			payWorkers((Workers)col);
+		}
+	}
+	
+	private void payWorkers(Workers workers) {
+		if(workers.getSalary() == 0)
+			return;
+		Corporation employer = workers.getFacility().getOwner();
+		long credits = entityStore.getCredits(employer);
+		long salaryAvail = credits / workers.getSalary();
+		int qty = workers.getQuantity();
+//		if(log.isDebugEnabled())
+//			log.debug(employer + " has " + credits + " credits. Can pay " + salaryAvail + " of " + qty +" workers (" + workers.getSalary() + "ea.)");
+		if (salaryAvail < qty) {
+			int quit = (int) (qty - salaryAvail);
+			Unemployed unemployed = getUnemployed(workers.getPopClass());
+			unemployed.addPopulation(quit);
+			workers.removePopulation(quit);
+			entityStore.update(unemployed);
+			entityStore.update(workers);
+			if (log.isDebugEnabled())
+				log.debug(this + ": PAYING : " + workers.getFacility() + " had " + quit + " x "
+						+ workers.getPopClass()
+						+ " quitters due to unpaid salary.");
+			qty -= quit;
+		}
+		if(qty > 0) {
+			int salaryPaid = (qty * workers.getSalary());
+			Object[] args = { workers.getPopClass().getName(),
+					String.valueOf(qty) };
+			String desc = CashTransaction.getDescription(
+					CashTransaction.SALARY_PAID, args);
+			entityStore.transferCredits(employer, workers, salaryPaid, desc);
+			if (log.isDebugEnabled())
+				log.debug(this + ": PAYING : " + workers + " paid " + salaryPaid);
+		}
+	}
+	
+	private void quitWorkers(List<AColonists> workers) {
+		for(AColonists col : workers) {
+			quitWorkers((Workers)col);
+		}
+	}
+
+	private void quitWorkers(Workers workers) {
+		Facility facility = workers.getFacility();
+		double quitChance = 100.0 - workers.getHappiness();
+		if(quitChance < 0.0)
+			quitChance = 0.0;
+		int total = workers.getQuantity();
+		int quitters = (int) (total * (quitChance / 100.0));
+		if (log.isDebugEnabled())
+			log.debug(this + ": " + facility + " had " + quitters + " x "
+					+ workers.getPopClass() + " quitters. Chance: "
+					+ quitChance);
+		if (quitters > 0) {
+			Unemployed unemployed = getUnemployed(workers.getPopClass());
+			int colonistCount = unemployed.getQuantity();
+			long cashPerPerson = colonistCount == 0 ? 0 : entityStore.getCredits(workers) / colonistCount;
+			long cash = quitters * cashPerPerson;
+			workers.removePopulation(quitters);
+			unemployed.addPopulation(quitters);
+			entityStore.update(workers);
+			entityStore.update(unemployed);
+			if (cash > 0) {
+				entityStore.transferCredits(workers, unemployed, cash, "");
+			}
+		}
+	}
+	/* (non-Javadoc)
+	 * @see starcorp.server.engine.AServerTask#doJob()
+	 */
+	@Override
+	protected void doJob() throws Exception {
+		market = 
+			entityStore.mapMarketByItemType(colony, AItemType.listTypes(ConsumerGoods.class));
+		services =
+			entityStore.mapFacilitiesWithWorkersByType(colony, AFacilityType.listTypes(ServiceFacility.class));
+			new HashMap<AFacilityType, Map<Facility, List<AColonists>>>();
+		grants =
+			entityStore.mapColonistGrantsByPopClass(colony, true);
+		List<AColonists> colonists = entityStore.listWorkers(colony);
+		int size = colonists.size();
+		log.info(this + ": HIRING : " + size + " workers to check for hiring @ " + colony);
+		hireWorkers(colonists);
+		
+		colonists = entityStore.listWorkers(colony);
+		size = colonists.size();
+		log.info(this + ": PAYING : " + size + " workers to pay @ " + colony);
+		payWorkers(colonists);
+		
+		colonists = entityStore.listColonists(colony);
+		size = colonists.size();
+		log.info(this + ": GRANTS : " + size + " colonists to pay grants @ " + colony);
+		payGrants(colonists);
+		
+		doNeeds();
+		
+		colonists = entityStore.listWorkers(colony);
+		size = colonists.size();
+		log.info(this + ": QUIT : " + size + " workers to check for quitting @ " + colony);
+		quitWorkers(colonists);
+		
+		colonists = entityStore.listColonists(colony);
+		size = colonists.size();
+		log.info(this + ": BIRTHS : " + size + " colonists to check for births @ " + colony);
+		doBirths(colonists);
+
+		colonists = entityStore.listColonists(colony);
+		size = colonists.size();
+		log.info(this + ": DEATHS : " + size + " colonists to check for deaths @ " + colony);
+		doDeaths(colonists);
+		processor.done(this);
 	}
 
 	/* (non-Javadoc)
@@ -357,13 +412,6 @@ public class ColonyUpdater extends AServerTask {
 	@Override
 	protected Log getLog() {
 		return log;
-	}
-
-	@Override
-	protected void onException(Exception e) {
-		super.onException(e);
-		// retry
-		engine.schedule(this);
 	}
 
 }

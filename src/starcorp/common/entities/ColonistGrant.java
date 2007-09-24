@@ -10,9 +10,9 @@
  */
 package starcorp.common.entities;
 
+
 import org.dom4j.Element;
 
-import starcorp.common.types.GalacticDate;
 import starcorp.common.types.PopulationClass;
 
 /**
@@ -21,20 +21,9 @@ import starcorp.common.types.PopulationClass;
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 16 Sep 2007
  */
-public class ColonistGrant extends ABaseEntity {
-	// TODO remove from ABaseEntity hierarchy
-	private Colony colony;
-	private PopulationClass popClass;
-	private int credits;
-	private boolean available;
-	private GalacticDate issuedDate;
-	
-	public Colony getColony() {
-		return colony;
-	}
-	public void setColony(Colony colony) {
-		this.colony = colony;
-	}
+public class ColonistGrant extends AGovernmentLaw {
+	PopulationClass popClass;
+	int credits;
 	public String getPopClassType() {
 		return popClass == null ? null : popClass.getKey();
 	}
@@ -55,40 +44,24 @@ public class ColonistGrant extends ABaseEntity {
 	public void setCredits(int credit) {
 		this.credits = credit;
 	}
-	public boolean isAvailable() {
-		return available;
-	}
-	public void setAvailable(boolean available) {
-		this.available = available;
-	}
-	public GalacticDate getIssuedDate() {
-		return issuedDate;
-	}
-	public void setIssuedDate(GalacticDate issuedDate) {
-		this.issuedDate = issuedDate;
-	}
+
 	@Override
 	public void readXML(Element e) {
 		super.readXML(e);
-		this.colony = new Colony();
-		colony.readXML(e.element("colony").element("entity"));
 		this.popClass = PopulationClass.getType(e.attributeValue("popClass"));
 		this.credits = Integer.parseInt(e.attributeValue("credits","0"));
-		this.available = Boolean.parseBoolean(e.attributeValue("available","false"));
-		this.issuedDate = new GalacticDate(e.element("issued").element("date"));
 	}
+
 	@Override
 	public Element toBasicXML(Element parent) {
 		Element e = super.toBasicXML(parent);
-		colony.toBasicXML(e.addElement("colony"));
 		e.addAttribute("popClass", popClass.getKey());
 		e.addAttribute("credits",String.valueOf(credits));
-		e.addAttribute("available",String.valueOf(available));
-		issuedDate.toXML(e.addElement("issued"));
 		return e;
 	}
+
 	@Override
 	public String toString() {
-		return popClass.getKey() + " \u20a1 " + credits + " " + super.toString() + " @ " + colony.getName() + " (" + colony.getID() + ")"; 
+		return popClass.getKey() + " \u20a1 " + credits + " " + super.toString(); 
 	}
 }

@@ -18,7 +18,6 @@ import starcorp.common.turns.OrderReport;
 import starcorp.common.turns.TurnError;
 import starcorp.common.turns.TurnOrder;
 import starcorp.common.types.OrderType;
-import starcorp.common.types.Population;
 import starcorp.common.types.PopulationClass;
 import starcorp.server.turns.AOrderProcessor;
 
@@ -54,9 +53,9 @@ public class SetSalary extends AOrderProcessor {
 				workers.setColony(colony);
 				workers.setFacility(facility);
 				workers.setHappiness(0.0);
-				workers.setPopulation(new Population(popClass));
+				workers.setPopClass(popClass);
 				workers.setSalary(0);
-				entityStore.save(workers);
+				entityStore.create(workers);
 			}
 			
 			if(salary < workers.getSalary()) {
@@ -65,14 +64,15 @@ public class SetSalary extends AOrderProcessor {
 					unemployed = new Unemployed();
 					unemployed.setColony(colony);
 					unemployed.setHappiness(0.0);
-					unemployed.setPopulation(new Population(popClass));
-					entityStore.save(unemployed);
+					unemployed.setPopClass(popClass);
+					entityStore.create(unemployed);
 				}
-				int credits = entityStore.getCredits(workers);
-				unemployed.addPopulation(workers.getQuantity());
-				workers.getPopulation().setQuantity(0);
-				entityStore.save(unemployed);
-				entityStore.save(workers);
+				long credits = entityStore.getCredits(workers);
+				int qty = workers.getQuantity();
+				unemployed.addPopulation(qty);
+				workers.setQuantity(0);
+				entityStore.update(workers);
+				entityStore.update(unemployed);
 				entityStore.transferCredits(workers, unemployed, credits, "");
 			}
 			

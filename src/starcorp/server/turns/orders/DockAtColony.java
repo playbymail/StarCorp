@@ -50,10 +50,11 @@ public class DockAtColony extends AOrderProcessor {
 		}
 		else {
 			Planet planet = ship.getPlanet();
+			Planet colonyPlanet = ((Planet) entityStore.load(Planet.class, colony.getPlanetID()));
 			if(planet == null) {
 				error = new TurnError(TurnError.INVALID_LOCATION);
 			}
-			else if(!colony.getPlanet().equals(planet)) {
+			else if(!colonyPlanet.equals(planet)) {
 				error = new TurnError(TurnError.INVALID_LOCATION);
 			}
 			else if(planet.getGravityRating() > ship.getDesign().getMaxDockGravity()){

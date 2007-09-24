@@ -24,11 +24,7 @@ import starcorp.common.types.Items;
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 16 Sep 2007
  */
-public class MarketItem extends ABaseEntity {
-	// TODO remove from ABaseEntity hierarchy
-	private Colony colony;
-	private Corporation seller;
-	private Items item;
+public class MarketItem extends ColonyItem {
 	private int costPerItem;
 	private GalacticDate issuedDate;
 	private GalacticDate soldDate;
@@ -39,23 +35,11 @@ public class MarketItem extends ABaseEntity {
 		public List<Items> bought = new ArrayList<Items>();
 	}
 	
-	public Colony getColony() {
-		return colony;
-	}
-	public void setColony(Colony colony) {
-		this.colony = colony;
-	}
 	public Corporation getSeller() {
-		return seller;
+		return getOwner();
 	}
 	public void setSeller(Corporation seller) {
-		this.seller = seller;
-	}
-	public Items getItem() {
-		return item;
-	}
-	public void setItem(Items item) {
-		this.item = item;
+		setOwner(seller);
 	}
 	public int getCostPerItem() {
 		return costPerItem;
@@ -79,11 +63,6 @@ public class MarketItem extends ABaseEntity {
 	@Override
 	public void readXML(Element e) {
 		super.readXML(e);
-		this.seller = new Corporation();
-		this.seller.readXML(e.element("seller").element("entity"));
-		this.colony = new Colony();
-		this.colony.readXML(e.element("colony").element("entity"));
-		this.item = new Items(e);
 		this.costPerItem = Integer.parseInt(e.attributeValue("price","0"));
 		this.issuedDate = new GalacticDate(e.element("issued").element("date"));
 		this.soldDate = new GalacticDate(e.element("sold").element("date"));
@@ -92,9 +71,6 @@ public class MarketItem extends ABaseEntity {
 	@Override
 	public Element toBasicXML(Element parent) {
 		Element e = super.toBasicXML(parent);
-		seller.toBasicXML(e.addElement("seller"));
-		colony.toBasicXML(e.addElement("colony"));
-		item.toXML(e);
 		e.addAttribute("price",String.valueOf(costPerItem));
 		issuedDate.toXML(e.addElement("issued"));
 		soldDate.toXML(e.addElement("sold"));
@@ -102,7 +78,7 @@ public class MarketItem extends ABaseEntity {
 	}
 	@Override
 	public String toString() {
-		return item + " \u20a1 " + costPerItem + "ea. " + super.toString() + " @ " + colony.getName() + " (" + colony.getID() + ")";
+		return "\u20a1 " + costPerItem + "ea. " + super.toString();
 	}
 	
 }

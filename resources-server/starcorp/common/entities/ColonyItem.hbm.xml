@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="starcorp.common.entities.ColonyItem" table="COLONY_ITEMS">
+    	<id name="ID"><generator class="native"/></id>
+    	<version name="version"/>
+   		<many-to-one name="owner" lazy="false"/>
+   		<many-to-one name="colony" lazy="false"/>
+   		<component name="item">
+   			<property name="type" column="itemType"/>
+   			<property name="quantity"/>
+   		</component>
+
+    	<joined-subclass name="starcorp.common.entities.MarketItem" table="MARKET_ITEMS">
+    		<key column="ITEM_ID"/>
+    		<many-to-one name="seller" lazy="false"/>
+    		<property name="costPerItem"/>
+    		<component name="issuedDate">
+    			<property name="year" column="issuedYear"/>
+    			<property name="month" column="issuedMonth"/>
+    		</component>
+    		<component name="soldDate">
+    			<property name="year" column="soldYear"/>
+    			<property name="month" column="soldMonth"/>
+    		</component>
+    	</joined-subclass> <!-- MarketItem -->
+    	
+    </class> <!-- ColonyItem -->
+</hibernate-mapping>

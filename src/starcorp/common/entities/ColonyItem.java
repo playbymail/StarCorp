@@ -23,8 +23,7 @@ import starcorp.common.types.Items;
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 16 Sep 2007
  */
-public class ColonyItem extends ABaseEntity {
-	// TODO remove from ABaseEntity hierarchy
+public class ColonyItem {
 	public static int count(List<?> items) {
 		int count = 0;
 		for(Object o : items) {
@@ -47,6 +46,8 @@ public class ColonyItem extends ABaseEntity {
 		return used;
 	}
 	
+	private long ID;
+	private int version;
 	private Corporation owner;
 	private Colony colony;
 	private Items item;
@@ -88,9 +89,8 @@ public class ColonyItem extends ABaseEntity {
 		this.item = item;
 	}
 
-	@Override
 	public void readXML(Element e) {
-		super.readXML(e);
+		this.ID = Integer.parseInt(e.attributeValue("ID","0"));
 		this.owner = new Corporation();
 		this.owner.readXML(e.element("owner").element("entity"));
 		this.colony = new Colony();
@@ -98,17 +98,34 @@ public class ColonyItem extends ABaseEntity {
 		this.item = new Items(e);
 	}
 
-	@Override
 	public Element toBasicXML(Element parent) {
-		Element e = super.toBasicXML(parent);
-		owner.toBasicXML(e.addElement("owner"));
-		colony.toBasicXML(e.addElement("colony"));
-		item.toXML(e);
-		return e;
+		Element root = parent.addElement("entity");
+		root.addAttribute("ID", String.valueOf(ID));
+		root.addAttribute("class", getClass().getSimpleName());
+		owner.toBasicXML(root.addElement("owner"));
+		colony.toBasicXML(root.addElement("colony"));
+		item.toXML(root);
+		return root;
 	}
 
 	@Override
 	public String toString() {
 		return item + " for " + owner.getName() +" (" + owner.getID() + ") " + super.toString() + " @ " + colony.getName() + " (" + colony.getID() + ")";
+	}
+
+	public long getID() {
+		return ID;
+	}
+
+	public void setID(long id) {
+		ID = id;
+	}
+
+	public int getVersion() {
+		return version;
+	}
+
+	public void setVersion(int version) {
+		this.version = version;
 	}
 }

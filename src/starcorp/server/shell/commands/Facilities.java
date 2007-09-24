@@ -59,7 +59,6 @@ public class Facilities extends ACommand {
 				return log;
 			}
 			protected void doJob() throws Exception {
-				beginTransaction();
 				out.println();
 				out.println("List of facilities:");
 				List<AFacilityType> types = AFacilityType.listTypes();
@@ -68,7 +67,6 @@ public class Facilities extends ACommand {
 				}
 				out.print(Shell.PROMPT);
 				out.flush();
-				commit();
 			}
 		};
 	}

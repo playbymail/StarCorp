@@ -21,8 +21,9 @@ import starcorp.common.types.Coordinates2D;
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 15 Sep 2007
  */
-public class ResourceDeposit extends ABaseEntity {
-	// TODO remove from ABaseEntity hierarchy
+public class ResourceDeposit {
+	private long ID;
+	private int version;
 	private StarSystemEntity systemEntity;
 	private Coordinates2D location;
 	private AItemType type;
@@ -95,8 +96,8 @@ public class ResourceDeposit extends ABaseEntity {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + yield;
-		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		result = prime * result + (int) (ID ^ (ID >>> 32));
+		result = prime * result + version;
 		return result;
 	}
 
@@ -109,12 +110,9 @@ public class ResourceDeposit extends ABaseEntity {
 		if (getClass() != obj.getClass())
 			return false;
 		final ResourceDeposit other = (ResourceDeposit) obj;
-		if (yield != other.yield)
+		if (ID != other.ID)
 			return false;
-		if (type == null) {
-			if (other.type != null)
-				return false;
-		} else if (!type.equals(other.type))
+		if (version != other.version)
 			return false;
 		return true;
 	}
@@ -147,9 +145,8 @@ public class ResourceDeposit extends ABaseEntity {
 		this.type = type;
 	}
 
-	@Override
 	public void readXML(Element e) {
-		super.readXML(e);
+		this.ID = Integer.parseInt(e.attributeValue("ID","0"));
 		this.systemEntity = (StarSystemEntity) ABaseEntity.fromXML(e.element("entity"));
 		this.location = new Coordinates2D(e);
 		this.type = AItemType.getType(e.attributeValue("type"));
@@ -157,19 +154,36 @@ public class ResourceDeposit extends ABaseEntity {
 		this.yield = Integer.parseInt(e.attributeValue("yield","0"));
 	}
 
-	@Override
 	public Element toBasicXML(Element parent) {
-		Element e = super.toBasicXML(parent);
-		systemEntity.toBasicXML(e);
-		location.toXML(e);
-		e.addAttribute("type", type.getKey());
-		e.addAttribute("total", String.valueOf(totalQuantity));
-		e.addAttribute("yield", String.valueOf(yield));
-		return e;
+		Element root = parent.addElement("entity");
+		root.addAttribute("ID", String.valueOf(ID));
+		root.addAttribute("class", getClass().getSimpleName());
+		systemEntity.toBasicXML(root);
+		location.toXML(root);
+		root.addAttribute("type", type.getKey());
+		root.addAttribute("total", String.valueOf(totalQuantity));
+		root.addAttribute("yield", String.valueOf(yield));
+		return root;
 	}
 
 	@Override
 	public String toString() {
-		return type.getKey() + " x " + totalQuantity + " " + super.toString() + " @ " + systemEntity.getName() + " (" + systemEntity.getID() + ") " + location;
+		return type.getKey() + " x " + totalQuantity + " [" + getID() + "] @ " + systemEntity.getName() + " (" + systemEntity.getID() + ") " + location;
+	}
+
+	public long getID() {
+		return ID;
+	}
+
+	public void setID(long id) {
+		ID = id;
+	}
+
+	public int getVersion() {
+		return version;
+	}
+
+	public void setVersion(int version) {
+		this.version = version;
 	}
 }

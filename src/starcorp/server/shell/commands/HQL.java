@@ -58,7 +58,6 @@ public class HQL extends ACommand {
 				return log;
 			}
 			protected void doJob() throws Exception {
-				beginTransaction();
 				String hql = args.concat(0);
 				if(hql == null || hql.length() < 1) {
 					out.println();
@@ -76,7 +75,6 @@ public class HQL extends ACommand {
 						}
 					}
 				}
-				commit();
 				out.print(Shell.PROMPT);
 				out.flush();
 			}

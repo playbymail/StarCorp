@@ -12,6 +12,7 @@ package starcorp.server.turns.orders;
 
 import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Planet;
+import starcorp.common.entities.StarSystem;
 import starcorp.common.entities.Starship;
 import starcorp.common.turns.OrderReport;
 import starcorp.common.turns.TurnError;
@@ -55,7 +56,8 @@ public class LeaveOrbit extends AOrderProcessor {
 				report.add(ship.getID());
 				report.add(planet.getName());
 				report.add(planet.getID());
-				report.addScannedEntities(entityStore.listSystemEntities(ship.getSystem(), ship.getLocation()));
+				StarSystem system = (StarSystem) entityStore.load(StarSystem.class,planet.getSystemID());
+				report.addScannedEntities(entityStore.listSystemEntities(system, ship.getLocation()));
 				order.setReport(report);
 			}
 		}

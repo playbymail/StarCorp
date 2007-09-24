@@ -10,10 +10,6 @@
  */
 package starcorp.common.entities;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import starcorp.common.types.CashTransaction;
 import starcorp.common.types.GalacticDate;
 
 /**
@@ -26,36 +22,26 @@ public class CreditAccount {
 
 	private long ID;
 	private int version;
-	private ABaseEntity accountHolder;
-	private int credits;
-	private Set<CashTransaction> transactions = new HashSet<CashTransaction>();
-	public int add(int credits, GalacticDate date, String description) {
+	private long credits;
+
+	public long add(int credits, GalacticDate date) {
 		this.credits += credits;
-		transactions.add(new CashTransaction(date, credits,description));
 		return this.credits;
 	}
 	
-	public void remove(int credits, GalacticDate date, String description) {
+	public void remove(int credits, GalacticDate date) {
 		this.credits -= credits;
-		transactions.add(new CashTransaction(date, (0 - credits),description));
 	}
 	
 	public boolean hasCredits(int credits) {
 		return this.credits >= credits;
 	}
 	
-	public int getCredits() {
+	public long getCredits() {
 		return credits;
 	}
-	public void setCredits(int credits) {
+	public void setCredits(long credits) {
 		this.credits = credits;
-	}
-	public Set<CashTransaction> getTransactions() {
-		return transactions;
-	}
-
-	public void setTransactions(Set<CashTransaction> transactions) {
-		this.transactions = transactions;
 	}
 
 	public long getID() {
@@ -74,29 +60,9 @@ public class CreditAccount {
 		this.version = version;
 	}
 
-	public ABaseEntity getAccountHolder() {
-		return accountHolder;
-	}
-
-	public void setAccountHolder(ABaseEntity accountHolder) {
-		this.accountHolder = accountHolder;
-	}
-
 	public String toString()
 	{
-	    final String TAB = "    ";
-	    
-	    String retValue = "";
-	    
-	    retValue = "CreditAccount ( "
-	        + super.toString() + TAB
-	        + "ID = " + this.ID + TAB
-	        + "version = " + this.version + TAB
-	        + "accountHolder = " + this.accountHolder + TAB
-	        + "credits = " + this.credits + TAB
-	        + " )";
-	
-	    return retValue;
+		return "CreditAccount [" + ID + "] Balance: " + credits;
 	}
 
 	@Override

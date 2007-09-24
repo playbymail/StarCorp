@@ -12,6 +12,7 @@ package starcorp.server.engine;
 
 import org.apache.commons.logging.Log;
 
+import starcorp.server.Util;
 import starcorp.server.entitystore.IEntityStore;
 
 /**
@@ -21,29 +22,13 @@ import starcorp.server.entitystore.IEntityStore;
  * @version 22 Sep 2007
  */
 public abstract class AServerTask implements Runnable {
-	public static final String getDisplayDuration(long milliseconds) {
-		int seconds = (int) milliseconds / 1000;
-		if(seconds < 60) { // less than a minute
-			return seconds + "s";
-		}
-		else if(seconds < 3600){ // less than an hour
-			int minutes = (int) (seconds / 60);
-			int secs = seconds % (minutes * 60);
-			return minutes +"m "+secs+"s";
-		}
-		else {
-			int hours = (int) (seconds / 3600);
-			int secs = seconds % (hours * 3600);
-			int minutes = (int) (secs / 60);
-			secs = seconds % (minutes * 60);
-			return hours + "h "+minutes +"m "+secs+"s";
-		}
-	}
-
 	protected ServerEngine engine;
 	protected IEntityStore entityStore;
 	protected int taskNumber;
 	private boolean done = false;
+	protected long startTime;
+	protected long endTime;
+	protected long timeTaken;
 	
 	public AServerTask() {
 	}
@@ -60,32 +45,20 @@ public abstract class AServerTask implements Runnable {
 		this.taskNumber = number;
 	}
 	
-	protected void beginTransaction() {
-		entityStore.beginTransaction();
-	}
-	
-	protected void rollback() {
-		entityStore.rollback();
-	}
-	
-	protected void commit() {
-		entityStore.commit();
-	}
-
 	public void run() {
 		try {
-			long start = System.currentTimeMillis();
+			startTime = System.currentTimeMillis();
 			if(getLog().isDebugEnabled())
 				getLog().debug("[Task: " + taskNumber +"] started.");
 			doJob();
 			
-			long time = System.currentTimeMillis() - start;
+			endTime = System.currentTimeMillis();
+			timeTaken = endTime - startTime;
 			if(getLog().isDebugEnabled())
-				getLog().debug("[Task: " + taskNumber +"] done in " + getDisplayDuration(time) + ".");
+				getLog().debug("[Task: " + taskNumber +"] done in " + Util.getDisplayDuration(timeTaken) + ".");
 		}
 		catch(Exception e) {
 			getLog().error("[Task: " + taskNumber +"] "+ e.getMessage(),e);
-			rollback();
 			onException(e);
 		}
 		engine.done(this);
@@ -120,7 +93,12 @@ public abstract class AServerTask implements Runnable {
 	
 	@Override
 	public String toString() {
-		return "[" + taskNumber + "] " + getName();
+		long running = timeTaken;
+		if(timeTaken == 0) {
+			running = System.currentTimeMillis() - startTime;
+		}
+		String s = Util.getDisplayDuration(running);
+		return "[" + taskNumber + " : " + s + " ] " + getName();
 	}
 
 	@Override
@@ -143,5 +121,21 @@ public abstract class AServerTask implements Runnable {
 		if (taskNumber != other.taskNumber)
 			return false;
 		return true;
+	}
+
+	public int getTaskNumber() {
+		return taskNumber;
+	}
+
+	public long getStartTime() {
+		return startTime;
+	}
+
+	public long getEndTime() {
+		return endTime;
+	}
+
+	public long getTimeTaken() {
+		return timeTaken;
 	}
 }

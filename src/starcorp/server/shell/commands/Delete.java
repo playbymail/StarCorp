@@ -60,7 +60,6 @@ public class Delete extends ACommand {
 			}
 
 			protected void doJob() throws Exception {
-				beginTransaction();
 				String entityClass = args.get(0);
 				int ID = args.getAsInt(1);
 				if (entityClass == null || ID == 0) {
@@ -82,8 +81,6 @@ public class Delete extends ACommand {
 					out.print(Shell.PROMPT);
 					out.flush();
 				}
-				commit();
-
 			}
 		};
 	}

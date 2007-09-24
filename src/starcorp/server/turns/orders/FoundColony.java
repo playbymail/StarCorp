@@ -105,11 +105,11 @@ public class FoundColony extends AOrderProcessor {
 						colony.setHazardLevel(hazardLevel);
 						colony.setLocation(location);
 						colony.setName(name);
-						colony.setPlanet(planet);
+						colony.setPlanetID(planet.getID());
 				
-						entityStore.save(colony);
+						entityStore.create(colony);
 						hub.setColony(colony);
-						entityStore.save(hub);
+						entityStore.create(hub);
 						
 						OrderReport report = new OrderReport(order);
 						report.add(colony.getName());

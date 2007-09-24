@@ -57,7 +57,7 @@ public class IssueColonistGrant extends AOrderProcessor {
 			grant.setIssuedDate(ServerConfiguration.getCurrentDate());
 			grant.setPopClass(popClass);
 			
-			entityStore.save(grant);
+			entityStore.create(grant);
 			
 			OrderReport report = new OrderReport(order);
 			report.add(popClass.getName());

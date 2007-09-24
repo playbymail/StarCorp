@@ -27,6 +27,7 @@ import starcorp.common.types.CoordinatesPolar;
 import starcorp.common.types.PlanetMapSquare;
 import starcorp.common.types.TerrainType;
 import starcorp.common.util.PackageExplorer;
+import starcorp.server.Util;
 import starcorp.server.entitystore.IEntityStore;
 
 /**
@@ -85,25 +86,21 @@ public abstract class APlanetTemplate {
 	}
 	
 	public Planet create(int systemID, int quadrant, int orbit, String name) {
-		entityStore.beginTransaction();
 		StarSystem system = (StarSystem) entityStore.load(StarSystem.class,systemID);
 		if(system == null) {
 			return null;
 		}
 		CoordinatesPolar location = new CoordinatesPolar(quadrant,orbit);
-		entityStore.commit();
 		return create(system,null,location,name);
 
 	}
 	
 	public Planet create(int orbitingPlanetID, String name) {
-		entityStore.beginTransaction();
 		Planet p = (Planet) entityStore.load(Planet.class, orbitingPlanetID);
 		if(p == null) {
 			return null;
 		}
-		entityStore.commit();
-		return create(p.getSystem(),p,p.getLocation(),name);
+		return create((StarSystem)entityStore.load(StarSystem.class, p.getSystemID()),p,p.getLocation(),name);
 	}
 	
 	public Planet create(StarSystem system, Planet orbiting, CoordinatesPolar location, String name) {
@@ -113,10 +110,8 @@ public abstract class APlanetTemplate {
 		planet.setLocation(location);
 		planet.setName(name);
 		planet.setOrbiting(orbiting);
-		planet.setSystem(system);
-		entityStore.beginTransaction();
-		entityStore.save(planet);
-		entityStore.commit();
+		planet.setSystemID(system.getID());
+		entityStore.create(planet);
 		generateMap(planet, getWidth(), getHeight());
 		return planet;
 	}
@@ -197,16 +192,14 @@ public abstract class APlanetTemplate {
 				deposit.setTotalQuantity(totalQuantity);
 				deposit.setType(type);
 				deposit.setYield(yield);
-				entityStore.beginTransaction();
-				entityStore.save(deposit);
-				entityStore.commit();
+				entityStore.create(deposit);
 				if(log.isDebugEnabled())log.debug("Created " + deposit);
 			}
 		}
 	}
 	
 	private void generateMap(Planet planet, int width, int height) {
-		if(planet.getOrbiting() != null) {
+		if(planet.getOrbitingID() > 0 ) {
 			width /= 10;
 			width = width > 1 ? width : 1;
 			height /= 10;
@@ -222,8 +215,6 @@ public abstract class APlanetTemplate {
 				generateResources(planet, location, terrain);
 			}
 		}
-		entityStore.beginTransaction();
-		entityStore.save(planet);
-		entityStore.commit();
+		entityStore.update(planet);
 	}
 }

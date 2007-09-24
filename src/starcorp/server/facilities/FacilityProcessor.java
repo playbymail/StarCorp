@@ -10,19 +10,18 @@
  */
 package starcorp.server.facilities;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import starcorp.common.entities.AColonists;
 import starcorp.common.entities.Colony;
 import starcorp.common.entities.ColonyItem;
 import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Facility;
 import starcorp.common.entities.MarketItem;
-import starcorp.common.entities.Planet;
 import starcorp.common.entities.ResourceDeposit;
 import starcorp.common.types.AFactoryItem;
 import starcorp.common.types.AItemType;
@@ -55,18 +54,12 @@ public class FacilityProcessor extends AServerTask {
 	@Override
 	protected void doJob() throws Exception {
 		log.info(this + ": Started facility processor");
-		beginTransaction();
-		List<Facility> facilities = new ArrayList<Facility>();
-		for(Object o : entityStore.listFacilities()) {
-			facilities.add((Facility)o);
-		}
-		commit();
+		List<Facility> facilities = entityStore.listFacilities();
 		log.info(this + ": " + facilities.size() + " facilities to process");
 		for(Facility facility : facilities) {
-			beginTransaction();
-			List<?> workers = entityStore.listWorkers(facility);
+			List<AColonists> workers = entityStore.listWorkers(facility);
 			process(facility,workers);
-			commit();
+			Thread.yield();
 		}
 		log.info("Finished facility processor");
 	}
@@ -88,7 +81,7 @@ public class FacilityProcessor extends AServerTask {
 		else if(facility.getTypeClass() instanceof ResourceGenerator) {
 			processGenerator(facility, workers);
 		}
-		entityStore.save(facility);
+		entityStore.update(facility);
 		if(log.isDebugEnabled())
 			log.debug("Processed " + facility);
 	}
@@ -100,13 +93,10 @@ public class FacilityProcessor extends AServerTask {
 		Corporation owner = facility.getOwner();
 		Colony colony = facility.getColony();
 		List<AItemType> types = IndustrialGoods.listPower();
-		List<?> items = entityStore.listItems(owner, colony, types);
+		List<ColonyItem> items = entityStore.listItems(owner, colony, types);
 		if(ColonyItem.count(items) < required) {
 			// attempt to buy from market
-			List<MarketItem> market = new ArrayList<MarketItem>();
-			for(Object o : entityStore.listMarket(colony, types, 1)) {
-				market.add((MarketItem)o);
-			}
+			List<MarketItem> market = entityStore.listMarket(colony, types, 1);
 			MarketItem.BuyResult result = Util.buy(ServerConfiguration.getCurrentDate(), market, required, entityStore.getCredits(owner),entityStore);
 			if(result.quantityBought < required) {
 				// not enough - just add this to the colonies stockpile
@@ -119,10 +109,10 @@ public class FacilityProcessor extends AServerTask {
 						cItem.setColony(colony);
 						cItem.setItem(new Items(item.getTypeClass()));
 						cItem.setOwner(owner);
-						entityStore.save(cItem);
+						entityStore.create(cItem);
 					}
 					cItem.add(item.getQuantity());
-					entityStore.save(cItem);
+					entityStore.update(cItem);
 				}
 			}
 			else {
@@ -158,7 +148,7 @@ public class FacilityProcessor extends AServerTask {
 			ColonyItem cItem = entityStore.getItem(colony, owner, item.getTypeClass());
 			int qty = item.getQuantity() * quantity;
 			cItem.remove(qty);
-			entityStore.save(cItem);
+			entityStore.update(cItem);
 		}
 	}
 	
@@ -182,10 +172,10 @@ public class FacilityProcessor extends AServerTask {
 			cItem.setColony(factory.getColony());
 			cItem.setItem(new Items(type));
 			cItem.setOwner(factory.getOwner());
-			entityStore.save(cItem);
+			entityStore.create(cItem);
 		}
 		cItem.add(qty);
-		entityStore.save(cItem);
+		entityStore.update(cItem);
 		if(log.isDebugEnabled())
 			log.debug(factory +" produced " + qty + " x " + type);
 		useMaterials(factory.getColony(),factory.getOwner(), type, qty); 
@@ -216,15 +206,12 @@ public class FacilityProcessor extends AServerTask {
 			log.debug(generator + " started generating.");
 		Corporation owner = generator.getOwner();
 		Colony colony = generator.getColony();
-		Planet planet = colony.getPlanet();
 		Coordinates2D location = colony.getLocation();
-		List<?> deposits = entityStore.listDeposits(planet, location);
+		List<ResourceDeposit> deposits = entityStore.listDeposits(colony.getPlanetID(), location);
 		double efficiency = generator.getEfficiency(workers);
 		ResourceGenerator type = (ResourceGenerator) generator.getTypeClass();
 		
-		Iterator<?> i = deposits.iterator();
-		while(i.hasNext()) {
-			ResourceDeposit deposit = (ResourceDeposit) i.next();
+		for(ResourceDeposit deposit : deposits){
 			if(deposit.getTotalQuantity() < deposit.getYield()) {
 				continue;
 			}
@@ -239,12 +226,12 @@ public class FacilityProcessor extends AServerTask {
 					item.setColony(colony);
 					item.setItem(new Items(deposit.getTypeClass()));
 					item.setOwner(owner);
-					entityStore.save(item);
+					entityStore.create(item);
 				}
 				item.add(qty);
 				deposit.remove(qty);
-				entityStore.save(item);
-				entityStore.save(deposit);
+				entityStore.update(item);
+				entityStore.update(deposit);
 				if(log.isDebugEnabled())
 					log.debug(generator + " generated " + qty + " x " + deposit.getType());
 			}

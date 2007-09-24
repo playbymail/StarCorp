@@ -42,7 +42,7 @@ public class DesignShip extends AOrderProcessor {
 		}
 		
 		if(design.isValid()) {
-			entityStore.save(design);
+			entityStore.create(design);
 			
 			OrderReport report = new OrderReport(order);
 			report.add(name);

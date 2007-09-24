@@ -13,6 +13,7 @@ package starcorp.server.turns.orders;
 import java.util.ArrayList;
 import java.util.List;
 
+import starcorp.common.entities.CashTransaction;
 import starcorp.common.entities.Colony;
 import starcorp.common.entities.ColonyItem;
 import starcorp.common.entities.Corporation;
@@ -22,7 +23,6 @@ import starcorp.common.turns.OrderReport;
 import starcorp.common.turns.TurnError;
 import starcorp.common.turns.TurnOrder;
 import starcorp.common.types.AItemType;
-import starcorp.common.types.CashTransaction;
 import starcorp.common.types.ColonyHub;
 import starcorp.common.types.Items;
 import starcorp.common.types.OrderType;
@@ -79,6 +79,7 @@ public class CorporationBuyItem extends AOrderProcessor {
 				colonyItem.setColony(colony);
 				colonyItem.setItem(item);
 				colonyItem.setOwner(corp);
+				entityStore.create(colonyItem);
 			}
 			MarketItem.BuyResult result = Util.buy(ServerConfiguration.getCurrentDate(), marketItems, quantity, entityStore.getCredits(corp),entityStore);
 			Object[] args = {String.valueOf(result.quantityBought), type.getName(),colony.getName(),String.valueOf(colony.getID())};
@@ -86,7 +87,7 @@ public class CorporationBuyItem extends AOrderProcessor {
 			colonyItem.getItem().add(result.quantityBought);
 			entityStore.removeCredits(corp, result.totalPrice, desc);
 			
-			entityStore.save(colonyItem);
+			entityStore.update(colonyItem);
 			Object[] args2 = {colonyHub.getTypeClass().getName(), colony.getName(), String.valueOf(colony.getID())};
 			desc = CashTransaction.getDescription(CashTransaction.MARKET_FEES, args2);
 			entityStore.removeCredits(corp, colonyHub.getServiceCharge(), desc);

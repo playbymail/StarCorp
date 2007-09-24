@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 import starcorp.common.entities.Corporation;
 import starcorp.common.entities.ResourceDeposit;
+import starcorp.common.entities.StarSystem;
 import starcorp.common.entities.StarSystemEntity;
 import starcorp.common.entities.Starship;
 import starcorp.common.turns.OrderReport;
@@ -47,7 +48,7 @@ public class MineGasField extends AOrderProcessor {
 		else if(!ship.enoughTimeUnits(TIME_UNITS)) {
 			error = new TurnError(TurnError.INSUFFICIENT_TIME);
 		}
-		else if(gasfield == null || !gasfield.isGasfield() || !gasfield.getSystem().equals(ship.getSystem()) || !gasfield.getLocation().equals(ship.getLocation()) || ship.getPlanet() != null) {
+		else if(gasfield == null || !gasfield.isGasfield() || gasfield.getSystemID() != ship.getSystemID() || !gasfield.getLocation().equals(ship.getLocation()) || ship.getPlanet() != null) {
 			error = new TurnError(TurnError.INVALID_LOCATION);
 		}
 		else if(!ship.getDesign().canMineGasField()) {
@@ -63,7 +64,8 @@ public class MineGasField extends AOrderProcessor {
 			}
 			ship.incrementTimeUnitsUsed(TIME_UNITS);
 			OrderReport report = new OrderReport(order);
-			report.addScannedEntities(entityStore.listSystemEntities(ship.getSystem(),ship.getLocation()));
+			StarSystem system = (StarSystem) entityStore.load(StarSystem.class, ship.getSystemID());
+			report.addScannedEntities(entityStore.listSystemEntities(system,ship.getLocation()));
 			report.add(gasfield.getName());
 			report.add(gasfield.getID());
 			order.setReport(report);

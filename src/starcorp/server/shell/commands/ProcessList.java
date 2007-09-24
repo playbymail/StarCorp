@@ -64,6 +64,7 @@ public class ProcessList extends ACommand {
 				for(Enumeration<AServerTask> e= engine.runningTasks(); e.hasMoreElements();) {
 					out.println(e.nextElement());
 				}
+				out.println(engine);
 				out.print(Shell.PROMPT);
 				out.flush();
 			}

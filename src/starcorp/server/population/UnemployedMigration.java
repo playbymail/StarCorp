@@ -10,7 +10,6 @@
  */
 package starcorp.server.population;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -22,7 +21,6 @@ import starcorp.common.entities.Planet;
 import starcorp.common.entities.StarSystem;
 import starcorp.common.entities.Unemployed;
 import starcorp.common.types.CoordinatesPolar;
-import starcorp.common.types.Population;
 import starcorp.server.engine.AServerTask;
 
 /**
@@ -41,30 +39,16 @@ public class UnemployedMigration extends AServerTask {
 	public static final double MIGRATION_DISTANCE_SAME_SYSTEM = 0.5;
 
 	private void doMigration(Unemployed unemployed) {
-		beginTransaction();
 		if (unemployed.getQuantity() < 1)
 			return;
-		Planet planet = unemployed.getColony().getPlanet();
-		StarSystem system = planet.getSystem();
+		Planet planet = (Planet) entityStore.load(Planet.class, unemployed.getColony().getPlanetID());
+		StarSystem system = planet == null ? null : (StarSystem) entityStore.load(StarSystem.class, planet.getSystemID());
 		CoordinatesPolar location = planet.getLocation();
 		
-		List<Colony> samePlanet = new ArrayList<Colony>();
-		for(Object o : entityStore.listColonies(planet)) {
-			samePlanet.add((Colony)o);
-		}
-		List<Colony> sameLocation =  new ArrayList<Colony>();
-		for(Object o : entityStore.listColonies(system, location, planet)) {
-			sameLocation.add((Colony)o);
-		}
-		List<Colony> sameSystem =  new ArrayList<Colony>();
-		for(Object o : entityStore.listColonies(system, location)) {
-			sameSystem.add((Colony)o);
-		}
-		List<Colony> others =  new ArrayList<Colony>();
-		for(Object o : entityStore.listColonies(system)) {
-			others.add((Colony)o);
-		}
-		commit();
+		List<Colony> samePlanet = entityStore.listColonies(planet);
+		List<Colony> sameLocation =  entityStore.listColonies(system, location, planet);
+		List<Colony> sameSystem =  entityStore.listColonies(system, location);
+		List<Colony> others =  entityStore.listColonies(system);
 		doMigration(unemployed, samePlanet, MIGRATION_DISTANCE_SAME_PLANET);
 		doMigration(unemployed, sameLocation, MIGRATION_DISTANCE_SAME_LOCATION);
 		doMigration(unemployed, sameSystem, MIGRATION_DISTANCE_SAME_SYSTEM);
@@ -76,34 +60,30 @@ public class UnemployedMigration extends AServerTask {
 			double distanceModifier) {
 		if (unemployed.getQuantity() < 1)
 			return;
-		beginTransaction();
-		List<?> colonists = entityStore.listColonists(colony, unemployed
+		List<AColonists> colonists = entityStore.listColonists(colony, unemployed
 				.getPopClass());
 		double happiness = AColonists.getAverageHappiness(colonists);
-		commit();
 		double migrationRate = unemployed.getHappiness() - happiness;
 		migrationRate *= distanceModifier;
 
 		int migrate = (int) (unemployed.getQuantity() * migrationRate);
 
 		if (migrate > 0) {
-			beginTransaction();
-			int creditsPerPerson = entityStore.getCredits(unemployed) / unemployed.getQuantity();
-			int credits = migrate * creditsPerPerson;
-			unemployed.removePopulation(migrate);
+			long creditsPerPerson = entityStore.getCredits(unemployed) / unemployed.getQuantity();
+			long credits = migrate * creditsPerPerson;
 			Unemployed other = entityStore.getUnemployed(colony, unemployed
 					.getPopClass());
 			if (other == null) {
 				other = new Unemployed();
 				other.setColony(colony);
 				other.setHappiness(0.0);
-				other.setPopulation(new Population(unemployed.getPopClass()));
-				entityStore.save(other);
+				other.setPopClass(unemployed.getPopClass());
+				entityStore.create(other);
 			}
 			other.addPopulation(migrate);
-			entityStore.save(other);
-			entityStore.save(unemployed);
-			commit();
+			unemployed.removePopulation(migrate);
+			entityStore.update(other);
+			entityStore.update(unemployed);
 			entityStore.removeCredits(unemployed, credits, "");
 			if (log.isDebugEnabled())
 				log.debug(migrate + " of " + unemployed.getPopClass()
@@ -125,19 +105,15 @@ public class UnemployedMigration extends AServerTask {
 	 */
 	@Override
 	protected void doJob() throws Exception {
-		beginTransaction();
-		List<Unemployed> unemployed = new ArrayList<Unemployed>();
-		for(Object o : entityStore.listUnemployed()) {
-			unemployed.add((Unemployed)o);
-		}
-		commit();
+		List<AColonists> unemployed = entityStore.listUnemployed();
 		int size = unemployed.size();
 		int i = 1;
 		log.info(this + ": " + size + " unemployed to process");
-		for(Unemployed colonist : unemployed) {
+		for(AColonists colonist : unemployed) {
 			if(log.isDebugEnabled())
 				log.debug(this + ": " + i + " of " + size + " unemployed processing.");
-			doMigration(colonist);
+			doMigration((Unemployed)colonist);
+			Thread.yield();
 			i++;
 		}
 	}

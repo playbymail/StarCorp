@@ -11,7 +11,6 @@
 package starcorp.server.setup.colonies;
 
 import starcorp.server.setup.AColonyTemplate;
-import starcorp.server.setup.Util;
 
 /**
  * starcorp.server.setup.colonies.AgriOutpost
@@ -26,7 +25,7 @@ public class AgriOutpost extends AColonyTemplate {
 	 */
 	@Override
 	protected int countFarms() {
-		return (Util.rnd.nextInt(5) + 1) * 20;
+		return (starcorp.server.Util.rnd.nextInt(5) + 1) * 20;
 	}
 
 	/* (non-Javadoc)

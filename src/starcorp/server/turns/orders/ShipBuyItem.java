@@ -13,16 +13,17 @@ package starcorp.server.turns.orders;
 import java.util.ArrayList;
 import java.util.List;
 
+import starcorp.common.entities.CashTransaction;
 import starcorp.common.entities.Colony;
 import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Facility;
 import starcorp.common.entities.MarketItem;
+import starcorp.common.entities.Planet;
 import starcorp.common.entities.Starship;
 import starcorp.common.turns.OrderReport;
 import starcorp.common.turns.TurnError;
 import starcorp.common.turns.TurnOrder;
 import starcorp.common.types.AItemType;
-import starcorp.common.types.CashTransaction;
 import starcorp.common.types.ColonyHub;
 import starcorp.common.types.OrbitalDock;
 import starcorp.common.types.OrderType;
@@ -49,6 +50,10 @@ public class ShipBuyItem extends AOrderProcessor {
 		
 		Starship ship = (Starship) entityStore.load(Starship.class, starshipId);
 		Colony colony = (Colony) entityStore.load(Colony.class, colonyId);
+		Planet colonyPlanet = null;
+		if(colony != null)
+			colonyPlanet = ((Planet) entityStore.load(Planet.class, colony.getPlanetID()));
+		
 		AItemType type = AItemType.getType(itemTypeKey);
 		List<MarketItem> marketItems = new ArrayList<MarketItem>();
 		for(Object o : entityStore.listMarket(colony, 1)) {
@@ -66,7 +71,7 @@ public class ShipBuyItem extends AOrderProcessor {
 		else if(colony == null) {
 			error = new TurnError(TurnError.INVALID_COLONY);
 		}
-		else if(ship.getPlanet() == null || !ship.getPlanet().equals(colony.getPlanet())) {
+		else if(ship.getPlanet() == null || !ship.getPlanet().equals(colonyPlanet)) {
 			error = new TurnError(TurnError.INVALID_LOCATION);
 		}
 		else if(ship.getColony() != null && !ship.getColony().equals(colony)) {

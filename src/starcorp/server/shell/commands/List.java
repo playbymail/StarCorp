@@ -57,7 +57,6 @@ public class List extends ACommand {
 				return log;
 			}
 			protected void doJob() throws Exception {
-				beginTransaction();
 				String entityClass = args.get(0);
 				int page = args.getAsInt(1);
 				
@@ -67,7 +66,7 @@ public class List extends ACommand {
 				else {
 					String className = "starcorp.common.entities." + entityClass;
 					Class clazz = Class.forName(className);
-					java.util.List<?> list = entityStore.list(clazz);
+					java.util.List<Object> list = entityStore.listEntities(clazz);
 					int size = list.size();
 					if(size < 1) {
 						out.println();
@@ -96,7 +95,6 @@ public class List extends ACommand {
 						}
 					}
 				}
-				commit();
 				out.print(Shell.PROMPT);
 				out.flush();
 			}

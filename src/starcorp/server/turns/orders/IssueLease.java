@@ -59,7 +59,7 @@ public class IssueLease extends AOrderProcessor {
 			lease.setPrice(price);
 			lease.setTypeClass(type);
 			
-			entityStore.save(lease);
+			entityStore.create(lease);
 			
 			OrderReport report = new OrderReport(order);
 			report.add(type.getName());

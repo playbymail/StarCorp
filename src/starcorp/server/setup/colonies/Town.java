@@ -11,7 +11,6 @@
 package starcorp.server.setup.colonies;
 
 import starcorp.server.setup.AColonyTemplate;
-import starcorp.server.setup.Util;
 
 /**
  * starcorp.server.setup.colonies.Town
@@ -26,7 +25,7 @@ public class Town extends AColonyTemplate {
 	 */
 	@Override
 	protected int countFarms() {
-		return (Util.rnd.nextInt(5) + 1) + 10;
+		return (starcorp.server.Util.rnd.nextInt(5) + 1) + 10;
 	}
 
 	/* (non-Javadoc)
@@ -34,7 +33,7 @@ public class Town extends AColonyTemplate {
 	 */
 	@Override
 	protected int countHeavyFactories() {
-		return (Util.rnd.nextInt(5) + 1);
+		return (starcorp.server.Util.rnd.nextInt(5) + 1);
 	}
 
 	/* (non-Javadoc)
@@ -42,7 +41,7 @@ public class Town extends AColonyTemplate {
 	 */
 	@Override
 	protected int countLightFactories() {
-		return (Util.rnd.nextInt(10) + 1);
+		return (starcorp.server.Util.rnd.nextInt(10) + 1);
 	}
 
 	/* (non-Javadoc)
@@ -50,7 +49,7 @@ public class Town extends AColonyTemplate {
 	 */
 	@Override
 	protected int countMines() {
-		return (Util.rnd.nextInt(10) + 1);
+		return (starcorp.server.Util.rnd.nextInt(10) + 1);
 	}
 
 	/* (non-Javadoc)
@@ -66,7 +65,7 @@ public class Town extends AColonyTemplate {
 	 */
 	@Override
 	protected int countRefineries() {
-		return (Util.rnd.nextInt(10) + 1);
+		return (starcorp.server.Util.rnd.nextInt(10) + 1);
 	}
 
 	/* (non-Javadoc)
@@ -95,6 +94,6 @@ public class Town extends AColonyTemplate {
 
 	@Override
 	protected int countPumps() {
-		return (Util.rnd.nextInt(5) + 1) + 5;
+		return (starcorp.server.Util.rnd.nextInt(5) + 1) + 5;
 	}
 }

@@ -25,6 +25,7 @@ import starcorp.common.entities.StarSystem;
 import starcorp.common.types.Coordinates3D;
 import starcorp.common.types.CoordinatesPolar;
 import starcorp.common.util.PackageExplorer;
+import starcorp.server.Util;
 import starcorp.server.entitystore.IEntityStore;
 
 /**
@@ -98,17 +99,13 @@ public abstract class ASystemTemplate {
 	}
 	
 	public StarSystem create(Coordinates3D location, String name) {
-		entityStore.beginTransaction();
 		StarSystem system = new StarSystem();
 		system.setLocation(location);
 		system.setName(name);
 		system.setType(randomType());
-		entityStore.save(system);
-		entityStore.commit();
+		entityStore.create(system);
 		generateFeatures(system);
-		entityStore.beginTransaction();
-		entityStore.save(system);
-		entityStore.commit();
+		entityStore.update(system);
 		return system;
 	}
 	
@@ -151,9 +148,7 @@ public abstract class ASystemTemplate {
 		deposit.setTotalQuantity(rnd.nextInt(10000000));
 		deposit.setType(itemKey);
 		deposit.setYield(rnd.nextInt(100) + 1);
-		entityStore.beginTransaction();
-		entityStore.save(deposit);
-		entityStore.commit();
+		entityStore.create(deposit);
 		if(log.isDebugEnabled())log.debug("Created " + deposit);
 		return deposit;
 	}
@@ -182,10 +177,8 @@ public abstract class ASystemTemplate {
 			field.setAsteroid(true);
 			field.setLocation(location);
 			field.setName("Asteroid " + location);
-			field.setSystem(system);
-			entityStore.beginTransaction();
-			entityStore.save(field);
-			entityStore.commit();
+			field.setSystemID(system.getID());
+			entityStore.create(field);
 			if(log.isDebugEnabled())log.debug("Created " + field);
 			generateResources(field);
 		}
@@ -194,10 +187,8 @@ public abstract class ASystemTemplate {
 			field.setGasfield(true);
 			field.setLocation(location);
 			field.setName("Gas Field " + location);
-			field.setSystem(system);
-			entityStore.beginTransaction();
-			entityStore.save(field);
-			entityStore.commit();
+			field.setSystemID(system.getID());
+			entityStore.create(field);
 			if(log.isDebugEnabled())log.debug("Created " + field);
 			generateResources(field);
 		}
