@@ -153,8 +153,8 @@ public class TurnProcessor extends AServerTask {
 				report.addPlayerEntities(entityStore.listFacilities(corp));
 				report.addPlayerEntities(entityStore.listItems(corp));
 				report.addPlayerEntities(entityStore.listLeases(corp, true));
-				report.addPlayerEntities(entityStore.listMarket(1));
 				report.addPlayerEntities(entityStore.listShips(corp));
+				report.setMarket(entityStore.listMarket(1));
 			}
 		}
 		log.info(this + ": Processed turn from " + turn.getCorporation() + ". Order: " + turn.getOrders().size() + ". Errors: " + turn.getErrors().size());

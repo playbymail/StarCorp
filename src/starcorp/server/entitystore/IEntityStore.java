@@ -126,6 +126,7 @@ public interface IEntityStore {
 	public abstract FacilityLease getLease(Colony colony, Corporation owner, AFacilityType type, boolean openOnly);
 	
 	public abstract List<MarketItem> listMarket(int minQty);
+	public abstract List<MarketItem> listMarket(Corporation seller, int minQty);
 	public abstract List<MarketItem> listMarket(Colony colony, int minQty);
 	public abstract List<MarketItem> listMarket(Colony colony, List<AItemType> types, int minQty);
 	

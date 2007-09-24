@@ -1463,4 +1463,10 @@ public class HibernateStore implements IEntityStore {
 		return avg;
 	}
 
+	public List<MarketItem> listMarket(Corporation seller, int minQty) {
+		String q = "from MarketItem where item.quantity >= " + minQty + " and owner = :seller";
+		beginTransaction();
+		return copyMarket(listObject(createQuery(q, "seller", seller)));
+	}
+
 }

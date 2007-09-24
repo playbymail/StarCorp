@@ -17,6 +17,7 @@ import java.util.List;
 import org.dom4j.Element;
 
 import starcorp.common.entities.IEntity;
+import starcorp.common.entities.MarketItem;
 import starcorp.common.util.Util;
 
 /**
@@ -28,14 +29,13 @@ import starcorp.common.util.Util;
 public class TurnReport {
 
 	private Turn turn;
-	@SuppressWarnings("unchecked")
-	private List playerEntities = new ArrayList();
+	private List<IEntity> playerEntities = new ArrayList<IEntity>();
+	private List<MarketItem> market;
 	
 	public TurnReport(Turn turn) {
 		this.turn = turn;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public TurnReport(Element e) {
 		this.turn = new Turn(e.element("turn"));
 		for(Iterator<?> i = e.element("player-entities").elementIterator("entity"); i.hasNext();) {
@@ -43,15 +43,28 @@ public class TurnReport {
 			if(entity != null)
 				playerEntities.add(entity);
 		}
+		for(Iterator<?> i = e.element("market").elementIterator("entity"); i.hasNext();) {
+			MarketItem item = (MarketItem) Util.fromXML((Element)i.next());
+			if(item != null)
+				market.add(item);
+		}
 	}
 	
 	public Element toXML(Element parent) {
 		Element root = parent.addElement("turn-report");
 		turn.toXML(root);
 		Element e = root.addElement("player-entities");
+		e.addAttribute("size", String.valueOf(playerEntities.size()));
 		for(Iterator<?> i = playerEntities.iterator(); i.hasNext();) {
 			IEntity entity = (IEntity) i.next();
 			entity.toFullXML(e);
+		}
+		e = root.addElement("market");
+		e.addAttribute("size", String.valueOf(market.size()));
+		if(market != null) {
+			for(MarketItem item : market) {
+				item.toBasicXML(e);
+			}
 		}
 		return root;
 	}
@@ -62,15 +75,24 @@ public class TurnReport {
 	public void setTurn(Turn turn) {
 		this.turn = turn;
 	}
-	public List<?> getPlayerEntities() {
+	public List<IEntity> getPlayerEntities() {
 		return playerEntities;
 	}
-	@SuppressWarnings("unchecked")
-	public void addPlayerEntities(List entities) {
-		playerEntities.addAll(entities);
+	public void addPlayerEntities(List<?> entities) {
+		for(Object o : entities) {
+			IEntity entity = (IEntity) o;
+			playerEntities.add(entity);
+		}
 	}
-	@SuppressWarnings("unchecked")
 	public void addPlayerEntity(IEntity entity) {
 		playerEntities.add(entity);
+	}
+
+	public List<MarketItem> getMarket() {
+		return market;
+	}
+
+	public void setMarket(List<MarketItem> market) {
+		this.market = market;
 	}
 }
