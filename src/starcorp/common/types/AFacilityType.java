@@ -178,7 +178,7 @@ public abstract class AFacilityType extends ABaseType {
 	}
 	
 	public String getCategory() {
-		return "[" + getClass().getSimpleName() + "]";
+		return getClass().getSimpleName();
 	}
 	
 	public abstract String getSubCategory();

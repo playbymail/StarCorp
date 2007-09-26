@@ -9,6 +9,8 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 
+import starcorp.client.gui.windows.MainWindow;
+
 public abstract class AWindow implements IComponent {
 
 	protected final Display display;
@@ -28,6 +30,8 @@ public abstract class AWindow implements IComponent {
 		});
 	}
 	
+	public abstract MainWindow getMainWindow();
+	
 	protected void center() {
 		Rectangle bounds = display.getBounds();
 		Point size = shell.getSize();
@@ -42,7 +46,7 @@ public abstract class AWindow implements IComponent {
 		shell.forceFocus();
 	}
 	
-	public void pack() {
+	public void redraw() {
 		shell.pack();
 	}
 
@@ -59,5 +63,40 @@ public abstract class AWindow implements IComponent {
 
 	protected void close() {
 		dispose();
+	}
+
+	public Shell getShell() {
+		return shell;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((display == null) ? 0 : display.hashCode());
+		result = prime * result + ((shell == null) ? 0 : shell.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		final AWindow other = (AWindow) obj;
+		if (display == null) {
+			if (other.display != null)
+				return false;
+		} else if (!display.equals(other.display))
+			return false;
+		if (shell == null) {
+			if (other.shell != null)
+				return false;
+		} else if (!shell.equals(other.shell))
+			return false;
+		return true;
 	}
 }

@@ -14,6 +14,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
 
+import starcorp.client.gui.windows.MainWindow;
+
 /**
  * starcorp.client.gui.ADataEntryWindow
  *
@@ -48,7 +50,7 @@ public abstract class ADataEntryWindow extends AWindow {
 		builderPane.open(shell);
 		tablePane.open(shell);
 		
-		pack();
+		redraw();
 		center();
 		shell.open();
 	}
@@ -56,11 +58,15 @@ public abstract class ADataEntryWindow extends AWindow {
 	protected abstract ABuilderPane createBuilder();
 	protected abstract ATablePane createTable();
 	
-	public void pack() {
-		builderPane.pack();
-		tablePane.pack();
-//		shell.pack();
+	public void redraw() {
+		builderPane.redraw();
+		tablePane.redraw();
 		center();
+	}
+
+	@Override
+	public MainWindow getMainWindow() {
+		return mainWindow;
 	}
 
 }

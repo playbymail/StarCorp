@@ -8,21 +8,48 @@
  *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
  *  See the License for the specific language governing permissions and limitations under the License. 
  */
-package starcorp.client.gui;
+package starcorp.client.gui.windows;
 
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 
+import starcorp.client.gui.IComponent;
+
 /**
- * starcorp.client.gui.IComponent
+ * starcorp.client.gui.StarshipDesignWindow
  *
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 25 Sep 2007
  */
-public interface IComponent {
+public class StarshipDesignWindow implements IComponent {
 
-	public abstract void open(Composite parent);
-	public abstract void redraw();
-	public abstract void dispose();
-	public abstract Point computeSize();
+	/* (non-Javadoc)
+	 * @see starcorp.client.gui.IComponent#dispose()
+	 */
+	public void dispose() {
+		// TODO Auto-generated method stub
+
+	}
+
+	/* (non-Javadoc)
+	 * @see starcorp.client.gui.IComponent#open(org.eclipse.swt.widgets.Composite)
+	 */
+	public void open(Composite parent) {
+		// TODO Auto-generated method stub
+
+	}
+
+	/* (non-Javadoc)
+	 * @see starcorp.client.gui.IComponent#pack()
+	 */
+	public void redraw() {
+		// TODO Auto-generated method stub
+
+	}
+
+	public Point computeSize() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

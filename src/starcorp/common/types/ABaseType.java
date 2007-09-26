@@ -27,4 +27,29 @@ public abstract class ABaseType implements Comparable<ABaseType>{
 	public int compareTo(ABaseType o) {
 		return getName().compareTo((o == null ? null : o.getName()));
 	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((getKey() == null) ? 0 : getKey().hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		final ABaseType other = (ABaseType) obj;
+		if (getKey() == null) {
+			if (other.getKey() != null)
+				return false;
+		} else if (!getKey().equals(other.getKey()))
+			return false;
+		return true;
+	}
 }

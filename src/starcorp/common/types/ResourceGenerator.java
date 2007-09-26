@@ -77,14 +77,13 @@ public class ResourceGenerator extends AFacilityType {
 
 	@Override
 	public String getSubCategory() {
-		return "|| Generator ( " + 
+		return
 		(isOrganic() ? "organics " : "") + 
 		(isMinerals() ? "minerals " : "") +
-		(isMetal() ? "metal " : "") + 
+		(isMetal() ? "metals " : "") + 
 		(isFissile() ? "fissile " : "") + 
 		(isFuel() ? "fuel " : "") +
 		(isGas() ? "gas " : "") + 
-		(isLiquid() ? "liquid " : "" ) +
-		") ||";
+		(isLiquid() ? "liquids " : "" );
 	}
 }

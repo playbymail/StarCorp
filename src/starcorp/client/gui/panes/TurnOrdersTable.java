@@ -8,21 +8,33 @@
  *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
  *  See the License for the specific language governing permissions and limitations under the License. 
  */
-package starcorp.client.gui;
+package starcorp.client.gui.panes;
+
+import starcorp.client.gui.ADataEntryWindow;
+import starcorp.client.gui.ATablePane;
 
 /**
- * starcorp.client.gui.ASearchPane
+ * starcorp.client.gui.TurnOrdersTable
  *
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 25 Sep 2007
  */
-public abstract class ABuilderPane extends AWindowPane {
+public class TurnOrdersTable extends ATablePane {
 
-	protected final ADataEntryWindow mainWindow;
-	
-	public ABuilderPane(ADataEntryWindow mainWindow) {
+	public TurnOrdersTable(ADataEntryWindow mainWindow) {
 		super(mainWindow);
-		this.mainWindow = mainWindow;
 	}
-	
+
+	@Override
+	protected int countColumns() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	protected String getColumnName(int index) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

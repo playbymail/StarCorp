@@ -8,21 +8,31 @@
  *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
  *  See the License for the specific language governing permissions and limitations under the License. 
  */
-package starcorp.client.gui;
+package starcorp.client.gui.panes;
+
+import java.util.List;
+
+import org.eclipse.swt.widgets.Widget;
+
+import starcorp.client.gui.ABuilderPane;
+import starcorp.client.gui.ADataEntryWindow;
 
 /**
- * starcorp.client.gui.ASearchPane
+ * starcorp.client.gui.SearchLawBuilder
  *
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 25 Sep 2007
  */
-public abstract class ABuilderPane extends AWindowPane {
+public class SearchLawBuilder extends ABuilderPane {
 
-	protected final ADataEntryWindow mainWindow;
-	
-	public ABuilderPane(ADataEntryWindow mainWindow) {
+	public SearchLawBuilder(ADataEntryWindow mainWindow) {
 		super(mainWindow);
-		this.mainWindow = mainWindow;
+		// TODO Auto-generated constructor stub
 	}
-	
+
+	@Override
+	protected void createWidgets(List<Widget> widgets) {
+		// TODO Auto-generated method stub
+		
+	}
 }

@@ -76,12 +76,11 @@ public class ServiceFacility extends AFacilityType {
 
 	@Override
 	public String getSubCategory() {
-		return " || Service (" + 
-		(isMedical() ? " medical / " : "") + 
-		(isFitness() ? " fitness / " : "") + 
-		(isEntertainment() ? " ent / " : "") + 
-		(isEducation() ? " edu / " : "") + 
-		getQuality() + ") || ";
+		return "Quality " + getQuality() +
+		(isMedical() ? " medical " : "") + 
+		(isFitness() ? " fitness " : "") + 
+		(isEntertainment() ? " entertainment " : "") + 
+		(isEducation() ? " education " : "");
 	}
 	
 	public int getQuality() {

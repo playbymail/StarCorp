@@ -66,11 +66,10 @@ public class Factory extends AFacilityType {
 
 	@Override
 	public String getSubCategory() {
-		return " || Factory ( " + 
-		(isConsumer() ? "consumer / " : "") + 
-		(isIndustrial() ? "industrial / " : "") + 
-		(isConstruction() ? "construction / " : "") + 
-		(isShipard() ? "shipyard / " : "") +
-		getMaxCapacity() + ") || ";
+		return "Capacity " + getMaxCapacity() + "mu of" +
+		(isConsumer() ? " consumer" : "") + 
+		(isIndustrial() ? " industrial" : "") + 
+		(isConstruction() ? " construction" : "") + 
+		(isShipard() ? " shipyard" : "");
 	}
 }

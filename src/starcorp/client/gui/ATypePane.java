@@ -12,41 +12,43 @@ package starcorp.client.gui;
 
 import java.util.List;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Widget;
 
 import starcorp.client.gui.windows.MainWindow;
-import starcorp.common.entities.IEntity;
+import starcorp.common.types.ABaseType;
 
 /**
- * starcorp.client.gui.AEntityPane
+ * starcorp.client.gui.ATypePane
  *
  * @author Seyed Razavi <monkeyx@gmail.com>
- * @version 25 Sep 2007
+ * @version 26 Sep 2007
  */
-public abstract class AEntityPane extends ADataPane {
+public class ATypePane extends ADataPane {
 
-	private final IEntity entity;
+	private final ABaseType type;
 	
-	public AEntityPane(MainWindow mainWindow, IEntity entity) {
+	/**
+	 * @param mainWindow
+	 */
+	public ATypePane(MainWindow mainWindow, ABaseType type) {
 		super(mainWindow);
-		this.entity = entity;
+		this.type = type;
 	}
 
+	/* (non-Javadoc)
+	 * @see starcorp.client.gui.AWindowPane#createWidgets(java.util.List)
+	 */
 	@Override
 	protected void createWidgets(List<Widget> widgets) {
-		System.out.println("AEntityPane createWidgets: " + entity);
-		super.getParent().setText(entity.getDisplayName());
+		System.out.println("ATypePane createWidgets: " + type);
+		super.getParent().setText(type.getName());
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((entity == null) ? 0 : entity.hashCode());
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
 		return result;
 	}
 
@@ -58,11 +60,11 @@ public abstract class AEntityPane extends ADataPane {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		final AEntityPane other = (AEntityPane) obj;
-		if (entity == null) {
-			if (other.entity != null)
+		final ATypePane other = (ATypePane) obj;
+		if (type == null) {
+			if (other.type != null)
 				return false;
-		} else if (!entity.equals(other.entity))
+		} else if (!type.equals(other.type))
 			return false;
 		return true;
 	}

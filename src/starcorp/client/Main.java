@@ -8,21 +8,23 @@
  *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
  *  See the License for the specific language governing permissions and limitations under the License. 
  */
-package starcorp.client.gui;
+package starcorp.client;
+
+import starcorp.client.gui.windows.MainWindow;
 
 /**
- * starcorp.client.gui.ASearchPane
+ * starcorp.client.Main
  *
  * @author Seyed Razavi <monkeyx@gmail.com>
- * @version 25 Sep 2007
+ * @version 26 Sep 2007
  */
-public abstract class ABuilderPane extends AWindowPane {
+public class Main {
 
-	protected final ADataEntryWindow mainWindow;
-	
-	public ABuilderPane(ADataEntryWindow mainWindow) {
-		super(mainWindow);
-		this.mainWindow = mainWindow;
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		new MainWindow().run();
 	}
-	
+
 }

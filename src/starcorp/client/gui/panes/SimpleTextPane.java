@@ -8,45 +8,54 @@
  *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
  *  See the License for the specific language governing permissions and limitations under the License. 
  */
-package starcorp.client.gui;
+package starcorp.client.gui.panes;
 
 import java.util.List;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Widget;
 
+import starcorp.client.gui.ADataPane;
 import starcorp.client.gui.windows.MainWindow;
-import starcorp.common.entities.IEntity;
 
 /**
- * starcorp.client.gui.AEntityPane
+ * starcorp.client.gui.SimpleTextPane
  *
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 25 Sep 2007
  */
-public abstract class AEntityPane extends ADataPane {
+public class SimpleTextPane extends ADataPane {
 
-	private final IEntity entity;
+	private final String heading;
+	private final String text;
 	
-	public AEntityPane(MainWindow mainWindow, IEntity entity) {
+	public SimpleTextPane(MainWindow mainWindow, String heading, String text) {
 		super(mainWindow);
-		this.entity = entity;
+		this.text = text;
+		this.heading = heading;
 	}
-
+	
+	/* (non-Javadoc)
+	 * @see starcorp.client.gui.ADataPane#createWidgets(java.util.List)
+	 */
 	@Override
 	protected void createWidgets(List<Widget> widgets) {
-		System.out.println("AEntityPane createWidgets: " + entity);
-		super.getParent().setText(entity.getDisplayName());
+		getParent().setText(heading);
+		GridData data = new GridData();
+		data.horizontalSpan=2;
+		Label lbl = createLabel(getParent(), widgets, text);
+		lbl.setLayoutData(data);
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((entity == null) ? 0 : entity.hashCode());
+		result = prime * result + ((heading == null) ? 0 : heading.hashCode());
+		result = prime * result + ((text == null) ? 0 : text.hashCode());
 		return result;
 	}
 
@@ -58,11 +67,16 @@ public abstract class AEntityPane extends ADataPane {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		final AEntityPane other = (AEntityPane) obj;
-		if (entity == null) {
-			if (other.entity != null)
+		final SimpleTextPane other = (SimpleTextPane) obj;
+		if (heading == null) {
+			if (other.heading != null)
 				return false;
-		} else if (!entity.equals(other.entity))
+		} else if (!heading.equals(other.heading))
+			return false;
+		if (text == null) {
+			if (other.text != null)
+				return false;
+		} else if (!text.equals(other.text))
 			return false;
 		return true;
 	}
