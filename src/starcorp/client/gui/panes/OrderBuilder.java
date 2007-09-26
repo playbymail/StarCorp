@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Widget;
 
 import starcorp.client.gui.ABuilderPane;
 import starcorp.client.gui.ADataEntryWindow;
+import starcorp.client.gui.windows.TurnOrderWindow;
 import starcorp.common.entities.IEntity;
 import starcorp.common.turns.Turn;
 import starcorp.common.turns.TurnOrder;
@@ -75,7 +76,9 @@ public class OrderBuilder extends ABuilderPane {
 			public void handleEvent (Event event) {
 				TurnOrder order = readOrder();
 				turn.add(order);
-				mainWindow.getMainWindow().setTurnDirty(true);
+				final TurnOrderWindow orderWindow = (TurnOrderWindow)mainWindow;
+				orderWindow.turnEdited();
+				orderWindow.turnOrdersReload();
 			}
 		});
 
@@ -261,9 +264,7 @@ public class OrderBuilder extends ABuilderPane {
 			createShipDropDown(widgets, 0);
 		}
 		else if(type.equals(OrderType.DESIGN_SHIP)){
-			createTextInput(widgets, 0, "Name");
-			createShipHullsList(widgets, 1);
-			
+			mainWindow.getMainWindow().openStarshipDesignWindow();
 		}
 		else if(type.equals(OrderType.MOVE)){
 			// TODO filter to ships in space
@@ -276,6 +277,8 @@ public class OrderBuilder extends ABuilderPane {
 			createShipDropDown(widgets, 0);
 			createStarSystemDropDown(widgets, 1);
 		}
+		
+		mainWindow.redraw();
 	}
 	
 	private TurnOrder readOrder() {
@@ -437,7 +440,7 @@ public class OrderBuilder extends ABuilderPane {
 	
 	private void createPlanetDropDown(List<Widget> widgets, int index) {
 		if(report != null)
-			setContents(index,createEntitySelection(orderArgumentPanels[index], widgets, report.getScannedPlanets(), null),"Asteroid");
+			setContents(index,createEntitySelection(orderArgumentPanels[index], widgets, report.getScannedPlanets(), null),"Planet");
 		else
 			createErrorLabel(widgets, index, "Planet", "No report loaded");
 	}

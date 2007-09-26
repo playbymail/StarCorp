@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
@@ -98,7 +99,7 @@ public class TreeBrowser implements IComponent  {
 				shipItem.setData(design);
 				listItemDesigns.add(shipItem);
 				
-				List<Starship> ships = mainWindow.getTurnReport().getPlayerStarships(design);
+				Set<Starship> ships = mainWindow.getTurnReport().getPlayerStarships(design);
 				if(ships != null && ships.size() > 0) {
 					for(Starship ship : ships) {
 						TreeItem item = new TreeItem(shipItem,SWT.NONE);
@@ -116,7 +117,7 @@ public class TreeBrowser implements IComponent  {
 				item.setData(ship);
 				listItemShips.add(item);
 			}
-			Map<Colony,List<Facility>> map = report.getPlayerFacilitiesByColony();
+			Map<Colony,Set<Facility>> map = report.getPlayerFacilitiesByColony();
 			for(Colony colony : map.keySet()) {
 				TreeItem itemColony = new TreeItem(itemFacilities,SWT.NONE);
 				itemColony.setText(colony.getName() +" [" + colony.getID() +"]");

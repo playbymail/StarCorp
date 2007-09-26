@@ -40,6 +40,7 @@ import starcorp.client.gui.widgets.TreeBrowser;
 import starcorp.client.turns.TurnSubmitter;
 import starcorp.common.entities.Corporation;
 import starcorp.common.turns.Turn;
+import starcorp.common.turns.TurnOrder;
 import starcorp.common.turns.TurnReport;
 import starcorp.common.types.GalacticDate;
 
@@ -473,6 +474,12 @@ public class MainWindow extends AWindow {
 
 	public void setTurnReport(TurnReport turnReport) {
 		this.turnReport = turnReport;
+	}
+	
+	public void addTurnOrder(TurnOrder order) {
+		// TODO implement
+		openTurnWindow();
+		// add order to current turn & refresh turn window to show latest orders
 	}
 
 	public Turn getCurrentTurn() {

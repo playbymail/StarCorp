@@ -25,6 +25,11 @@ public class MarketTable extends ATablePane {
 		super(mainWindow);
 		// TODO Auto-generated constructor stub
 	}
+	
+	@Override
+	protected String getTableName() {
+		return "Colony Markets";
+	}
 
 	@Override
 	protected int countColumns() {

@@ -25,6 +25,11 @@ public class LawTable extends ATablePane {
 		super(mainWindow);
 		// TODO Auto-generated constructor stub
 	}
+	
+	@Override
+	protected String getTableName() {
+		return "Leases / Grants";
+	}
 
 	@Override
 	protected int countColumns() {

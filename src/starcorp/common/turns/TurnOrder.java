@@ -81,7 +81,7 @@ public class TurnOrder {
 	}
 	
 	public String get(int index) {
-		return args.get(index);
+		return index >= 0 && index < args.size() ? args.get(index) : "";
 	}
 	
 	public void set(int index, String value) {

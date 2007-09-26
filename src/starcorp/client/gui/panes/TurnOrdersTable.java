@@ -10,8 +10,20 @@
  */
 package starcorp.client.gui.panes;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.Widget;
+
 import starcorp.client.gui.ADataEntryWindow;
 import starcorp.client.gui.ATablePane;
+import starcorp.client.gui.windows.TurnOrderWindow;
+import starcorp.common.turns.Turn;
+import starcorp.common.turns.TurnOrder;
+import starcorp.common.types.OrderType;
 
 /**
  * starcorp.client.gui.TurnOrdersTable
@@ -20,21 +32,62 @@ import starcorp.client.gui.ATablePane;
  * @version 25 Sep 2007
  */
 public class TurnOrdersTable extends ATablePane {
-
-	public TurnOrdersTable(ADataEntryWindow mainWindow) {
+	private final Turn turn;
+	
+	public TurnOrdersTable(Turn turn, ADataEntryWindow mainWindow) {
 		super(mainWindow);
+		this.turn = turn;
+	}
+	
+	@Override
+	protected String getTableName() {
+		return "Turn Orders";
 	}
 
 	@Override
 	protected int countColumns() {
-		// TODO Auto-generated method stub
-		return 0;
+		return 7;
 	}
 
 	@Override
 	protected String getColumnName(int index) {
-		// TODO Auto-generated method stub
+		switch(index) {
+		case 0:
+			return "Type";
+		case 1:
+		case 2:
+		case 3:
+		case 4:
+		case 5:
+		case 6:
+			return "";
+		}
 		return null;
+	}
+
+	@Override
+	protected void populate() {
+		for(TurnOrder order : turn.getOrders()) {
+			String[] values = new String[countColumns()];
+			values[0] = order.getType().getKey();
+			for(int i = 1; i < countColumns(); i++) {
+				values[i] = order.get((i-1));
+			}
+			createRow(values);
+		}
+	}
+
+	@Override
+	protected void columnEdited(int row, int column, String value) {
+		TurnOrder order = turn.getOrders().get(row);
+		if(column == 0) {
+			order.setType(OrderType.getType(value));
+		}
+		else {
+			order.set((column-1), value);
+		}
+		TurnOrderWindow orderWindow = (TurnOrderWindow)super.window;
+		orderWindow.turnEdited();
 	}
 
 }

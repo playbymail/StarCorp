@@ -38,4 +38,9 @@ public class ItemsTable extends ATablePane {
 		return null;
 	}
 
+	@Override
+	protected String getTableName() {
+		return "Items";
+	}
+
 }

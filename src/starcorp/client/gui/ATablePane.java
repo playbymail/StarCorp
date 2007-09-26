@@ -19,10 +19,16 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowData;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 
 /**
@@ -55,7 +61,7 @@ public abstract class ATablePane extends AWindowPane {
 	}
 	
 	protected int getTableStyle() {
-		return SWT.SINGLE | SWT.FULL_SELECTION | SWT.HIDE_SELECTION;
+		return SWT.BORDER | SWT.MULTI;
 	}
 	
 	protected boolean isHeaderVisible() {
@@ -68,57 +74,97 @@ public abstract class ATablePane extends AWindowPane {
 	
 
 	protected void createWidgets(List<Widget> widgets) {
+		getParent().setText(getTableName());
 		table = new Table(getParent(),getTableStyle());
 		table.setHeaderVisible(isHeaderVisible());
 		table.setLinesVisible(isLinesVisible());
-		
 		for(int i = 0; i < countColumns(); i++) {
 			TableColumn col = new TableColumn(table, SWT.CENTER);
 			col.setText(getColumnName(i));
+			col.setWidth(getColumnWidth(i));
 			columns.add(col);
-			col.pack();
 		}
 		populate();
 		
-		final TableEditor editor = new TableEditor(table);
-		editor.horizontalAlignment = SWT.LEFT;
-		editor.grabHorizontal = true;
-		
-		table.addMouseListener(new MouseAdapter() {
-			public void mouseDown(MouseEvent event) {
-				// Dispose any existing editor
-		        Control old = editor.getEditor();
-		        if (old != null) old.dispose();
-
-		        // Determine where the mouse was clicked
-		        Point pt = new Point(event.x, event.y);
-
-		        // Determine which row was selected
-		        final TableItem item = table.getItem(pt);
-		        if (item != null) {
-		        	// Determine which column was selected
-		        	int column = -1;
-		        	for (int i = 0, n = table.getColumnCount(); i < n; i++) {
-		        		Rectangle rect = item.getBounds(i);
-		        		if (rect.contains(pt)) {
-		        			// This is the selected column
-		        			column = i;
-		        			break;
-		        		}
-		        	}
-		        	columnSelected(editor, item,column);
-		        }
-			}
-		});
-	}
-
-	protected void columnSelected(TableEditor editor, TableItem row, int column) {
-		
+		if(isEditable()) {
+			createEditor();
+		}
 	}
 	
-	protected void createRow() {
+	protected int getColumnWidth(int index) {
+		return 80;
+	}
+	
+	private void createEditor() {
+		 final TableEditor editor = new TableEditor(table);
+		    editor.horizontalAlignment = SWT.LEFT;
+		    editor.grabHorizontal = true;
+		    table.addListener(SWT.MouseDown, new Listener() {
+		      public void handleEvent(Event event) {
+		        Rectangle clientArea = table.getClientArea();
+		        Point pt = new Point(event.x, event.y);
+		        int index = table.getTopIndex();
+		        while (index < table.getItemCount()) {
+		          boolean visible = false;
+		          final TableItem item = table.getItem(index);
+		          for (int i = 0; i < table.getColumnCount(); i++) {
+		            Rectangle rect = item.getBounds(i);
+		            if (rect.contains(pt)) {
+		              final int row = index;
+		              final int column = i;
+		              final Text text = new Text(table, SWT.NONE);
+		              Listener textListener = new Listener() {
+		                public void handleEvent(final Event e) {
+		                  switch (e.type) {
+		                  case SWT.FocusOut:
+		                    item.setText(column, text.getText());
+		                    columnEdited(row, column, text.getText());
+		                    text.dispose();
+		                    break;
+		                  case SWT.Traverse:
+		                    switch (e.detail) {
+		                    case SWT.TRAVERSE_RETURN:
+		                      item
+		                          .setText(column, text
+		                              .getText());
+		                    // FALL THROUGH
+		                    case SWT.TRAVERSE_ESCAPE:
+		                      text.dispose();
+		                      e.doit = false;
+		                    }
+		                    break;
+		                  }
+		                }
+		              };
+		              text.addListener(SWT.FocusOut, textListener);
+		              text.addListener(SWT.Traverse, textListener);
+		              editor.setEditor(text, item, i);
+		              text.setText(item.getText(i));
+		              text.selectAll();
+		              text.setFocus();
+		              return;
+		            }
+		            if (!visible && rect.intersects(clientArea)) {
+		              visible = true;
+		            }
+		          }
+		          if (!visible)
+		            return;
+		          index++;
+		        }
+		      }
+		    });
+	}
+	
+	protected void columnEdited(int row, int column, String value) {
+		
+	}
+
+	protected TableItem createRow(String[] values) {
 		final TableItem item = new TableItem(table,SWT.NONE);
+		item.setText(values);
 		items.add(item);
+		return item;
 	}
 	
 	protected void deleteRow(int row) {
@@ -138,11 +184,29 @@ public abstract class ATablePane extends AWindowPane {
 		editor.setEditor(c,item,column);
 	}
 	
+	protected boolean isEditable() {
+		return true;
+	}
+	
 	protected void populate() {}
+	
+	protected abstract String getTableName();
 	
 	protected abstract int countColumns();
 	
 	protected abstract String getColumnName(int index);
+	
+	protected Table getTable() {
+		return table;
+	}
+	
+	protected TableItem row(int index) {
+		return items.get(index);
+	}
+	
+	protected TableColumn column(int index) {
+		return columns.get(index);
+	}
 
 	public void redraw() {
 		table.pack();
@@ -150,6 +214,15 @@ public abstract class ATablePane extends AWindowPane {
 
 	public Point computeSize() {
 		return table.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+	}
+
+	@Override
+	public void open(Composite parent) {
+		super.open(parent);
+		GridLayout layout = new GridLayout(1,false);
+		layout.marginWidth=20;
+		layout.marginHeight=10;
+		getParent().setLayout(layout);
 	}
 
 }

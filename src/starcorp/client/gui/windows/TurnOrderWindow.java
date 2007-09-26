@@ -54,14 +54,24 @@ public class TurnOrderWindow extends ADataEntryWindow {
 	protected ABuilderPane createBuilder() {
 		return new OrderBuilder(this);
 	}
-
+	
 	@Override
 	protected ATablePane createTable() {
-		return new TurnOrdersTable(this);
+		return new TurnOrdersTable(turn, this);
 	}
 
-	public void turnChanged() {
+	public void turnEdited() {
 		mainWindow.setTurnDirty(true);
+	}
+	
+	public void turnOrdersReload() {
+		builderPane.dispose();
+		builderPane = createBuilder();
+		builderPane.open(getTop());
+		tablePane.dispose();
+		tablePane = createTable();
+		tablePane.open(getBottom());
+		redraw();
 	}
 	
 	public Turn getTurn() {

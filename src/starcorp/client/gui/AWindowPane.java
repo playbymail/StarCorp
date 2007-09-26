@@ -40,6 +40,7 @@ import starcorp.common.entities.Colony;
 import starcorp.common.entities.IEntity;
 import starcorp.common.entities.Planet;
 import starcorp.common.entities.StarshipDesign;
+import starcorp.common.turns.TurnOrder;
 import starcorp.common.types.ABaseType;
 import starcorp.common.types.AFacilityType;
 import starcorp.common.types.AItemType;
@@ -86,7 +87,22 @@ public abstract class AWindowPane implements IComponent {
 
 	public void redraw() {
 		panel.pack();
-		panel.redraw();
+	}
+	
+	protected Hyperlink createOrderLink(Composite parent, List<Widget> widgets, final TurnOrder order, String label) {
+		if(label == null) {
+			label = order.getType().getName();
+		}
+		Hyperlink lnk = createHyperlink(parent, widgets, label);
+		lnk.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {
+				window.getMainWindow().addTurnOrder(order);
+			}
+			public void widgetSelected(SelectionEvent e) {
+				window.getMainWindow().addTurnOrder(order);
+			}
+		});
+		return lnk;
 	}
 	
 	protected Hyperlink createFacilityTypeLink(Composite parent, List<Widget> widgets, final AFacilityType type, String label) {
@@ -295,7 +311,7 @@ public abstract class AWindowPane implements IComponent {
 		final Combo c = new Combo(parent,SWT.DROP_DOWN | SWT.READ_ONLY);
 		for(String s : items) {
 			c.add(s);
-			System.out.println(s);
+//			System.out.println(s);
 		}
 		c.setData(values);
 		RowData data = new RowData(SWT.DEFAULT,70);
@@ -315,7 +331,7 @@ public abstract class AWindowPane implements IComponent {
 		return list;
 	}
 
-	protected Combo createTypeSelection(Composite parent, List<Widget> widgets, List<?> types, String label) {
+	protected Combo createTypeSelection(Composite parent, List<Widget> widgets, Collection<?> types, String label) {
 		String[] items = new String[types.size()];
 		TreeSet<ABaseType> set = new TreeSet<ABaseType>();
 		for(Object o : types) {
@@ -330,7 +346,7 @@ public abstract class AWindowPane implements IComponent {
 		return createCombo(parent, widgets, items, set, label);
 	}
 	
-	protected org.eclipse.swt.widgets.List createTypeMultiSelection(Composite parent, List<Widget> widgets, List<?> types, String label) {
+	protected org.eclipse.swt.widgets.List createTypeMultiSelection(Composite parent, List<Widget> widgets, Collection<?> types, String label) {
 		String[] items = new String[types.size()];
 		TreeSet<ABaseType> set = new TreeSet<ABaseType>();
 		for(Object o : types) {
@@ -346,7 +362,7 @@ public abstract class AWindowPane implements IComponent {
 		
 	}
 
-	protected Combo createEntitySelection(Composite parent, List<Widget> widgets, List<?> types, String label) {
+	protected Combo createEntitySelection(Composite parent, List<Widget> widgets, Collection<?> types, String label) {
 		String[] items = new String[types.size()];
 		TreeSet<IEntity> set = new TreeSet<IEntity>();
 		for(Object o : types) {
@@ -361,7 +377,7 @@ public abstract class AWindowPane implements IComponent {
 		return createCombo(parent, widgets, items, set, label);
 	}
 	
-	protected org.eclipse.swt.widgets.List createEntityMultiSelection(Composite parent, List<Widget> widgets, List<?> types, String label) {
+	protected org.eclipse.swt.widgets.List createEntityMultiSelection(Composite parent, List<Widget> widgets, Collection<?> types, String label) {
 		String[] items = new String[types.size()];
 		TreeSet<IEntity> set = new TreeSet<IEntity>();
 		for(Object o : types) {

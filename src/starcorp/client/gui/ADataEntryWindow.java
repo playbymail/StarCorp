@@ -11,6 +11,9 @@
 package starcorp.client.gui;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
 
@@ -26,6 +29,9 @@ public abstract class ADataEntryWindow extends AWindow {
 
 	protected final MainWindow mainWindow;
 	
+	private Composite topPanel;
+	private Composite bottomPanel;
+	
 	protected ABuilderPane builderPane;
 	protected ATablePane tablePane;
 	
@@ -37,18 +43,34 @@ public abstract class ADataEntryWindow extends AWindow {
 	public void dispose() {
 		builderPane.dispose();
 		tablePane.dispose();
+		topPanel.dispose();
+		bottomPanel.dispose();
 		shell.dispose();
 		mainWindow.focus();
 	}
 
+	protected Composite getTop() {
+		return topPanel;
+	}
+	
+	protected Composite getBottom() {
+		return bottomPanel;
+	}
 	public void open(Composite parent) {
 		shell.setLayout(new RowLayout(SWT.VERTICAL));
 		shell.setSize(700, 500);
+		
+		topPanel = new Composite(shell,SWT.NONE);
+		topPanel.setLayout(new GridLayout(1,false));
+		
+		bottomPanel = new Composite(shell,SWT.NONE);
+		bottomPanel.setLayout(new GridLayout(1,false));
+		
 		builderPane = createBuilder();
 		tablePane = createTable();
 		
-		builderPane.open(shell);
-		tablePane.open(shell);
+		builderPane.open(topPanel);
+		tablePane.open(bottomPanel);
 		
 		redraw();
 		center();
@@ -61,6 +83,9 @@ public abstract class ADataEntryWindow extends AWindow {
 	public void redraw() {
 		builderPane.redraw();
 		tablePane.redraw();
+		topPanel.pack();
+		bottomPanel.pack();
+		shell.pack();
 		center();
 	}
 

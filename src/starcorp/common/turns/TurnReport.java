@@ -14,10 +14,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -190,25 +193,29 @@ public class TurnReport {
 		return count;
 	}
 	
-	public List<StellarAnomoly> getScannedAnomolies() {
-		List<StellarAnomoly> list = new ArrayList<StellarAnomoly>();
+	public Set<StellarAnomoly> getScannedAnomolies() {
+		Set<StellarAnomoly> list = new TreeSet<StellarAnomoly>();
 		for(Object o : turn.getScannedEntities(StellarAnomoly.class)) {
 			list.add((StellarAnomoly)o);
 		}
 		return list;
 	}
 	
-	public List<Colony> getKnownColonies() {
-		List<Colony> colonies = new ArrayList<Colony>();
+	public Set<Colony> getKnownColonies() {
+		Set<Colony> colonies = new TreeSet<Colony>();
 		colonies.addAll(getPlayerFacilitiesByColony().keySet());
 		for(Object o : turn.getScannedEntities(Colony.class)) {
 			colonies.add((Colony)o);
 		}
+		for(Starship ship : getPlayerStarships()) {
+			if(ship.getColony() != null)
+				colonies.add(ship.getColony());
+		}
 		return colonies;
 	}
 	
-	public List<Planet> getScannedPlanets() {
-		List<Planet> entities = new ArrayList<Planet>();
+	public Set<Planet> getScannedPlanets() {
+		Set<Planet> entities = new TreeSet<Planet>();
 		for(Object o :turn.getScannedEntities(Planet.class)) {
 			Planet p = (Planet)o;
 			entities.add(p);
@@ -216,8 +223,8 @@ public class TurnReport {
 		return entities;
 	}
 
-	public List<StarSystemEntity> getScannedAsteroids() {
-		List<StarSystemEntity> entities = new ArrayList<StarSystemEntity>();
+	public Set<StarSystemEntity> getScannedAsteroids() {
+		Set<StarSystemEntity> entities = new TreeSet<StarSystemEntity>();
 		for(Object o :turn.getScannedEntities(StarSystemEntity.class)) {
 			StarSystemEntity entity = (StarSystemEntity)o;
 			if(entity.isAsteroid()) {
@@ -227,8 +234,8 @@ public class TurnReport {
 		return entities;
 	}
 	
-	public List<StarSystemEntity> getScannedGasFields() {
-		List<StarSystemEntity> entities = new ArrayList<StarSystemEntity>();
+	public Set<StarSystemEntity> getScannedGasFields() {
+		Set<StarSystemEntity> entities = new TreeSet<StarSystemEntity>();
 		for(Object o :turn.getScannedEntities(StarSystemEntity.class)) {
 			StarSystemEntity entity = (StarSystemEntity)o;
 			if(entity.isGasfield()) {
@@ -238,19 +245,19 @@ public class TurnReport {
 		return entities;
 	}
 	
-	public List<Starship> getPlayerStarships(StarshipDesign design) {
+	public Set<Starship> getPlayerStarships(StarshipDesign design) {
 		return getPlayerStarshipsByDesign().get(design);
 	}
 	
-	public Map<StarshipDesign,List<Starship>> getPlayerStarshipsByDesign() {
-		Map<StarshipDesign,List<Starship>> map = new TreeMap<StarshipDesign, List<Starship>>();
+	public Map<StarshipDesign,Set<Starship>> getPlayerStarshipsByDesign() {
+		Map<StarshipDesign,Set<Starship>> map = new TreeMap<StarshipDesign, Set<Starship>>();
 		
 		for(Object o : playerEntities) {
 			if(o instanceof Starship) {
 				Starship ship = (Starship) o;
-				List<Starship> list = map.get(ship.getDesign());
+				Set<Starship> list = map.get(ship.getDesign());
 				if(list == null) {
-					list = new ArrayList<Starship>();
+					list = new TreeSet<Starship>();
 					map.put(ship.getDesign(),list);
 				}
 				list.add(ship);
@@ -259,8 +266,8 @@ public class TurnReport {
 		return map;
 	}
 	
-	public List<Starship> getPlayerStarships() {
-		List<Starship> list = new ArrayList<Starship>();
+	public Set<Starship> getPlayerStarships() {
+		Set<Starship> list = new TreeSet<Starship>();
 		for(Object o : playerEntities) {
 			if(o instanceof Starship)
 				list.add((Starship)o);
@@ -268,14 +275,14 @@ public class TurnReport {
 		return list;
 	}
 	
-	public Map<Colony,List<Facility>> getPlayerFacilitiesByColony() {
-		Map<Colony, List<Facility>> map = new TreeMap<Colony, List<Facility>>(); 
+	public Map<Colony,Set<Facility>> getPlayerFacilitiesByColony() {
+		Map<Colony, Set<Facility>> map = new TreeMap<Colony, Set<Facility>>(); 
 		for(Object o : playerEntities) {
 			if(o instanceof Facility) {
 				Facility f = (Facility) o;
-				List<Facility> list = map.get(f.getColony());
+				Set<Facility> list = map.get(f.getColony());
 				if(list == null) {
-					list = new ArrayList<Facility>();
+					list = new TreeSet<Facility>();
 					map.put(f.getColony(), list);
 				}
 				list.add(f);
@@ -284,8 +291,8 @@ public class TurnReport {
 		return map;
 	}
 	
-	public List<Facility> getPlayerFacilities() {
-		List<Facility> list = new ArrayList<Facility>();
+	public Set<Facility> getPlayerFacilities() {
+		Set<Facility> list = new TreeSet<Facility>();
 		for(Object o : playerEntities) {
 			if(o instanceof Facility) {
 				list.add((Facility)o);
@@ -294,8 +301,8 @@ public class TurnReport {
 		return list;
 	}
 
-	public List<Facility> getPlayerFacilitiesByType(Class clazz) {
-		List<Facility> list = new ArrayList<Facility>();
+	public Set<Facility> getPlayerFacilitiesByType(Class clazz) {
+		Set<Facility> list = new TreeSet<Facility>();
 		for(Object o : playerEntities) {
 			if(o instanceof Facility) {
 				Facility f = (Facility) o;
@@ -307,8 +314,8 @@ public class TurnReport {
 		return list;
 	}
 
-	public List<StarshipDesign> getPlayerDesigns() {
-		List<StarshipDesign> list = new ArrayList<StarshipDesign>();
+	public Set<StarshipDesign> getPlayerDesigns() {
+		Set<StarshipDesign> list = new TreeSet<StarshipDesign>();
 		for(Object o : playerEntities) {
 			if(o instanceof StarshipDesign)
 				list.add((StarshipDesign)o);

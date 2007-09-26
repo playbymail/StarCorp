@@ -102,6 +102,8 @@ public class Turn {
 	}
 	
 	public void readXML(Element root) {
+		if(root == null)
+			return;
 		this.corporation = new Corporation();
 		Element eCorp = root.element("corporation");
 		if(eCorp != null) this.corporation.readXML(eCorp.element("entity"));
