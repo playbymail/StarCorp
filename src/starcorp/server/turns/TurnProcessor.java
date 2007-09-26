@@ -86,18 +86,8 @@ public class TurnProcessor extends AServerTask {
 						TurnReport report = process(turn);
 						GalacticDate date = ServerConfiguration.getCurrentDate();
 						Corporation corp = report.getTurn().getCorporation();
-						Document doc = DocumentHelper.createDocument();
-						report.toXML(doc.addElement("starcorp"));
 						String filename = ServerConfiguration.REPORTS_FOLDER + "/" + corp.getPlayerEmail() + "-turn-" + date.getMonth() + "-" +  date.getYear() + ".xml";
-						// TODO switch to compact format to save space after debugging
-						// OutputFormat format = OutputFormat.createCompactFormat();
-						OutputFormat format = OutputFormat.createPrettyPrint();
-						XMLWriter writer = new XMLWriter(
-							new FileWriter(filename), format
-						);
-						
-						writer.write(doc);
-						writer.close();
+						report.write(new FileWriter(filename));
 						
 						String[] to = {corp.getPlayerName() + "<" + corp.getPlayerEmail() + ">"};
 						String subject = "Starcorp turn " + date.getMonth() + "." + date.getYear();
@@ -147,14 +137,18 @@ public class TurnProcessor extends AServerTask {
 						turn.add(error);
 					}
 				}
-				report.addPlayerEntities(entityStore.listColonistGrants(corp, true));
 				report.addPlayerEntities(entityStore.listDesigns(corp));
-				report.addPlayerEntities(entityStore.listDevelopmentGrants(corp, true));
 				report.addPlayerEntities(entityStore.listFacilities(corp));
-				report.addPlayerEntities(entityStore.listItems(corp));
-				report.addPlayerEntities(entityStore.listLeases(corp, true));
 				report.addPlayerEntities(entityStore.listShips(corp));
 				report.setMarket(entityStore.listMarket(1));
+				report.setLaws(entityStore.listLaws());
+				report.setItems(entityStore.listItems(turn.getCorporation()));
+				// TODO add factory queue items to report
+				// TODO add facility workers to report
+				// TODO add CreditAccount for corporation to report
+				// TODO add recent CashTransaction for corporation to report
+				// TODO add known systems (requires changes to entities)
+				// TODO add count of facilities by type for each known colony
 			}
 		}
 		log.info(this + ": Processed turn from " + turn.getCorporation() + ". Order: " + turn.getOrders().size() + ". Errors: " + turn.getErrors().size());

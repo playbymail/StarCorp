@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -64,6 +65,10 @@ public class OrderType extends ABaseType {
 
 	static {
 		loadTypes();
+	}
+	
+	public static Set<String> setOrders() {
+		return types.keySet();
 	}
 	
 	public static void main(String[] args) {

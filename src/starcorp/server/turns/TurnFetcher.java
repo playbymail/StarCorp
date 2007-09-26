@@ -105,26 +105,16 @@ public class TurnFetcher extends AServerTask {
 	
 	private boolean saveTurn(IEmail email) {
 		boolean saved = false;
-		SAXReader reader = new SAXReader();
 		int max = email.countAttachments();
 		for(int i = 0; i < max; i++) {
 			Attachment a = email.getAttachment(i);
 			ByteArrayInputStream is = new ByteArrayInputStream(a.content);
 			try {
-				Document doc = reader.read(is);
-				Turn turn = new Turn(doc.getRootElement().element("turn"));
+				Turn turn = new Turn(is);
 				Corporation corp = turn.getCorporation();
 				GalacticDate date = ServerConfiguration.getCurrentDate();
 				String filename = ServerConfiguration.TURNS_FOLDER + "/" + corp.getPlayerEmail() + "-turn-" + date.getMonth() + "-" +  date.getYear() + ".xml";
-				// TODO switch to compact format to save space after debugging
-				// OutputFormat format = OutputFormat.createCompactFormat();
-				OutputFormat format = OutputFormat.createPrettyPrint();
-				XMLWriter writer = new XMLWriter(
-					new FileWriter(filename), format
-				);
-				
-				writer.write(doc);
-				writer.close();
+				turn.write(new FileWriter(filename));
 				saved = true;
 			}
 			catch(Throwable e) {

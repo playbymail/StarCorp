@@ -27,7 +27,7 @@ import starcorp.common.types.Items;
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 24 Sep 2007
  */
-public class ACorporateItem implements IEntity {
+public abstract class ACorporateItem implements IEntity {
 	private long ID;
 	private int version;
 	private Corporation owner;
@@ -122,6 +122,10 @@ public class ACorporateItem implements IEntity {
 
 	public Element toFullXML(Element parent) {
 		return toBasicXML(parent);
+	}
+
+	public String getDisplayName() {
+		return getClass().getSimpleName() + " [" + getID() +"] @ " + colony.getName() + " [" + colony.getID() + "]";
 	}
 
 }

@@ -22,7 +22,7 @@ import starcorp.common.types.GalacticDate;
  * @version 15 Sep 2007
  */
 public class Colony extends ANamedEntity {
-
+	// TODO add planet name
 	private Corporation government;
 	private long planetID;
 	private Coordinates2D location;
@@ -65,6 +65,7 @@ public class Colony extends ANamedEntity {
 			this.planetID = Integer.parseInt(planet.attributeValue("ID","0"));
 		this.location = new Coordinates2D(e);
 		this.foundedDate = new GalacticDate(e.element("founded").element("date"));
+		this.hazardLevel = Double.parseDouble(e.attributeValue("hazard","0.0"));
 	}
 	@Override
 	public Element toBasicXML(Element parent) {

@@ -35,4 +35,18 @@ public abstract class ANamedEntity extends ABaseEntity {
 		return name + " " + super.toString();
 	}
 
+	public String getDisplayName() {
+		return getName() +" [" + getID() +"]";
+	}
+
+	@Override
+	public int compareTo(ABaseEntity o) {
+		if(name != null && o instanceof ANamedEntity) {
+			ANamedEntity entity = (ANamedEntity) o;
+			if(entity.name != null)
+				entity.name.compareTo(name);
+		}
+		return super.compareTo(o);
+	}
+
 }

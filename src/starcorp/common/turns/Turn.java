@@ -10,11 +10,22 @@
  */
 package starcorp.common.turns;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
+import org.dom4j.io.OutputFormat;
+import org.dom4j.io.SAXReader;
+import org.dom4j.io.XMLWriter;
 
 import starcorp.common.entities.Corporation;
 import starcorp.common.types.GalacticDate;
@@ -40,9 +51,62 @@ public class Turn {
 		corporation = corp;
 	}
 	
+	public List<OrderReport> getOrderReports() {
+		List<OrderReport> reports = new ArrayList<OrderReport>();
+		for(TurnOrder order : orders) {
+			if(order.getReport() != null)
+				reports.add(order.getReport());
+		}
+		return reports;
+	}
+	
+	public List<?> getScannedEntities() {
+		List list = new ArrayList();
+		for(OrderReport report : getOrderReports()) {
+			list.addAll(report.getScannedEntities());
+		}
+		return list;
+	}
+	
+	public List<?> getScannedEntities(Class clazz) {
+		List list = new ArrayList();
+		for(Object o : getScannedEntities()) {
+			if(o.getClass().equals(clazz))
+				list.add(o);
+		}
+		return list;
+	}
+	
+	public Turn(InputStream is) throws DocumentException {
+		SAXReader sax = new SAXReader();
+		Document doc = sax.read(is);
+		readXML(doc.getRootElement().element("turn"));
+	}
+	
+	public void write(Writer writer) throws IOException {
+		// TODO switch to compact format to save space after debugging
+		// OutputFormat format = OutputFormat.createCompactFormat();
+		OutputFormat format = OutputFormat.createPrettyPrint();
+		XMLWriter xmlWriter = new XMLWriter(
+			writer, format
+		);
+		
+		Document doc = DocumentHelper.createDocument();
+		Element root = doc.addElement("starcorp");
+		toXML(root);
+		
+		xmlWriter.write(doc);
+		xmlWriter.close();
+	}
+	
 	public Turn(Element root) {
+		readXML(root);
+	}
+	
+	public void readXML(Element root) {
 		this.corporation = new Corporation();
-		this.corporation.readXML(root.element("corporation").element("entity"));
+		Element eCorp = root.element("corporation");
+		if(eCorp != null) this.corporation.readXML(eCorp.element("entity"));
 		Element eDate = root.element("processed");
 		if(eDate != null) {
 			this.processedDate = new GalacticDate(eDate.element("date"));
@@ -57,7 +121,8 @@ public class Turn {
 	
 	public Element toXML(Element parent) {
 		Element root = parent.addElement("turn");
-		corporation.toFullXML(root.addElement("corporation"));
+		if(corporation != null)
+			corporation.toFullXML(root.addElement("corporation"));
 		if(processedDate != null)
 			processedDate.toXML(root.addElement("processed"));
 		if(orders.size() > 0) {

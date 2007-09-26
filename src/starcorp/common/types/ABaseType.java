@@ -16,11 +16,15 @@ package starcorp.common.types;
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 15 Sep 2007
  */
-public abstract class ABaseType {
+public abstract class ABaseType implements Comparable<ABaseType>{
 
+	public abstract String getKey();
 	public abstract String getName();
 	
 	public String toString() {
 		return getName();
+	}
+	public int compareTo(ABaseType o) {
+		return getName().compareTo((o == null ? null : o.getName()));
 	}
 }

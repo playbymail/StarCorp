@@ -133,4 +133,8 @@ public abstract class AGovernmentLaw implements IEntity {
 		writer.close();
 	}
 
+	public String getDisplayName() {
+		return getClass().getSimpleName() +" [" + getID() +"] @ " + colony.getName() + "[" + colony.getID() +"]";
+	}
+
 }

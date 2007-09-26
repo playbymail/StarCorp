@@ -69,7 +69,7 @@ public class List extends ACommand {
 				else {
 					String className = "starcorp.common.entities." + entityClass;
 					Class clazz = Class.forName(className);
-					java.util.List<Object> list = entityStore.listEntities(clazz);
+					java.util.List<?> list = entityStore.listEntities(clazz);
 					int size = list.size();
 					if(size < 1) {
 						out.println();

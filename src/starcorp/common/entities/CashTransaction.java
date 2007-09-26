@@ -203,5 +203,9 @@ public class CashTransaction implements IEntity {
 	public Element toFullXML(Element parent) {
 		return toBasicXML(parent);
 	}
+
+	public String getDisplayName() {
+		return getDescription() + " [" + getID() + "]";
+	}
 	
 }

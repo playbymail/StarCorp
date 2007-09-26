@@ -41,9 +41,11 @@ public class Corporation extends ANamedEntity {
 	public void readXML(Element e) {
 		super.readXML(e);
 		Element player = e.element("player");
-		this.playerEmail = player.attributeValue("email");
-		this.playerName = player.attributeValue("name");
-		this.playerPassword = player.attributeValue("password");
+		if(player != null) {
+			this.playerEmail = player.attributeValue("email");
+			this.playerName = player.attributeValue("name");
+			this.playerPassword = player.attributeValue("password");
+		}
 		Element eDate = e.element("founded");
 		if(eDate != null) {
 			this.foundedDate = new GalacticDate(eDate.element("date"));

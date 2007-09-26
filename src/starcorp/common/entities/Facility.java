@@ -157,4 +157,8 @@ public class Facility extends ABaseEntity {
 	public String toString() {
 		return type.getKey() + " " + super.toString() + " @ " + colony.getName() + " (" + colony.getID() + ")";
 	}
+
+	public String getDisplayName() {
+		return getTypeClass().getName() + " [" + getID() +"]";
+	}
 }

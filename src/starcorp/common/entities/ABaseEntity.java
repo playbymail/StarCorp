@@ -24,7 +24,7 @@ import org.dom4j.io.XMLWriter;
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 15 Sep 2007
  */
-public abstract class ABaseEntity implements IEntity {
+public abstract class ABaseEntity implements IEntity, Comparable<ABaseEntity> {
 	
 	private long ID;
 	private int version;
@@ -123,4 +123,10 @@ public abstract class ABaseEntity implements IEntity {
 			return false;
 		return true;
 	}
+
+	public int compareTo(ABaseEntity o) {
+		return (int) ((o == null ? 0 :o.ID) - this.ID);
+	}
+
+	
 }

@@ -23,4 +23,5 @@ public interface IEntity {
 
 	public abstract void setVersion(int version);
 
+	public abstract String getDisplayName();
 }

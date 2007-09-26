@@ -44,6 +44,48 @@ public class Starship extends StarSystemEntity {
 	private GalacticDate builtDate;
 	private int timeUnitsUsed;
 	
+	public String getLocationDescription() {
+		StringBuffer loc = new StringBuffer();
+		
+		if(getColony() != null) {
+			loc.append("Docked at ");
+			loc.append(getColony().getName());
+			loc.append(" [");
+			loc.append(getColony().getID());
+			loc.append("] on ");
+			loc.append(getPlanet().getName());
+			loc.append(" [");
+			loc.append(getPlanet().getID());
+			loc.append("]");
+		}
+		else if(getPlanet() != null) {
+			if(getPlanetLocation() != null) {
+				loc.append("Docked at");
+				loc.append(getPlanetLocation());
+				loc.append(" on ");
+				loc.append(getPlanet().getName());
+				loc.append(" [");
+				loc.append(getPlanet().getID());
+				loc.append("]");
+			}
+			else {
+				loc.append("Orbiting ");
+				loc.append(getPlanet().getName());
+				loc.append(" [");
+				loc.append(getPlanet().getID());
+				loc.append("]");
+			}
+		}
+		else {
+			loc.append("At ");
+			loc.append(getLocation());
+			loc.append(" in system ");
+			loc.append(getSystemID());
+		}
+		
+		return loc.toString();
+	}
+	
 	public int getCargoConsumerGoodsMass() {
 		int mass = 0;
 		Iterator<Items> i = cargo.iterator();

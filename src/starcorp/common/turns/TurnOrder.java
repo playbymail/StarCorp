@@ -84,7 +84,8 @@ public class TurnOrder {
 	}
 	
 	public void set(int index, String value) {
-		args.set(index, value);
+		if(value != null)
+			args.set(index, value);
 	}
 	
 	public int getAsInt(int index) {

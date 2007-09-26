@@ -206,4 +206,8 @@ public class ResourceDeposit implements IEntity {
 	public Element toFullXML(Element parent) {
 		return toBasicXML(parent);
 	}
+
+	public String getDisplayName() {
+		return getTypeClass().getName() + " x " + getYield() + " [" + getID() + "]";
+	}
 }

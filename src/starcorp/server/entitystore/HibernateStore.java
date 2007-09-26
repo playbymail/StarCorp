@@ -1468,5 +1468,19 @@ public class HibernateStore implements IEntityStore {
 		beginTransaction();
 		return copyMarket(listObject(createQuery(q, "seller", seller)));
 	}
+	
+	private List<AGovernmentLaw> copyLaws(List<?> objects) {
+		List<AGovernmentLaw> list = new ArrayList<AGovernmentLaw>();
+		for(Object o : objects) {
+			list.add((AGovernmentLaw)o);
+		}
+		return list;
+	}
+
+	public List<AGovernmentLaw> listLaws() {
+		String q = "from AGovernmentLaw where available = true";
+		beginTransaction();
+		return copyLaws(listObject(createQuery(q)));
+	}
 
 }

@@ -39,47 +39,11 @@ public class TurnSubmitter {
 
 	private static Log log = LogFactory.getLog(TurnSubmitter.class);
 	
-	public static void main(String[] args) {
-		try {
-			Turn turn = new Turn();
-			Corporation corporation = new Corporation(ClientConfiguration.PLAYER_NAME, ClientConfiguration.PLAYER_EMAIL,ClientConfiguration.PLAYER_PASSWORD);
-			corporation.setName("Test Corp");
-			turn.setCorporation(corporation);
-			for(int i = 0; i < 10; i++) {
-				TurnOrder order = new TurnOrder();
-				order.setCorp(corporation);
-				order.setType(OrderType.getType("design-ship"));
-				order.add("command-deck");
-				order.add("crew-deck");
-				order.add("impulse-drive");
-				order.add("light-cargo");
-				turn.add(order);
-			}
-			submit(turn);
-			System.out.println("Done");
-		}
-		catch(Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
 	private static SendEmail email = new SendEmail(ClientConfiguration.SMTP_HOST_NAME, ClientConfiguration.SMTP_PORT, ClientConfiguration.SMTP_AUTH_USER, ClientConfiguration.SMTP_AUTH_PASSWORD);
 	
 	public static void submit(Turn turn) throws IOException, MessagingException {
-		String filename = "turn.xml";
-		// TODO switch to compact format to save space after debugging
-		// OutputFormat format = OutputFormat.createCompactFormat();
-		OutputFormat format = OutputFormat.createPrettyPrint();
-		XMLWriter writer = new XMLWriter(
-			new FileWriter(filename), format
-		);
-		
-		Document doc = DocumentHelper.createDocument();
-		Element root = doc.addElement("starcorp");
-		turn.toXML(root);
-		
-		writer.write(doc);
-		writer.close();
+		String filename = "submitted-turn.xml";
+		turn.write(new FileWriter(filename));
 		
 		String from = turn.getCorporation().getPlayerEmail();
 		String[] to = {ClientConfiguration.SERVER_EMAIL_TURNS};

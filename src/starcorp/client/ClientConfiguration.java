@@ -22,10 +22,6 @@ public class ClientConfiguration {
 
 	private static final ResourceBundle bundle = ResourceBundle.getBundle("client");
 
-	public static final String PLAYER_EMAIL = bundle.getString("player.email");
-	public static final String PLAYER_NAME = bundle.getString("player.name"); 
-	public static final String PLAYER_PASSWORD = bundle.getString("player.password");
-	
 	public static final String SMTP_HOST_NAME = bundle.getString("smtp.host");
 	public static final String SMTP_PORT = bundle.getString("smtp.port");
 	public static final String SMTP_AUTH_USER = bundle.getString("smtp.user");

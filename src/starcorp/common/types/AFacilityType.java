@@ -91,6 +91,18 @@ public abstract class AFacilityType extends ABaseType {
 		return types;
 	}
 	
+	public static List<AFacilityType> listTypesExcludeClass(Class<?> typeClass) {
+		List<AFacilityType> types = new ArrayList<AFacilityType>();
+		Iterator<Map.Entry<String, AFacilityType>> i = AFacilityType.types.entrySet().iterator();
+		while(i.hasNext()) {
+			Map.Entry<String, AFacilityType> entry = i.next();
+			if(!entry.getValue().getClass().equals(typeClass)) {
+				types.add(entry.getValue());
+			}
+		}
+		return types;
+	}
+
 	public static List<AFacilityType> listTypes() {
 		List<AFacilityType> types = new ArrayList<AFacilityType>();
 		Iterator<Map.Entry<String, AFacilityType>> i = AFacilityType.types.entrySet().iterator();

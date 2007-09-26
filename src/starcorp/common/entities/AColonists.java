@@ -126,4 +126,8 @@ public abstract class AColonists extends ABaseEntity {
 		return population + " " + super.toString() + " @ " + colony.getName() + " (" + colony.getID() + ")"; 
 	}
 
+	public String getDisplayName() {
+		return getPopClass().getName() +" x " + getQuantity() + " [" + getID() +"] @ " + colony.getName() +" [" + colony.getID() + "]";
+	}
+
 }

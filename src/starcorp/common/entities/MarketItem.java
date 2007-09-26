@@ -54,8 +54,10 @@ public class MarketItem extends ACorporateItem {
 	public void readXML(Element e) {
 		super.readXML(e);
 		this.costPerItem = Integer.parseInt(e.attributeValue("price","0"));
-		this.issuedDate = new GalacticDate(e.element("issued").element("date"));
-		this.soldDate = new GalacticDate(e.element("sold").element("date"));
+		Element issued = e.element("issued");
+		if(issued != null) this.issuedDate = new GalacticDate(issued.element("date"));
+		Element sold = e.element("sold");
+		if(sold != null) this.soldDate = new GalacticDate(sold.element("date"));
 	}
 
 	@Override

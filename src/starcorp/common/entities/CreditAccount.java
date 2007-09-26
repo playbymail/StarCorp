@@ -123,5 +123,9 @@ public class CreditAccount implements IEntity {
 	public Element toFullXML(Element parent) {
 		return toBasicXML(parent);
 	}
+
+	public String getDisplayName() {
+		return getID() +" balance: " + getCredits();
+	}
 	
 }

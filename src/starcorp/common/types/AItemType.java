@@ -222,6 +222,6 @@ public abstract class AItemType extends ABaseType {
 
 	@Override
 	public String toString() {
-		return super.toString() + " [" + getKey() + "] " + getMassUnits() + "mu";
+		return super.toString() + " [" + getKey() + "]";
 	}
 }

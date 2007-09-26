@@ -21,5 +21,6 @@
 	<classpathentry kind="lib" path="lib/common/dom4j-1.6.1.jar"/>
 	<classpathentry kind="lib" path="lib/common/activation.jar"/>
 	<classpathentry kind="lib" path="lib/common/mail.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.eclipse.swt"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
