@@ -13,6 +13,8 @@ package starcorp.client.gui;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Widget;
@@ -42,17 +44,53 @@ public class StarshipPane extends AEntityPane {
 		lblDesign.setText("Design:");
 		widgets.add(lblDesign);
 		
-		Label lblDesignName = new Label(getDataGroup(),SWT.NONE);
-		lblDesignName.setText(ship.getDesign().getName() +" [" + ship.getDesign().getID() +"]");
-		widgets.add(lblDesignName);
+		Hyperlink lnkDesign = new Hyperlink(getDataGroup(),SWT.NONE);
+		lnkDesign.setText(ship.getDesign().getDisplayName());
+		lnkDesign.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {
+				mainWindow.setDataPane(new StarshipDesignPane(mainWindow,ship.getDesign()));
+			}
+			public void widgetSelected(SelectionEvent e) {
+				mainWindow.setDataPane(new StarshipDesignPane(mainWindow,ship.getDesign()));
+			}
+		});
+		widgets.add(lnkDesign);
 		
 		Label lblLocation = new Label(getDataGroup(),SWT.NONE);
 		lblLocation.setText("Location:");
 		widgets.add(lblLocation);
 		
-		Label lblLocationDesc = new Label(getDataGroup(),SWT.NONE);
-		lblLocationDesc.setText(ship.getLocationDescription());
-		widgets.add(lblLocationDesc);
+		String locDesc = ship.getLocationDescription();
+		
+		if(ship.getColony() != null) {
+			Hyperlink lnk = new Hyperlink(getDataGroup(),SWT.NONE);
+			lnk.setText(locDesc);
+			lnk.addSelectionListener(new SelectionListener() {
+				public void widgetDefaultSelected(SelectionEvent e) {
+					mainWindow.setDataPane(new ColonyPane(mainWindow,ship.getColony()));
+				}
+				public void widgetSelected(SelectionEvent e) {
+					mainWindow.setDataPane(new ColonyPane(mainWindow,ship.getColony()));
+				}
+			});
+		}
+		else if(ship.getPlanet() != null) {
+			Hyperlink lnk = new Hyperlink(getDataGroup(),SWT.NONE);
+			lnk.setText(locDesc);
+			lnk.addSelectionListener(new SelectionListener() {
+				public void widgetDefaultSelected(SelectionEvent e) {
+					mainWindow.setDataPane(new SystemEntityPane(mainWindow,ship.getPlanet()));
+				}
+				public void widgetSelected(SelectionEvent e) {
+					mainWindow.setDataPane(new SystemEntityPane(mainWindow,ship.getPlanet()));
+				}
+			});
+		}
+		else {
+			Label lbl = new Label(getDataGroup(),SWT.NONE);
+			lbl.setText(locDesc);
+			widgets.add(lbl);
+		}
 		
 		Label lblCargo = new Label(getDataGroup(),SWT.NONE);
 		lblCargo.setText("Cargo:");
@@ -66,7 +104,13 @@ public class StarshipPane extends AEntityPane {
 			lbl.setText(item.toString());
 			widgets.add(lbl);
 		}
+		if(ship.getCargo().size() < 1) {
+			Label lbl = new Label(getDataGroup(),SWT.NONE);
+			lbl.setText("None");
+			widgets.add(lbl);
+		}
 		
 		// TODO display nearby star systems, planets or other system entities
+		// TODO add buttons to add orders suitable to current starship
 	}
 }

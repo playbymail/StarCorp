@@ -184,12 +184,12 @@ public class StarshipDesign extends ANamedEntity {
 		return ((double) totalMass / (double) totalThrust);
 	}
 
-	public double getMaxOrbitGravity() {
-		return 5 / getImpulseSpeed();
+	public long getMaxOrbitGravity() {
+		return Math.round(5 / getImpulseSpeed());
 	}
 	
-	public double getMaxDockGravity() {
-		return 3 / getImpulseSpeed();
+	public long getMaxDockGravity() {
+		return Math.round(3 / getImpulseSpeed());
 	}
 	
 	public boolean canMineAsteroid() {

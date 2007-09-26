@@ -20,11 +20,6 @@ import javax.mail.MessagingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.dom4j.Document;
-import org.dom4j.io.OutputFormat;
-import org.dom4j.io.SAXReader;
-import org.dom4j.io.XMLWriter;
-
 import starcorp.common.entities.Corporation;
 import starcorp.common.turns.Turn;
 import starcorp.common.types.GalacticDate;

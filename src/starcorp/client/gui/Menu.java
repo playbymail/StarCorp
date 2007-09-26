@@ -10,9 +10,6 @@
  */
 package starcorp.client.gui;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
@@ -67,6 +64,15 @@ public class Menu implements IComponent  {
 		file.setText("&File");
 		file.setMenu(fileMenu);
 		
+		MenuItem newAccount = new MenuItem(fileMenu, SWT.PUSH);
+		newAccount.setText("New &account");
+		newAccount.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event event) {
+				mainWindow.createNewAccount();
+			}
+		});
+		
+		new MenuItem(fileMenu, SWT.SEPARATOR);
 		MenuItem newTurn = new MenuItem(fileMenu, SWT.PUSH);
 		newTurn.setText("&New turn");
 		newTurn.addListener(SWT.Selection, new Listener() {

@@ -64,10 +64,7 @@ public class TurnOrderWindow extends ADataEntryWindow {
 	}
 	
 	public Corporation promptCredentials() {
-		Corporation existing = getTurn().getCorporation();
-		CredentialsDialog dialog = new CredentialsDialog(shell,existing);
-		
-		return dialog.open();
+		return mainWindow.promptCredentials();
 	}
 
 	@Override

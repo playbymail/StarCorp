@@ -14,27 +14,28 @@ import java.util.List;
 
 import org.eclipse.swt.widgets.Widget;
 
-import starcorp.common.entities.IEntity;
+import starcorp.common.entities.StarSystemEntity;
 
 /**
- * starcorp.client.gui.AEntityPane
+ * starcorp.client.gui.SystemEntityPane
  *
  * @author Seyed Razavi <monkeyx@gmail.com>
- * @version 25 Sep 2007
+ * @version 26 Sep 2007
  */
-public abstract class AEntityPane extends ADataPane {
+public class SystemEntityPane extends AEntityPane {
 
-	private IEntity entity;
-	
-	public AEntityPane(MainWindow mainWindow, IEntity entity) {
-		super(mainWindow);
-		this.entity = entity;
+	public SystemEntityPane(MainWindow mainWindow,StarSystemEntity entity) {
+		super(mainWindow,entity);
+		// TODO Auto-generated constructor stub
 	}
 
+	/* (non-Javadoc)
+	 * @see starcorp.client.gui.ADataPane#createWidgets(java.util.List)
+	 */
 	@Override
 	protected void createWidgets(List<Widget> widgets) {
-		System.out.println("AEntityPane createWidgets: " + entity);
-		getDataGroup().setText(entity.getDisplayName());
-		
+		// TODO Auto-generated method stub
+
 	}
+
 }

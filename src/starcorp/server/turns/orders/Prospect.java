@@ -50,6 +50,7 @@ public class Prospect extends AOrderProcessor {
 		else {
 			ship.incrementTimeUnitsUsed(TIME_UNITS);
 			OrderReport report = new OrderReport(order);
+			// TODO filter deposits by ship's available labs
 			List<?> deposits = entityStore.listDeposits(ship.getPlanet().getID(), ship.getPlanetLocation());
 			report.setScannedLocation(ship.getPlanet().get(ship.getPlanetLocation()));
 			List<?> ships = entityStore.listShips(ship.getPlanet(),ship.getPlanetLocation());

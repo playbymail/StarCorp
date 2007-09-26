@@ -59,7 +59,8 @@ public class TurnOrder {
 		for(int i = 0; i < args.size(); i++) {
 			Element e = root.addElement("order-arg");
 			e.addAttribute("position", String.valueOf(i));
-			e.addText(args.get(i));
+			if(args.get(i) != null)
+				e.addText(args.get(i));
 		}
 		if(report != null) {
 			report.toXML(root);

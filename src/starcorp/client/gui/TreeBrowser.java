@@ -21,7 +21,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
@@ -84,11 +83,22 @@ public class TreeBrowser implements IComponent  {
 				listItemOrders.add(item);
 			}
 			for(StarshipDesign design : report.getPlayerDesigns()) {
-				TreeItem item = new TreeItem(itemDesigns,SWT.NONE);
+				TreeItem shipItem = new TreeItem(itemDesigns,SWT.NONE);
 				tree.addListener(SWT.Selection, listenDesign(design));
-				item.setText(design.getName() +" [" + design.getID() +"]");
-				item.setData(design);
-				listItemDesigns.add(item);
+				shipItem.setText(design.getName() +" [" + design.getID() +"]");
+				shipItem.setData(design);
+				listItemDesigns.add(shipItem);
+				
+				List<Starship> ships = mainWindow.getTurnReport().getPlayerStarships(design);
+				if(ships != null && ships.size() > 0) {
+					for(Starship ship : ships) {
+						TreeItem item = new TreeItem(shipItem,SWT.NONE);
+						tree.addListener(SWT.Selection, listenShip(ship));
+						item.setText(ship.getName() +" [" + ship.getID() +"]");
+						item.setData(ship);
+						listItemDesigns.add(item);
+					}
+				}
 			}
 			for(Starship ship : report.getPlayerStarships()) {
 				TreeItem item = new TreeItem(itemShips,SWT.NONE);

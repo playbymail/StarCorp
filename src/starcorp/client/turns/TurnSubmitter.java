@@ -16,17 +16,8 @@ import javax.mail.MessagingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.dom4j.Document;
-import org.dom4j.DocumentHelper;
-import org.dom4j.Element;
-import org.dom4j.io.OutputFormat;
-import org.dom4j.io.XMLWriter;
-
 import starcorp.client.ClientConfiguration;
-import starcorp.common.entities.Corporation;
 import starcorp.common.turns.Turn;
-import starcorp.common.turns.TurnOrder;
-import starcorp.common.types.OrderType;
 import starcorp.common.util.SendEmail;
 
 /**

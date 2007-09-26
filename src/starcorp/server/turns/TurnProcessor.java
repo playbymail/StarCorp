@@ -12,25 +12,28 @@ package starcorp.server.turns;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.util.Iterator;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dom4j.Document;
-import org.dom4j.DocumentHelper;
-import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
-import org.dom4j.io.XMLWriter;
-
+import starcorp.common.entities.Colony;
 import starcorp.common.entities.Corporation;
+import starcorp.common.entities.Planet;
+import starcorp.common.entities.Starship;
+import starcorp.common.entities.StarshipDesign;
 import starcorp.common.turns.Turn;
 import starcorp.common.turns.TurnError;
 import starcorp.common.turns.TurnOrder;
 import starcorp.common.turns.TurnReport;
+import starcorp.common.types.AItemType;
 import starcorp.common.types.GalacticDate;
+import starcorp.common.types.Items;
 import starcorp.common.types.OrderType;
 import starcorp.common.util.SendEmail;
 import starcorp.server.ServerConfiguration;
+import starcorp.server.Util;
 import starcorp.server.engine.AServerTask;
 
 /**
@@ -125,18 +128,21 @@ public class TurnProcessor extends AServerTask {
 			GalacticDate lastTurn = corp.getLastTurnDate();
 			GalacticDate currentDate = ServerConfiguration.getCurrentDate();
 			if(lastTurn != null && !lastTurn.before(currentDate)) {
+				if(log.isDebugEnabled())
+					log.debug("Turn early " + turn);
 				turn.add(TurnError.ERROR_EARLY_TURN);
 			}
 			else {
-				Iterator<TurnOrder> i = turn.getOrders().iterator();
-				while(i.hasNext()) {
-					TurnOrder order = i.next();
+				for(TurnOrder order : turn.getOrders()) {
 					order.setCorp(corp);
 					TurnError error = process(order);
 					if(error != null) {
 						turn.add(error);
 					}
+					if(log.isDebugEnabled())
+						log.debug("Processed " + order + " : error = " + error);
 				}
+				turn.setProcessedDate(ServerConfiguration.getCurrentDate());
 				report.addPlayerEntities(entityStore.listDesigns(corp));
 				report.addPlayerEntities(entityStore.listFacilities(corp));
 				report.addPlayerEntities(entityStore.listShips(corp));
@@ -162,11 +168,42 @@ public class TurnProcessor extends AServerTask {
 			corp.setFoundedDate(ServerConfiguration.getCurrentDate());
 			entityStore.create(corp);
 			entityStore.addCredits(corp, ServerConfiguration.SETUP_INITIAL_CREDITS, ServerConfiguration.SETUP_DESCRIPTION);
+			createStartingPosition(corp);
 			return corp;
 		}
 		else {
 			return null;
 		}
+	}
+	
+	private void createStartingPosition(Corporation corp){
+		// TODO make this configurable esp starting colony
+		StarshipDesign design = new StarshipDesign();
+		design.setDesignDate(ServerConfiguration.getCurrentDate());
+		design.setName("Surveyer");
+		design.setOwner(corp);
+		design.setHulls(new Items(AItemType.getType("command-deck"),1));
+		design.setHulls(new Items(AItemType.getType("crew-deck"),2));
+		design.setHulls(new Items(AItemType.getType("impulse-drive"),1));
+		design.setHulls(new Items(AItemType.getType("warp-drive-I"),1));
+		design.setHulls(new Items(AItemType.getType("lab"),1));
+		design.setHulls(new Items(AItemType.getType("light-cargo"),1));
+		design.setHulls(new Items(AItemType.getType("scanner"),1));
+		design.setHulls(new Items(AItemType.getType("probe"),1));
+		design = (StarshipDesign) entityStore.create(design);
+		Starship ship = new Starship();
+		ship.setBuiltDate(ServerConfiguration.getCurrentDate());
+		ship.setDesign(design);
+		ship.setName("SS " + corp.getName());
+		List<Colony> colonies = entityStore.listColonies();
+		Colony colony = colonies.get(Util.rnd.nextInt(colonies.size()));
+		Planet planet = (Planet) entityStore.load(Planet.class, colony.getPlanetID());
+		ship.setColony(colony);
+		ship.setPlanet(planet);
+		ship.setPlanetLocation(colony.getLocation());
+		ship.setLocation(planet.getLocation());
+		ship.setOwner(corp);
+		entityStore.create(ship);
 	}
 	
 	private Corporation authorize(Corporation corp) {

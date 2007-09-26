@@ -17,7 +17,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Widget;
 
 import starcorp.common.entities.Colony;
-import starcorp.common.entities.IEntity;
 
 /**
  * starcorp.client.gui.ColonyPane

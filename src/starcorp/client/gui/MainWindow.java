@@ -20,23 +20,16 @@ import javax.mail.MessagingException;
 import org.dom4j.DocumentException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.Shell;
-
 import starcorp.client.turns.TurnSubmitter;
 import starcorp.common.entities.Corporation;
 import starcorp.common.turns.Turn;
 import starcorp.common.turns.TurnReport;
 import starcorp.common.types.GalacticDate;
-import starcorp.common.types.OrderType;
 
 /**
  * starcorp.client.gui.MainWindow
@@ -186,6 +179,7 @@ public class MainWindow extends AWindow {
 			TurnSubmitter.submit(currentTurn);
 			menu.setEnableSubmit(false);
 			toolbar.setEnableSubmit(false);
+			messageBox("Turn Submitted", "Your turn has successfully been submitted.", SWT.ICON_INFORMATION | SWT.OK);
 		} catch (IOException e) {
 			int buttonID = messageBox("Turn Submission Error", e.getMessage(), SWT.ICON_ERROR | SWT.ABORT | SWT.RETRY);
 			if(SWT.RETRY == buttonID) {
@@ -280,6 +274,23 @@ public class MainWindow extends AWindow {
 			}
 			shell.setText(sb.toString());
 			pack();
+		}
+	}
+	
+	public Corporation promptCredentials() {
+		Corporation existing = currentTurn == null ? null : currentTurn.getCorporation();
+		CredentialsDialog dialog = new CredentialsDialog(shell,existing);
+		
+		return dialog.open();
+	}
+
+	public void createNewAccount() {
+		Corporation corp = promptCredentials();
+		if(corp != null) {
+			Turn turn = new Turn();
+			turn.setCorporation(corp);
+			setCurrentTurn(turn);
+			submitTurn();
 		}
 	}
 	
