@@ -11,6 +11,7 @@
 package starcorp.common.types;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -254,7 +255,7 @@ public abstract class AFacilityType extends ABaseType {
 		return modules;
 	}
 	
-	public double getEfficiency(List<?> currentWorkers) {
+	public double getEfficiency(Collection<?> currentWorkers) {
 		Map<PopulationClass, Population> requiredWorkers = getWorkerRequirement();
 		
 		int requiredTotal = 0;

@@ -55,6 +55,8 @@ public interface IEntityStore {
 	public abstract void resetFacilityTransactions();
 	public abstract void resetShipTimeUnits();
 	
+	public abstract int getNextQueuePosition(Facility factory);
+	
 	public abstract double getAveragePrice(Colony colony, AItemType type);
 	public abstract double getAverageHappiness(Colony colony, PopulationClass popClass);
 	
@@ -101,6 +103,7 @@ public interface IEntityStore {
 	public abstract ColonyItem getItem(Colony colony, AItemType type);
 	public abstract ColonyItem getItem(Colony colony, Corporation owner, AItemType type);
 	
+	public abstract List<FactoryQueueItem> listQueue(Corporation corp);
 	public abstract List<FactoryQueueItem> listQueue(Facility facility);
 	
 	public abstract Corporation getCorporation(String email);
@@ -139,6 +142,7 @@ public interface IEntityStore {
 	public abstract List<AColonists> listColonists();
 	public abstract List<AColonists> listColonists(Colony colony);
 	public abstract List<AColonists> listColonists(Colony colony, PopulationClass popClass);
+	public abstract List<AColonists> listWorkers(Corporation  corp);
 	public abstract List<AColonists> listWorkers(Facility facility);
 	public abstract List<AColonists> listWorkers(Colony colony);
 	public abstract List<AColonists> listWorkers(Colony colony, PopulationClass popClass);

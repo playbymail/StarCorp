@@ -10,6 +10,7 @@
  */
 package starcorp.server.turns.orders;
 
+import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Facility;
 import starcorp.common.entities.FactoryQueueItem;
 import starcorp.common.turns.OrderReport;
@@ -30,17 +31,20 @@ import starcorp.server.turns.AOrderProcessor;
  * @version 16 Sep 2007
  */
 public class FactoryBuild extends AOrderProcessor {
-	// TODO test
+
 	@Override
 	public TurnError process(TurnOrder order) {
 		TurnError error = null;
+		Corporation corp = order.getCorp();
 		int factoryId = order.getAsInt(0);
 		String itemTypeKey = order.get(1);
 		int quantity = order.getAsInt(2);
-		int position = order.getAsInt(3);
 		Facility factory = (Facility) entityStore.load(Facility.class, factoryId);
 		AItemType type = AItemType.getType(itemTypeKey);
 		if(factory == null || !(factory.getTypeClass() instanceof Factory)) {
+			error = new TurnError(TurnError.INVALID_FACILITY,order);
+		}
+		else if(!factory.getOwner().equals(corp)) {
 			error = new TurnError(TurnError.INVALID_FACILITY,order);
 		}
 		else if(type == null || !(type instanceof AFactoryItem)) {
@@ -49,13 +53,12 @@ public class FactoryBuild extends AOrderProcessor {
 		else {
 			Factory facType = (Factory) factory.getTypeClass();
 			if(facType.canBuild(type)) {
-				Items item = new Items();
-				item.setQuantity(quantity);
-				item.setTypeClass(type);
+				int position = entityStore.getNextQueuePosition(factory);
 				FactoryQueueItem queueItem = new FactoryQueueItem();
+				queueItem.setOwner(corp);
 				queueItem.setColony(factory.getColony());
 				queueItem.setFactory(factory);
-				queueItem.setItem(item);
+				queueItem.setItem(new Items(type,quantity));
 				queueItem.setPosition(position);
 				queueItem.setQueuedDate(ServerConfiguration.getCurrentDate());
 				entityStore.create(queueItem);

@@ -64,9 +64,9 @@ public class TurnReportPane extends ADataPane {
 			}
 			
 			createLabel(getParent(), widgets, "Orders:");
-			createLabel(getParent(), widgets, String.valueOf(orderCount));
+			createLabel(getParent(), widgets, format(orderCount));
 			createLabel(getParent(), widgets, "Errors:");
-			createLabel(getParent(), widgets, String.valueOf(errorCount));
+			createLabel(getParent(), widgets, format(errorCount));
 
 			if(errorCount > 0) {
 				Group grpErrors = createGroup(getParent(), widgets, "Errors");

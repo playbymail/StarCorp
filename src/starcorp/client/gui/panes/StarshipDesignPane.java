@@ -123,5 +123,6 @@ public class StarshipDesignPane extends AEntityPane {
 			createItemLink(grpHulls, widgets, item, null);
 		}
 		
+		// TODO create build drop down filtered by colonies where sufficient hulls are available
 }
 }

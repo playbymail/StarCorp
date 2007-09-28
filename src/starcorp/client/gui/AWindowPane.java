@@ -10,6 +10,7 @@
  */
 package starcorp.client.gui;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -29,6 +30,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 
+import starcorp.client.gui.panes.ColonistPane;
 import starcorp.client.gui.panes.ColonyPane;
 import starcorp.client.gui.panes.CorporationPane;
 import starcorp.client.gui.panes.FacilityPane;
@@ -38,6 +40,7 @@ import starcorp.client.gui.panes.StarshipDesignPane;
 import starcorp.client.gui.panes.StarshipPane;
 import starcorp.client.gui.panes.SystemEntityPane;
 import starcorp.client.gui.widgets.Hyperlink;
+import starcorp.common.entities.AColonists;
 import starcorp.common.entities.Colony;
 import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Facility;
@@ -95,6 +98,22 @@ public abstract class AWindowPane implements IComponent {
 		panel.pack();
 	}
 	
+	protected String format(long number) {
+		return NumberFormat.getNumberInstance().format(number);
+	}
+	
+	protected String format(double number) {
+		return NumberFormat.getNumberInstance().format(number);
+	}
+	
+	protected String formatPercentage(double number) {
+		return NumberFormat.getPercentInstance().format(number);
+	}
+	
+	protected String formatPercentage(long number) {
+		return NumberFormat.getPercentInstance().format(number);
+	}
+
 	protected Button createCheckbox(Composite parent, List<Widget> widgets, String label) {
 		createLabel(parent, widgets, label);
 		Button btn = new Button(parent, SWT.CHECK);
@@ -213,6 +232,24 @@ public abstract class AWindowPane implements IComponent {
 		return lnk;
 	}
 	
+	protected Hyperlink createColonistLink(Composite parent, List<Widget> widgets, final AColonists colonist, String label) {
+		if(label == null) {
+			label = colonist.getDisplayName();
+		}
+		Hyperlink lnk = createHyperlink(parent, widgets, label);
+		lnk.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {
+				window.getMainWindow().set(new ColonistPane(window.getMainWindow(),colonist));
+				window.getMainWindow().focus();
+			}
+			public void widgetSelected(SelectionEvent e) {
+				window.getMainWindow().set(new ColonistPane(window.getMainWindow(),colonist));
+				window.getMainWindow().focus();
+			}
+		});
+		return lnk;
+	}
+
 	protected Hyperlink createCorporationLink(Composite parent, List<Widget> widgets, final Corporation corp, String label) {
 		if(label == null) {
 			label = corp.getDisplayName();

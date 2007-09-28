@@ -55,7 +55,7 @@ public class FacilityTypePane extends ATypePane {
 		createLabel(getParent(), widgets, type.getSubCategory());
 		
 		createLabel(getParent(),widgets,"Power Required:");
-		createLabel(getParent(), widgets, String.valueOf(type.getPowerRequirement()));
+		createLabel(getParent(), widgets, format(type.getPowerRequirement()));
 		
 		Group grpWorkers = createGroup(getParent(), widgets, "Required Workers");
 		GridData data = new GridData();

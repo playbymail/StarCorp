@@ -11,6 +11,7 @@
 package starcorp.client.gui.panes;
 
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -24,7 +25,10 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 import starcorp.client.gui.AEntityPane;
 import starcorp.client.gui.windows.MainWindow;
+import starcorp.common.entities.AColonists;
+import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Facility;
+import starcorp.common.entities.FactoryQueueItem;
 import starcorp.common.turns.TurnOrder;
 import starcorp.common.types.AItemType;
 import starcorp.common.types.Factory;
@@ -68,7 +72,7 @@ public class FacilityPane extends AEntityPane {
 
 		if(facility.getServiceCharge() > 0) {
 			createLabel(getParent(), widgets, "Service Charge:");
-			createLabel(getParent(), widgets, "\u20a1 " + facility.getServiceCharge());
+			createLabel(getParent(), widgets, "\u20a1 " + format(facility.getServiceCharge()));
 		}
 		
 		if(facility.getTypeClass() instanceof Factory) {
@@ -91,6 +95,49 @@ public class FacilityPane extends AEntityPane {
 			});
 		}
 		
-		// TODO add workers, efficiency and queue items
+		Corporation player = getTurnReport().getTurn().getCorporation();
+		if(player.equals(facility.getOwner())) {
+			Group grp = createGroup(getParent(), widgets, "Employees");
+			GridData data = new GridData();
+			data.minimumWidth=100;
+			data.minimumHeight=100;
+			data.verticalAlignment=SWT.TOP;
+			data.grabExcessHorizontalSpace=true;
+			data.grabExcessVerticalSpace=true;
+			if(!(facility.getTypeClass() instanceof Factory)) {
+				data.horizontalSpan=2;
+			}
+			grp.setLayoutData(data);
+			grp.setLayout(new GridLayout(1,false));
+			
+			Set<AColonists> employees = getTurnReport().getEmployees(facility);
+			double efficiency = facility.getEfficiency(employees);
+
+			for(AColonists colonist : employees) {
+				createColonistLink(grp, widgets, colonist, null);
+			}
+			
+			createLabel(grp, widgets, "Efficiency: " + formatPercentage(efficiency) + "%");
+
+			if(facility.getTypeClass() instanceof Factory) {
+				data = new GridData();
+				data.verticalAlignment=SWT.TOP;
+				data.minimumWidth=100;
+				data.minimumHeight=300;
+				data.grabExcessHorizontalSpace=true;
+				data.grabExcessVerticalSpace=true;
+				grp = createGroup(getParent(), widgets, "Factory Queue");
+				grp.setLayoutData(data);
+				grp.setLayout(new GridLayout(2,false));
+				
+				List<FactoryQueueItem> list = getTurnReport().getQueue(facility);
+				for(int i = (list.size() - 1); i > -1; i--) {
+					FactoryQueueItem item = list.get(i);
+					createLabel(grp, widgets, item.getPosition() + ":");
+					createItemLink(grp, widgets, item.getItem(), null);
+				}
+			}
+		}
+		
 	}
 }

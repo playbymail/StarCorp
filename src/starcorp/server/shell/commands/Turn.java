@@ -166,6 +166,9 @@ public class Turn extends ACommand {
 						out
 								.println("No turn yet.  Use turn corp (Corporation ID) first.");
 					} else {
+						// refresh corporation on turn from entitystore
+						Corporation corp = (Corporation) entityStore.load(Corporation.class, turn.getCorporation().getID());
+						turn.setCorporation(corp);
 						TurnProcessor processor = new TurnProcessor();
 						processor.setEntityStore(entityStore);
 						TurnReport report = processor.process(turn);

@@ -10,6 +10,7 @@
  */
 package starcorp.common.entities;
 
+import java.util.Collection;
 import java.util.List;
 import org.dom4j.Element;
 
@@ -37,7 +38,7 @@ public class Facility extends ABaseEntity {
 	
 	private GalacticDate builtDate;
 	
-	public double getEfficiency(List<?> currentWorkers) {
+	public double getEfficiency(Collection<?> currentWorkers) {
 		return isPowered() ?  type.getEfficiency(currentWorkers) : 0.0;
 	}
 	

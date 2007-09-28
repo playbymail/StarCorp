@@ -52,7 +52,7 @@ public class SystemEntityPane extends AEntityPane {
 		
 		createLabel(getParent(), widgets, "System:");
 		// TODO replace with name + ID
-		createLabel(getParent(), widgets, String.valueOf(entity.getSystemID()));
+		createLabel(getParent(), widgets, format(entity.getSystemID()));
 		
 		createLabel(getParent(), widgets, "Location:");
 		createLabel(getParent(), widgets, entity.getLocation().toString());
@@ -73,13 +73,13 @@ public class SystemEntityPane extends AEntityPane {
 			if(planet.getOrbitingID() > 0) {
 				// TODO replace with name + ID
 				createLabel(getParent(), widgets, "Orbiting:");
-				createLabel(getParent(), widgets, String.valueOf(planet.getOrbitingID()));
+				createLabel(getParent(), widgets, format(planet.getOrbitingID()));
 			}
 			createLabel(getParent(),widgets,"Atmosphere:");
 			createLabel(getParent(), widgets, planet.getAtmosphereTypeClass().getName());
 			
 			createLabel(getParent(),widgets,"Base Hazard Level:");
-			createLabel(getParent(), widgets, String.valueOf(planet.getAtmosphereTypeClass().getHazardLevel()));
+			createLabel(getParent(), widgets, format(planet.getAtmosphereTypeClass().getHazardLevel()));
 			
 			createLabel(getParent(), widgets, "Gravity:");
 			createLabel(getParent(), widgets, planet.getGravityRating() + "g");

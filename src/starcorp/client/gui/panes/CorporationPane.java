@@ -56,16 +56,28 @@ public class CorporationPane extends AEntityPane {
 	@Override
 	protected void createWidgets(List<Widget> widgets) {
 		super.createWidgets(widgets);
-		createLabel(getParent(), widgets, "Credits:");
-		createLabel(getParent(), widgets, "0");// TODO get credit account
-
-		createLabel(getParent(), widgets, "Ships:");
-		createLabel(getParent(), widgets, String.valueOf(mainWindow.getTurnReport().countPlayerStarships()));
+		Group grp = createGroup(getParent(), widgets, "");
+		grp.setLayoutData(new GridData(SWT.LEFT,SWT.TOP,true,true,2,1));
+		grp.setLayout(new GridLayout(2,false));
+		createLabel(grp, widgets, "Player:");
+		createLabel(grp, widgets, corp.getPlayerName() == null ? "NPC" : corp.getPlayerName());
 		
-		createLabel(getParent(), widgets, "Facilities:");
-		createLabel(getParent(), widgets, String.valueOf(mainWindow.getTurnReport().countPlayerFacilities()));
+		// TODO make email a link to send a message to the player (use a custom dialog)
+		createLabel(grp, widgets, "Email:");
+		createLabel(grp,widgets,corp.getPlayerEmail() == null ? "NPC" : corp.getPlayerEmail());
 		
-		createMarket(getParent(), widgets);
+		if(getTurnReport() != null && corp.equals(getTurnReport().getTurn().getCorporation())) {
+			createLabel(grp, widgets, "Credits:");
+			createLabel(grp, widgets, "\u20a1 " + format(getTurnReport().getCredits()));
+	
+			createLabel(grp, widgets, "Ships:");
+			createLabel(grp, widgets, format(mainWindow.getTurnReport().countPlayerStarships()));
+			
+			createLabel(grp, widgets, "Facilities:");
+			createLabel(grp, widgets, format(mainWindow.getTurnReport().countPlayerFacilities()));
+			
+			createMarket(getParent(), widgets);
+		}
 		
 		// TODO add cash transactions
 	}
@@ -85,55 +97,85 @@ public class CorporationPane extends AEntityPane {
 		createLabel(grp,widgets, "Price (ea.)");
 		
 		Set<MarketItem> set = getTurnReport().getMarketBySeller().get(corp);
-		Iterator<MarketItem> i = set.iterator();
-		for(int count = 0; i.hasNext() && count < (MARKET_ITEMS_PER_PAGE * (page - 1));count++) {
-			i.next();
-		}
-		GridData data = new GridData(80,20);
-		for(int n = 0; n < MARKET_ITEMS_PER_PAGE; n++) {
-			MarketItem item = i.hasNext() ? i.next() : null;
-			if(item == null)
-				continue;
-			AItemType type = item.getItem().getTypeClass();
-			String name = item.getItem().getTypeClass().getName();
-			String qty = String.valueOf(item.getItem().getQuantity());
-			String price = "\u20a1 " + item.getCostPerItem();
-			createItemLink(grp, widgets, type, qty + " x " + name);
-			createColonyLink(grp, widgets, item.getColony(), null);
-			createLabel(grp,widgets, price).setLayoutData(data);
-		}
-		int totalPages = set.size() / MARKET_ITEMS_PER_PAGE;
-		if(set.size() % MARKET_ITEMS_PER_PAGE > 0) totalPages++;
-		Group grpPages = createGroup(grp, widgets, "Pages");
-		GridLayout pagesLayout = new GridLayout(totalPages,true);
-		pagesLayout.makeColumnsEqualWidth=true;
-		pagesLayout.marginWidth=5;
-		pagesLayout.marginHeight=5;
-		pagesLayout.horizontalSpacing=5;
-		grpPages.setLayout(pagesLayout);
-		data = new GridData(SWT.CENTER,SWT.TOP,true,true);
-		data.horizontalSpan=4;
-		data.grabExcessHorizontalSpace=true;
-		data.horizontalAlignment=SWT.CENTER;
-		grpPages.setLayoutData(data);
-		for(int n = 1; n <= totalPages; n++) {
-			if(n == page) {
-				createLabel(grpPages, widgets, String.valueOf(n));
+		if(set != null) {
+			Iterator<MarketItem> i = set.iterator();
+			for(int count = 0; i.hasNext() && count < (MARKET_ITEMS_PER_PAGE * (page - 1));count++) {
+				i.next();
 			}
-			else {
-				Hyperlink lnk = createHyperlink(grpPages, widgets, String.valueOf(n));
-				final int selected = n;
-				lnk.addSelectionListener(new SelectionListener() {
-					public void widgetDefaultSelected(SelectionEvent e) {
-						loadPage(selected);
-					}
-					public void widgetSelected(SelectionEvent e) {
-						loadPage(selected);
-					}
-				});
+			GridData data = new GridData(80,20);
+			for(int n = 0; n < MARKET_ITEMS_PER_PAGE; n++) {
+				MarketItem item = i.hasNext() ? i.next() : null;
+				if(item == null)
+					continue;
+				AItemType type = item.getItem().getTypeClass();
+				String name = item.getItem().getTypeClass().getName();
+				String qty = format(item.getItem().getQuantity());
+				String price = "\u20a1 " + format(item.getCostPerItem());
+				createItemLink(grp, widgets, type, qty + " x " + name);
+				createColonyLink(grp, widgets, item.getColony(), null);
+				createLabel(grp,widgets, price).setLayoutData(data);
+			}
+			int totalPages = set.size() / MARKET_ITEMS_PER_PAGE;
+			if(set.size() % MARKET_ITEMS_PER_PAGE > 0) totalPages++;
+			Group grpPages = createGroup(grp, widgets, "Pages");
+			GridLayout pagesLayout = new GridLayout(totalPages,true);
+			pagesLayout.makeColumnsEqualWidth=true;
+			pagesLayout.marginWidth=5;
+			pagesLayout.marginHeight=5;
+			pagesLayout.horizontalSpacing=5;
+			grpPages.setLayout(pagesLayout);
+			data = new GridData(SWT.CENTER,SWT.TOP,true,true);
+			data.horizontalSpan=4;
+			data.grabExcessHorizontalSpace=true;
+			data.horizontalAlignment=SWT.CENTER;
+			grpPages.setLayoutData(data);
+			for(int n = 1; n <= totalPages; n++) {
+				if(n == page) {
+					createLabel(grpPages, widgets, format(n));
+				}
+				else {
+					Hyperlink lnk = createHyperlink(grpPages, widgets, format(n));
+					final int selected = n;
+					lnk.addSelectionListener(new SelectionListener() {
+						public void widgetDefaultSelected(SelectionEvent e) {
+							loadPage(selected);
+						}
+						public void widgetSelected(SelectionEvent e) {
+							loadPage(selected);
+						}
+					});
+				}
 			}
 		}
 		return grp;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((corp == null) ? 0 : corp.hashCode());
+		result = prime * result + page;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		final CorporationPane other = (CorporationPane) obj;
+		if (corp == null) {
+			if (other.corp != null)
+				return false;
+		} else if (!corp.equals(other.corp))
+			return false;
+		if (page != other.page)
+			return false;
+		return true;
 	}
 	
 	

@@ -735,6 +735,15 @@ public class HibernateStore implements IEntityStore {
 		return lease;
 	}
 
+	public int getNextQueuePosition(Facility factory) {
+		String q = "select max(position) from FactoryQueueItem where factory = :factory";
+		beginTransaction();
+		Query query = createQuery(q,"factory",factory);
+		int max = (Integer) query.uniqueResult();
+		commit();
+		return max + 1;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -812,6 +821,15 @@ public class HibernateStore implements IEntityStore {
 		return copyColonies(listObject(createQuery(q, "systemID", excludeSystem.getID())));
 	}
 
+	// private List<StarSystem> copyStars(List<?> objects) {
+	// List<StarSystem> list = new ArrayList<StarSystem>();
+	// for(Object o : objects) {
+	// list.add((StarSystem)o);
+	// }
+	// commit();
+	// return list;
+	// }
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -824,15 +842,6 @@ public class HibernateStore implements IEntityStore {
 		beginTransaction();
 		return copyColonies(listObject(createQuery(q, "location", excludeLocation)));
 	}
-
-	// private List<StarSystem> copyStars(List<?> objects) {
-	// List<StarSystem> list = new ArrayList<StarSystem>();
-	// for(Object o : objects) {
-	// list.add((StarSystem)o);
-	// }
-	// commit();
-	// return list;
-	// }
 
 	/*
 	 * (non-Javadoc)
@@ -857,7 +866,7 @@ public class HibernateStore implements IEntityStore {
 		beginTransaction();
 		return copyGrants(listObject(queryColonistGrants(colony, openOnly)));
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -891,7 +900,7 @@ public class HibernateStore implements IEntityStore {
 		beginTransaction();
 		return copyColonists(listObject(createQuery(q, "colony", colony)));
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -945,7 +954,7 @@ public class HibernateStore implements IEntityStore {
 		beginTransaction();
 		return copyDeposits(listObject(createQuery(q)));
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -956,7 +965,7 @@ public class HibernateStore implements IEntityStore {
 		beginTransaction();
 		return copyDesigns(listObject(createQuery(q, "owner", owner)));
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -1174,8 +1183,14 @@ public class HibernateStore implements IEntityStore {
 		return copyPlanets(listObject(createQuery(q)));
 	}
 
+	public List<FactoryQueueItem> listQueue(Corporation corp) {
+		String q = "select queue from FactoryQueueItem as queue left outer join queue.factory as factory where factory.owner = :owner order by position desc";
+		beginTransaction();
+		return copyQueue(listObject(createQuery(q, "owner", corp)));
+	}
+
 	public List<FactoryQueueItem> listQueue(Facility facility) {
-		String q = "from FactoryQueueItem where factory = :facility order by position";
+		String q = "from FactoryQueueItem where factory = :facility order by position desc";
 		beginTransaction();
 		return copyQueue(listObject(createQuery(q, "facility", facility)));
 	}
@@ -1197,18 +1212,18 @@ public class HibernateStore implements IEntityStore {
 		return copyShips(listObject(createQuery(q, "owner", owner)));
 	}
 
-	public List<Starship> listShips(Planet orbiting, Starship exclude) {
-		String q = "from Starship where planet = :orbiting and planetLocation.x < 1 and planetLocation.y < 1 and ID <> " + exclude.getID();
-		beginTransaction();
-		return copyShips(listObject(createQuery(q, "orbiting", orbiting)));
-	}
-
 	public List<Starship> listShips(Planet planet, Coordinates2D location, Starship exclude) {
 		String q = "from Starship where planet = :planet and planetLocation = :location and ID <> " + exclude.getID();
 		Map<String, Object> map = prepareParameters("planet", planet);
 		prepareParameters(map, "location", location);
 		beginTransaction();
 		return copyShips(listObject(createQuery(q, map)));
+	}
+
+	public List<Starship> listShips(Planet orbiting, Starship exclude) {
+		String q = "from Starship where planet = :orbiting and planetLocation.x < 1 and planetLocation.y < 1 and ID <> " + exclude.getID();
+		beginTransaction();
+		return copyShips(listObject(createQuery(q, "orbiting", orbiting)));
 	}
 
 	/*
@@ -1236,18 +1251,18 @@ public class HibernateStore implements IEntityStore {
 	}
 
 	public List<StarSystemEntity> listSystemEntities(StarSystem star,
+			CoordinatesPolar location, StarSystemEntity exclude) {
+		String q = "from StarSystemEntity where systemID = " + star.getID() +" and location = :location and ID <> " + exclude.getID();
+		beginTransaction();
+		return copySystemEntities(listObject(createQuery(q, "location", location)));
+	}
+	public List<StarSystemEntity> listSystemEntities(StarSystem star,
 			StarSystemEntity exclude) {
 		String q = "from StarSystemEntity where systemID = " + star.getID() + " and ID <> " + exclude.getID();
 		beginTransaction();
 		return copySystemEntities(listObject(createQuery(q)));
 	}
 
-	public List<StarSystemEntity> listSystemEntities(StarSystem star,
-			CoordinatesPolar location, StarSystemEntity exclude) {
-		String q = "from StarSystemEntity where systemID = " + star.getID() +" and location = :location and ID <> " + exclude.getID();
-		beginTransaction();
-		return copySystemEntities(listObject(createQuery(q, "location", location)));
-	}
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -1304,6 +1319,12 @@ public class HibernateStore implements IEntityStore {
 				+ popClass.getKey() + "'";
 		beginTransaction();
 		return copyColonists(listObject(createQuery(q, "colony", colony)));
+	}
+
+	public List<AColonists> listWorkers(Corporation corp) {
+		String q = "select w from Workers as w left join w.facility as fac where fac.owner = :owner";
+		beginTransaction();
+		return copyColonists(listObject(createQuery(q, "owner", corp)));
 	}
 
 	/*
@@ -1404,12 +1425,12 @@ public class HibernateStore implements IEntityStore {
 		commit();
 		return market;
 	}
-
+	
 	public List<Object> query(String hql) {
 		beginTransaction();
 		return copyObjects(listObject(createQuery(hql)));
 	}
-	
+
 	public long removeCredits(IEntity entity, long credits, String reason) {
 		addCredits(entity, (0 - credits), reason);
 		return getCredits(entity);
@@ -1429,11 +1450,11 @@ public class HibernateStore implements IEntityStore {
 		createQuery(q).executeUpdate();
 		commit();
 	}
-
+	
 	public void shutdown() {
 		sessionFactory.close();
 	}
-	
+
 	public long transferCredits(IEntity from, IEntity to, long credits,
 			String reason) {
 		long total = addCredits(to, credits, reason);

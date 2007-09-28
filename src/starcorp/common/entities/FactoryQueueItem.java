@@ -41,6 +41,7 @@ public class FactoryQueueItem extends ACorporateItem {
 	@Override
 	public void readXML(Element e) {
 		super.readXML(e);
+		position = Integer.parseInt(e.attributeValue("position","0"));
 		factory = new Facility();
 		factory.readXML(e.element("factory").element("entity"));
 		queuedDate = new GalacticDate(e.element("queued").element("date"));
@@ -48,6 +49,7 @@ public class FactoryQueueItem extends ACorporateItem {
 	@Override
 	public Element toBasicXML(Element parent) {
 		Element e = super.toBasicXML(parent);
+		e.addAttribute("position", String.valueOf(position));
 		factory.toBasicXML(e.addElement("factory"));
 		queuedDate.toXML(e.addElement("queued"));
 		return e;
@@ -61,6 +63,33 @@ public class FactoryQueueItem extends ACorporateItem {
 	}
 	public void setPosition(int position) {
 		this.position = position;
+	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((factory == null) ? 0 : factory.hashCode());
+		result = prime * result + position;
+		return result;
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		final FactoryQueueItem other = (FactoryQueueItem) obj;
+		if (factory == null) {
+			if (other.factory != null)
+				return false;
+		} else if (!factory.equals(other.factory))
+			return false;
+		if (position != other.position)
+			return false;
+		return true;
 	}
 	
 }

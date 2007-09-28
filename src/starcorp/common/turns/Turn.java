@@ -82,9 +82,8 @@ public class Turn {
 	}
 	
 	public void write(Writer writer) throws IOException {
-		// TODO switch to compact format to save space after debugging
-		// OutputFormat format = OutputFormat.createCompactFormat();
-		OutputFormat format = OutputFormat.createPrettyPrint();
+		OutputFormat format = OutputFormat.createCompactFormat();
+		// OutputFormat format = OutputFormat.createPrettyPrint();
 		XMLWriter xmlWriter = new XMLWriter(
 			writer, format
 		);

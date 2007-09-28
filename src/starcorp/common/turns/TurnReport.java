@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -29,11 +30,13 @@ import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
 
+import starcorp.common.entities.AColonists;
 import starcorp.common.entities.AGovernmentLaw;
 import starcorp.common.entities.Colony;
 import starcorp.common.entities.ColonyItem;
 import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Facility;
+import starcorp.common.entities.FactoryQueueItem;
 import starcorp.common.entities.IEntity;
 import starcorp.common.entities.MarketItem;
 import starcorp.common.entities.Planet;
@@ -42,6 +45,7 @@ import starcorp.common.entities.StarSystemEntity;
 import starcorp.common.entities.Starship;
 import starcorp.common.entities.StarshipDesign;
 import starcorp.common.entities.StellarAnomoly;
+import starcorp.common.entities.Workers;
 import starcorp.common.types.AFacilityType;
 import starcorp.common.types.CoordinatesPolar;
 import starcorp.common.util.Util;
@@ -60,6 +64,9 @@ public class TurnReport {
 	private List<AGovernmentLaw> laws;
 	private List<ColonyItem> items;
 	private Set<StarSystem> knownSystems;
+	private List<AColonists> employees;
+	private List<FactoryQueueItem> factoryQueue; 
+	private long credits;
 	
 	public TurnReport(Turn turn) {
 		this.turn = turn;
@@ -74,9 +81,8 @@ public class TurnReport {
 	public void write(Writer writer) throws IOException {
 		Document doc = DocumentHelper.createDocument();
 		toXML(doc.addElement("starcorp"));
-		// TODO switch to compact format to save space after debugging
-		// OutputFormat format = OutputFormat.createCompactFormat();
-		OutputFormat format = OutputFormat.createPrettyPrint();
+		OutputFormat format = OutputFormat.createCompactFormat();
+		// OutputFormat format = OutputFormat.createPrettyPrint();
 		XMLWriter xmlWriter = new XMLWriter(
 			writer, format
 		);
@@ -95,6 +101,25 @@ public class TurnReport {
 			IEntity entity = Util.fromXML((Element)i.next());
 			if(entity != null)
 				playerEntities.add(entity);
+		}
+		this.credits = Long.parseLong(e.attributeValue("credits","0"));
+		factoryQueue = new ArrayList<FactoryQueueItem>();
+		Element eQueue = e.element("factory-queue");
+		if(eQueue != null) {
+			for(Iterator<?> i = eQueue.elementIterator("entity"); i.hasNext();) {
+				FactoryQueueItem item  = (FactoryQueueItem) Util.fromXML((Element)i.next());
+				if(item != null)
+					factoryQueue.add(item);
+			}
+		}
+		employees = new ArrayList<AColonists>();
+		Element eEmployees = e.element("employees");
+		if(eEmployees != null) {
+			for(Iterator<?> i = eEmployees.elementIterator("entity"); i.hasNext();) {
+				AColonists worker  = (AColonists) Util.fromXML((Element)i.next());
+				if(worker != null)
+					employees.add(worker);
+			}
 		}
 		market = new ArrayList<MarketItem>();
 		Element eMarket = e.element("market");
@@ -136,12 +161,27 @@ public class TurnReport {
 	
 	public Element toXML(Element parent) {
 		Element root = parent.addElement("turn-report");
+		root.addAttribute("credits", String.valueOf(credits));
 		turn.toXML(root);
 		Element e = root.addElement("player-entities");
 		e.addAttribute("size", String.valueOf(playerEntities.size()));
 		for(Iterator<?> i = playerEntities.iterator(); i.hasNext();) {
 			IEntity entity = (IEntity) i.next();
 			entity.toFullXML(e);
+		}
+		e = root.addElement("factory-queue");
+		if(factoryQueue != null) {
+			e.addAttribute("size", String.valueOf(factoryQueue.size()));
+			for(FactoryQueueItem item : factoryQueue) {
+				if(item != null)item.toBasicXML(e);
+			}
+		}
+		e = root.addElement("employees");
+		if(employees != null) {
+			e.addAttribute("size", String.valueOf(employees.size()));
+			for(AColonists worker : employees) {
+				worker.toBasicXML(e);
+			}
 		}
 		e = root.addElement("market");
 		if(market != null) {
@@ -517,5 +557,54 @@ public class TurnReport {
 
 	public void setKnownSystems(Set<StarSystem> knownSystems) {
 		this.knownSystems = knownSystems;
+	}
+
+	public Set<AColonists> getEmployees(Facility facility) {
+		Set<AColonists> set = new TreeSet<AColonists>();
+		for(AColonists colonist : employees) {
+			Workers w = (Workers) colonist;
+			if(facility.equals(w.getFacility())) {
+				set.add(w);
+			}
+		}
+		return set;
+	}
+
+	public List<AColonists> getEmployees() {
+		return employees;
+	}
+
+	public void setEmployees(List<AColonists> employees) {
+		this.employees = employees;
+	}
+
+	public List<FactoryQueueItem> getQueue(Facility facility) {
+		List<FactoryQueueItem> set = new ArrayList<FactoryQueueItem>();
+//		System.out.println("queue items: " + factoryQueue.size());
+		for(FactoryQueueItem item : factoryQueue) {
+//			System.out.println("queue items factory: " + item.getFactory());
+			if(facility.equals(item.getFactory())) {
+//				System.out.println("queue item matches!");
+				set.add(item);
+			}
+		}
+		System.out.println("queue items for " + facility + ": " + set.size());
+		return set;
+	}
+
+	public List<FactoryQueueItem> getFactoryQueue() {
+		return factoryQueue;
+	}
+
+	public void setFactoryQueue(List<FactoryQueueItem> factoryQueue) {
+		this.factoryQueue = factoryQueue;
+	}
+
+	public long getCredits() {
+		return credits;
+	}
+
+	public void setCredits(long credits) {
+		this.credits = credits;
 	}
 }

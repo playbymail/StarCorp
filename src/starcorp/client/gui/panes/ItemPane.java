@@ -60,7 +60,7 @@ public class ItemPane extends ATypePane {
 		createLabel(getParent(), widgets, type.getKey());
 		
 		createLabel(getParent(), widgets, "Mass:");
-		createLabel(getParent(), widgets, String.valueOf(type.getMassUnits()));
+		createLabel(getParent(), widgets, format(type.getMassUnits()));
 		
 		if(type instanceof ConsumerGoods) {
 			createLabel(getParent(), widgets, "Consumer Goods:");

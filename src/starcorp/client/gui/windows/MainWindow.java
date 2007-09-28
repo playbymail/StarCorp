@@ -132,7 +132,7 @@ public class MainWindow extends AWindow {
 		data.grabExcessVerticalSpace = true;
 		dataPanel.setLayoutData(data);
 		
-		currentDataPane = new SimpleTextPane(this,"Welcome","Load a turn report or submit a new turn.");
+		currentDataPane = new SimpleTextPane(this,"Welcome","Load a turn report or create a new account.");
 		currentDataPane.open(dataPanel);
 		
 		data = new GridData();

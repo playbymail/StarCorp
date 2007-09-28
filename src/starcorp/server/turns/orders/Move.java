@@ -55,6 +55,9 @@ public class Move extends AOrderProcessor {
 			if(log.isDebugEnabled())
 				log.debug(ship + " : " + corp);
 		}
+		else if(quadrant > 4 || quadrant < 1 || orbit < 1 || orbit > 20) {
+			error = new TurnError(TurnError.INVALID_LOCATION,order);
+		}
 		else {
 			if(ship.getPlanet() != null) {
 				error = new TurnError(TurnError.INVALID_LOCATION,order);

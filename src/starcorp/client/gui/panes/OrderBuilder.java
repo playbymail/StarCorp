@@ -291,7 +291,7 @@ public class OrderBuilder extends ABuilderPane {
 			String val = null;
 			if(o instanceof IEntity) {
 				IEntity entity = (IEntity) o;
-				val = String.valueOf(entity.getID());
+				val = format(entity.getID());
 			}
 			else if(o instanceof ABaseType) {
 				ABaseType type = (ABaseType) o;

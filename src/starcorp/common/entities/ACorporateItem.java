@@ -74,9 +74,13 @@ public abstract class ACorporateItem implements IEntity, Comparable<ACorporateIt
 	public void readXML(Element e) {
 		this.ID = Integer.parseInt(e.attributeValue("ID","0"));
 		this.owner = new Corporation();
-		this.owner.readXML(e.element("owner").element("entity"));
+		Element eOwner = e.element("owner");
+		if(eOwner != null)
+			this.owner.readXML(eOwner.element("entity"));
 		this.colony = new Colony();
-		this.colony.readXML(e.element("colony").element("entity"));
+		Element eColony = e.element("colony");
+		if(eColony != null)
+			this.colony.readXML(eColony.element("entity"));
 		this.item = new Items(e);
 	}
 
@@ -84,15 +88,18 @@ public abstract class ACorporateItem implements IEntity, Comparable<ACorporateIt
 		Element root = parent.addElement("entity");
 		root.addAttribute("ID", String.valueOf(ID));
 		root.addAttribute("class", getClass().getSimpleName());
-		owner.toBasicXML(root.addElement("owner"));
-		colony.toBasicXML(root.addElement("colony"));
-		item.toXML(root);
+		if(owner != null)
+			owner.toBasicXML(root.addElement("owner"));
+		if(colony != null)
+			colony.toBasicXML(root.addElement("colony"));
+		if(item != null)
+			item.toXML(root);
 		return root;
 	}
 
 	@Override
 	public String toString() {
-		return item + " for " + owner.getName() +" (" + owner.getID() + ") @ " + colony.getName() + " (" + colony.getID() + ")";
+		return item.toString();
 	}
 
 	public long getID() {

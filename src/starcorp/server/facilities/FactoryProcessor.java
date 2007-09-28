@@ -35,6 +35,7 @@ import starcorp.server.engine.AServerTask;
  * @version 24 Sep 2007
  */
 public class FactoryProcessor extends AServerTask {
+	// TODO testings
 	private static final Log log = LogFactory.getLog(FactoryProcessor.class);
 	
 	private void processFactory(Facility factory, List<?> workers) {

@@ -146,12 +146,12 @@ public class TurnProcessor extends AServerTask {
 			report.setMarket(entityStore.listMarket(1));
 			report.setLaws(entityStore.listLaws());
 			report.setItems(entityStore.listItems(turn.getCorporation()));
-			// TODO add factory queue items to report
-			// TODO add facility workers to report
-			// TODO add CreditAccount for corporation to report
+			report.setEmployees(entityStore.listWorkers(corp));
+			report.setFactoryQueue(entityStore.listQueue(corp));
+			report.setCredits(entityStore.getCredits(corp));
 			// TODO add recent CashTransaction for corporation to report
 			// TODO add known systems (requires changes to entities)
-			// TODO add count of facilities by type for each known colony
+			// TODO filter market items to known systems
 		}
 		log.info(this + ": Processed turn from " + turn.getCorporation() + ". Order: " + turn.getOrders().size() + ". Errors: " + turn.getErrors().size());
 		processed++;

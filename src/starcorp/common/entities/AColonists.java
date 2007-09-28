@@ -110,14 +110,8 @@ public abstract class AColonists extends ABaseEntity {
 	public Element toBasicXML(Element parent) {
 		Element e = super.toBasicXML(parent);
 		colony.toBasicXML(e.addElement("colony"));
-		population.toXML(e);
-		return e;
-	}
-
-	@Override
-	public Element toFullXML(Element parent) {
-		Element e = super.toFullXML(parent);
 		e.addAttribute("happiness", String.valueOf(happiness));
+		population.toXML(e);
 		return e;
 	}
 
@@ -127,7 +121,7 @@ public abstract class AColonists extends ABaseEntity {
 	}
 
 	public String getDisplayName() {
-		return getPopClass().getName() +" x " + getQuantity() + " [" + getID() +"] @ " + colony.getName() +" [" + colony.getID() + "]";
+		return getPopClass().getName() +" x " + getQuantity() + " [" + getID() +"]";
 	}
 
 }

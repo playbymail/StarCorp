@@ -388,7 +388,7 @@ public class StarshipPane extends AEntityPane {
 				}
 				i++;
 			}
-			Group grpCargoActions = createGroup(grpCargo, widgets, "");
+			Group grpCargoActions = createGroup(grpCargo, widgets, "Actions");
 			grpCargoActions.setLayout(new GridLayout(5,false));
 			grpCargoActions.setLayoutData(new GridData(SWT.LEFT,SWT.TOP,false,false));
 			final Text txtJettisonQty = createTextInput(grpCargoActions, widgets, "Quantity:");

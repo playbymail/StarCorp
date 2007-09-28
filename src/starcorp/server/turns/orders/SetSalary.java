@@ -49,39 +49,34 @@ public class SetSalary extends AOrderProcessor {
 			Colony colony = facility.getColony();
 			Workers workers = entityStore.getWorkers(facility, popClass);
 			if(workers == null) {
-				workers = new Workers();
-				workers.setColony(colony);
-				workers.setFacility(facility);
-				workers.setHappiness(0.0);
-				workers.setPopClass(popClass);
-				workers.setSalary(0);
-				entityStore.create(workers);
+				error = new TurnError(TurnError.INVALID_POP_CLASS,order);
 			}
-			
-			if(salary < workers.getSalary()) {
-				Unemployed unemployed = entityStore.getUnemployed(colony, popClass);
-				if(unemployed == null) {
-					unemployed = new Unemployed();
-					unemployed.setColony(colony);
-					unemployed.setHappiness(0.0);
-					unemployed.setPopClass(popClass);
-					entityStore.create(unemployed);
+			else {
+				if(salary < workers.getSalary()) {
+					Unemployed unemployed = entityStore.getUnemployed(colony, popClass);
+					if(unemployed == null) {
+						unemployed = new Unemployed();
+						unemployed.setColony(colony);
+						unemployed.setHappiness(0.0);
+						unemployed.setPopClass(popClass);
+						unemployed = (Unemployed) entityStore.create(unemployed);
+					}
+					long credits = entityStore.getCredits(workers);
+					int qty = workers.getQuantity();
+					unemployed.addPopulation(qty);
+					workers.setQuantity(0);
+					entityStore.update(unemployed);
+					entityStore.transferCredits(workers, unemployed, credits, "");
 				}
-				long credits = entityStore.getCredits(workers);
-				int qty = workers.getQuantity();
-				unemployed.addPopulation(qty);
-				workers.setQuantity(0);
+				
+				workers.setSalary(salary);
 				entityStore.update(workers);
-				entityStore.update(unemployed);
-				entityStore.transferCredits(workers, unemployed, credits, "");
+				OrderReport report = new OrderReport(order,workers,facility);
+				report.add(facility.getID());
+				report.add(salary);
+				report.add(popClass.getName());
+				order.setReport(report);
 			}
-			
-			workers.setSalary(salary);
-			entityStore.update(workers);
-			OrderReport report = new OrderReport(order,workers,facility);
-			report.add(facility.getID());
-			report.add(salary);
-			order.setReport(report);
 		}
 		
 		return error;
