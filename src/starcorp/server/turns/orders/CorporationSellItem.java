@@ -35,7 +35,7 @@ import starcorp.server.turns.AOrderProcessor;
  * @version 16 Sep 2007
  */
 public class CorporationSellItem extends AOrderProcessor {
-
+	// TODO test
 	@Override
 	public TurnError process(TurnOrder order) {
 		TurnError error = null;
@@ -48,49 +48,54 @@ public class CorporationSellItem extends AOrderProcessor {
 		
 		Colony colony = (Colony) entityStore.load(Colony.class, colonyId);
 		AItemType type = AItemType.getType(itemTypeKey);
-		Facility colonyHub = entityStore.getFacility(colony, colony.getGovernment(), ColonyHub.class);
-		ColonyItem colonyItem = entityStore.getItem(colony, corp, type);
-		List<?> workers = colonyHub == null ? null : entityStore.listWorkers(colonyHub);
 		
 		if(colony == null) {
-			error = new TurnError(TurnError.INVALID_COLONY);
+			error = new TurnError(TurnError.INVALID_COLONY,order);
 		}
-		else if(colonyHub == null) {
-			error = new TurnError(TurnError.INVALID_COLONY);
-		}
-		else if(colonyItem == null) {
-			error = new TurnError(TurnError.INVALID_ITEM);
-		}
-		else if(colonyHub.getTransactionsRemaining(workers) < 1) {
-			error = new TurnError(TurnError.MARKET_OUT_OF_TRANSACTIONS);
+		else if(type == null) {
+			error = new TurnError(TurnError.INVALID_ITEM,order);
 		}
 		else {
-			quantity = colonyItem.getItem().remove(quantity);
-			Items item = new Items();
-			item.setQuantity(quantity);
-			item.setTypeClass(type);
-			
-			MarketItem marketItem = new MarketItem();
-			marketItem.setColony(colony);
-			marketItem.setCostPerItem(price);
-			marketItem.setIssuedDate(ServerConfiguration.getCurrentDate());
-			marketItem.setSeller(corp);
-			marketItem.setItem(item);
-			
-			entityStore.create(marketItem);
-			
-			Object[] args2 = {colonyHub.getTypeClass().getName(), colony.getName(), String.valueOf(colony.getID())};
-			String desc = CashTransaction.getDescription(CashTransaction.MARKET_FEES, args2);
-			entityStore.removeCredits(corp, colonyHub.getServiceCharge(), desc);
-			colonyHub.incTransactionCount();
-			
-			report = new OrderReport(order);
-			report.add(quantity);
-			report.add(type.getName());
-			report.add(colony.getName());
-			report.add(colony.getID());
-			report.add(price);
-			order.setReport(report);
+			Facility colonyHub = entityStore.getFacility(colony, colony.getGovernment(), ColonyHub.class);
+			ColonyItem colonyItem = entityStore.getItem(colony, corp, type);
+			List<?> workers = colonyHub == null ? null : entityStore.listWorkers(colonyHub);
+			if(colonyItem == null) {
+				error = new TurnError(TurnError.INVALID_ITEM,order);
+			}
+			else if(colonyHub == null) {
+				error = new TurnError(TurnError.INVALID_COLONY,order);
+			}
+			else if(colonyHub.getTransactionsRemaining(workers) < 1) {
+				error = new TurnError(TurnError.MARKET_OUT_OF_TRANSACTIONS,order);
+			}
+			else {
+				quantity = colonyItem.getItem().remove(quantity);
+				Items item = new Items();
+				item.setQuantity(quantity);
+				item.setTypeClass(type);
+				
+				MarketItem marketItem = new MarketItem();
+				marketItem.setColony(colony);
+				marketItem.setCostPerItem(price);
+				marketItem.setIssuedDate(ServerConfiguration.getCurrentDate());
+				marketItem.setSeller(corp);
+				marketItem.setItem(item);
+				
+				entityStore.create(marketItem);
+				
+				Object[] args2 = {colonyHub.getTypeClass().getName(), colony.getName(), String.valueOf(colony.getID())};
+				String desc = CashTransaction.getDescription(CashTransaction.MARKET_FEES, args2);
+				entityStore.removeCredits(corp, colonyHub.getServiceCharge(), desc);
+				colonyHub.incTransactionCount();
+				entityStore.update(colonyHub);
+				report = new OrderReport(order,colony,corp);
+				report.add(quantity);
+				report.add(type.getName());
+				report.add(colony.getName());
+				report.add(colony.getID());
+				report.add(price);
+				order.setReport(report);
+			}
 		}
 		return error;
 	}

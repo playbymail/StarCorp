@@ -44,6 +44,26 @@ public class Starship extends StarSystemEntity {
 	private GalacticDate builtDate;
 	private int timeUnitsUsed;
 	
+	public boolean inOpenSpace() {
+		return !isDocked() && !inOrbit();
+	}
+	
+	public boolean isDocked() {
+		return getPlanetLocation() != null || getColony() != null;
+	}
+	
+	public boolean inOrbit() {
+		return getPlanetLocation() == null && getColony() == null && getPlanet() != null;
+	}
+	
+	public boolean isOrbiting(Planet planet) {
+		return getPlanetLocation() == null && getColony() == null && planet.equals(getPlanet());
+	}
+	
+	public boolean isOrbiting(long planetID) {
+		return getPlanetLocation() == null && getColony() == null && getPlanet() != null && getPlanet().getID() == planetID;
+	}
+
 	public String getLocationDescription() {
 		StringBuffer loc = new StringBuffer();
 		
@@ -129,19 +149,6 @@ public class Starship extends StarSystemEntity {
 		
 	}
 	
-	public int getCargoStarshipHullsMass() {
-		int mass = 0;
-		Iterator<Items> i = cargo.iterator();
-		while(i.hasNext()) {
-			Items item = i.next();
-			if(item.getTypeClass() instanceof StarshipHulls) {
-				mass += (item.getTypeClass().getMassUnits() * item.getQuantity());
-			}
-		}
-		return mass;
-		
-	}
-	
 	public int getCargoOrganicsMass() {
 		int mass = 0;
 		Iterator<Items> i = cargo.iterator();
@@ -176,7 +183,7 @@ public class Starship extends StarSystemEntity {
 	
 	public int getSpaceFor(AItemType type) {
 		int mu = getCargoSpace(type);
-		return type.getMassUnits() / mu;
+		return mu / type.getMassUnits();
 	}
 	
 	public int getCargoSpace(AItemType type) {
@@ -206,9 +213,7 @@ public class Starship extends StarSystemEntity {
 	}
 	
 	public Items getCargo(AItemType type) {
-		Iterator<Items> i = cargo.iterator();
-		while(i.hasNext()) {
-			Items item = i.next();
+		for(Items item : cargo) {
 			if(item.getTypeClass().equals(type)) {
 				return item;
 			}
@@ -216,15 +221,15 @@ public class Starship extends StarSystemEntity {
 		return null;
 	}
 	
-	public Items setCargo(Items item) {
+	private Items setCargo(Items item) {
 		Iterator<Items> i = cargo.iterator();
 		while(i.hasNext()) {
 			Items item2 = i.next();
 			if(item2.getTypeClass().equals(item.getTypeClass())) {
-				item2.add(item.getQuantity());
-				item = item2;
 				i.remove();
 			}
+			else if(item2.getQuantity() < 1)
+				i.remove();
 		}
 		cargo.add(item);
 		return item;
@@ -245,7 +250,8 @@ public class Starship extends StarSystemEntity {
 		else {
 			item.add(qty);
 		}
-		setCargo(item);
+		if(item.getQuantity() > 0)
+			setCargo(item);
 		return qty;
 	}
 	
@@ -326,7 +332,7 @@ public class Starship extends StarSystemEntity {
 	}
 	
 	public boolean enoughTimeUnits(int required) {
-		return getTimeUnitsRemaining() <= required;
+		return getTimeUnitsRemaining() >= required;
 	}
 
 	@Override
@@ -334,6 +340,10 @@ public class Starship extends StarSystemEntity {
 		super.readXML(e);
 		this.owner = new Corporation();
 		this.owner.readXML(e.element("owner").element("entity"));
+		String sTU = e.attributeValue("TU");
+		if(sTU != null) {
+			timeUnitsUsed = Integer.parseInt(sTU);
+		}
 		Element ePlanet = e.element("planet");
 		if(ePlanet != null) {
 			this.planet = new Planet();
@@ -352,8 +362,11 @@ public class Starship extends StarSystemEntity {
 		this.design.readXML(e.element("design").element("entity"));
 		this.builtDate = new GalacticDate(e.element("built").element("date"));
 		
-		for(Iterator i = e.element("cargo").elementIterator("item"); i.hasNext();) {
-			cargo.add(new Items((Element)i.next()));
+		Element eCargo = e.element("cargo");
+		if(eCargo != null) {
+			for(Iterator i = eCargo.elementIterator("item"); i.hasNext();) {
+				cargo.add(new Items((Element)i.next()));
+			}
 		}
 	}
 
@@ -375,6 +388,7 @@ public class Starship extends StarSystemEntity {
 	@Override
 	public Element toFullXML(Element parent) {
 		Element e =super.toFullXML(parent);
+		e.addAttribute("TU", String.valueOf(timeUnitsUsed));
 		Element eCargo = e.addElement("cargo");
 		Iterator<Items> i = cargo.iterator();
 		while(i.hasNext()) {

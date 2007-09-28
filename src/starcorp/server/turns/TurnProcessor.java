@@ -43,7 +43,6 @@ import starcorp.server.engine.AServerTask;
  * @version 16 Sep 2007
  */
 public class TurnProcessor extends AServerTask {
-	
 	private static final Log log = LogFactory.getLog(TurnProcessor.class);
 	private final SendEmail sendEmail;
 	private final File reportsFolder;
@@ -122,40 +121,37 @@ public class TurnProcessor extends AServerTask {
 	}
 	
 	public TurnReport process(Turn turn) {
+		if(log.isDebugEnabled()) {
+			log.debug(turn);
+		}
 		Corporation corp = turn.getCorporation();
 		TurnReport report = new TurnReport(turn);
 		if(corp != null){
-			GalacticDate lastTurn = corp.getLastTurnDate();
 			GalacticDate currentDate = ServerConfiguration.getCurrentDate();
-			if(lastTurn != null && !lastTurn.before(currentDate)) {
-				if(log.isDebugEnabled())
-					log.debug("Turn early " + turn);
-				turn.add(TurnError.ERROR_EARLY_TURN);
-			}
-			else {
-				for(TurnOrder order : turn.getOrders()) {
-					order.setCorp(corp);
-					TurnError error = process(order);
-					if(error != null) {
-						turn.add(error);
-					}
-					if(log.isDebugEnabled())
-						log.debug("Processed " + order + " : error = " + error);
+			corp.setLastTurnDate(currentDate);
+			entityStore.update(corp);
+			for(TurnOrder order : turn.getOrders()) {
+				order.setCorp(corp);
+				TurnError error = process(order);
+				if(error != null) {
+					turn.add(error);
 				}
-				turn.setProcessedDate(ServerConfiguration.getCurrentDate());
-				report.addPlayerEntities(entityStore.listDesigns(corp));
-				report.addPlayerEntities(entityStore.listFacilities(corp));
-				report.addPlayerEntities(entityStore.listShips(corp));
-				report.setMarket(entityStore.listMarket(1));
-				report.setLaws(entityStore.listLaws());
-				report.setItems(entityStore.listItems(turn.getCorporation()));
-				// TODO add factory queue items to report
-				// TODO add facility workers to report
-				// TODO add CreditAccount for corporation to report
-				// TODO add recent CashTransaction for corporation to report
-				// TODO add known systems (requires changes to entities)
-				// TODO add count of facilities by type for each known colony
+				if(log.isDebugEnabled())
+					log.debug("Processed " + order + " : error = " + error);
 			}
+			turn.setProcessedDate(ServerConfiguration.getCurrentDate());
+			report.addPlayerEntities(entityStore.listDesigns(corp));
+			report.addPlayerEntities(entityStore.listFacilities(corp));
+			report.addPlayerEntities(entityStore.listShips(corp));
+			report.setMarket(entityStore.listMarket(1));
+			report.setLaws(entityStore.listLaws());
+			report.setItems(entityStore.listItems(turn.getCorporation()));
+			// TODO add factory queue items to report
+			// TODO add facility workers to report
+			// TODO add CreditAccount for corporation to report
+			// TODO add recent CashTransaction for corporation to report
+			// TODO add known systems (requires changes to entities)
+			// TODO add count of facilities by type for each known colony
 		}
 		log.info(this + ": Processed turn from " + turn.getCorporation() + ". Order: " + turn.getOrders().size() + ". Errors: " + turn.getErrors().size());
 		processed++;
@@ -201,6 +197,7 @@ public class TurnProcessor extends AServerTask {
 		ship.setColony(colony);
 		ship.setPlanet(planet);
 		ship.setPlanetLocation(colony.getLocation());
+		ship.setSystemID(planet.getSystemID());
 		ship.setLocation(planet.getLocation());
 		ship.setOwner(corp);
 		entityStore.create(ship);
@@ -213,6 +210,9 @@ public class TurnProcessor extends AServerTask {
 	private TurnError process(TurnOrder order) {
 		TurnError error = null;
 		OrderType type = order.getType();
+		if(type == null) {
+			return new TurnError(TurnError.INVALID_ORDER_TYPE,order);
+		}
 		AOrderProcessor processor = AOrderProcessor.getProcessor(type.getKey());
 		if(processor == null) {
 			error = new TurnError(TurnError.INVALID_ORDER_TYPE,order);

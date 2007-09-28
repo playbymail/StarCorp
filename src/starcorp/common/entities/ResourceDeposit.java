@@ -166,7 +166,7 @@ public class ResourceDeposit implements IEntity {
 		root.addAttribute("ID", String.valueOf(ID));
 		root.addAttribute("class", getClass().getSimpleName());
 		root.addAttribute("entity",String.valueOf(systemEntityID));
-		location.toXML(root);
+		if(location != null) location.toXML(root);
 		root.addAttribute("type", type.getKey());
 		root.addAttribute("total", String.valueOf(totalQuantity));
 		root.addAttribute("yield", String.valueOf(yield));
@@ -208,6 +208,6 @@ public class ResourceDeposit implements IEntity {
 	}
 
 	public String getDisplayName() {
-		return getTypeClass().getName() + " x " + getYield() + " [" + getID() + "]";
+		return getTypeClass().getName() + " x " + getYield();
 	}
 }

@@ -10,12 +10,14 @@
  */
 package starcorp.client.gui.panes;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Widget;
 
 import starcorp.client.gui.ADataEntryWindow;
@@ -53,7 +55,6 @@ public class TurnOrdersTable extends ATablePane {
 	protected String getColumnName(int index) {
 		switch(index) {
 		case 0:
-			return "Type";
 		case 1:
 		case 2:
 		case 3:
@@ -68,6 +69,8 @@ public class TurnOrdersTable extends ATablePane {
 	@Override
 	protected void populate() {
 		for(TurnOrder order : turn.getOrders()) {
+			if(order.getType() == null)
+				continue;
 			String[] values = new String[countColumns()];
 			values[0] = order.getType().getKey();
 			for(int i = 1; i < countColumns(); i++) {
@@ -88,6 +91,31 @@ public class TurnOrdersTable extends ATablePane {
 		}
 		TurnOrderWindow orderWindow = (TurnOrderWindow)super.window;
 		orderWindow.turnEdited();
+	}
+
+	@Override
+	protected void createWidgets(List<Widget> widgets) {
+		super.createWidgets(widgets);
+		Group grp = createGroup(getParent(), widgets, "");
+		RowLayout layout = new RowLayout();
+		layout.marginWidth=10;
+		layout.marginHeight=5;
+		layout.justify=true;
+		layout.fill=true;
+		layout.spacing=480;
+		grp.setLayout(layout);
+		createButton(grp, widgets, "Clear")
+		.addListener(SWT.Selection, new Listener() {
+			public void handleEvent (Event event) {
+				((TurnOrderWindow)window).clearTurn();
+			}
+		});
+		createButton(grp, widgets, "Submit")
+		.addListener(SWT.Selection, new Listener() {
+			public void handleEvent (Event event) {
+				window.getMainWindow().submitTurn();
+			}
+		});
 	}
 
 }

@@ -1,14 +1,14 @@
 package starcorp.common.types;
 
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.MissingResourceException;
 import java.util.Set;
+import java.util.TreeSet;
 
 public abstract class AFactoryItem extends AItemType {
 
 	public Set<Items> getComponent() {
-		Set<Items> items = new HashSet<Items>();
+		Set<Items> items = new TreeSet<Items>();
 		Enumeration<String> keys = bundle.getKeys();
 		while(keys.hasMoreElements()) {
 			String key = keys.nextElement();

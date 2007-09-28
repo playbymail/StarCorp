@@ -5,7 +5,7 @@ import org.dom4j.Element;
 import starcorp.common.types.CoordinatesPolar;
 
 public class StarSystemEntity extends ANamedEntity {
-
+	// TODO add system name
 	protected long systemID;
 	protected CoordinatesPolar location;
 	protected boolean asteroid;
@@ -32,12 +32,18 @@ public class StarSystemEntity extends ANamedEntity {
 			// ignore
 		}
 		this.location = new CoordinatesPolar(e);
+		if("true".equals(e.attributeValue("asteroid")))
+			asteroid = true;
+		if("true".equals(e.attributeValue("gasfield")))
+			gasfield = true;
 	}
 
 	@Override
 	public Element toBasicXML(Element parent) {
 		Element e =super.toBasicXML(parent);
 		e.addAttribute("system", String.valueOf(systemID));
+		if(isAsteroid()) e.addAttribute("asteroid", "true");
+		if(isGasfield()) e.addAttribute("gasfield", "true");
 		location.toXML(e);
 		return e;
 	}

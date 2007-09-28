@@ -95,38 +95,57 @@ public class StarshipHulls extends AFactoryItem {
 		StringBuffer s = new StringBuffer();
 		int cargoCapacity = getConsumerCapacity() + getIndustrialCapacity() + getModulesCapacity() + getOrganicsCapacity() + getLiquidGasCapacity(); 
 		if(cargoCapacity > 0) {
-			s.append("Cargo (");
-			s.append(getConsumerCapacity());
-			s.append("/");
-			s.append(getIndustrialCapacity());
-			s.append("/");
-			s.append(getModulesCapacity());
-			s.append("/");
-			s.append(getOrganicsCapacity());
-			s.append("/");
-			s.append(getLiquidGasCapacity());
-			s.append(") ");
+			s.append(" Cargo Space: ");
+			if(getConsumerCapacity() > 0) {
+				s.append(getConsumerCapacity());
+				s.append("mu Consumer Goods ");
+			}
+			if(getIndustrialCapacity() > 0) {
+				s.append(getIndustrialCapacity());
+				s.append("mu Industrial Goods ");
+			}
+			if(getModulesCapacity() > 0) {
+				s.append(getModulesCapacity());
+				s.append("mu Modules");
+			}
+			if(getOrganicsCapacity() > 0) {
+				s.append(getOrganicsCapacity());
+				s.append("mu Organics");
+			}
+			if(getLiquidGasCapacity() > 0) {
+				s.append(getLiquidGasCapacity());
+				s.append("mu Liquids / Gas");
+			}
 		}
 		if(getThrustPower() > 0) {
-			s.append("Thrust (" + getThrustPower() + ") ");
+			s.append(" Thrust (" + getThrustPower() + ") ");
 		}
 		if(getWarpFactor() > 0) {
-			s.append("Warp (" + getWarpFactor() + ") ");
+			s.append(" Warp (" + getWarpFactor() + ") ");
 		}
 		if(isAsteroidMining() || isGasFieldMining()) {
-			s.append("Mine (" + isAsteroidMining() + " / " + isGasFieldMining() + ") ");
+			s.append(" Mine" + 
+					(isAsteroidMining() ? " asteroids" : "") +
+					(isGasFieldMining() ? " gas fields" : ""));
 		}
 		if(getLongScanner() > 0 || isShortScanner()) {
-			s.append("Scan (" + isShortScanner() + " / " + getLongScanner() + ") ");
+			s.append(" Scan " + 
+					(isShortScanner() ? "short range " : "") +
+					getLongScanner() + " long range");
 		}
 		if(isCommand())
-			s.append("Command ");
+			s.append(" Command");
 		if(isCrew())
-			s.append("Crew ");
+			s.append(" Crew");
 		if(isSystemProbe() || isPlanetProbe())
-			s.append("Probe (" + isSystemProbe() + " / " + isPlanetProbe() + ") ");
+			s.append(" Probe" + 
+				(isSystemProbe() ? " system" : "") +
+				(isPlanetProbe() ? " planet" : ""));
 		if(isBioLab() || isPhysicsLab() || isGeoLab())
-			s.append("Lab (" + isBioLab() + " / " + isPhysicsLab() + " / " + isGeoLab() + ") ");
+			s.append(" Lab" + 
+				(isBioLab() ? " bio" : "") + 
+				(isPhysicsLab() ? " physics" : "") +
+				(isGeoLab() ? " geo" : ""));
 		
 		return s.toString().trim();
 			

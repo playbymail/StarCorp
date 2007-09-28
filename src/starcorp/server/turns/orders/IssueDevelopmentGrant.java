@@ -28,7 +28,7 @@ import starcorp.server.turns.AOrderProcessor;
  * @version 16 Sep 2007
  */
 public class IssueDevelopmentGrant extends AOrderProcessor {
-
+	// TODO test
 	@Override
 	public TurnError process(TurnOrder order) {
 		TurnError error = null;
@@ -41,13 +41,13 @@ public class IssueDevelopmentGrant extends AOrderProcessor {
 		AFacilityType type = AFacilityType.getType(facilityType);
 		
 		if(colony == null) {
-			error = new TurnError(TurnError.INVALID_COLONY);
+			error = new TurnError(TurnError.INVALID_COLONY,order);
 		}
 		else if(type == null) {
-			error = new TurnError(TurnError.INVALID_FACILITY_TYPE);
+			error = new TurnError(TurnError.INVALID_FACILITY_TYPE,order);
 		}
 		else if(!colony.getGovernment().equals(corp)){
-			error = new TurnError(TurnError.INVALID_COLONY);
+			error = new TurnError(TurnError.INVALID_COLONY,order);
 		}
 		else {
 			DevelopmentGrant grant = new DevelopmentGrant();
@@ -58,7 +58,7 @@ public class IssueDevelopmentGrant extends AOrderProcessor {
 			
 			entityStore.create(grant);
 			
-			OrderReport report = new OrderReport(order);
+			OrderReport report = new OrderReport(order,grant, corp);
 			report.add(type.getName());
 			report.add(credit);
 			report.add(colony.getName());

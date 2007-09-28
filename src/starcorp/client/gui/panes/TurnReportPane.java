@@ -73,7 +73,8 @@ public class TurnReportPane extends ADataPane {
 				grpErrors.setLayout(new RowLayout(SWT.VERTICAL));
 				
 				for(TurnError error :  turn.getErrors()) {
-					createLabel(grpErrors, widgets, error.getMessage());
+					String msg = error.getMessage();
+					createLabel(grpErrors, widgets, msg);
 				}
 			}
 		}

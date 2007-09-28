@@ -29,6 +29,7 @@ import starcorp.client.gui.IComponent;
 import starcorp.client.gui.panes.ColonyPane;
 import starcorp.client.gui.panes.CorporationPane;
 import starcorp.client.gui.panes.FacilityPane;
+import starcorp.client.gui.panes.FacilityTypePane;
 import starcorp.client.gui.panes.OrderReportPane;
 import starcorp.client.gui.panes.StarshipDesignPane;
 import starcorp.client.gui.panes.StarshipPane;
@@ -42,6 +43,7 @@ import starcorp.common.entities.StarshipDesign;
 import starcorp.common.turns.Turn;
 import starcorp.common.turns.TurnOrder;
 import starcorp.common.turns.TurnReport;
+import starcorp.common.types.AFacilityType;
 
 /**
  * starcorp.client.gui.TreeBrowser
@@ -57,7 +59,6 @@ public class TreeBrowser implements IComponent  {
 	private TreeItem itemCorporation;
 	private TreeItem itemReport;
 	private List<TreeItem> listItemOrders = new ArrayList<TreeItem>();
-	private TreeItem itemEntities;
 	private TreeItem itemShips;
 	private List<TreeItem> listItemShips = new ArrayList<TreeItem>();
 	private TreeItem itemDesigns;
@@ -88,9 +89,10 @@ public class TreeBrowser implements IComponent  {
 			for(TurnOrder order : turn.getOrders()) {
 				TreeItem item = new TreeItem(itemReport,SWT.NONE);
 				tree.addListener(SWT.Selection, listenOrder(order));
-				item.setText(order.getType().getName());
+				item.setText(order.getType() == null ? "Unknown" : order.getType().getName());
 				item.setData(order);
 				listItemOrders.add(item);
+				// TODO context menu: redo order
 			}
 			for(StarshipDesign design : report.getPlayerDesigns()) {
 				TreeItem shipItem = new TreeItem(itemDesigns,SWT.NONE);
@@ -98,7 +100,7 @@ public class TreeBrowser implements IComponent  {
 				shipItem.setText(design.getName() +" [" + design.getID() +"]");
 				shipItem.setData(design);
 				listItemDesigns.add(shipItem);
-				
+				// TODO context menu: build ship
 				Set<Starship> ships = mainWindow.getTurnReport().getPlayerStarships(design);
 				if(ships != null && ships.size() > 0) {
 					for(Starship ship : ships) {
@@ -107,6 +109,7 @@ public class TreeBrowser implements IComponent  {
 						item.setText(ship.getName() +" [" + ship.getID() +"]");
 						item.setData(ship);
 						listItemDesigns.add(item);
+						// TODO context menu with suitable orders for ships
 					}
 				}
 			}
@@ -116,23 +119,32 @@ public class TreeBrowser implements IComponent  {
 				item.setText(ship.getName() +" [" + ship.getID() +"]");
 				item.setData(ship);
 				listItemShips.add(item);
+				// TODO context menu with suitable orders for ships
 			}
-			Map<Colony,Set<Facility>> map = report.getPlayerFacilitiesByColony();
-			for(Colony colony : map.keySet()) {
-				TreeItem itemColony = new TreeItem(itemFacilities,SWT.NONE);
-				itemColony.setText(colony.getName() +" [" + colony.getID() +"]");
-				itemColony.setData(colony);
-				tree.addListener(SWT.Selection, listenColony(colony));
-				listItemFacilities.add(itemColony);
-				for(Facility facility : map.get(colony)) {
-					TreeItem item = new TreeItem(itemColony,SWT.NONE);
-					tree.addListener(SWT.Selection, listenFacility(facility));
-					item.setText(facility.getTypeClass().getName() +" [" + facility.getID() +"]");
-					item.setData(facility);
-					listItemFacilities.add(item);
+			Map<AFacilityType,Map<Colony,Set<Facility>>> map = report.getPlayerFacilitiesByTypeAndColony();
+			for(AFacilityType type : map.keySet()) {
+				TreeItem itemType = new TreeItem(itemFacilities,SWT.NONE);
+				itemType.setText(type.getName());
+				itemType.setData(type);
+				listItemFacilities.add(itemType);
+				tree.addListener(SWT.Selection, listenFacilityType(type));
+				Map<Colony,Set<Facility>> subMap = map.get(type);
+				for(Colony colony : subMap.keySet()) {
+					TreeItem itemColony = new TreeItem(itemType,SWT.NONE);
+					itemColony.setText(colony.getName() +" [" + colony.getID() +"]");
+					itemColony.setData(colony);
+					tree.addListener(SWT.Selection, listenColony(colony));
+					listItemFacilities.add(itemColony);
+					for(Facility facility : subMap.get(colony)) {
+						TreeItem item = new TreeItem(itemColony,SWT.NONE);
+						tree.addListener(SWT.Selection, listenFacility(facility));
+						item.setText(facility.getTypeClass().getName() +" [" + facility.getID() +"]");
+						item.setData(facility);
+						listItemFacilities.add(item);
+						// TODO context menu with suitable orders for facilities
+					}
 				}
 			}
-			
 		}
 	}
 	
@@ -153,7 +165,6 @@ public class TreeBrowser implements IComponent  {
 		itemFacilities.dispose();
 		itemDesigns.dispose();
 		itemShips.dispose();
-		itemEntities.dispose();
 		itemCorporation.dispose();
 		itemReport.dispose();
 		tree.dispose();
@@ -181,16 +192,13 @@ public class TreeBrowser implements IComponent  {
 		itemReport = new TreeItem(tree,SWT.NONE);
 		itemReport.setText("Turn Report");
 
-		itemEntities = new TreeItem(tree,SWT.NONE);
-		itemEntities.setText("Entities");
-
-		itemDesigns = new TreeItem(itemEntities,SWT.NONE);
+		itemDesigns = new TreeItem(tree,SWT.NONE);
 		itemDesigns.setText("Designs");
 
-		itemShips = new TreeItem(itemEntities,SWT.NONE);
+		itemShips = new TreeItem(tree,SWT.NONE);
 		itemShips.setText("Starships");
 
-		itemFacilities = new TreeItem(itemEntities,SWT.NONE);
+		itemFacilities = new TreeItem(tree,SWT.NONE);
 		itemFacilities.setText("Facilities");	
 
 		redraw();
@@ -217,6 +225,16 @@ public class TreeBrowser implements IComponent  {
 			}
 		};
 	}
+	
+	private Listener listenFacilityType(final AFacilityType type) {
+		return new Listener() {
+			public void handleEvent(Event event) {
+				if(event.item.getData() == type)
+					mainWindow.set(new FacilityTypePane(mainWindow, type));
+			}
+		};
+	}
+	
 	private Listener listenOrder(final TurnOrder order) {
 		return new Listener() {
 			public void handleEvent(Event event) {

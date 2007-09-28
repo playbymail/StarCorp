@@ -85,6 +85,14 @@ public class Util {
 		public int quantityBought;
 		public int totalPrice;
 		public List<Items> bought = new ArrayList<Items>();
+		
+		public String toString() {
+			StringBuffer sb = new StringBuffer("Quantity Bought: " + quantityBought + " Total Price: " + totalPrice + "\n");
+			for(Items item : bought) {
+				sb.append(item.toString());
+			}
+			return sb.toString();
+		}
 	}
 	
 	public static ServiceResult service(GalacticDate date, Map<Facility, List<AColonists>> facilities, int quantity, long cashAvailable, IEntityStore entityStore) {
@@ -208,14 +216,14 @@ public class Util {
 		}
 		return null;
 	}
-	
+	// TODO move these name options to a configuration file
 	private static final String[] colonyNamePrefixes = new String[17];
 	private static final String[] colonyNameMiddles = new String[54];
 	private static final String[] colonyNameSuffixes = new String[39];
 	
-	private static final String[] corpNamePrefixes = new String[10];
-	private static final String[] corpNameMiddles = new String[20];
-	private static final String[] corpNameSuffixes = new String[10];
+	private static final String[] corpNamePrefixes = new String[15];
+	private static final String[] corpNameMiddles = new String[35];
+	private static final String[] corpNameSuffixes = new String[20];
 
 	static {
 		corpNamePrefixes[0] = "New ";
@@ -228,6 +236,11 @@ public class Util {
 		corpNamePrefixes[7] = "";
 		corpNamePrefixes[8] = "";
 		corpNamePrefixes[9] = "";
+		corpNamePrefixes[10] = "";
+		corpNamePrefixes[11] = "";
+		corpNamePrefixes[12] = "";
+		corpNamePrefixes[13] = "";
+		corpNamePrefixes[14] = "";
 		
 		corpNameMiddles[0] = "Omega";
 		corpNameMiddles[1] = "Alpha";
@@ -249,6 +262,21 @@ public class Util {
 		corpNameMiddles[17] = "Lyra";
 		corpNameMiddles[18] = "Hydrus";
 		corpNameMiddles[19] = "Sirius";
+		corpNameMiddles[20] = "Protux";
+		corpNameMiddles[21] = "Scimitar";
+		corpNameMiddles[22] = "Zeus";
+		corpNameMiddles[23] = "Apollo";
+		corpNameMiddles[24] = "Athena";
+		corpNameMiddles[25] = "Hermes";
+		corpNameMiddles[26] = "Ares";
+		corpNameMiddles[27] = "Jupiter";
+		corpNameMiddles[28] = "Neptune";
+		corpNameMiddles[29] = "Pluto";
+		corpNameMiddles[30] = "Mars";
+		corpNameMiddles[31] = "Saturn";
+		corpNameMiddles[32] = "Janus";
+		corpNameMiddles[33] = "Camelot";
+		corpNameMiddles[34] = "Totem";
 		
 		corpNameSuffixes[0] = " Alliance";
 		corpNameSuffixes[1] = " Conglomerate";
@@ -260,6 +288,16 @@ public class Util {
 		corpNameSuffixes[7] = " Ventures";
 		corpNameSuffixes[8] = " Mining";
 		corpNameSuffixes[9] = " Corporation";
+		corpNameSuffixes[10] = " Associates";
+		corpNameSuffixes[11] = " Trust";
+		corpNameSuffixes[12] = " Group";
+		corpNameSuffixes[13] = " Intergalactic";
+		corpNameSuffixes[14] = " Solutions";
+		corpNameSuffixes[15] = " Society";
+		corpNameSuffixes[16] = " Service";
+		corpNameSuffixes[17] = " Holdings";
+		corpNameSuffixes[18] = " Company";
+		corpNameSuffixes[19] = ", Inc.";
 		
 		colonyNamePrefixes[0] = "Fort ";
 		colonyNamePrefixes[1] = "Port ";

@@ -18,7 +18,7 @@ import org.dom4j.Element;
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 15 Sep 2007
  */
-public class Items {
+public class Items implements Comparable<Items>{
 
 	private AItemType type;
 	private int quantity;
@@ -144,6 +144,10 @@ public class Items {
 
 	@Override
 	public String toString() {
-		return quantity + " x " + type;
+		return quantity + " x " + (type == null ? "Unknown" : type.getName());
+	}
+
+	public int compareTo(Items o) {
+		return (o == null) ? 0 : o.type.compareTo(this.type);
 	}
 }

@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +32,7 @@ import org.dom4j.io.XMLWriter;
 import starcorp.common.entities.AGovernmentLaw;
 import starcorp.common.entities.Colony;
 import starcorp.common.entities.ColonyItem;
+import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Facility;
 import starcorp.common.entities.IEntity;
 import starcorp.common.entities.MarketItem;
@@ -42,6 +42,8 @@ import starcorp.common.entities.StarSystemEntity;
 import starcorp.common.entities.Starship;
 import starcorp.common.entities.StarshipDesign;
 import starcorp.common.entities.StellarAnomoly;
+import starcorp.common.types.AFacilityType;
+import starcorp.common.types.CoordinatesPolar;
 import starcorp.common.util.Util;
 
 /**
@@ -57,7 +59,7 @@ public class TurnReport {
 	private List<MarketItem> market;
 	private List<AGovernmentLaw> laws;
 	private List<ColonyItem> items;
-	private List<StarSystem> knownSystems;
+	private Set<StarSystem> knownSystems;
 	
 	public TurnReport(Turn turn) {
 		this.turn = turn;
@@ -121,7 +123,7 @@ public class TurnReport {
 					items.add(item);
 			}
 		}
-		knownSystems = new ArrayList<StarSystem>();
+		knownSystems = new TreeSet<StarSystem>();
 		Element eSystems = e.element("systems");
 		if(eSystems != null) {
 			for(Iterator<?> i = eSystems.elementIterator("entity"); i.hasNext();) {
@@ -201,9 +203,20 @@ public class TurnReport {
 		return list;
 	}
 	
+	public Set<StellarAnomoly> getScannedAnomolies(CoordinatesPolar location) {
+		Set<StellarAnomoly> list = new TreeSet<StellarAnomoly>();
+		for(Object o : turn.getScannedEntities(StellarAnomoly.class)) {
+			StellarAnomoly anomoly = (StellarAnomoly)o;
+			if(anomoly.getLocation().equals(location))
+				list.add(anomoly);
+		}
+		return list;
+	}
+	
 	public Set<Colony> getKnownColonies() {
 		Set<Colony> colonies = new TreeSet<Colony>();
 		colonies.addAll(getPlayerFacilitiesByColony().keySet());
+		colonies.addAll(getMarketByColony().keySet());
 		for(Object o : turn.getScannedEntities(Colony.class)) {
 			colonies.add((Colony)o);
 		}
@@ -214,11 +227,52 @@ public class TurnReport {
 		return colonies;
 	}
 	
+	public Set<Colony> getKnownColonies(Planet planet) {
+		Set<Colony> colonies = new TreeSet<Colony>();
+		for(Colony colony : getKnownColonies()) {
+			if(colony.getPlanetID() == planet.getID())
+				colonies.add(colony);
+		}
+		return colonies;
+	}
+	
 	public Set<Planet> getScannedPlanets() {
 		Set<Planet> entities = new TreeSet<Planet>();
 		for(Object o :turn.getScannedEntities(Planet.class)) {
 			Planet p = (Planet)o;
 			entities.add(p);
+		}
+		return entities;
+	}
+	
+	public Set<Planet> getScannedPlanets(long systemID, CoordinatesPolar location) {
+		Set<Planet> entities = new TreeSet<Planet>();
+		for(Object o :turn.getScannedEntities(Planet.class)) {
+			Planet p = (Planet)o;
+			if(p.getSystemID() == systemID && p.getLocation().equals(location))
+				entities.add(p);
+		}
+		return entities;
+	}
+
+	public Set<Planet> getScannedPlanets(long systemID) {
+		Set<Planet> entities = new TreeSet<Planet>();
+		for(Object o :turn.getScannedEntities(Planet.class)) {
+			Planet p = (Planet)o;
+			if(p.getSystemID() == systemID)
+				entities.add(p);
+		}
+		return entities;
+	}
+
+	public Set<StarSystemEntity> getScannedEntitiesExcludeShips(long systemID) {
+		Set<StarSystemEntity> entities = new TreeSet<StarSystemEntity>();
+		for(Object o :turn.getScannedEntities(StarSystemEntity.class)) {
+			StarSystemEntity p = (StarSystemEntity)o;
+			if(!(p.getClass().equals(Starship.class))) {
+				if(p.getSystemID() == systemID)
+					entities.add(p);
+			}
 		}
 		return entities;
 	}
@@ -234,11 +288,33 @@ public class TurnReport {
 		return entities;
 	}
 	
+	public Set<StarSystemEntity> getScannedAsteroids(CoordinatesPolar location) {
+		Set<StarSystemEntity> entities = new TreeSet<StarSystemEntity>();
+		for(Object o :turn.getScannedEntities(StarSystemEntity.class)) {
+			StarSystemEntity entity = (StarSystemEntity)o;
+			if(entity.isAsteroid() && entity.getLocation().equals(location)) {
+				entities.add(entity);
+			}
+		}
+		return entities;
+	}
+	
 	public Set<StarSystemEntity> getScannedGasFields() {
 		Set<StarSystemEntity> entities = new TreeSet<StarSystemEntity>();
 		for(Object o :turn.getScannedEntities(StarSystemEntity.class)) {
 			StarSystemEntity entity = (StarSystemEntity)o;
 			if(entity.isGasfield()) {
+				entities.add(entity);
+			}
+		}
+		return entities;
+	}
+	
+	public Set<StarSystemEntity> getScannedGasFields(CoordinatesPolar location) {
+		Set<StarSystemEntity> entities = new TreeSet<StarSystemEntity>();
+		for(Object o :turn.getScannedEntities(StarSystemEntity.class)) {
+			StarSystemEntity entity = (StarSystemEntity)o;
+			if(entity.isGasfield() && entity.getLocation().equals(location)) {
 				entities.add(entity);
 			}
 		}
@@ -266,6 +342,33 @@ public class TurnReport {
 		return map;
 	}
 	
+	public Set<Starship> getPlayerOrbitingrStarships(Planet planet) {
+		Set<Starship> list = new TreeSet<Starship>();
+		for(Starship ship : getPlayerStarships() ) {
+			if(ship.isOrbiting(planet))
+				list.add(ship);
+		}
+		return list;
+	}
+	
+	public Set<Starship> getPlayerStarships(Colony colony) {
+		Set<Starship> list = new TreeSet<Starship>();
+		for(Starship ship : getPlayerStarships() ) {
+			if(colony.equals(ship.getColony()))
+				list.add(ship);
+		}
+		return list;
+	}
+	
+	public Set<Starship> getPlayerStarshipsInOrOrbitingColony(Colony colony) {
+		Set<Starship> list = new TreeSet<Starship>();
+		for(Starship ship : getPlayerStarships() ) {
+			if(colony.equals(ship.getColony()) || ship.isOrbiting(colony.getID()))
+				list.add(ship);
+		}
+		return list;
+	}
+	
 	public Set<Starship> getPlayerStarships() {
 		Set<Starship> list = new TreeSet<Starship>();
 		for(Object o : playerEntities) {
@@ -289,6 +392,28 @@ public class TurnReport {
 			}
 		}
 		return map;
+	}
+	
+	public Map<AFacilityType,Map<Colony,Set<Facility>>> getPlayerFacilitiesByTypeAndColony() {
+		Map<AFacilityType,Map<Colony,Set<Facility>>> facMap = new TreeMap<AFacilityType, Map<Colony,Set<Facility>>>();
+		 
+		for(Object o : playerEntities) {
+			if(o instanceof Facility) {
+				Facility f = (Facility) o;
+				Map<Colony, Set<Facility>> map = facMap.get(f.getTypeClass());
+				if(map == null) {
+					map = new TreeMap<Colony, Set<Facility>>();
+					facMap.put(f.getTypeClass(), map);
+				}
+				Set<Facility> list = map.get(f.getColony());
+				if(list == null) {
+					list = new TreeSet<Facility>();
+					map.put(f.getColony(), list);
+				}
+				list.add(f);
+			}
+		}
+		return facMap;
 	}
 	
 	public Set<Facility> getPlayerFacilities() {
@@ -335,6 +460,32 @@ public class TurnReport {
 	public void addPlayerEntity(IEntity entity) {
 		playerEntities.add(entity);
 	}
+	
+	public Map<Colony, Set<MarketItem>> getMarketByColony() {
+		Map<Colony, Set<MarketItem>> map = new TreeMap<Colony, Set<MarketItem>>();
+		for(MarketItem item : getMarket()) {
+			Set<MarketItem> list = map.get(item.getColony());
+			if(list == null) {
+				list = new TreeSet<MarketItem>();
+				map.put(item.getColony(),list);
+			}
+			list.add(item);
+		}
+		return map;
+	}
+	
+	public Map<Corporation, Set<MarketItem>> getMarketBySeller() {
+		Map<Corporation, Set<MarketItem>> map = new TreeMap<Corporation, Set<MarketItem>>();
+		for(MarketItem item : getMarket()) {
+			Set<MarketItem> list = map.get(item.getSeller());
+			if(list == null) {
+				list = new TreeSet<MarketItem>();
+				map.put(item.getSeller(),list);
+			}
+			list.add(item);
+		}
+		return map;
+	}
 
 	public List<MarketItem> getMarket() {
 		return market;
@@ -360,11 +511,11 @@ public class TurnReport {
 		this.items = items;
 	}
 
-	public List<StarSystem> getKnownSystems() {
+	public Set<StarSystem> getKnownSystems() {
 		return knownSystems;
 	}
 
-	public void setKnownSystems(List<StarSystem> knownSystems) {
+	public void setKnownSystems(Set<StarSystem> knownSystems) {
 		this.knownSystems = knownSystems;
 	}
 }

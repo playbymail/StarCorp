@@ -52,6 +52,9 @@ import starcorp.common.types.PopulationClass;
 public interface IEntityStore {
 	public abstract void shutdown();
 
+	public abstract void resetFacilityTransactions();
+	public abstract void resetShipTimeUnits();
+	
 	public abstract double getAveragePrice(Colony colony, AItemType type);
 	public abstract double getAverageHappiness(Colony colony, PopulationClass popClass);
 	
@@ -64,15 +67,8 @@ public interface IEntityStore {
 	public abstract IEntity load(Class<?> entityClass, long ID);
 	public abstract IEntity create(IEntity entity);
 	public abstract IEntity update(IEntity entity);
-	public abstract AGovernmentLaw create(AGovernmentLaw law);
-	public abstract AGovernmentLaw update(AGovernmentLaw law);
-	public abstract ACorporateItem create(ACorporateItem item);
-	public abstract ACorporateItem update(ACorporateItem item);
-	public abstract ResourceDeposit create(ResourceDeposit deposit);
-	public abstract ResourceDeposit update(ResourceDeposit deposit);
 	
 	public abstract void delete(IEntity entity);
-	public abstract void delete(ACorporateItem item);
 	
 	public abstract List<Object> query(String hql);
 	
@@ -82,7 +78,9 @@ public interface IEntityStore {
 	public abstract List<StarSystem> listSystems(Coordinates3D origin, int range);
 	
 	public abstract List<StarSystemEntity> listSystemEntities(StarSystem star);
+	public abstract List<StarSystemEntity> listSystemEntities(StarSystem star, StarSystemEntity exclude);
 	public abstract List<StarSystemEntity> listSystemEntities(StarSystem star, CoordinatesPolar location);
+	public abstract List<StarSystemEntity> listSystemEntities(StarSystem star, CoordinatesPolar location, StarSystemEntity exclude);
 
 	public abstract List<Planet> listPlanets(StarSystem star, int maxGravity, List<AtmosphereType> atmospheres);
 	
@@ -132,9 +130,9 @@ public interface IEntityStore {
 	public abstract List<MarketItem> listMarket(Colony colony, List<AItemType> types, int minQty);
 	
 	public abstract List<Starship> listShips(Corporation owner);
-	public abstract List<Starship> listShips(Planet orbiting);
-	public abstract List<Starship> listShips(Planet planet, Coordinates2D location);
-	public abstract List<Starship> listShips(Colony docked);
+	public abstract List<Starship> listShips(Planet orbiting, Starship exclude);
+	public abstract List<Starship> listShips(Planet planet, Coordinates2D location, Starship exclude);
+	public abstract List<Starship> listShips(Colony docked, Starship excludeShip);
 	
 	public abstract List<StarshipDesign> listDesigns(Corporation owner);
 	

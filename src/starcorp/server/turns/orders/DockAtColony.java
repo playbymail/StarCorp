@@ -10,6 +10,9 @@
  */
 package starcorp.server.turns.orders;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import starcorp.common.entities.Colony;
 import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Planet;
@@ -29,6 +32,8 @@ import starcorp.server.turns.AOrderProcessor;
 public class DockAtColony extends AOrderProcessor {
 	public static final int TIME_UNITS = 10;
 	
+	private static final Log log = LogFactory.getLog(DockAtColony.class);
+	
 	@Override
 	public TurnError process(TurnOrder order) {
 		TurnError error = null;
@@ -39,39 +44,45 @@ public class DockAtColony extends AOrderProcessor {
 		Starship ship = (Starship) entityStore.load(Starship.class, starshipId);
 		Colony colony = (Colony) entityStore.load(Colony.class, colonyId);
 		
+		if(log.isDebugEnabled())
+			log.debug(ship + " : " + colony);
+		
 		if(ship == null || !ship.getOwner().equals(corp)) {
-			error = new TurnError(TurnError.INVALID_SHIP);
+			error = new TurnError(TurnError.INVALID_SHIP,order);
 		}
 		else if(colony == null) {
-			error = new TurnError(TurnError.INVALID_LOCATION);
+			error = new TurnError(TurnError.INVALID_LOCATION,order);
 		}
 		else if(!ship.enoughTimeUnits(TIME_UNITS)) {
-			error = new TurnError(TurnError.INSUFFICIENT_TIME);
+			error = new TurnError(TurnError.INSUFFICIENT_TIME,order);
 		}
 		else {
 			Planet planet = ship.getPlanet();
 			Planet colonyPlanet = ((Planet) entityStore.load(Planet.class, colony.getPlanetID()));
+			if(log.isDebugEnabled())
+				log.debug(planet + " : " + colonyPlanet);
 			if(planet == null) {
-				error = new TurnError(TurnError.INVALID_LOCATION);
+				error = new TurnError(TurnError.INVALID_LOCATION,order);
 			}
 			else if(!colonyPlanet.equals(planet)) {
-				error = new TurnError(TurnError.INVALID_LOCATION);
+				error = new TurnError(TurnError.INVALID_LOCATION,order);
 			}
 			else if(planet.getGravityRating() > ship.getDesign().getMaxDockGravity()){
-				error = new TurnError(TurnError.GRAVITY_TOO_HIGH);
+				error = new TurnError(TurnError.GRAVITY_TOO_HIGH,order);
 			}
 			else {
 				ship.setPlanetLocation(colony.getLocation());
 				ship.setColony(colony);
 				ship.incrementTimeUnitsUsed(TIME_UNITS);
-				OrderReport report = new OrderReport(order);
+				entityStore.update(ship);
+				OrderReport report = new OrderReport(order,colony,ship);
 				report.add(ship.getName());
 				report.add(ship.getID());
 				report.add(colony.getName());
 				report.add(colony.getID());
 				report.addScannedEntity(colony);
 				report.addScannedEntities(entityStore.listFacilities(colony));
-				report.addScannedEntities(entityStore.listShips(colony));
+				report.addScannedEntities(entityStore.listShips(colony,ship));
 				order.setReport(report);
 			}
 		}

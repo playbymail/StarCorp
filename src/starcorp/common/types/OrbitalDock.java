@@ -26,22 +26,22 @@ public class OrbitalDock extends AFacilityType {
 			return 0;
 		}
 		else if(efficiency < 10) {
-			return 5;
+			return 500;
 		}
 		else if (efficiency < 25) {
-			return 10;
+			return 1000;
 		}
 		else if (efficiency < 50) {
-			return 25;
+			return 2500;
 		}
 		else if (efficiency < 75) {
-			return 50;
+			return 5000;
 		}
 		else if (efficiency < 100) {
-			return 100;
+			return 10000;
 		}
 		else {
-			return -1; // unlimited
+			return 100000;
 		}
 	}
 

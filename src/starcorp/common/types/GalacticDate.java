@@ -10,7 +10,17 @@
  */
 package starcorp.common.types;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Writer;
+
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
+import org.dom4j.io.OutputFormat;
+import org.dom4j.io.SAXReader;
+import org.dom4j.io.XMLWriter;
 
 /**
  * starcorp.common.types.GalacticDate
@@ -38,14 +48,41 @@ public class GalacticDate {
 	}
 	
 	public GalacticDate(Element e) {
+		readXML(e);
+	}
+	
+	public GalacticDate(InputStream is) throws DocumentException {
+		SAXReader sax = new SAXReader();
+		Document doc = sax.read(is);
+		readXML(doc.getRootElement().element("date"));
+	}
+	
+	public void readXML(Element e) {
 		this.year = Integer.parseInt(e.attributeValue("year"));
 		this.month = Integer.parseInt(e.attributeValue("month"));
+	}
+	
+	public void write(Writer writer) throws IOException {
+		// TODO switch to compact format to save space after debugging
+		// OutputFormat format = OutputFormat.createCompactFormat();
+		OutputFormat format = OutputFormat.createPrettyPrint();
+		XMLWriter xmlWriter = new XMLWriter(
+			writer, format
+		);
+		
+		Document doc = DocumentHelper.createDocument();
+		Element root = doc.addElement("date");
+		toXML(root);
+		
+		xmlWriter.write(doc);
+		xmlWriter.close();
+		writer.close();
 	}
 	
 	public Element toXML(Element parent) {
 		Element root = parent.addElement("date");
 		root.addAttribute("year", String.valueOf(year));
-		root.addAttribute("month", String.valueOf(year));
+		root.addAttribute("month", String.valueOf(month));
 		return root;
 	}
 	
@@ -105,14 +142,16 @@ public class GalacticDate {
 	public int getYear() {
 		return year;
 	}
-	public void setYear(int year) {
+	public GalacticDate setYear(int year) {
 		this.year = year;
+		return this;
 	}
 	public int getMonth() {
 		return month;
 	}
-	public void setMonth(int month) {
+	public GalacticDate setMonth(int month) {
 		this.month = month;
+		return this;
 	}
 
 	@Override

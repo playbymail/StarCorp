@@ -28,7 +28,7 @@ import starcorp.server.turns.AOrderProcessor;
  * @version 16 Sep 2007
  */
 public class IssueLease extends AOrderProcessor {
-
+	// TODO test
 	@Override
 	public TurnError process(TurnOrder order) {
 		TurnError error = null;
@@ -43,13 +43,13 @@ public class IssueLease extends AOrderProcessor {
 		Corporation licensee = (Corporation) entityStore.load(Corporation.class, licenseeId);
 		
 		if(colony == null) {
-			error = new TurnError(TurnError.INVALID_COLONY);
+			error = new TurnError(TurnError.INVALID_COLONY,order);
 		}
 		else if(type == null) {
-			error = new TurnError(TurnError.INVALID_FACILITY_TYPE);
+			error = new TurnError(TurnError.INVALID_FACILITY_TYPE,order);
 		}
 		else if(!colony.getGovernment().equals(corp)){
-			error = new TurnError(TurnError.INVALID_COLONY);
+			error = new TurnError(TurnError.INVALID_COLONY,order);
 		}
 		else {
 			FacilityLease lease = new FacilityLease();
@@ -61,7 +61,7 @@ public class IssueLease extends AOrderProcessor {
 			
 			entityStore.create(lease);
 			
-			OrderReport report = new OrderReport(order);
+			OrderReport report = new OrderReport(order,lease, corp);
 			report.add(type.getName());
 			report.add(price);
 			report.add(colony.getName());

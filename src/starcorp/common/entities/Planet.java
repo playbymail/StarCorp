@@ -28,7 +28,7 @@ import starcorp.common.types.TerrainType;
  * @version 15 Sep 2007
  */
 public class Planet extends StarSystemEntity {
-
+	// TODO add orbiting planet name
 	private long orbitingID;
 	private AtmosphereType atmosphereType;
 	private int gravityRating;

@@ -171,6 +171,14 @@ public class HibernateStore implements IEntityStore {
 		return list;
 	}
 
+	private List<AGovernmentLaw> copyLaws(List<?> objects) {
+		List<AGovernmentLaw> list = new ArrayList<AGovernmentLaw>();
+		for(Object o : objects) {
+			list.add((AGovernmentLaw)o);
+		}
+		return list;
+	}
+
 	private List<FacilityLease> copyLeases(List<?> objects) {
 		List<FacilityLease> list = new ArrayList<FacilityLease>();
 		for (Object o : objects) {
@@ -204,6 +212,14 @@ public class HibernateStore implements IEntityStore {
 			list.add((Planet) o);
 		}
 		commit();
+		return list;
+	}
+
+	private List<FactoryQueueItem> copyQueue(List<?> objects) {
+		List<FactoryQueueItem> list = new ArrayList<FactoryQueueItem>();
+		for(Object o : objects) {
+			list.add((FactoryQueueItem)o);
+		}
 		return list;
 	}
 
@@ -467,32 +483,6 @@ public class HibernateStore implements IEntityStore {
 		return entity;
 	}
 
-	public AGovernmentLaw create(AGovernmentLaw law) {
-		beginTransaction();
-		getSession().saveOrUpdate(law);
-		commit();
-		return law;
-	}
-
-	public ACorporateItem create(ACorporateItem item) {
-		beginTransaction();
-		getSession().saveOrUpdate(item);
-		commit();
-		return item;
-	}
-
-	public ResourceDeposit create(ResourceDeposit deposit) {
-		beginTransaction();
-		getSession().saveOrUpdate(deposit);
-		commit();
-		return deposit;
-	}
-
-	public void delete(ACorporateItem item) {
-		beginTransaction();
-		getSession().delete(item);
-		commit();
-	}
 	public void delete(IEntity entity) {
 		if (entity instanceof Colony) {
 			deleteColony((Colony) entity);
@@ -511,6 +501,38 @@ public class HibernateStore implements IEntityStore {
 			getSession().delete(entity);
 			commit();
 		}
+	}
+
+	public double getAverageHappiness(Colony colony, PopulationClass popClass) {
+		String q = "select avg(col.happiness) from AColonists as col where col.colony = :colony and col.popClassType = '" + popClass.getKey() + "'";
+		beginTransaction();
+		Query query = createQuery(q, "colony", colony);
+		double avg = 0.0;
+		try {
+			avg = (Double) query.uniqueResult();
+		}
+		catch(Throwable e) {
+			log.error(e.getMessage(),e);
+		}
+		commit();
+		return avg;
+	}
+
+	public double getAveragePrice(Colony colony, AItemType type) {
+		if(type == null || colony == null)
+			return 0.0;
+		String q = "select avg(costPerItem) from MarketItem where item.type = '" + type.getKey() +"' and colony = :colony";
+		beginTransaction();
+		Query query = createQuery(q, "colony", colony);
+		double avg = 0.0;
+		try {
+			avg = (Double) query.uniqueResult();
+		}
+		catch(Throwable e) {
+			log.error(e.getMessage(),e);
+		}
+		commit();
+		return avg;
 	}
 
 	/*
@@ -586,7 +608,7 @@ public class HibernateStore implements IEntityStore {
 		commit();
 		return credits;
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -672,7 +694,7 @@ public class HibernateStore implements IEntityStore {
 		commit();
 		return i;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -803,6 +825,15 @@ public class HibernateStore implements IEntityStore {
 		return copyColonies(listObject(createQuery(q, "location", excludeLocation)));
 	}
 
+	// private List<StarSystem> copyStars(List<?> objects) {
+	// List<StarSystem> list = new ArrayList<StarSystem>();
+	// for(Object o : objects) {
+	// list.add((StarSystem)o);
+	// }
+	// commit();
+	// return list;
+	// }
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -843,22 +874,13 @@ public class HibernateStore implements IEntityStore {
 		beginTransaction();
 		return copyGrants(listObject(createQuery(q, map)));
 	}
-
+	
 	public List<AColonists> listColonists() {
 		String q = "from AColonists";
 		beginTransaction();
 		return copyColonists(listObject(createQuery(q)));
 	}
-
-	// private List<StarSystem> copyStars(List<?> objects) {
-	// List<StarSystem> list = new ArrayList<StarSystem>();
-	// for(Object o : objects) {
-	// list.add((StarSystem)o);
-	// }
-	// commit();
-	// return list;
-	// }
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -869,7 +891,7 @@ public class HibernateStore implements IEntityStore {
 		beginTransaction();
 		return copyColonists(listObject(createQuery(q, "colony", colony)));
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -891,7 +913,7 @@ public class HibernateStore implements IEntityStore {
 		beginTransaction();
 		return copyDeposits(listObject(createQuery(q, "location", location)));
 	}
-	
+
 	public List<ResourceDeposit> listDeposits(Planet planet,
 			List<AItemType> types, int minTotal) {
 		String q = "from ResourceDeposit where systemEntityID = " + planet.getID() + " and totalQuantity >= "
@@ -912,7 +934,7 @@ public class HibernateStore implements IEntityStore {
 		beginTransaction();
 		return copyDeposits(listObject(createQuery(q)));
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -923,7 +945,7 @@ public class HibernateStore implements IEntityStore {
 		beginTransaction();
 		return copyDeposits(listObject(createQuery(q)));
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -934,7 +956,7 @@ public class HibernateStore implements IEntityStore {
 		beginTransaction();
 		return copyDesigns(listObject(createQuery(q, "owner", owner)));
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -978,7 +1000,7 @@ public class HibernateStore implements IEntityStore {
 		beginTransaction();
 		return copyFacilities(listObject(createQuery(q, "colony", colony)));
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -1023,6 +1045,23 @@ public class HibernateStore implements IEntityStore {
 
 	}
 
+	public List<Facility> listFacilitiesPowered(List<AFacilityType> types) {
+		String q = "from Facility where powered = true";
+		if(types != null && types.size() > 0) {
+			q += " and type IN (";
+			int i = 0;
+			for(AFacilityType type : types) {
+				if(i > 0)
+					q += ", ";
+				q += "'" + type.getKey() + "'";
+				i++;
+			}
+			q += ")";
+		}
+		beginTransaction();
+		return copyFacilities(listObject(createQuery(q)));
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -1051,6 +1090,12 @@ public class HibernateStore implements IEntityStore {
 		q += ")";
 		beginTransaction();
 		return copyItems(listObject(createQuery(q, "owner", owner)));
+	}
+
+	public List<AGovernmentLaw> listLaws() {
+		String q = "from AGovernmentLaw where available = true";
+		beginTransaction();
+		return copyLaws(listObject(createQuery(q)));
 	}
 
 	/*
@@ -1093,6 +1138,12 @@ public class HibernateStore implements IEntityStore {
 		return copyMarket(listObject(queryMarket(colony, types, minQty)));
 	}
 
+	public List<MarketItem> listMarket(Corporation seller, int minQty) {
+		String q = "from MarketItem where item.quantity >= " + minQty + " and owner = :seller";
+		beginTransaction();
+		return copyMarket(listObject(createQuery(q, "seller", seller)));
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -1123,13 +1174,14 @@ public class HibernateStore implements IEntityStore {
 		return copyPlanets(listObject(createQuery(q)));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#listShips(starcorp.common.entities.Colony)
-	 */
-	public List<Starship> listShips(Colony docked) {
-		String q = "from Starship where colony = :docked";
+	public List<FactoryQueueItem> listQueue(Facility facility) {
+		String q = "from FactoryQueueItem where factory = :facility order by position";
+		beginTransaction();
+		return copyQueue(listObject(createQuery(q, "facility", facility)));
+	}
+
+	public List<Starship> listShips(Colony docked, Starship excludeShip) {
+		String q = "from Starship where colony = :docked and ID <> " + excludeShip.getID();
 		beginTransaction();
 		return copyShips(listObject(createQuery(q, "docked", docked)));
 	}
@@ -1145,25 +1197,14 @@ public class HibernateStore implements IEntityStore {
 		return copyShips(listObject(createQuery(q, "owner", owner)));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#listShips(starcorp.common.entities.Planet)
-	 */
-	public List<Starship> listShips(Planet orbiting) {
-		String q = "from Starship where planet = :orbiting and planetLocation.x < 1 and planetLocation.y < 1";
+	public List<Starship> listShips(Planet orbiting, Starship exclude) {
+		String q = "from Starship where planet = :orbiting and planetLocation.x < 1 and planetLocation.y < 1 and ID <> " + exclude.getID();
 		beginTransaction();
 		return copyShips(listObject(createQuery(q, "orbiting", orbiting)));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#listShips(starcorp.common.entities.Planet,
-	 *      starcorp.common.types.Coordinates2D)
-	 */
-	public List<Starship> listShips(Planet planet, Coordinates2D location) {
-		String q = "from Starship where planet = :planet and planetLocation = :location";
+	public List<Starship> listShips(Planet planet, Coordinates2D location, Starship exclude) {
+		String q = "from Starship where planet = :planet and planetLocation = :location and ID <> " + exclude.getID();
 		Map<String, Object> map = prepareParameters("planet", planet);
 		prepareParameters(map, "location", location);
 		beginTransaction();
@@ -1194,6 +1235,19 @@ public class HibernateStore implements IEntityStore {
 		return copySystemEntities(listObject(createQuery(q, "location", location)));
 	}
 
+	public List<StarSystemEntity> listSystemEntities(StarSystem star,
+			StarSystemEntity exclude) {
+		String q = "from StarSystemEntity where systemID = " + star.getID() + " and ID <> " + exclude.getID();
+		beginTransaction();
+		return copySystemEntities(listObject(createQuery(q)));
+	}
+
+	public List<StarSystemEntity> listSystemEntities(StarSystem star,
+			CoordinatesPolar location, StarSystemEntity exclude) {
+		String q = "from StarSystemEntity where systemID = " + star.getID() +" and location = :location and ID <> " + exclude.getID();
+		beginTransaction();
+		return copySystemEntities(listObject(createQuery(q, "location", location)));
+	}
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -1355,16 +1409,31 @@ public class HibernateStore implements IEntityStore {
 		beginTransaction();
 		return copyObjects(listObject(createQuery(hql)));
 	}
-
+	
 	public long removeCredits(IEntity entity, long credits, String reason) {
 		addCredits(entity, (0 - credits), reason);
 		return getCredits(entity);
 	}
 
+	public void resetFacilityTransactions() {
+		String q = "update versioned Facility set transactionCount = 0";
+		beginTransaction();
+		createQuery(q).executeUpdate();
+		commit();
+		
+	}
+
+	public void resetShipTimeUnits() {
+		String q = "update versioned Starship set timeUnitsUsed = 0";
+		beginTransaction();
+		createQuery(q).executeUpdate();
+		commit();
+	}
+
 	public void shutdown() {
 		sessionFactory.close();
 	}
-
+	
 	public long transferCredits(IEntity from, IEntity to, long credits,
 			String reason) {
 		long total = addCredits(to, credits, reason);
@@ -1379,108 +1448,11 @@ public class HibernateStore implements IEntityStore {
 		return entity;
 	}
 
-	public AGovernmentLaw update(AGovernmentLaw law) {
-		beginTransaction();
-		getSession().merge(law);
-		commit();
-		return law;
-	}
-
-	public ACorporateItem update(ACorporateItem item) {
-		beginTransaction();
-		getSession().merge(item);
-		commit();
-		return item;
-	}
-
 	public ResourceDeposit update(ResourceDeposit deposit) {
 		beginTransaction();
 		getSession().merge(deposit);
 		commit();
 		return deposit;
-	}
-
-	public List<Facility> listFacilitiesPowered(List<AFacilityType> types) {
-		String q = "from Facility where powered = true";
-		if(types != null && types.size() > 0) {
-			q += " and type IN (";
-			int i = 0;
-			for(AFacilityType type : types) {
-				if(i > 0)
-					q += ", ";
-				q += "'" + type.getKey() + "'";
-				i++;
-			}
-			q += ")";
-		}
-		beginTransaction();
-		return copyFacilities(listObject(createQuery(q)));
-	}
-
-	public double getAverageHappiness(Colony colony, PopulationClass popClass) {
-		String q = "select avg(col.happiness) from AColonists as col where col.colony = :colony and col.popClassType = '" + popClass.getKey() + "'";
-		beginTransaction();
-		Query query = createQuery(q, "colony", colony);
-		double avg = 0.0;
-		try {
-			avg = (Double) query.uniqueResult();
-		}
-		catch(Throwable e) {
-			log.error(e.getMessage(),e);
-		}
-		commit();
-		return avg;
-	}
-	
-	private List<FactoryQueueItem> copyQueue(List<?> objects) {
-		List<FactoryQueueItem> list = new ArrayList<FactoryQueueItem>();
-		for(Object o : objects) {
-			list.add((FactoryQueueItem)o);
-		}
-		return list;
-	}
-
-	public List<FactoryQueueItem> listQueue(Facility facility) {
-		String q = "from FactoryQueueItem where factory = :facility order by position";
-		beginTransaction();
-		return copyQueue(listObject(createQuery(q, "facility", facility)));
-	}
-
-	public double getAveragePrice(Colony colony, AItemType type) {
-		if(type == null || colony == null)
-			return 0.0;
-		String q = "select avg(costPerItem) from MarketItem where item.type = '" + type.getKey() +"' and colony = :colony";
-		beginTransaction();
-		Query query = createQuery(q, "colony", colony);
-		double avg = 0.0;
-		try {
-			avg = (Double) query.uniqueResult();
-		}
-		catch(Throwable e) {
-			log.error(e.getMessage(),e);
-		}
-		commit();
-		return avg;
-	}
-
-	public List<MarketItem> listMarket(Corporation seller, int minQty) {
-		String q = "from MarketItem where item.quantity >= " + minQty + " and owner = :seller";
-		beginTransaction();
-		return copyMarket(listObject(createQuery(q, "seller", seller)));
-	}
-	
-	private List<AGovernmentLaw> copyLaws(List<?> objects) {
-		List<AGovernmentLaw> list = new ArrayList<AGovernmentLaw>();
-		for(Object o : objects) {
-			list.add((AGovernmentLaw)o);
-		}
-		return list;
-	}
-
-	public List<AGovernmentLaw> listLaws() {
-		String q = "from AGovernmentLaw where available = true";
-		beginTransaction();
-		return copyLaws(listObject(createQuery(q)));
 	}
 
 }

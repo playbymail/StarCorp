@@ -31,7 +31,7 @@ import starcorp.server.turns.AOrderProcessor;
  */
 public class MineGasField extends AOrderProcessor {
 	public static final int TIME_UNITS = 50;
-	
+	// TODO test
 	@Override
 	public TurnError process(TurnOrder order) {
 		TurnError error = null;
@@ -43,16 +43,16 @@ public class MineGasField extends AOrderProcessor {
 		StarSystemEntity gasfield = (StarSystemEntity) entityStore.load(StarSystemEntity.class, gasFieldId);
 		
 		if(ship == null || !ship.getOwner().equals(corp)) {
-			error = new TurnError(TurnError.INVALID_SHIP);
+			error = new TurnError(TurnError.INVALID_SHIP,order);
 		}
 		else if(!ship.enoughTimeUnits(TIME_UNITS)) {
-			error = new TurnError(TurnError.INSUFFICIENT_TIME);
+			error = new TurnError(TurnError.INSUFFICIENT_TIME,order);
 		}
 		else if(gasfield == null || !gasfield.isGasfield() || gasfield.getSystemID() != ship.getSystemID() || !gasfield.getLocation().equals(ship.getLocation()) || ship.getPlanet() != null) {
-			error = new TurnError(TurnError.INVALID_LOCATION);
+			error = new TurnError(TurnError.INVALID_LOCATION,order);
 		}
 		else if(!ship.getDesign().canMineGasField()) {
-			error = new TurnError(TurnError.INVALID_SHIP);
+			error = new TurnError(TurnError.INVALID_SHIP,order);
 		}
 		else {
 			List<?> deposits = entityStore.listDeposits(gasfield);
@@ -61,9 +61,11 @@ public class MineGasField extends AOrderProcessor {
 				ResourceDeposit y = (ResourceDeposit) i.next();
 				int qty = ship.addCargo(y.getTypeClass(), y.getYield());
 				y.setTotalQuantity(y.getTotalQuantity() - qty);
+				entityStore.update(y);
 			}
 			ship.incrementTimeUnitsUsed(TIME_UNITS);
-			OrderReport report = new OrderReport(order);
+			entityStore.update(ship);
+			OrderReport report = new OrderReport(order,gasfield,ship);
 			StarSystem system = (StarSystem) entityStore.load(StarSystem.class, ship.getSystemID());
 			report.addScannedEntities(entityStore.listSystemEntities(system,ship.getLocation()));
 			report.add(gasfield.getName());

@@ -28,7 +28,7 @@ import starcorp.server.turns.AOrderProcessor;
  * @version 16 Sep 2007
  */
 public class IssueColonistGrant extends AOrderProcessor {
-
+	// TODO test
 	@Override
 	public TurnError process(TurnOrder order) {
 		TurnError error = null;
@@ -41,13 +41,13 @@ public class IssueColonistGrant extends AOrderProcessor {
 		PopulationClass popClass = PopulationClass.getType(popClassType);
 		
 		if(colony == null) {
-			error = new TurnError(TurnError.INVALID_COLONY);
+			error = new TurnError(TurnError.INVALID_COLONY,order);
 		}
 		else if(popClass == null) {
-			error = new TurnError(TurnError.INVALID_POP_CLASS);
+			error = new TurnError(TurnError.INVALID_POP_CLASS,order);
 		}
 		else if(!colony.getGovernment().equals(corp)){
-			error = new TurnError(TurnError.INVALID_COLONY);
+			error = new TurnError(TurnError.INVALID_COLONY,order);
 		}
 		else {
 			ColonistGrant grant = new ColonistGrant();
@@ -59,7 +59,7 @@ public class IssueColonistGrant extends AOrderProcessor {
 			
 			entityStore.create(grant);
 			
-			OrderReport report = new OrderReport(order);
+			OrderReport report = new OrderReport(order,grant, corp);
 			report.add(popClass.getName());
 			report.add(credit);
 			report.add(colony.getName());

@@ -84,7 +84,7 @@ public abstract class AFacilityType extends ABaseType {
 		Iterator<Map.Entry<String, AFacilityType>> i = AFacilityType.types.entrySet().iterator();
 		while(i.hasNext()) {
 			Map.Entry<String, AFacilityType> entry = i.next();
-			if(entry.getValue().getClass().equals(typeClass)) {
+			if(typeClass.isAssignableFrom(entry.getValue().getClass())) {
 				types.add(entry.getValue());
 			}
 		}
@@ -256,13 +256,11 @@ public abstract class AFacilityType extends ABaseType {
 	
 	public double getEfficiency(List<?> currentWorkers) {
 		Map<PopulationClass, Population> requiredWorkers = getWorkerRequirement();
-		Iterator<PopulationClass> i = requiredWorkers.keySet().iterator();
 		
 		int requiredTotal = 0;
 		int currentTotal = 0;
 		
-		while(i.hasNext()) {
-			PopulationClass popClass = i.next();
+		for(PopulationClass popClass : requiredWorkers.keySet()) {
 			Population c = requiredWorkers.get(popClass);
 			requiredTotal += c.getQuantity();
 		}
@@ -281,7 +279,7 @@ public abstract class AFacilityType extends ABaseType {
 			}
 		}
 		
-		return ((double) requiredTotal / (double) currentTotal); 
+		return ((double) requiredTotal / (double) currentTotal) * 100.0; 
 	}
 
 	@Override

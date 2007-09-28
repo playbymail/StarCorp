@@ -131,6 +131,10 @@ public class TerrainType extends ABaseType {
 		return Double.parseDouble(getResource(this,"hazard"));
 	}
 	
+	public String getImageFilename() {
+		return getResource(this,"image");
+	}
+	
 	public Map<AItemType, Integer> getResourcesChances() {
 		HashMap<AItemType, Integer> resources = new HashMap<AItemType, Integer>();
 		Enumeration<String> keys = bundle.getKeys();

@@ -73,15 +73,17 @@ public class View extends ACommand {
 					String className = "starcorp.common.entities." + entityClass;
 					Class clazz = Class.forName(className);
 					IEntity entity = entityStore.load(clazz, ID);
-					if(xml) {
-						StringWriter sw = new StringWriter();
-						entity.printXML(sw);
-						out.println();
-						out.println(sw.toString());
-					}
-					else {
-						out.println();
-						out.println(entity);
+					if(entity != null) {
+						if(xml) {
+							StringWriter sw = new StringWriter();
+							entity.printXML(sw);
+							out.println();
+							out.println(sw.toString());
+						}
+						else {
+							out.println();
+							out.println(entity);
+						}
 					}
 					out.print(Shell.PROMPT);
 					out.flush();

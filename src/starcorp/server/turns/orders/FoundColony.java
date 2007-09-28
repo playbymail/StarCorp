@@ -36,7 +36,7 @@ import starcorp.server.turns.AOrderProcessor;
  * @version 16 Sep 2007
  */
 public class FoundColony extends AOrderProcessor {
-
+	// TODO test
 	@Override
 	public TurnError process(TurnOrder order) {
 		TurnError error = null;
@@ -48,21 +48,21 @@ public class FoundColony extends AOrderProcessor {
 		Starship ship = (Starship) entityStore.load(Starship.class, starshipId);
 		ColonyHub hubType = (ColonyHub) AFacilityType.getType(hubTypeKey);
 		if(ship == null || !ship.getOwner().equals(corp)) {
-			error = new TurnError(TurnError.INVALID_SHIP);
+			error = new TurnError(TurnError.INVALID_SHIP,order);
 		}
 		else if(hubType == null) {
-			error = new TurnError(TurnError.INVALID_FACILITY_TYPE);
+			error = new TurnError(TurnError.INVALID_FACILITY_TYPE,order);
 		}
 		else {
 			Planet planet = ship.getPlanet();
 			Coordinates2D location = ship.getPlanetLocation();
 			if(planet == null || location == null) {
-				error = new TurnError(TurnError.INVALID_LOCATION);
+				error = new TurnError(TurnError.INVALID_LOCATION,order);
 			}
 			else {
 				Colony colony = entityStore.getColony(planet, location);
 				if(colony != null) {
-					error = new TurnError(TurnError.INVALID_LOCATION);
+					error = new TurnError(TurnError.INVALID_LOCATION,order);
 				}
 				else {
 					PlanetMapSquare sq = planet.get(location);
@@ -80,7 +80,7 @@ public class FoundColony extends AOrderProcessor {
 						Items item = i.next();
 						Items cargo = ship.getCargo(item.getTypeClass());
 						if(cargo == null || cargo.getQuantity() < item.getQuantity()) {
-							error = new TurnError(TurnError.INSUFFICIENT_BUILDING_MODULES);
+							error = new TurnError(TurnError.INSUFFICIENT_BUILDING_MODULES,order);
 							hasNeededModules = false;
 							break;
 						}
@@ -110,8 +110,8 @@ public class FoundColony extends AOrderProcessor {
 						entityStore.create(colony);
 						hub.setColony(colony);
 						entityStore.create(hub);
-						
-						OrderReport report = new OrderReport(order);
+						entityStore.update(ship);
+						OrderReport report = new OrderReport(order,colony,ship);
 						report.add(colony.getName());
 						report.add(colony.getID());
 						report.add(planet.getName());

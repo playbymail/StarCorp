@@ -32,6 +32,8 @@ public class TurnOrder {
 	private List<String> args = new ArrayList<String>(); 
 	private OrderReport report;
 	
+	private TurnError error;
+	
 	public TurnOrder() {
 		
 	}
@@ -45,27 +47,39 @@ public class TurnOrder {
 		this.type = OrderType.getType(e.attributeValue("type"));
 		for(Iterator<?> i = e.elementIterator("order-arg"); i.hasNext();) {
 			Element arg = (Element) i.next();
-			args.set(Integer.parseInt(arg.attributeValue("position")), arg.getTextTrim());
+			args.add(arg.getTextTrim());
 		}
 		Element eRep = e.element("order-report");
 		if(eRep != null) {
 			report = new OrderReport(eRep);
 		}
+		Element eError = e.element("error");
+		if(eError != null) {
+			error = new TurnError(eError);
+		}
 	}
 	
 	public Element toXML(Element parent) {
 		Element root = parent.addElement("order");
-		root.addAttribute("type", type.getKey());
-		for(int i = 0; i < args.size(); i++) {
-			Element e = root.addElement("order-arg");
-			e.addAttribute("position", String.valueOf(i));
-			if(args.get(i) != null)
-				e.addText(args.get(i));
-		}
-		if(report != null) {
-			report.toXML(root);
+		if(type != null) { 
+			root.addAttribute("type", type.getKey());
+			for(int i = 0; i < args.size(); i++) {
+				Element e = root.addElement("order-arg");
+				if(args.get(i) != null)
+					e.addText(args.get(i));
+			}
+			if(report != null) {
+				report.toXML(root);
+			}
+			if(error != null) {
+				error.toXML(root);
+			}
 		}
 		return root;
+	}
+	
+	public void add(long arg) {
+		args.add(String.valueOf(arg));
 	}
 	
 	public void add(String arg) {
@@ -85,7 +99,7 @@ public class TurnOrder {
 	}
 	
 	public void set(int index, String value) {
-		if(value != null)
+		if(value != null && index >= 0 && index < args.size())
 			args.set(index, value);
 	}
 	
@@ -99,7 +113,7 @@ public class TurnOrder {
 		
 	}
 	
-	public void set(int index, int value) {
+	public void set(int index, long value) {
 		try {
 			set(index, String.valueOf(value));
 		}
@@ -133,5 +147,60 @@ public class TurnOrder {
 
 	public void setReport(OrderReport report) {
 		this.report = report;
+	}
+
+	public String toString()
+	{
+		StringBuffer sb = new StringBuffer(type == null ? "" : type.getKey());
+		for(String s : args) {
+			sb.append(" ");
+			sb.append(s);
+		}
+		return sb.toString();
+	}
+
+	public TurnError getError() {
+		return error;
+	}
+
+	public void setError(TurnError error) {
+		this.error = error;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((args == null) ? 0 : args.hashCode());
+		result = prime * result + ((corp == null) ? 0 : corp.hashCode());
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		final TurnOrder other = (TurnOrder) obj;
+		if (args == null) {
+			if (other.args != null)
+				return false;
+		} else if (!args.equals(other.args))
+			return false;
+		if (corp == null) {
+			if (other.corp != null)
+				return false;
+		} else if (!corp.equals(other.corp))
+			return false;
+		if (type == null) {
+			if (other.type != null)
+				return false;
+		} else if (!type.equals(other.type))
+			return false;
+		return true;
 	}
 }

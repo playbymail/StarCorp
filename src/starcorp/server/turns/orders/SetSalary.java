@@ -28,7 +28,7 @@ import starcorp.server.turns.AOrderProcessor;
  * @version 18 Sep 2007
  */
 public class SetSalary extends AOrderProcessor {
-
+	// TODO test
 	@Override
 	public TurnError process(TurnOrder order) {
 		TurnError error = null;
@@ -40,10 +40,10 @@ public class SetSalary extends AOrderProcessor {
 		Facility facility = (Facility) entityStore.load(Facility.class, facilityId);
 		
 		if(facility == null) {
-			error = new TurnError(TurnError.INVALID_FACILITY);
+			error = new TurnError(TurnError.INVALID_FACILITY,order);
 		}
 		else if(popClass == null) {
-			error = new TurnError(TurnError.INVALID_POP_CLASS);
+			error = new TurnError(TurnError.INVALID_POP_CLASS,order);
 		}
 		else {
 			Colony colony = facility.getColony();
@@ -77,8 +77,8 @@ public class SetSalary extends AOrderProcessor {
 			}
 			
 			workers.setSalary(salary);
-			
-			OrderReport report = new OrderReport(order);
+			entityStore.update(workers);
+			OrderReport report = new OrderReport(order,workers,facility);
 			report.add(facility.getID());
 			report.add(salary);
 			order.setReport(report);

@@ -10,7 +10,13 @@
  */
 package starcorp.server;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ResourceBundle;
+
+import org.dom4j.DocumentException;
 
 import starcorp.common.types.GalacticDate;
 
@@ -42,15 +48,50 @@ public class ServerConfiguration {
 	public static final int SETUP_INITIAL_CREDITS = Integer.parseInt(bundle.getString("setup.corporation.credits"));
 	public static final String SETUP_DESCRIPTION = bundle.getString("setup.corporation.description");
 	
+	private static final String dateFile = bundle.getString("date.file");
 	private static GalacticDate currentDate;
 	
-	public static GalacticDate getCurrentDate() {
+	public static synchronized GalacticDate getCurrentDate() {
 		if(currentDate == null) {
-			int year = Integer.parseInt(bundle.getString("current.year"));
-			int month = Integer.parseInt(bundle.getString("current.month"));
-			currentDate = new GalacticDate(year,month);
+			try {
+				currentDate = new GalacticDate(new FileInputStream(dateFile));
+			} catch (FileNotFoundException e) {
+				// ignore
+			} catch (DocumentException e) {
+				// ignore
+			}
+			
+			if(currentDate == null) {
+				currentDate = new GalacticDate(1,1);
+				try {
+					currentDate.write(new FileWriter(dateFile));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		return currentDate;
+	}
+	
+	public static synchronized void incrementDate() {
+		currentDate = getCurrentDate().add(1);
+		try {
+			currentDate.write(new FileWriter(dateFile));
+//			System.out.println("Wrote " + currentDate);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static synchronized GalacticDate setDate(int month, int year) {
+		currentDate = getCurrentDate().setMonth(month).setYear(year);
+		try {
+			currentDate.write(new FileWriter(dateFile));
+//			System.out.println("Wrote " + currentDate);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return getCurrentDate();
 	}
 	
 }

@@ -25,7 +25,7 @@ import starcorp.server.turns.AOrderProcessor;
  * @version 16 Sep 2007
  */
 public class Investigate extends AOrderProcessor {
-
+	// TODO test
 	public static final int TIME_UNITS = 50;
 	
 	@Override
@@ -39,16 +39,17 @@ public class Investigate extends AOrderProcessor {
 		StellarAnomoly anomoly = (StellarAnomoly) entityStore.load(StellarAnomoly.class, anomolyId);
 		
 		if(ship == null || !ship.getOwner().equals(corp)) {
-			error = new TurnError(TurnError.INVALID_SHIP);
+			error = new TurnError(TurnError.INVALID_SHIP,order);
 		}
 		else if(!ship.enoughTimeUnits(TIME_UNITS)) {
-			error = new TurnError(TurnError.INSUFFICIENT_TIME);
+			error = new TurnError(TurnError.INSUFFICIENT_TIME,order);
 		}
 		else if(anomoly == null) {
-			error = new TurnError(TurnError.INVALID_LOCATION);
+			error = new TurnError(TurnError.INVALID_LOCATION,order);
 		}
 		else {
 			ship.incrementTimeUnitsUsed(TIME_UNITS);
+			entityStore.update(ship);
 			// TODO handle event
 		}
 		

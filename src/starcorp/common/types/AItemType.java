@@ -97,7 +97,7 @@ public abstract class AItemType extends ABaseType {
 		
 		while(i.hasNext()) {
 			Map.Entry<String, AItemType> entry = i.next();
-			if(typeClass.equals(entry.getValue().getClass())) {
+			if(typeClass.isAssignableFrom(entry.getValue().getClass())) {
 				types.add(entry.getValue());
 			}
 		}

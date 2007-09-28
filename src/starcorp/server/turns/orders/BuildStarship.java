@@ -32,7 +32,7 @@ import starcorp.server.turns.AOrderProcessor;
  * @version 16 Sep 2007
  */
 public class BuildStarship extends AOrderProcessor {
-
+	// TODO test
 	/* (non-Javadoc)
 	 * @see starcorp.server.turns.AOrderProcessor#process(starcorp.client.turns.TurnOrder)
 	 */
@@ -48,10 +48,10 @@ public class BuildStarship extends AOrderProcessor {
 		StarshipDesign design = (StarshipDesign) entityStore.load(StarshipDesign.class, designId);
 			
 		if(colony == null) {
-			error = new TurnError(TurnError.INVALID_COLONY);
+			error = new TurnError(TurnError.INVALID_COLONY,order);
 		}
 		else if(design == null) {
-			error = new TurnError(TurnError.INVALID_SHIP_DESIGN);
+			error = new TurnError(TurnError.INVALID_SHIP_DESIGN,order);
 		}
 		else {	
 			Starship ship = new Starship();
@@ -72,7 +72,7 @@ public class BuildStarship extends AOrderProcessor {
 				Items item = i.next();
 				ColonyItem colonyItem = entityStore.getItem(colony, corp, item.getTypeClass());
 				if(colonyItem == null || colonyItem.getItem().getQuantity() < item.getQuantity()) {
-					error = new TurnError(TurnError.INSUFFICIENT_SHIP_HULLS);
+					error = new TurnError(TurnError.INSUFFICIENT_SHIP_HULLS,order);
 					hasNeededHulls = false;
 					break;
 				}
@@ -87,11 +87,12 @@ public class BuildStarship extends AOrderProcessor {
 					if(colonyItem != null || !(colonyItem.getItem().getQuantity() < item.getQuantity())) {
 						colonyItem.getItem().remove(item.getQuantity());
 					}
+					entityStore.update(colonyItem);
 				}
 				
 				entityStore.create(ship);
 				
-				OrderReport report = new OrderReport(order);
+				OrderReport report = new OrderReport(order,ship,corp);
 				report.add(name);
 				report.add(ship.getID());
 				report.add(design.getName());

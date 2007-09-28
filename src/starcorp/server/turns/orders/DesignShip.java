@@ -26,7 +26,7 @@ import starcorp.server.turns.AOrderProcessor;
  * @version 16 Sep 2007
  */
 public class DesignShip extends AOrderProcessor {
-
+	// TODO test
 	@Override
 	public TurnError process(TurnOrder order) {
 		TurnError error = null;
@@ -44,13 +44,13 @@ public class DesignShip extends AOrderProcessor {
 		if(design.isValid()) {
 			entityStore.create(design);
 			
-			OrderReport report = new OrderReport(order);
+			OrderReport report = new OrderReport(order,design,corp);
 			report.add(name);
 			report.add(design.getID());
 			order.setReport(report);
 		}
 		else {
-			error = new TurnError(TurnError.INVALID_SHIP_DESIGN);
+			error = new TurnError(TurnError.INVALID_SHIP_DESIGN,order);
 		}
 		return error;
 	}

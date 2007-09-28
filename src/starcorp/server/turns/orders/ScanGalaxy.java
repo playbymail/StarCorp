@@ -39,15 +39,16 @@ public class ScanGalaxy extends AOrderProcessor {
 		Starship ship = (Starship) entityStore.load(Starship.class, starshipId);
 		
 		if(ship == null || !ship.getOwner().equals(corp)) {
-			error = new TurnError(TurnError.INVALID_SHIP);
+			error = new TurnError(TurnError.INVALID_SHIP,order);
 		}
 		else if(!ship.enoughTimeUnits(TIME_UNITS)) {
-			error = new TurnError(TurnError.INSUFFICIENT_TIME);
+			error = new TurnError(TurnError.INSUFFICIENT_TIME,order);
 		}
 		else {
 			ship.incrementTimeUnitsUsed(TIME_UNITS);
+			entityStore.update(ship);
 			int range = ship.getDesign().getScanGalaxyRange();
-			OrderReport report = new OrderReport(order);
+			OrderReport report = new OrderReport(order,null,ship);
 			StarSystem system = (StarSystem) entityStore.load(StarSystem.class, ship.getSystemID());
 			List<?> systems = entityStore.listSystems(system.getLocation(), range);
 			report.addScannedEntities(systems);

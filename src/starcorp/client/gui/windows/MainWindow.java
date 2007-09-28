@@ -39,6 +39,7 @@ import starcorp.client.gui.widgets.Toolbar;
 import starcorp.client.gui.widgets.TreeBrowser;
 import starcorp.client.turns.TurnSubmitter;
 import starcorp.common.entities.Corporation;
+import starcorp.common.entities.Planet;
 import starcorp.common.turns.Turn;
 import starcorp.common.turns.TurnOrder;
 import starcorp.common.turns.TurnReport;
@@ -59,6 +60,7 @@ public class MainWindow extends AWindow {
 	private int historyIndex = -1;
 	private List<ADataPane> history = new ArrayList<ADataPane>();
 	
+	PlanetMapWindow mapWindow;
 	TurnOrderWindow turnWindow;
 	SearchMarketWindow searchMarketWindow;
 	SearchItemsWindow searchItemsWindow;
@@ -172,16 +174,30 @@ public class MainWindow extends AWindow {
 	}
 	
 	public void closeChildWindows() {
-		if(turnWindow != null)
+		if(mapWindow != null) {
+			mapWindow.dispose();
+			mapWindow = null;
+		}
+		if(turnWindow != null) {
 			turnWindow.dispose();
-		if(searchMarketWindow != null)
+			turnWindow = null;
+		}
+		if(searchMarketWindow != null) {
 			searchMarketWindow.dispose();
-		if(searchItemsWindow != null)
+			searchMarketWindow = null;
+		}
+		if(searchItemsWindow != null) {
 			searchItemsWindow.dispose();
-		if(searchLawsWindow != null)
+			searchItemsWindow = null;
+		}
+		if(searchLawsWindow != null) {
 			searchLawsWindow.dispose();
-		if(designWindow != null)
+			searchLawsWindow = null;
+		}
+		if(designWindow != null) {
 			designWindow.dispose();
+			designWindow = null;
+		}
 	}
 
 	public void submitTurn() {
@@ -204,6 +220,10 @@ public class MainWindow extends AWindow {
 			TurnSubmitter.submit(currentTurn);
 			menu.setEnableSubmit(false);
 			toolbar.setEnableSubmit(false);
+			if(turnWindow != null) {
+				turnWindow.dispose();
+				turnWindow = null;
+			}
 			messageBox("Turn Submitted", "Your turn has successfully been submitted.", SWT.ICON_INFORMATION | SWT.OK);
 		} catch (IOException e) {
 			int buttonID = messageBox("Turn Submission Error", e.getMessage(), SWT.ICON_ERROR | SWT.ABORT | SWT.RETRY);
@@ -304,7 +324,7 @@ public class MainWindow extends AWindow {
 	}
 	
 	public Corporation promptCredentials() {
-		Corporation existing = currentTurn == null ? null : currentTurn.getCorporation();
+		Corporation existing = getCorporation();
 		CredentialsDialog dialog = new CredentialsDialog(shell,existing);
 		
 		return dialog.open();
@@ -348,7 +368,7 @@ public class MainWindow extends AWindow {
 		saveTurn(fileName);
 	}
 	
-	public void openTurnWindow() {
+	public TurnOrderWindow openTurnWindow() {
 		if(turnWindow == null) {
 			turnWindow = new TurnOrderWindow(this);
 			turnWindow.open(turnWindow.getShell());
@@ -357,22 +377,23 @@ public class MainWindow extends AWindow {
 		else {
 			turnWindow.focus();
 		}
+		return turnWindow;
 	}
 	
 	public void openSearchMarketWindow() {
-		// TODO
+		// TODO open search market window
 	}
 	
 	public void openSearchLawWindow() {
-		// TODO
+		// TODO open search law window
 	}
 	
 	public void openSearchItemsWindow() {
-		// TODO
+		// TODO open search items window
 	}
 	
 	public void openStarshipDesignWindow() {
-		// TODO
+		// TODO open starship design window
 	}
 
 	public ADataPane getDataPane() {
@@ -467,6 +488,16 @@ public class MainWindow extends AWindow {
 		
 		return new Point(width,height);
 	}
+	
+	public PlanetMapWindow openPlanetMap(Planet planet) {
+		System.out.println("Open map " + planet);
+		if(mapWindow != null) {
+			mapWindow.dispose();
+		}
+		mapWindow = new PlanetMapWindow(this,planet);
+		mapWindow.open(shell);
+		return mapWindow;
+	}
 
 	public TurnReport getTurnReport() {
 		return turnReport;
@@ -477,9 +508,18 @@ public class MainWindow extends AWindow {
 	}
 	
 	public void addTurnOrder(TurnOrder order) {
-		// TODO implement
 		openTurnWindow();
-		// add order to current turn & refresh turn window to show latest orders
+		currentTurn.add(order);
+		setTurnDirty(true);
+		turnWindow.turnOrdersReload();
+	}
+	
+	public void addTurnOrders(List<TurnOrder> orders) {
+		openTurnWindow();
+		for(TurnOrder order : orders) {
+			currentTurn.add(order);
+		}
+		turnWindow.turnOrdersReload();
 	}
 
 	public Turn getCurrentTurn() {
@@ -511,6 +551,16 @@ public class MainWindow extends AWindow {
 		this.turnDirty = turnDirty;
 		menu.setEnableSave(turnDirty);
 		toolbar.setEnableSave(turnDirty);
+	}
+	
+	public Corporation getCorporation() {
+		if(currentTurn != null && currentTurn.getCorporation() != null) {
+			return currentTurn.getCorporation();
+		}
+		else if(turnReport != null && turnReport.getTurn() != null) {
+			return turnReport.getTurn().getCorporation();
+		}
+		return null;
 	}
 
 	@Override

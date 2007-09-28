@@ -12,11 +12,22 @@ package starcorp.client.gui.panes;
 
 import java.util.List;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
-
 import starcorp.client.gui.AEntityPane;
 import starcorp.client.gui.windows.MainWindow;
 import starcorp.common.entities.Facility;
+import starcorp.common.turns.TurnOrder;
+import starcorp.common.types.AItemType;
+import starcorp.common.types.Factory;
 
 /**
  * starcorp.client.gui.FacilityPane
@@ -40,6 +51,9 @@ public class FacilityPane extends AEntityPane {
 		createLabel(getParent(), widgets, "Colony:");
 		createColonyLink(getParent(), widgets, facility.getColony(), null);
 
+		createLabel(getParent(), widgets, "Owner:");
+		createCorporationLink(getParent(), widgets, facility.getOwner(), null);
+
 		createLabel(getParent(), widgets, "Type:");
 		createFacilityTypeLink(getParent(), widgets, facility.getTypeClass(), null);
 
@@ -55,6 +69,26 @@ public class FacilityPane extends AEntityPane {
 		if(facility.getServiceCharge() > 0) {
 			createLabel(getParent(), widgets, "Service Charge:");
 			createLabel(getParent(), widgets, "\u20a1 " + facility.getServiceCharge());
+		}
+		
+		if(facility.getTypeClass() instanceof Factory) {
+			Group grp = createGroup(getParent(), widgets, "Factory Orders");
+			GridData data = new GridData();
+			data.horizontalSpan=2;
+			grp.setLayoutData(data);
+			grp.setLayout(new GridLayout(5,false));
+			List<AItemType> types = ((Factory)facility.getTypeClass()).canBuild();
+			final Combo c = createTypeSelection(grp, widgets, types, "Item:");
+			final Text txt = createIntegerInput(grp, widgets, "Quantity:");
+			Button add = createButton(grp, widgets, "Add");
+			add.addListener(SWT.Selection, new Listener() {
+				public void handleEvent (Event event) {
+					AItemType type = (AItemType) getComboValue(c);
+					int qty = getIntegerTextValue(txt);
+					TurnOrder order = buildOrder(facility, type, qty);
+					mainWindow.addTurnOrder(order);
+				}
+			});
 		}
 		
 		// TODO add workers, efficiency and queue items

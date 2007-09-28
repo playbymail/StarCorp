@@ -36,12 +36,9 @@ public class Shell {
 	 * @throws Exception 
 	 */
 	public static void main(String[] args) throws Exception {
-		
-		new Shell();
-		
+		new Shell(args);
 	}
-	private static final GalacticDate date = ServerConfiguration.getCurrentDate();
-	public static final String PROMPT = date + ">";
+	public static final String PROMPT = "> ";
 
 	private final ServerEngine engine;
 	private final CommandParser parser;
@@ -49,13 +46,21 @@ public class Shell {
 	private final IEntityStore entityStore;
 	private final BufferedReader input;
 	
-	public Shell() {
+	public Shell(String[] args) {
 		entityStore = new HibernateStore();
 		engine = new ServerEngine(entityStore);
 		parser = new CommandParser();
 		input = new BufferedReader(new InputStreamReader(System.in));
 		System.out.println("Welcome to Starcorp server!");
 		System.out.flush();
+		if(args != null && args.length > 0) {
+			StringBuffer sb = new StringBuffer();
+			for(int i = 0; i < args.length; i++) {
+				sb.append(args[i]);
+				sb.append(" ");
+			}
+			processCommandLine(sb.toString());
+		}
 		while(true) {
 			processInput();
 			Thread.yield();

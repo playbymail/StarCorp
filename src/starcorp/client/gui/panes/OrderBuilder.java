@@ -10,7 +10,6 @@
  */
 package starcorp.client.gui.panes;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
@@ -36,12 +35,12 @@ import starcorp.common.turns.TurnOrder;
 import starcorp.common.turns.TurnReport;
 import starcorp.common.types.ABaseType;
 import starcorp.common.types.AFacilityType;
+import starcorp.common.types.AFactoryItem;
 import starcorp.common.types.AItemType;
 import starcorp.common.types.ColonyHub;
 import starcorp.common.types.Factory;
 import starcorp.common.types.OrderType;
 import starcorp.common.types.PopulationClass;
-import starcorp.common.types.StarshipHulls;
 
 /**
  * starcorp.client.gui.OrderBuilder
@@ -71,7 +70,6 @@ public class OrderBuilder extends ABuilderPane {
 		buttonPanel.setLayout(new RowLayout(SWT.VERTICAL));
 		
 		Button add = createButton(buttonPanel, widgets, "Add");
-		// TODO replace text for button with an icon + tooltip
 		add.addListener(SWT.Selection, new Listener() {
 			public void handleEvent (Event event) {
 				TurnOrder order = readOrder();
@@ -96,57 +94,47 @@ public class OrderBuilder extends ABuilderPane {
 	private Combo orderTypeSelector;
 
 	private void createOrderTypeSelection(Group orderSelectionPanel, final List<Widget> widgets) {
-		List<String> types = new ArrayList<String>();
-		types.addAll(OrderType.setOrders());
-		String[] items = new String[types.size()];
-		for(int i = 0; i < items.length; i++) {
-			items[i] = types.get(i);
-		}
-		orderTypeSelector = createCombo(orderSelectionPanel, widgets, items, types, null);
+		orderTypeSelector = createTypeSelection(orderSelectionPanel, widgets, OrderType.listOrders(), null);
 		orderTypeSelector.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
-				chooseOrderType(widgets, (String)getComboValue(orderTypeSelector)); 
+				chooseOrderType(widgets, (OrderType)getComboValue(orderTypeSelector)); 
 			}
 			public void widgetDefaultSelected(SelectionEvent e) {
-				chooseOrderType(widgets, (String)getComboValue(orderTypeSelector));
+				chooseOrderType(widgets, (OrderType)getComboValue(orderTypeSelector));
 			}
 		});
 	}
 
-	private void chooseOrderType(List<Widget> widgets, String type) {
-		System.out.println(type + " selected");
+	private void chooseOrderType(List<Widget> widgets, OrderType orderType) {
+		System.out.println(orderType + " selected");
 		clearAllContents();
+		String type = orderType.getKey();
 		if(type.equals(OrderType.BUILD_FACILITY)){
-			// TODO filter facility types to colonies building modules available
 			createColonyDropDown(widgets, 0);
 			createFacilityTypeDropDown(widgets, 1);
 		}
 		else if(type.equals(OrderType.BUILD_STARSHIP)){
-			// TODO filter ship designs by colony items for given colony
 			createColonyDropDown(widgets, 0);
 			createShipDesignDropDown(widgets, 1);
 		}
 		else if(type.equals(OrderType.ISSUE_COLONIST_GRANT)){
-			// TODO filter colonies to those which player is government
 			createColonyDropDown(widgets, 0);
 			createPopClassDropDown(widgets, 1);
 			createIntegerInput(widgets, 2, "Credits");
 		}
 		else if(type.equals(OrderType.ISSUE_DEVELOPMENT_GRANT)){
-			// TODO filter colonies to those which player is government
 			createColonyDropDown(widgets, 0);
 			createFacilityTypeDropDown(widgets, 1);
 			createIntegerInput(widgets, 2, "Credits");
 		}
 		else if(type.equals(OrderType.ISSUE_LEASE)){
-			// TODO filter colonies to those which player is government
 			createColonyDropDown(widgets, 0);
 			createFacilityTypeDropDown(widgets, 1);
 			createIntegerInput(widgets, 2, "Price");
 		}
 		else if(type.equals(OrderType.FACTORY_BUILD)){
 			createFactoryDropDown(widgets, 0);
-			createItemTypeDropDown(widgets, 1);
+			createFactoryItemTypeDropDown(widgets, 1);
 			createIntegerInput(widgets, 2, "Quantity");
 		}
 		else if(type.equals(OrderType.SET_SALARY)){
@@ -166,16 +154,12 @@ public class OrderBuilder extends ABuilderPane {
 			createIntegerInput(widgets, 3, "Price");
 		}
 		else if(type.equals(OrderType.SHIP_BUY_ITEM)){
-			// TODO filter ships to those at a colony or in orbit of a planet
-			// TODO filter colony drop down based on ship selection
 			createShipDropDown(widgets, 0);
 			createColonyDropDown(widgets, 1);
 			createItemTypeDropDown(widgets, 2);
 			createIntegerInput(widgets, 3, "Quantity");
 		}
 		else if(type.equals(OrderType.SHIP_SELL_ITEM)){
-			// TODO filter ships to those at a colony or in orbit of a planet
-			// TODO filter colony drop down based on ship selection
 			createShipDropDown(widgets, 0);
 			createColonyDropDown(widgets, 1);
 			createItemTypeDropDown(widgets, 2);
@@ -183,47 +167,35 @@ public class OrderBuilder extends ABuilderPane {
 			createIntegerInput(widgets, 4, "Price");
 		}
 		else if(type.equals(OrderType.SHIP_PICKUP_ITEM)){
-			// TODO filter ships to those at a colony or in orbit of a planet
-			// TODO filter colony drop down based on ship selection
 			createColonyDropDown(widgets, 0);
 			createItemTypeDropDown(widgets, 1);
 			createIntegerInput(widgets, 2, "Quantity");
 		}
 		else if(type.equals(OrderType.SHIP_DELIVER_ITEM)){
-			// TODO filter ships to those at a colony or in orbit of a planet
-			// TODO filter colony drop down based on ship selection
 			createColonyDropDown(widgets, 0);
 			createItemTypeDropDown(widgets, 1);
 			createIntegerInput(widgets, 2, "Quantity");
 		}
 		else if(type.equals(OrderType.FOUND_COLONY)){
-			// TODO filter to ships landed on a planet
 			createShipDropDown(widgets, 0);
 			createTextInput(widgets, 1, "Name");
 		}
 		else if(type.equals(OrderType.INVESTIGATE)){
-			// TODO filter to ships in same location as a known anomoly
 			createShipDropDown(widgets, 0);
 			createAnomolyDropDown(widgets, 1);
 		}
 		else if(type.equals(OrderType.LEAVE_ORBIT)){
-			// TODO filter to ships in orbit of a planet
 			createShipDropDown(widgets, 0);
 		}
 		else if(type.equals(OrderType.ORBIT)){
-			// TODO filter to ships in space
-			// TODO filter planets based on ship selected
 			createShipDropDown(widgets, 0);
 			createPlanetDropDown(widgets, 1);
 		}
 		else if(type.equals(OrderType.DOCK_COLONY)){
-			// TODO filter to ships in orbit
-			// TODO filter colonies based on ship selected
 			createShipDropDown(widgets, 0);
 			createColonyDropDown(widgets, 1);
 		}
 		else if(type.equals(OrderType.DOCK_PLANET)){
-			// TODO filter to ships in orbit
 			createShipDropDown(widgets, 0);
 			createIntegerInput(widgets, 1, "X");
 			createIntegerInput(widgets, 2, "Y");
@@ -243,37 +215,29 @@ public class OrderBuilder extends ABuilderPane {
 			createGasFieldDropDown(widgets, 1);
 		}
 		else if(type.equals(OrderType.PROBE_PLANET)){
-			// TODO filter to ships in orbit
 			createShipDropDown(widgets, 0);
-			createPlanetDropDown(widgets, 1);
 		}
 		else if(type.equals(OrderType.PROBE_SYSTEM)){
-			// TODO filter to ships in space
 			createShipDropDown(widgets, 0);
 		}
 		else if(type.equals(OrderType.SCAN_GALAXY)){
-			// TODO filter to ships in space
 			createShipDropDown(widgets, 0);
 		}
 		else if(type.equals(OrderType.SCAN_SYSTEM)){
-			// TODO filter to ships in space
 			createShipDropDown(widgets, 0);
 		}
 		else if(type.equals(OrderType.PROSPECT)){
-			// TODO filter to ships landed on a planet
 			createShipDropDown(widgets, 0);
 		}
 		else if(type.equals(OrderType.DESIGN_SHIP)){
 			mainWindow.getMainWindow().openStarshipDesignWindow();
 		}
 		else if(type.equals(OrderType.MOVE)){
-			// TODO filter to ships in space
 			createShipDropDown(widgets, 0);
 			createIntegerInput(widgets, 1, "Quadrant");
 			createIntegerInput(widgets, 2, "Orbit");
 		}
 		else if(type.equals(OrderType.JUMP)){
-			// TODO filter to ships in space
 			createShipDropDown(widgets, 0);
 			createStarSystemDropDown(widgets, 1);
 		}
@@ -284,7 +248,7 @@ public class OrderBuilder extends ABuilderPane {
 	private TurnOrder readOrder() {
 		TurnOrder order = new TurnOrder();
 		order.setCorp(turn.getCorporation());
-		order.setType(OrderType.getType(getOrderSelected()));
+		order.setType(getOrderSelected());
 		
 		for(int i = 0; i < orderArgumentContent.length; i++) {
 			readContents(order, i);
@@ -292,9 +256,9 @@ public class OrderBuilder extends ABuilderPane {
 		return order;
 	}
 	
-	private String getOrderSelected() {
+	private OrderType getOrderSelected() {
 		Object o = getComboValue(orderTypeSelector);
-		return o == null ? "" : o.toString();
+		return o == null ? null : (OrderType)o;
 	}
 	
 	private void clearAllContents() {
@@ -396,12 +360,12 @@ public class OrderBuilder extends ABuilderPane {
 		setContents(index,createTypeSelection(orderArgumentPanels[index], widgets, AFacilityType.listTypesExcludeClass(ColonyHub.class), null),"Facility");
 	}
 	
-	private void createShipHullsList(List<Widget> widgets, int index) {
-		setContents(index,createTypeMultiSelection(orderArgumentPanels[index], widgets, AItemType.listTypes(StarshipHulls.class), null),"Starship Hulls");
-	}
-	
 	private void createItemTypeDropDown(List<Widget> widgets, int index) {
 		setContents(index,createTypeSelection(orderArgumentPanels[index], widgets, AItemType.listTypes(), null),"Item");
+	}
+	
+	private void createFactoryItemTypeDropDown(List<Widget> widgets, int index) {
+		setContents(index,createTypeSelection(orderArgumentPanels[index], widgets, AItemType.listTypes(AFactoryItem.class), null),"Item");
 	}
 	
 	private void createPopClassDropDown(List<Widget> widgets, int index) {

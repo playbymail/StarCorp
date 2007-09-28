@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.List;
 import org.dom4j.Element;
 
+import starcorp.common.entities.ABaseEntity;
 import starcorp.common.entities.IEntity;
 import starcorp.common.entities.Planet;
 import starcorp.common.types.OrderType;
@@ -30,8 +31,9 @@ import starcorp.common.util.Util;
 public class OrderReport {
 
 	private OrderType type;
+	private IEntity target;
+	private IEntity subject;
 	private List<String> msgArgs = new ArrayList<String>();
-	@SuppressWarnings("unchecked")
 	private List scannedEntities = new ArrayList();
 	private PlanetMapSquare scannedLocation;
 	private Planet mappedPlanet;
@@ -40,16 +42,25 @@ public class OrderReport {
 		
 	}
 	
-	public OrderReport(TurnOrder order) {
+	public OrderReport(TurnOrder order, IEntity target, IEntity subject) {
 		this.type = order.getType();
+		this.subject = subject;
+		this.target = target;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public OrderReport(Element e) {
 		this.type = OrderType.getType(e.attributeValue("type"));
+		Element eSubject = e.element("subject");
+		if(eSubject != null) {
+			subject = Util.fromXML(eSubject.element("entity"));
+		}
+		Element eTarget = e.element("target");
+		if(eTarget != null) {
+			target = Util.fromXML(eTarget.element("entity"));
+		}
 		for(Iterator<?> i = e.elementIterator("report-arg"); i.hasNext();) {
 			Element arg = (Element) i.next();
-			msgArgs.set(Integer.parseInt(arg.attributeValue("position")), arg.getText());
+			msgArgs.add(arg.getText());
 		}
 		Element scanned = e.element("scanned");
 		for(Iterator<?> i = scanned.elementIterator("entity"); i.hasNext();) {
@@ -71,16 +82,22 @@ public class OrderReport {
 	public Element toXML(Element parent) {
 		Element root = parent.addElement("order-report");
 		root.addAttribute("type", type.getKey());
+		if(subject != null) {
+			subject.toFullXML(root.addElement("subject"));
+		}
+		if(target != null) {
+			target.toBasicXML(root.addElement("target"));
+		}
 		for(int i = 0; i < msgArgs.size(); i++) {
 			Element e = root.addElement("report-arg");
-			e.addAttribute("position", String.valueOf(i));
 			e.addText(msgArgs.get(i));
 		}
 		Element scanned = root.addElement("scanned");
 		Iterator<?> i = scannedEntities.iterator();
 		while(i.hasNext()) {
 			IEntity entity = (IEntity) i.next();
-			entity.toBasicXML(scanned);
+			if(entity != null)
+				entity.toBasicXML(scanned);
 		}
 		if(scannedLocation != null) {
 			scannedLocation.toXML(scanned);
@@ -95,11 +112,7 @@ public class OrderReport {
 		return type.getDescription(msgArgs);
 	}
 	
-	public void add(int msgArg) {
-		msgArgs.add(String.valueOf(msgArg));
-	}
-	
-	public void add(double msgArg) {
+	public void add(long msgArg) {
 		msgArgs.add(String.valueOf(msgArg));
 	}
 
@@ -121,11 +134,9 @@ public class OrderReport {
 	public List<?> getScannedEntities() {
 		return scannedEntities;
 	}
-	@SuppressWarnings("unchecked")
 	public void addScannedEntities(List<?> scanned) {
 		scannedEntities.addAll(scanned);
 	}
-	@SuppressWarnings("unchecked")
 	public void addScannedEntity(IEntity entity) {
 		scannedEntities.add(entity);
 	}
@@ -152,6 +163,41 @@ public class OrderReport {
 
 	public void setMappedPlanet(Planet mappedPlanet) {
 		this.mappedPlanet = mappedPlanet;
+	}
+
+	public String toString()
+	{
+	    final String TAB = "    ";
+	    
+	    String retValue = "";
+	    
+	    retValue = "OrderReport ( "
+	        + super.toString() + TAB
+	        + "type = " + this.type + TAB
+	        + "subject = " + this.subject + TAB
+	        + "msgArgs = " + this.msgArgs + TAB
+	        + "scannedEntities = " + this.scannedEntities + TAB
+	        + "scannedLocation = " + this.scannedLocation + TAB
+	        + "mappedPlanet = " + this.mappedPlanet + TAB
+	        + " )";
+	
+	    return retValue;
+	}
+
+	public IEntity getSubject() {
+		return subject;
+	}
+
+	public void setSubject(IEntity subject) {
+		this.subject = subject;
+	}
+
+	public IEntity getTarget() {
+		return target;
+	}
+
+	public void setTarget(IEntity target) {
+		this.target = target;
 	}
 	
 	

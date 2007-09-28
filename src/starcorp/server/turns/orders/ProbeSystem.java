@@ -13,6 +13,7 @@ package starcorp.server.turns.orders;
 import java.util.Iterator;
 import java.util.List;
 
+import starcorp.common.entities.Planet;
 import starcorp.common.entities.StarSystem;
 import starcorp.common.entities.StarSystemEntity;
 import starcorp.common.entities.Corporation;
@@ -37,26 +38,27 @@ public class ProbeSystem extends AOrderProcessor {
 		TurnError error = null;
 		Corporation corp = order.getCorp();
 		int starshipId = order.getAsInt(0);
+		int entityId = order.getAsInt(1);
 		
 		Starship ship = (Starship) entityStore.load(Starship.class, starshipId);
+		StarSystemEntity entity = (StarSystemEntity) entityStore.load(StarSystemEntity.class, entityId);
 		
 		if(ship == null || !ship.getOwner().equals(corp)) {
-			error = new TurnError(TurnError.INVALID_SHIP);
+			error = new TurnError(TurnError.INVALID_SHIP,order);
 		}
 		else if(!ship.enoughTimeUnits(TIME_UNITS)) {
-			error = new TurnError(TurnError.INSUFFICIENT_TIME);
+			error = new TurnError(TurnError.INSUFFICIENT_TIME,order);
+		}
+		else if(entity == null || entity instanceof Planet || entity instanceof Starship) {
+			error = new TurnError(TurnError.INVALID_TARGET,order);
 		}
 		else {
 			ship.incrementTimeUnitsUsed(TIME_UNITS);
-			OrderReport report = new OrderReport(order);
-			StarSystem system = (StarSystem) entityStore.load(StarSystem.class, ship.getSystemID());
-			List<?> entities = entityStore.listSystemEntities(system,ship.getLocation());
-			report.addScannedEntities(entities);
-			Iterator<?> i = entities.iterator();
-			while(i.hasNext()) {
-				StarSystemEntity entity = (StarSystemEntity) i.next();
-				report.addScannedEntities(entityStore.listDeposits(entity));
-			}
+			entityStore.update(ship);
+			OrderReport report = new OrderReport(order,entity,ship);
+			report.add(entity.getName());
+			report.add(entity.getID());
+			report.addScannedEntities(entityStore.listDeposits(entity));
 			order.setReport(report);
 		}
 		

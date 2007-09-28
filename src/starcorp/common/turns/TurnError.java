@@ -25,8 +25,7 @@ public class TurnError {
 	
 	protected static final ResourceBundle bundle = ResourceBundle.getBundle("starcorp.common.turns.errors");
 
-	public static final TurnError ERROR_AUTHORIZATION_FAILED = new TurnError("error.authorization");
-	public static final TurnError ERROR_EARLY_TURN = new TurnError("error.earlyturn");
+	public static final TurnError ERROR_AUTHORIZATION_FAILED = new TurnError("error.authorization",null);
 	
 	public static final String INVALID_ORDER_TYPE = "error.order.type";
 	public static final String INVALID_LOCATION = "error.order.location";
@@ -41,40 +40,31 @@ public class TurnError {
 	public static final String OUT_OF_RANGE = "error.ship.range";
 	public static final String GRAVITY_TOO_HIGH = "error.ship.gravity";
 	public static final String INSUFFICIENT_SHIP_HULLS = "error.ship.hulls";
+	public static final String INSUFFICIENT_SPACE = "error.ship.cargo";
 	public static final String INVALID_ITEM = "error.item";
 	public static final String MARKET_OUT_OF_TRANSACTIONS = "error.market.transactions";
 	public static final String INVALID_POP_CLASS = "error.pop.class";
+	public static final String INVALID_TARGET = "error.target";
 	
 	private String msgKey;
-	private TurnOrder order;
 	
 	public TurnError() {
 		
 	}
 	
-	public TurnError(String msgKey) {
-		this.msgKey = msgKey;
-	}
-	
 	public TurnError(String msgKey, TurnOrder order) {
-		this(msgKey);
-		this.order = order;
+		this.msgKey = msgKey;
+		if(order != null)
+			order.setError(this);
 	}
 	
 	public TurnError(Element e) {
 		this.msgKey = e.attributeValue("key");
-		Element eOrder = e.element("order");
-		if(eOrder != null) {
-			this.order = new TurnOrder(eOrder);
-		}
 	}
 	
 	public Element toXML(Element parent) {
 		Element root = parent.addElement("error");
 		root.addAttribute("key", msgKey);
-		if(order != null) {
-			order.toXML(root);
-		}
 		return root;
 	}
 	
@@ -97,10 +87,18 @@ public class TurnError {
 	public void setMsgKey(String msgKey) {
 		this.msgKey = msgKey;
 	}
-	public TurnOrder getOrder() {
-		return order;
-	}
-	public void setOrder(TurnOrder order) {
-		this.order = order;
+
+	public String toString()
+	{
+	    final String TAB = "    ";
+	    
+	    String retValue = "";
+	    
+	    retValue = "TurnError ( "
+	        + super.toString() + TAB
+	        + "msgKey = " + this.msgKey + TAB
+	        + " )";
+	
+	    return retValue;
 	}
 }

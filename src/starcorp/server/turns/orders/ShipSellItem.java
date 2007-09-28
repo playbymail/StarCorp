@@ -12,6 +12,9 @@ package starcorp.server.turns.orders;
 
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import starcorp.common.entities.CashTransaction;
 import starcorp.common.entities.Colony;
 import starcorp.common.entities.Corporation;
@@ -37,7 +40,8 @@ import starcorp.server.turns.AOrderProcessor;
  * @version 16 Sep 2007
  */
 public class ShipSellItem extends AOrderProcessor {
-
+	private static final Log log = LogFactory.getLog(ShipSellItem.class);
+	
 	public TurnError process(TurnOrder order) {
 		TurnError error = null;
 		OrderReport report = null;
@@ -62,61 +66,71 @@ public class ShipSellItem extends AOrderProcessor {
 		List<?> dockWorkers = orbitalDock == null ? null : entityStore.listWorkers(orbitalDock);
 		
 		if(ship == null || !ship.getOwner().equals(corp)) {
-			error = new TurnError(TurnError.INVALID_SHIP);
+			error = new TurnError(TurnError.INVALID_SHIP,order);
 		}
 		else if(colony == null) {
-			error = new TurnError(TurnError.INVALID_COLONY);
+			error = new TurnError(TurnError.INVALID_COLONY,order);
 		}
 		else if(ship.getPlanet() == null || !ship.getPlanet().equals(colonyPlanet)) {
-			error = new TurnError(TurnError.INVALID_LOCATION);
+			error = new TurnError(TurnError.INVALID_LOCATION,order);
 		}
 		else if(ship.getColony() != null && !ship.getColony().equals(colony)) {
-			error = new TurnError(TurnError.INVALID_COLONY);
+			error = new TurnError(TurnError.INVALID_COLONY,order);
 		}
 		else if(ship.getColony() == null && orbitalDock == null) {
-			error = new TurnError(TurnError.INVALID_LOCATION);
+			error = new TurnError(TurnError.INVALID_LOCATION,order);
 		}
 		else if(colonyHub == null) {
-			error = new TurnError(TurnError.INVALID_COLONY);
+			error = new TurnError(TurnError.INVALID_COLONY,order);
 		}
 		else if(colonyHub.getTransactionsRemaining(hubWorkers) < 1) {
-			error = new TurnError(TurnError.MARKET_OUT_OF_TRANSACTIONS);
+			error = new TurnError(TurnError.MARKET_OUT_OF_TRANSACTIONS,order);
 		}
 		else if(orbitalDock != null && ship.getColony() == null && orbitalDock.getTransactionsRemaining(dockWorkers) < 1) {
-			error = new TurnError(TurnError.MARKET_OUT_OF_TRANSACTIONS);
+			error = new TurnError(TurnError.MARKET_OUT_OF_TRANSACTIONS,order);
 		}
 		else {
 			Items cargo = ship.getCargo(type);
-			if(quantity > cargo.getQuantity()) {
-				quantity = cargo.getQuantity();
+			if(cargo == null || cargo.getQuantity() < 1) {
+				error = new TurnError(TurnError.INVALID_ITEM,order);
 			}
-			MarketItem item = new MarketItem();
-			item.setColony(colony);
-			item.setCostPerItem(price);
-			item.setIssuedDate(ServerConfiguration.getCurrentDate());
-			item.setSeller(corp);
-			entityStore.create(item);
-			
-			ship.removeCargo(type, quantity);
-			Object[] args2 = {colonyHub.getTypeClass().getName(), colony.getName(), String.valueOf(colony.getID())};
-			String desc = CashTransaction.getDescription(CashTransaction.MARKET_FEES, args2);
-			entityStore.removeCredits(corp, colonyHub.getServiceCharge(), desc);
-			colonyHub.incTransactionCount();
-			if(orbitalDock != null && ship.getColony() == null) {
-				args2[0] = orbitalDock.getTypeClass().getName();
-				 desc = CashTransaction.getDescription(CashTransaction.MARKET_FEES, args2);
-				 entityStore.removeCredits(corp, orbitalDock.getServiceCharge(), desc);
-				orbitalDock.incTransactionCount();
+			else {
+				if(quantity > cargo.getQuantity()) {
+					quantity = cargo.getQuantity();
+				}
+				MarketItem item = new MarketItem();
+				item.setColony(colony);
+				item.setItem(new Items(type,quantity));
+				item.setCostPerItem(price);
+				item.setIssuedDate(ServerConfiguration.getCurrentDate());
+				item.setSeller(corp);
+				entityStore.create(item);
+				log.info("Created " + item);
+				ship.removeCargo(type, quantity);
+				entityStore.update(ship);
+				log.info("Updated " + ship);
+				Object[] args2 = {colonyHub.getTypeClass().getName(), colony.getName(), String.valueOf(colony.getID())};
+				String desc = CashTransaction.getDescription(CashTransaction.MARKET_FEES, args2);
+				entityStore.removeCredits(corp, colonyHub.getServiceCharge(), desc);
+				colonyHub.incTransactionCount();
+				entityStore.update(colonyHub);
+				if(orbitalDock != null && ship.getColony() == null) {
+					args2[0] = orbitalDock.getTypeClass().getName();
+					 desc = CashTransaction.getDescription(CashTransaction.MARKET_FEES, args2);
+					 entityStore.removeCredits(corp, orbitalDock.getServiceCharge(), desc);
+					orbitalDock.incTransactionCount();
+					entityStore.update(orbitalDock);
+				}
+				report = new OrderReport(order,colony,ship);
+				report.add(quantity);
+				report.add(type.getName());
+				report.add(colony.getName());
+				report.add(colony.getID());
+				report.add(price);
+				report.add(ship.getName());
+				report.add(ship.getID());
+				order.setReport(report);
 			}
-			report = new OrderReport(order);
-			report.add(quantity);
-			report.add(price);
-			report.add(type.getName());
-			report.add(colony.getName());
-			report.add(colony.getID());
-			report.add(ship.getName());
-			report.add(ship.getID());
-			order.setReport(report);
 		}
 		return error;
 	}

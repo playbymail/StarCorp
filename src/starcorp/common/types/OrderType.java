@@ -19,6 +19,7 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
  * starcorp.common.types.OrderType
@@ -37,6 +38,7 @@ public class OrderType extends ABaseType {
 	public static final String SET_SALARY = "salary";
 	public static final String CORP_BUY_ITEM = "corp-buy";
 	public static final String CORP_SELL_ITEM = "sell-item";
+	public static final String JETTISON_ITEM = "jettison";
 	public static final String SHIP_BUY_ITEM = "ship-buy";
 	public static final String SHIP_SELL_ITEM = "ship-sell";
 	public static final String SHIP_PICKUP_ITEM = "ship-pickup";
@@ -67,8 +69,12 @@ public class OrderType extends ABaseType {
 		loadTypes();
 	}
 	
-	public static Set<String> setOrders() {
-		return types.keySet();
+	public static Set<OrderType> listOrders() {
+		Set<OrderType> types = new TreeSet<OrderType>();
+		for(String s : OrderType.types.keySet() ) {
+			types.add(OrderType.types.get(s));
+		}
+		return types;
 	}
 	
 	public static void main(String[] args) {

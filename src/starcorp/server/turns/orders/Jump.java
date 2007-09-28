@@ -27,6 +27,7 @@ import starcorp.server.turns.AOrderProcessor;
  * @version 16 Sep 2007
  */
 public class Jump extends AOrderProcessor {
+	// TODO test
 	public static final int TIME_UNITS = 20;
 	
 	/* (non-Javadoc)
@@ -43,17 +44,17 @@ public class Jump extends AOrderProcessor {
 		StarSystem system = (StarSystem) entityStore.load(StarSystem.class, systemId);
 		
 		if(ship == null || !ship.getOwner().equals(corp)) {
-			error = new TurnError(TurnError.INVALID_SHIP);
+			error = new TurnError(TurnError.INVALID_SHIP,order);
 		}
 		else if(system == null) {
-			error = new TurnError(TurnError.INVALID_LOCATION);
+			error = new TurnError(TurnError.INVALID_LOCATION,order);
 		}
 		else if(!ship.enoughTimeUnits(TIME_UNITS)) {
-			error = new TurnError(TurnError.INSUFFICIENT_TIME);
+			error = new TurnError(TurnError.INSUFFICIENT_TIME,order);
 		}
 		else {
 			if(ship.getPlanet() != null) {
-				error = new TurnError(TurnError.INVALID_LOCATION);
+				error = new TurnError(TurnError.INVALID_LOCATION,order);
 			}
 			else {
 				StarSystem currentSystem = (StarSystem) entityStore.load(StarSystem.class, ship.getSystemID());
@@ -61,12 +62,13 @@ public class Jump extends AOrderProcessor {
 				Coordinates3D targetLocation = system.getLocation();
 				int distance = targetLocation.getDistance(currentLocation);
 				if(distance > ship.getDesign().getJumpRange()) {
-					error = new TurnError(TurnError.OUT_OF_RANGE);
+					error = new TurnError(TurnError.OUT_OF_RANGE,order);
 				}
 				else {
 					ship.setSystemID(system.getID());
 					ship.incrementTimeUnitsUsed(TIME_UNITS);
-					OrderReport report = new OrderReport(order);
+					entityStore.update(ship);
+					OrderReport report = new OrderReport(order,system,ship);
 					report.add(ship.getName());
 					report.add(ship.getID());
 					report.add(system.getName());

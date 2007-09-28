@@ -11,12 +11,22 @@
 package starcorp.client.gui.panes;
 
 import java.util.List;
+import java.util.Set;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Widget;
 
 import starcorp.client.gui.AEntityPane;
 import starcorp.client.gui.windows.MainWindow;
+import starcorp.common.entities.Colony;
+import starcorp.common.entities.Planet;
 import starcorp.common.entities.StarSystemEntity;
+import starcorp.common.types.PlanetMapSquare;
+import sun.reflect.ReflectionFactory.GetReflectionFactoryAction;
 
 /**
  * starcorp.client.gui.SystemEntityPane
@@ -26,9 +36,11 @@ import starcorp.common.entities.StarSystemEntity;
  */
 public class SystemEntityPane extends AEntityPane {
 
+	private final StarSystemEntity entity;
+	
 	public SystemEntityPane(MainWindow mainWindow,StarSystemEntity entity) {
 		super(mainWindow,entity);
-		// TODO Auto-generated constructor stub
+		this.entity = entity;
 	}
 
 	/* (non-Javadoc)
@@ -36,8 +48,57 @@ public class SystemEntityPane extends AEntityPane {
 	 */
 	@Override
 	protected void createWidgets(List<Widget> widgets) {
-		// TODO Auto-generated method stub
-
+		super.createWidgets(widgets);
+		
+		createLabel(getParent(), widgets, "System:");
+		// TODO replace with name + ID
+		createLabel(getParent(), widgets, String.valueOf(entity.getSystemID()));
+		
+		createLabel(getParent(), widgets, "Location:");
+		createLabel(getParent(), widgets, entity.getLocation().toString());
+		
+		createLabel(getParent(),widgets, "Type:");
+		if(entity instanceof Planet) {
+			createLabel(getParent(), widgets, "Planet");
+		}
+		else if(entity.isAsteroid()) {
+			createLabel(getParent(), widgets, "Asteroid");
+		}
+		else if(entity.isGasfield()) {
+			createLabel(getParent(), widgets, "Gas Field");
+		}
+		
+		if(entity instanceof Planet) {
+			Planet planet = (Planet) entity;
+			if(planet.getOrbitingID() > 0) {
+				// TODO replace with name + ID
+				createLabel(getParent(), widgets, "Orbiting:");
+				createLabel(getParent(), widgets, String.valueOf(planet.getOrbitingID()));
+			}
+			createLabel(getParent(),widgets,"Atmosphere:");
+			createLabel(getParent(), widgets, planet.getAtmosphereTypeClass().getName());
+			
+			createLabel(getParent(),widgets,"Base Hazard Level:");
+			createLabel(getParent(), widgets, String.valueOf(planet.getAtmosphereTypeClass().getHazardLevel()));
+			
+			createLabel(getParent(), widgets, "Gravity:");
+			createLabel(getParent(), widgets, planet.getGravityRating() + "g");
+			
+			Set<PlanetMapSquare> squares = planet.getMap();
+			if(squares == null || squares.size() > 0) {
+				createPlanetMapLink(getParent(), widgets, planet, "View Map");
+			}
+			
+			Set<Colony> colonies = mainWindow.getTurnReport().getKnownColonies(planet);
+			if(colonies != null && colonies.size() > 0) {
+				Group grp = createGroup(getParent(), widgets, "Colonies");
+				grp.setLayout(new GridLayout(3,true));
+				grp.setLayoutData(new GridData(SWT.DEFAULT,SWT.DEFAULT,true,true,2,1));
+				for(Colony colony : colonies) {
+					createColonyLink(grp, widgets, colony, null);
+				}
+			}
+		}
 	}
 
 }

@@ -10,6 +10,7 @@
  */
 package starcorp.common.types;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -37,6 +38,23 @@ public class Factory extends AFacilityType {
 			return true;
 		}
 		return false;
+	}
+	
+	public List<AItemType> canBuild() {
+		List<AItemType> types = new ArrayList<AItemType>();
+		if(isConsumer()) {
+			types.addAll(AItemType.listTypes(ConsumerGoods.class));
+		}
+		if(isIndustrial()) {
+			types.addAll(AItemType.listTypes(IndustrialGoods.class));
+		}
+		if(isConstruction()) {
+			types.addAll(AItemType.listTypes(BuildingModules.class));
+		}
+		if(isShipard()) {
+			types.addAll(AItemType.listTypes(StarshipHulls.class));
+		}
+		return types;
 	}
 	
 	public boolean isConsumer() {

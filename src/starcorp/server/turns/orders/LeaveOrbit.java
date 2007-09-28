@@ -38,26 +38,27 @@ public class LeaveOrbit extends AOrderProcessor {
 		Starship ship = (Starship) entityStore.load(Starship.class, starshipId);
 		
 		if(ship == null || !ship.getOwner().equals(corp)) {
-			error = new TurnError(TurnError.INVALID_SHIP);
+			error = new TurnError(TurnError.INVALID_SHIP,order);
 		}
 		else if(!ship.enoughTimeUnits(TIME_UNITS)) {
-			error = new TurnError(TurnError.INSUFFICIENT_TIME);
+			error = new TurnError(TurnError.INSUFFICIENT_TIME,order);
 		}
 		else {
 			if(ship.getPlanet() == null || ship.getPlanetLocation() != null) {
-				error = new TurnError(TurnError.INVALID_LOCATION);
+				error = new TurnError(TurnError.INVALID_LOCATION,order);
 			}
 			else {
 				Planet planet = ship.getPlanet();
 				ship.setPlanet(null);
 				ship.incrementTimeUnitsUsed(TIME_UNITS);
-				OrderReport report = new OrderReport(order);
+				entityStore.update(ship);
+				OrderReport report = new OrderReport(order,planet,ship);
 				report.add(ship.getName());
 				report.add(ship.getID());
 				report.add(planet.getName());
 				report.add(planet.getID());
 				StarSystem system = (StarSystem) entityStore.load(StarSystem.class,planet.getSystemID());
-				report.addScannedEntities(entityStore.listSystemEntities(system, ship.getLocation()));
+				report.addScannedEntities(entityStore.listSystemEntities(system, ship.getLocation(),ship));
 				order.setReport(report);
 			}
 		}

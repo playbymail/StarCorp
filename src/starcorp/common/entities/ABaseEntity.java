@@ -119,8 +119,6 @@ public abstract class ABaseEntity implements IEntity, Comparable<ABaseEntity> {
 		final ABaseEntity other = (ABaseEntity) obj;
 		if (ID != other.ID)
 			return false;
-		if (version != other.version)
-			return false;
 		return true;
 	}
 

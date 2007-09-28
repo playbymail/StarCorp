@@ -39,25 +39,23 @@ public class Prospect extends AOrderProcessor {
 		Starship ship = (Starship) entityStore.load(Starship.class, starshipId);
 		
 		if(ship == null || !ship.getOwner().equals(corp)) {
-			error = new TurnError(TurnError.INVALID_SHIP);
+			error = new TurnError(TurnError.INVALID_SHIP,order);
 		}
 		else if(!ship.enoughTimeUnits(TIME_UNITS)) {
-			error = new TurnError(TurnError.INSUFFICIENT_TIME);
+			error = new TurnError(TurnError.INSUFFICIENT_TIME,order);
 		}
 		else if(ship.getPlanet() == null || ship.getPlanetLocation() == null) {
-			error = new TurnError(TurnError.INVALID_LOCATION);
+			error = new TurnError(TurnError.INVALID_LOCATION,order);
 		}
 		else {
 			ship.incrementTimeUnitsUsed(TIME_UNITS);
-			OrderReport report = new OrderReport(order);
+			entityStore.update(ship);
+			OrderReport report = new OrderReport(order,null,ship);
 			// TODO filter deposits by ship's available labs
 			List<?> deposits = entityStore.listDeposits(ship.getPlanet().getID(), ship.getPlanetLocation());
 			report.setScannedLocation(ship.getPlanet().get(ship.getPlanetLocation()));
-			List<?> ships = entityStore.listShips(ship.getPlanet(),ship.getPlanetLocation());
-			report.addScannedEntities(ships);
-			report.add(report.getScannedLocation().getTerrainType().getName());
+			report.addScannedEntities(deposits);
 			report.add(deposits.size());
-			report.add(ships.size());
 			order.setReport(report);
 		}
 		

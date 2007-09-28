@@ -21,7 +21,6 @@ import org.eclipse.swt.widgets.Widget;
 
 import starcorp.client.gui.ATypePane;
 import starcorp.client.gui.windows.MainWindow;
-import starcorp.common.types.ABaseType;
 import starcorp.common.types.AFactoryItem;
 import starcorp.common.types.AItemType;
 import starcorp.common.types.BuildingModules;
@@ -48,6 +47,9 @@ public class ItemPane extends ATypePane {
 	public ItemPane(MainWindow mainWindow, AItemType type) {
 		super(mainWindow, type);
 		this.type = type;
+		if(type == null) {
+			throw new NullPointerException("Invalid type");
+		}
 	}
 
 	@Override

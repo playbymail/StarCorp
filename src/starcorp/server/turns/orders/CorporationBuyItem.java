@@ -52,25 +52,28 @@ public class CorporationBuyItem extends AOrderProcessor {
 		
 		Colony colony = (Colony) entityStore.load(Colony.class, colonyId);
 		AItemType type = AItemType.getType(itemTypeKey);
-		List<MarketItem> marketItems = new ArrayList<MarketItem>();
-		for(Object o : entityStore.listMarket(colony, 1)) {
-			marketItems.add((MarketItem)o);
-		}
 		
 		Facility colonyHub = entityStore.getFacility(colony, colony.getGovernment(), ColonyHub.class);
 		
 		List<?> workers = entityStore.listWorkers(colonyHub);
 		
 		if(colony == null) {
-			error = new TurnError(TurnError.INVALID_COLONY);
+			error = new TurnError(TurnError.INVALID_COLONY,order);
+		}
+		else if(type == null) {
+			error = new TurnError(TurnError.INVALID_ITEM,order);
 		}
 		else if(colonyHub == null) {
-			error = new TurnError(TurnError.INVALID_COLONY);
+			error = new TurnError(TurnError.INVALID_COLONY,order);
 		}
 		else if(colonyHub.getTransactionsRemaining(workers) < 1) {
-			error = new TurnError(TurnError.MARKET_OUT_OF_TRANSACTIONS);
+			error = new TurnError(TurnError.MARKET_OUT_OF_TRANSACTIONS,order);
 		}
 		else {	
+			List<MarketItem> marketItems = new ArrayList<MarketItem>();
+			for(Object o : entityStore.listMarket(colony, 1)) {
+				marketItems.add((MarketItem)o);
+			}
 			ColonyItem colonyItem = entityStore.getItem(colony, corp, type);
 			if(colonyItem == null) {
 				colonyItem = new ColonyItem();
@@ -92,8 +95,8 @@ public class CorporationBuyItem extends AOrderProcessor {
 			desc = CashTransaction.getDescription(CashTransaction.MARKET_FEES, args2);
 			entityStore.removeCredits(corp, colonyHub.getServiceCharge(), desc);
 			colonyHub.incTransactionCount();
-			
-			report = new OrderReport(order);
+			entityStore.update(colonyHub);
+			report = new OrderReport(order,colony,corp);
 			report.add(result.quantityBought);
 			report.add(type.getName());
 			report.add(colony.getName());

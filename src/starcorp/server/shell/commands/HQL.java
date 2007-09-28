@@ -73,6 +73,7 @@ public class HQL extends ACommand {
 						out.println("0 results.");
 					}
 					else {
+						out.println();
 						for(Object o : list) {
 							out.println(o);
 						}

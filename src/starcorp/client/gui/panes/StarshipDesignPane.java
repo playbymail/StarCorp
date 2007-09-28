@@ -112,7 +112,7 @@ public class StarshipDesignPane extends AEntityPane {
 		}
 
 		Group grpHulls = createGroup(getParent(),widgets,"Hulls");
-		grpHulls.setLayout(new RowLayout(SWT.VERTICAL));
+		grpHulls.setLayout(new GridLayout(3,true));
 		data = new GridData();
 		data.minimumWidth=500;
 		data.verticalAlignment=SWT.TOP;

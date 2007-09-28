@@ -19,7 +19,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -31,14 +30,21 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 
 import starcorp.client.gui.panes.ColonyPane;
+import starcorp.client.gui.panes.CorporationPane;
+import starcorp.client.gui.panes.FacilityPane;
 import starcorp.client.gui.panes.FacilityTypePane;
 import starcorp.client.gui.panes.ItemPane;
 import starcorp.client.gui.panes.StarshipDesignPane;
+import starcorp.client.gui.panes.StarshipPane;
 import starcorp.client.gui.panes.SystemEntityPane;
 import starcorp.client.gui.widgets.Hyperlink;
 import starcorp.common.entities.Colony;
+import starcorp.common.entities.Corporation;
+import starcorp.common.entities.Facility;
 import starcorp.common.entities.IEntity;
 import starcorp.common.entities.Planet;
+import starcorp.common.entities.StarSystemEntity;
+import starcorp.common.entities.Starship;
 import starcorp.common.entities.StarshipDesign;
 import starcorp.common.turns.TurnOrder;
 import starcorp.common.types.ABaseType;
@@ -87,6 +93,29 @@ public abstract class AWindowPane implements IComponent {
 
 	public void redraw() {
 		panel.pack();
+	}
+	
+	protected Button createCheckbox(Composite parent, List<Widget> widgets, String label) {
+		createLabel(parent, widgets, label);
+		Button btn = new Button(parent, SWT.CHECK);
+		widgets.add(btn);
+		return btn;
+	}
+	
+	protected Hyperlink createPlanetMapLink(Composite parent, List<Widget> widgets, final Planet planet, String label) {
+		if(label == null) {
+			label = planet.getDisplayName();
+		}
+		Hyperlink lnk = createHyperlink(parent, widgets, label);
+		lnk.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {
+				window.getMainWindow().openPlanetMap(planet);
+			}
+			public void widgetSelected(SelectionEvent e) {
+				window.getMainWindow().openPlanetMap(planet);
+			}
+		});
+		return lnk;
 	}
 	
 	protected Hyperlink createOrderLink(Composite parent, List<Widget> widgets, final TurnOrder order, String label) {
@@ -148,6 +177,24 @@ public abstract class AWindowPane implements IComponent {
 		return lnk;
 	}
 	
+	protected Hyperlink createSystemEntityLink(Composite parent, List<Widget> widgets, final StarSystemEntity entity, String label) {
+		if(label == null) {
+			label = entity.getDisplayName();
+		}
+		Hyperlink lnk = createHyperlink(parent, widgets, label);
+		lnk.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {
+				window.getMainWindow().set(new SystemEntityPane(window.getMainWindow(),entity));
+				window.getMainWindow().focus();
+			}
+			public void widgetSelected(SelectionEvent e) {
+				window.getMainWindow().set(new SystemEntityPane(window.getMainWindow(),entity));
+				window.getMainWindow().focus();
+			}
+		});
+		return lnk;
+	}
+	
 	protected Hyperlink createPlanetLink(Composite parent, List<Widget> widgets, final Planet planet, String label) {
 		if(label == null) {
 			label = planet.getDisplayName();
@@ -166,6 +213,42 @@ public abstract class AWindowPane implements IComponent {
 		return lnk;
 	}
 	
+	protected Hyperlink createCorporationLink(Composite parent, List<Widget> widgets, final Corporation corp, String label) {
+		if(label == null) {
+			label = corp.getDisplayName();
+		}
+		Hyperlink lnk = createHyperlink(parent, widgets, label);
+		lnk.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {
+				window.getMainWindow().set(new CorporationPane(window.getMainWindow(),corp));
+				window.getMainWindow().focus();
+			}
+			public void widgetSelected(SelectionEvent e) {
+				window.getMainWindow().set(new CorporationPane(window.getMainWindow(),corp));
+				window.getMainWindow().focus();
+			}
+		});
+		return lnk;
+	}
+	
+	protected Hyperlink createFacilityLink(Composite parent, List<Widget> widgets, final Facility facility, String label) {
+		if(label == null) {
+			label = facility.getDisplayName();
+		}
+		Hyperlink lnk = createHyperlink(parent, widgets, label);
+		lnk.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {
+				window.getMainWindow().set(new FacilityPane(window.getMainWindow(),facility));
+				window.getMainWindow().focus();
+			}
+			public void widgetSelected(SelectionEvent e) {
+				window.getMainWindow().set(new FacilityPane(window.getMainWindow(),facility));
+				window.getMainWindow().focus();
+			}
+		});
+		return lnk;
+	}
+
 	protected Hyperlink createColonyLink(Composite parent, List<Widget> widgets, final Colony colony, String label) {
 		if(label == null) {
 			label = colony.getDisplayName();
@@ -178,6 +261,24 @@ public abstract class AWindowPane implements IComponent {
 			}
 			public void widgetSelected(SelectionEvent e) {
 				window.getMainWindow().set(new ColonyPane(window.getMainWindow(),colony));
+				window.getMainWindow().focus();
+			}
+		});
+		return lnk;
+	}
+	
+	protected Hyperlink createShipLink(Composite parent, List<Widget> widgets, final Starship ship, String label) {
+		if(label == null) {
+			label = ship.getDisplayName();
+		}
+		Hyperlink lnk = createHyperlink(parent, widgets, label);
+		lnk.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {
+				window.getMainWindow().set(new StarshipPane(window.getMainWindow(),ship));
+				window.getMainWindow().focus();
+			}
+			public void widgetSelected(SelectionEvent e) {
+				window.getMainWindow().set(new StarshipPane(window.getMainWindow(),ship));
 				window.getMainWindow().focus();
 			}
 		});
@@ -213,10 +314,10 @@ public abstract class AWindowPane implements IComponent {
 
 	protected Button createButton(Composite parent, List<Widget> widgets, String label) {
 		Button btn = new Button(parent, SWT.PUSH);
+		widgets.add(btn);
 		if(label != null) {
 			btn.setText(label);
 		}
-		widgets.add(btn);
 		return btn;
 	}
 	
@@ -243,8 +344,6 @@ public abstract class AWindowPane implements IComponent {
 	protected Text createTextInput(Composite parent, List<Widget> widgets, String label) {
 		createLabel(parent, widgets, label);
 		Text txt = new Text(parent, SWT.BORDER);
-		RowData data = new RowData(100,SWT.DEFAULT);
-		txt.setLayoutData(data);
 		widgets.add(txt);
 		
 		return txt;
@@ -253,8 +352,6 @@ public abstract class AWindowPane implements IComponent {
 	protected Text createMultilineTextInput(Composite parent, List<Widget> widgets, String label) {
 		createLabel(parent, widgets, label);
 		Text txt = new Text(parent, SWT.BORDER | SWT.MULTI);
-		RowData data = new RowData(100,100);
-		txt.setLayoutData(data);
 		widgets.add(txt);
 		
 		return txt;
@@ -306,6 +403,16 @@ public abstract class AWindowPane implements IComponent {
 		return null;
 	}
 	
+	protected int getIntegerTextValue(Text txt) {
+		try {
+			return Integer.parseInt(txt.getText());
+		}
+		catch(NumberFormatException e) {
+			// e.printStackTrace();
+			return 0;
+		}
+	}
+	
 	protected Combo createCombo(Composite parent, List<Widget> widgets, String[] items, Object values, String label) {
 		createLabel(parent, widgets, label);
 		final Combo c = new Combo(parent,SWT.DROP_DOWN | SWT.READ_ONLY);
@@ -314,8 +421,6 @@ public abstract class AWindowPane implements IComponent {
 //			System.out.println(s);
 		}
 		c.setData(values);
-		RowData data = new RowData(SWT.DEFAULT,70);
-		c.setLayoutData(data);
 		widgets.add(c);
 		return c;
 	}
@@ -325,8 +430,6 @@ public abstract class AWindowPane implements IComponent {
 		final org.eclipse.swt.widgets.List list = new org.eclipse.swt.widgets.List(parent,SWT.MULTI | SWT.BORDER | SWT.V_SCROLL);
 		list.setItems(items);
 		list.setData(values);
-		RowData data = new RowData(SWT.DEFAULT,70);
-		list.setLayoutData(data);
 		widgets.add(list);
 		return list;
 	}

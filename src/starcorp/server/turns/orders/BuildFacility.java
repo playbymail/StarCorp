@@ -39,7 +39,7 @@ import starcorp.server.turns.AOrderProcessor;
  * @version 16 Sep 2007
  */
 public class BuildFacility extends AOrderProcessor {
-
+// TODO test
 	/* (non-Javadoc)
 	 * @see starcorp.server.turns.AOrderProcessor#process(starcorp.client.turns.TurnOrder)
 	 */
@@ -54,18 +54,18 @@ public class BuildFacility extends AOrderProcessor {
 		AFacilityType facilityType = AFacilityType.getType(facilityTypeKey);
 			
 		if(colony == null) {
-			error = new TurnError(TurnError.INVALID_COLONY);
+			error = new TurnError(TurnError.INVALID_COLONY,order);
 		}
 		else if(facilityType == null) {
-			error = new TurnError(TurnError.INVALID_FACILITY_TYPE);
+			error = new TurnError(TurnError.INVALID_FACILITY_TYPE,order);
 		}
 		else if(facilityType instanceof ColonyHub) {
-			error = new TurnError(TurnError.INVALID_FACILITY_TYPE);
+			error = new TurnError(TurnError.INVALID_FACILITY_TYPE,order);
 		}
 		else {
 			if(facilityType instanceof OrbitalDock) {
 				if(entityStore.listFacilities(colony, OrbitalDock.class).size() > 0) {
-					return new TurnError(TurnError.INVALID_FACILITY_TYPE);
+					return new TurnError(TurnError.INVALID_FACILITY_TYPE,order);
 				}
 			}
 			Facility facility = new Facility();
@@ -78,7 +78,7 @@ public class BuildFacility extends AOrderProcessor {
 			FacilityLease lease = entityStore.getLease(colony, corp, facilityType, true);
 			
 			if(lease == null) {
-				error = new TurnError(TurnError.NO_LEASE);
+				error = new TurnError(TurnError.NO_LEASE,order);
 			}
 			else {
 				DevelopmentGrant grant = entityStore.getDevelopmentGrant(colony, facilityType, true);
@@ -89,7 +89,7 @@ public class BuildFacility extends AOrderProcessor {
 					Items item = i.next();
 					ColonyItem colonyItem =  entityStore.getItem(colony, corp, item.getTypeClass());
 					if(colonyItem == null || colonyItem.getItem().getQuantity() < item.getQuantity()) {
-						error = new TurnError(TurnError.INSUFFICIENT_BUILDING_MODULES);
+						error = new TurnError(TurnError.INSUFFICIENT_BUILDING_MODULES,order);
 						hasNeededModules = false;
 						break;
 					}
@@ -108,7 +108,7 @@ public class BuildFacility extends AOrderProcessor {
 					
 					lease.setAvailable(false);
 					lease.setClosedDate(ServerConfiguration.getCurrentDate());
-					
+					entityStore.update(lease);
 					if(grant != null) {
 						Object[] args = {facilityType.getName(), colony.getName(), String.valueOf(colony.getID())};
 						String desc = CashTransaction.getDescription(CashTransaction.GRANT_PAID, args);
@@ -128,7 +128,7 @@ public class BuildFacility extends AOrderProcessor {
 						entityStore.create(w);
 					}
 					
-					OrderReport report = new OrderReport(order);
+					OrderReport report = new OrderReport(order,facility,corp);
 					report.add(facilityType.getName());
 					report.add(facility.getID());
 					report.add(colony.getName());

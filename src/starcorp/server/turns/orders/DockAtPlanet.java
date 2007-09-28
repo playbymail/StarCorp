@@ -41,18 +41,18 @@ public class DockAtPlanet extends AOrderProcessor {
 		Starship ship = (Starship) entityStore.load(Starship.class, starshipId);
 		
 		if(ship == null || !ship.getOwner().equals(corp)) {
-			error = new TurnError(TurnError.INVALID_SHIP);
+			error = new TurnError(TurnError.INVALID_SHIP,order);
 		}
 		else if(!ship.enoughTimeUnits(TIME_UNITS)) {
-			error = new TurnError(TurnError.INSUFFICIENT_TIME);
+			error = new TurnError(TurnError.INSUFFICIENT_TIME,order);
 		}
 		else {
 			Planet planet = ship.getPlanet();
 			if(planet == null) {
-				error = new TurnError(TurnError.INVALID_LOCATION);
+				error = new TurnError(TurnError.INVALID_LOCATION,order);
 			}
 			else if(planet.getGravityRating() > ship.getDesign().getMaxDockGravity()){
-				error = new TurnError(TurnError.GRAVITY_TOO_HIGH);
+				error = new TurnError(TurnError.GRAVITY_TOO_HIGH,order);
 			}
 			else {
 				Coordinates2D location = new Coordinates2D();
@@ -60,12 +60,13 @@ public class DockAtPlanet extends AOrderProcessor {
 				location.setY(y);
 				PlanetMapSquare sq = planet.get(location);
 				if(sq == null) {
-					error = new TurnError(TurnError.INVALID_LOCATION);
+					error = new TurnError(TurnError.INVALID_LOCATION,order);
 				}
 				else {
 					ship.setPlanetLocation(location);
 					ship.incrementTimeUnitsUsed(TIME_UNITS);
-					OrderReport report = new OrderReport(order);
+					entityStore.update(ship);
+					OrderReport report = new OrderReport(order,planet,ship);
 					report.add(ship.getName());
 					report.add(ship.getID());
 					report.add(planet.getName());
@@ -74,7 +75,7 @@ public class DockAtPlanet extends AOrderProcessor {
 					report.add(y);
 					report.add(sq.getTerrainType().getName());
 					report.addScannedEntity(entityStore.getColony(planet, location));
-					report.addScannedEntities(entityStore.listShips(planet, location));
+					report.addScannedEntities(entityStore.listShips(planet, location,ship));
 					order.setReport(report);
 				}
 			}

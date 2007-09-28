@@ -38,16 +38,17 @@ public class ScanSystem extends AOrderProcessor {
 		Starship ship = (Starship) entityStore.load(Starship.class, starshipId);
 		
 		if(ship == null || !ship.getOwner().equals(corp)) {
-			error = new TurnError(TurnError.INVALID_SHIP);
+			error = new TurnError(TurnError.INVALID_SHIP,order);
 		}
 		else if(!ship.enoughTimeUnits(TIME_UNITS)) {
-			error = new TurnError(TurnError.INSUFFICIENT_TIME);
+			error = new TurnError(TurnError.INSUFFICIENT_TIME,order);
 		}
 		else {
 			ship.incrementTimeUnitsUsed(TIME_UNITS);
-			OrderReport report = new OrderReport(order);
+			entityStore.update(ship);
 			StarSystem system = (StarSystem) entityStore.load(StarSystem.class, ship.getSystemID());
-			List<?> entities = entityStore.listSystemEntities(system);
+			OrderReport report = new OrderReport(order,system,ship);
+			List<?> entities = entityStore.listSystemEntities(system,ship);
 			report.addScannedEntities(entities);
 			report.add(entities.size());
 			order.setReport(report);

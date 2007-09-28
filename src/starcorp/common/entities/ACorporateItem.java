@@ -27,7 +27,7 @@ import starcorp.common.types.Items;
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 24 Sep 2007
  */
-public abstract class ACorporateItem implements IEntity {
+public abstract class ACorporateItem implements IEntity, Comparable<ACorporateItem> {
 	private long ID;
 	private int version;
 	private Corporation owner;
@@ -92,7 +92,7 @@ public abstract class ACorporateItem implements IEntity {
 
 	@Override
 	public String toString() {
-		return item + " for " + owner.getName() +" (" + owner.getID() + ") " + super.toString() + " @ " + colony.getName() + " (" + colony.getID() + ")";
+		return item + " for " + owner.getName() +" (" + owner.getID() + ") @ " + colony.getName() + " (" + colony.getID() + ")";
 	}
 
 	public long getID() {
@@ -125,7 +125,11 @@ public abstract class ACorporateItem implements IEntity {
 	}
 
 	public String getDisplayName() {
-		return getClass().getSimpleName() + " [" + getID() +"] @ " + colony.getName() + " [" + colony.getID() + "]";
+		return item == null ? "" : item.toString();
+	}
+
+	public int compareTo(ACorporateItem o) {
+		return (o == null) ? 0 : o.item.compareTo(this.item);
 	}
 
 }

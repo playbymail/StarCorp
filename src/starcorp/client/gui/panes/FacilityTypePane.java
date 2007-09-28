@@ -21,7 +21,6 @@ import org.eclipse.swt.widgets.Widget;
 
 import starcorp.client.gui.ATypePane;
 import starcorp.client.gui.windows.MainWindow;
-import starcorp.common.types.ABaseType;
 import starcorp.common.types.AFacilityType;
 import starcorp.common.types.Items;
 import starcorp.common.types.Population;
@@ -60,6 +59,7 @@ public class FacilityTypePane extends ATypePane {
 		
 		Group grpWorkers = createGroup(getParent(), widgets, "Required Workers");
 		GridData data = new GridData();
+		data.minimumWidth=200;
 		data.grabExcessHorizontalSpace=true;
 		data.horizontalSpan=2;
 		grpWorkers.setLayoutData(data);

@@ -30,7 +30,7 @@ import starcorp.server.turns.AOrderProcessor;
  * @version 16 Sep 2007
  */
 public class FactoryBuild extends AOrderProcessor {
-
+	// TODO test
 	@Override
 	public TurnError process(TurnOrder order) {
 		TurnError error = null;
@@ -41,10 +41,10 @@ public class FactoryBuild extends AOrderProcessor {
 		Facility factory = (Facility) entityStore.load(Facility.class, factoryId);
 		AItemType type = AItemType.getType(itemTypeKey);
 		if(factory == null || !(factory.getTypeClass() instanceof Factory)) {
-			error = new TurnError(TurnError.INVALID_FACILITY);
+			error = new TurnError(TurnError.INVALID_FACILITY,order);
 		}
 		else if(type == null || !(type instanceof AFactoryItem)) {
-			error = new TurnError(TurnError.INVALID_ITEM);
+			error = new TurnError(TurnError.INVALID_ITEM,order);
 		}
 		else {
 			Factory facType = (Factory) factory.getTypeClass();
@@ -59,14 +59,14 @@ public class FactoryBuild extends AOrderProcessor {
 				queueItem.setPosition(position);
 				queueItem.setQueuedDate(ServerConfiguration.getCurrentDate());
 				entityStore.create(queueItem);
-				OrderReport report = new OrderReport(order);
+				OrderReport report = new OrderReport(order,queueItem,factory);
 				report.add(type.getName());
 				report.add(quantity);
 				report.add(factory.getID());
 				order.setReport(report);
 			}
 			else {
-				error = new TurnError(TurnError.INVALID_ITEM);
+				error = new TurnError(TurnError.INVALID_ITEM,order);
 			}
 		}
 		return error;

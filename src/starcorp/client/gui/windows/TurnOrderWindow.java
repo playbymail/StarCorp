@@ -59,6 +59,12 @@ public class TurnOrderWindow extends ADataEntryWindow {
 	protected ATablePane createTable() {
 		return new TurnOrdersTable(turn, this);
 	}
+	
+	public void clearTurn() {
+		mainWindow.setCurrentTurn(null);
+		mainWindow.setTurnDirty(false);
+		close();
+	}
 
 	public void turnEdited() {
 		mainWindow.setTurnDirty(true);

@@ -15,6 +15,7 @@ import java.io.PrintWriter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import starcorp.server.ServerConfiguration;
 import starcorp.server.engine.AServerTask;
 import starcorp.server.facilities.FacilityProcessor;
 import starcorp.server.population.PopulationProcessor;
@@ -41,6 +42,28 @@ public class Updater extends ACommand {
 			out.print(Shell.PROMPT);
 			out.flush();
 		}
+		else if("inc".equalsIgnoreCase(type)) {
+			return new AServerTask() {
+				public String toString() {
+					return super.toString() + (args.count() > 0 ?  " [" + args + "]" : "");
+				}
+				protected String getName() {
+					return "updates";
+				}
+				protected Log getLog() {
+					return log;
+				}
+				protected void doJob() throws Exception {
+					ServerConfiguration.incrementDate();
+					entityStore.resetFacilityTransactions();
+					entityStore.resetShipTimeUnits();
+					out.println();
+					out.println("Date increment. Transactions / Time Units reset.");
+					out.println(Shell.PROMPT);
+					out.flush();
+				}
+			};
+		}
 		else if("pop".equalsIgnoreCase(type)) {
 			return new PopulationProcessor();
 		}
@@ -51,7 +74,7 @@ public class Updater extends ACommand {
 			out.println("NPC not implemented yet!");
 			out.print(Shell.PROMPT);
 			out.flush();
-			// TODO
+			// TODO npc processor implementation
 		}
 		else if("fac".equalsIgnoreCase(type)) {
 			return new FacilityProcessor();
@@ -74,6 +97,9 @@ public class Updater extends ACommand {
 					return log;
 				}
 				protected void doJob() throws Exception {
+					ServerConfiguration.incrementDate();
+					entityStore.resetFacilityTransactions();
+					entityStore.resetShipTimeUnits();
 					engine.scheduleAndWait(new PopulationProcessor());
 					engine.scheduleAndWait(new FacilityProcessor());
 					// TODO add npc proc

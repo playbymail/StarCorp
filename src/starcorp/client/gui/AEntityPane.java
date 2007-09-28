@@ -12,14 +12,23 @@ package starcorp.client.gui;
 
 import java.util.List;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Widget;
 
 import starcorp.client.gui.windows.MainWindow;
+import starcorp.common.entities.Colony;
+import starcorp.common.entities.Facility;
 import starcorp.common.entities.IEntity;
+import starcorp.common.entities.MarketItem;
+import starcorp.common.entities.Planet;
+import starcorp.common.entities.StarSystem;
+import starcorp.common.entities.StarSystemEntity;
+import starcorp.common.entities.Starship;
+import starcorp.common.entities.StellarAnomoly;
+import starcorp.common.turns.TurnOrder;
+import starcorp.common.turns.TurnReport;
+import starcorp.common.types.AItemType;
+import starcorp.common.types.Items;
+import starcorp.common.types.OrderType;
 
 /**
  * starcorp.client.gui.AEntityPane
@@ -66,5 +75,186 @@ public abstract class AEntityPane extends ADataPane {
 			return false;
 		return true;
 	}
+	
+	protected TurnReport getTurnReport() {
+		return mainWindow.getTurnReport();
+	}
+	
+	protected TurnOrder jettisonOrder(Starship ship, AItemType type, int qty) {
+		TurnOrder order = new TurnOrder();
+		order.setType(OrderType.getType(OrderType.JETTISON_ITEM));
+		order.add(ship.getID());
+		order.add(type.getKey());
+		order.add(qty);
+		return order;
+	}
 
+	protected TurnOrder sellOrder(Colony colony, AItemType type, int qty, int price) {
+		TurnOrder order = new TurnOrder();
+		order.setType(OrderType.getType(OrderType.CORP_SELL_ITEM));
+		order.add(colony.getID());
+		order.add(type.getKey());
+		order.add(qty);
+		order.add(price);
+		return order;
+	}
+	
+	protected TurnOrder sellOrder(Starship ship, Colony colony, AItemType type, int qty, int price) {
+		TurnOrder order = new TurnOrder();
+		order.setType(OrderType.getType(OrderType.SHIP_SELL_ITEM));
+		order.add(ship.getID());
+		order.add(colony.getID());
+		order.add(type.getKey());
+		order.add(qty);
+		order.add(price);
+		return order;
+	}
+
+	protected TurnOrder mineGasFieldOrder(Starship ship, StarSystemEntity gasfield) {
+		TurnOrder order = new TurnOrder();
+		order.setType(OrderType.getType(OrderType.MINE_GAS_FIELD));
+		order.add(ship.getID());
+		order.add(gasfield.getID());
+		return order;
+	}
+
+	protected TurnOrder mineAsteroidOrder(Starship ship, StarSystemEntity asteroid) {
+		TurnOrder order = new TurnOrder();
+		order.setType(OrderType.getType(OrderType.MINE_ASTEROID));
+		order.add(ship.getID());
+		order.add(asteroid.getID());
+		return order;
+	}
+
+	protected TurnOrder investigateOrder(Starship ship, StellarAnomoly anomoly) {
+		TurnOrder order = new TurnOrder();
+		order.setType(OrderType.getType(OrderType.INVESTIGATE));
+		order.add(ship.getID());
+		order.add(anomoly.getID());
+		return order;
+	}
+	
+	protected TurnOrder scanSystemOrder(Starship ship) {
+		TurnOrder order = new TurnOrder();
+		order.setType(OrderType.getType(OrderType.SCAN_SYSTEM));
+		order.add(ship.getID());
+		return order;
+	}
+
+	protected TurnOrder scanGalaxyOrder(Starship ship) {
+		TurnOrder order = new TurnOrder();
+		order.setType(OrderType.getType(OrderType.SCAN_GALAXY));
+		order.add(ship.getID());
+		return order;
+	}
+
+	protected TurnOrder prospectOrder(Starship ship) {
+		TurnOrder order = new TurnOrder();
+		order.setType(OrderType.getType(OrderType.PROSPECT));
+		order.add(ship.getID());
+		return order;
+	}
+	
+	protected TurnOrder probeSystemOrder(Starship ship, StarSystemEntity entity) {
+		TurnOrder order = new TurnOrder();
+		order.setType(OrderType.getType(OrderType.PROBE_SYSTEM));
+		order.add(ship.getID());
+		order.add(entity.getID());
+		return order;
+	}
+	
+	protected TurnOrder probePlanetOrder(Starship ship, Planet planet) {
+		TurnOrder order = new TurnOrder();
+		order.setType(OrderType.getType(OrderType.PROBE_PLANET));
+		order.add(ship.getID());
+		order.add(planet.getID());
+		return order;
+	}
+	
+	protected TurnOrder jumpOrder(Starship ship, StarSystem system) {
+		TurnOrder order = new TurnOrder();
+		order.setType(OrderType.getType(OrderType.JUMP));
+		order.add(ship.getID());
+		if(system != null)
+			order.add(system.getID());
+		return order;
+	}
+
+	protected TurnOrder orbitOrder(Starship ship, Planet planet) {
+		TurnOrder order = new TurnOrder();
+		order.setType(OrderType.getType(OrderType.ORBIT));
+		order.add(ship.getID());
+		order.add(planet.getID());
+		return order;
+	}
+	
+	protected TurnOrder leaveOrbitOrder(Starship ship) {
+		TurnOrder order = new TurnOrder();
+		order.setType(OrderType.getType(OrderType.LEAVE_ORBIT));
+		order.add(ship.getID());
+		return order;
+	}
+	
+	protected TurnOrder moveOrder(Starship ship, int quadrant, int orbit) {
+		TurnOrder order = new TurnOrder();
+		order.setType(OrderType.getType(OrderType.MOVE));
+		order.add(ship.getID());
+		order.add(quadrant);
+		order.add(orbit);
+		return order;
+	}
+	
+	protected TurnOrder takeOffOrder(Starship ship) {
+		TurnOrder order = new TurnOrder();
+		order.setType(OrderType.getType(OrderType.TAKE_OFF));
+		order.add(ship.getID());
+		return order;
+	}
+
+	protected TurnOrder dockOrder(Starship ship, Colony colony) {
+		TurnOrder order = new TurnOrder();
+		order.setType(OrderType.getType(OrderType.DOCK_COLONY));
+		order.add(ship.getID());
+		order.add(colony.getID());
+		return order;
+	}
+	
+	protected TurnOrder dockOrder(Starship ship, int x, int y) {
+		TurnOrder order = new TurnOrder();
+		order.setType(OrderType.getType(OrderType.DOCK_PLANET));
+		order.add(ship.getID());
+		order.add(x);
+		order.add(y);
+		return order;
+	}
+
+	protected TurnOrder buildOrder(Facility facility, AItemType type, int qty) {
+		TurnOrder order = new TurnOrder();
+		order.setType(OrderType.getType(OrderType.FACTORY_BUILD));
+		order.add(facility.getID());
+		order.add(type.getKey());
+		order.add(qty);
+		return order;
+	}
+
+	protected TurnOrder buyOrder(MarketItem item, Starship ship, int qty) {
+		TurnOrder order = new TurnOrder();
+		order.setType(OrderType.getType(OrderType.SHIP_BUY_ITEM));
+		order.add(ship.getID());
+		order.add(item.getColony().getID());
+		order.add(item.getItem().getType());
+		order.add(qty);
+		return order;
+	}
+	
+	protected TurnOrder buyOrder(MarketItem item, int qty) {
+		TurnOrder order = new TurnOrder();
+		order.setType(OrderType.getType(OrderType.CORP_BUY_ITEM));
+		order.add(item.getColony().getID());
+		order.add(item.getItem().getType());
+		order.add(qty);
+		return order;
+	}
+
+	
 }

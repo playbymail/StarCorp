@@ -41,7 +41,8 @@ public class ATypePane extends ADataPane {
 	@Override
 	protected void createWidgets(List<Widget> widgets) {
 		System.out.println("ATypePane createWidgets: " + type);
-		super.getParent().setText(type.getName());
+		if(type != null && type.getName() != null)
+			super.getParent().setText(type.getName());
 	}
 
 	@Override

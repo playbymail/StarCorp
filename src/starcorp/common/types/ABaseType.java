@@ -25,7 +25,9 @@ public abstract class ABaseType implements Comparable<ABaseType>{
 		return getName();
 	}
 	public int compareTo(ABaseType o) {
-		return getName().compareTo((o == null ? null : o.getName()));
+		String a = getName() == null ? "" : getName();
+		String b = (o == null ? "" : o.getName() == null ? "" : o.getName());
+		return a.compareTo(b);
 	}
 	
 	@Override

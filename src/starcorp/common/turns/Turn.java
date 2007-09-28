@@ -69,7 +69,7 @@ public class Turn {
 	public List<?> getScannedEntities(Class clazz) {
 		List list = new ArrayList();
 		for(Object o : getScannedEntities()) {
-			if(o.getClass().equals(clazz))
+			if(clazz.isAssignableFrom(o.getClass()))
 				list.add(o);
 		}
 		return list;
@@ -111,11 +111,18 @@ public class Turn {
 		if(eDate != null) {
 			this.processedDate = new GalacticDate(eDate.element("date"));
 		}
-		for(Iterator<?> i = root.elementIterator("order"); i.hasNext();) {
-			this.orders.add(new TurnOrder((Element)i.next()));
+		Element eOrders = root.element("orders");
+		if(eOrders != null) {
+			for(Iterator<?> i = eOrders.elementIterator("order"); i.hasNext();) {
+				this.orders.add(new TurnOrder((Element)i.next()));
+			}
 		}
-		for(Iterator<?> i = root.elementIterator("error"); i.hasNext();) {
-			this.errors.add(new TurnError((Element)i.next()));
+		
+		Element eErrors = root.element("errors");
+		if(eErrors != null) {
+			for(Iterator<?> i = eErrors.elementIterator("error"); i.hasNext();) {
+				this.errors.add(new TurnError((Element)i.next()));
+			}
 		}
 	}
 	
@@ -181,5 +188,22 @@ public class Turn {
 	}
 	public void setErrors(List<TurnError> errors) {
 		this.errors = errors;
+	}
+
+	public String toString()
+	{
+	    final String TAB = "    ";
+	    
+	    String retValue = "";
+	    
+	    retValue = "Turn ( "
+	        + super.toString() + TAB
+	        + "processedDate = " + this.processedDate + TAB
+	        + "corporation = " + this.corporation + TAB
+	        + "orders = " + this.orders + TAB
+	        + "errors = " + this.errors + TAB
+	        + " )";
+	
+	    return retValue;
 	}
 }

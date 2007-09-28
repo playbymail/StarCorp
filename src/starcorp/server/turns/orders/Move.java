@@ -13,6 +13,9 @@ package starcorp.server.turns.orders;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import starcorp.common.entities.Corporation;
 import starcorp.common.entities.StarSystem;
 import starcorp.common.entities.Starship;
@@ -30,18 +33,17 @@ import starcorp.server.turns.AOrderProcessor;
  * @version 16 Sep 2007
  */
 public class Move extends AOrderProcessor {
-
+	private static final Log log = LogFactory.getLog(Move.class);
+	
 	/* (non-Javadoc)
 	 * @see starcorp.server.turns.AOrderProcessor#process(starcorp.client.turns.TurnOrder)
 	 */
-	@SuppressWarnings("unchecked")
-	@Override
 	public TurnError process(TurnOrder order) {
 		TurnError error = null;
 		Corporation corp = order.getCorp();
 		int starshipId = order.getAsInt(0);
 		int quadrant = order.getAsInt(1);
-		int orbit = order.getAsInt(1);
+		int orbit = order.getAsInt(2);
 		CoordinatesPolar targetLocation = new CoordinatesPolar();
 		targetLocation.setQuadrant(quadrant);
 		targetLocation.setOrbit(orbit);
@@ -49,19 +51,26 @@ public class Move extends AOrderProcessor {
 		Starship ship = (Starship) entityStore.load(Starship.class, starshipId);
 				
 		if(ship == null || !ship.getOwner().equals(corp)) {
-			error = new TurnError(TurnError.INVALID_SHIP);
+			error = new TurnError(TurnError.INVALID_SHIP,order);
+			if(log.isDebugEnabled())
+				log.debug(ship + " : " + corp);
 		}
 		else {
 			if(ship.getPlanet() != null) {
-				error = new TurnError(TurnError.INVALID_LOCATION);
+				error = new TurnError(TurnError.INVALID_LOCATION,order);
 			}
 			else {
 				StarSystem system = (StarSystem) entityStore.load(StarSystem.class, ship.getSystemID());
 				CoordinatesPolar shipLocation = ship.getLocation();
 				double timeUnits = ship.getTimeUnitsRemaining();
 				double speed = ship.getDesign().getImpulseSpeed();
-				List entities = new ArrayList();
+				if(log.isDebugEnabled()) {
+					log.debug(ship +" : current: " + shipLocation + " : target: " + targetLocation + " : " + timeUnits +" TU : " + speed + " speed");
+					log.debug("!shipLocation.equals(targetLocation) = " + !shipLocation.equals(targetLocation));
+					log.debug("timeUnits >= speed = " + (timeUnits >= speed));
+				}
 				while(!shipLocation.equals(targetLocation) && timeUnits >= speed) {
+					CoordinatesPolar previous = new CoordinatesPolar(shipLocation.getQuadrant(),shipLocation.getOrbit());
 					if(shipLocation.getQuadrant() < targetLocation.getQuadrant()) {
 						shipLocation.setQuadrant(shipLocation.getQuadrant() + 1);
 					}
@@ -75,19 +84,27 @@ public class Move extends AOrderProcessor {
 						shipLocation.setOrbit(shipLocation.getOrbit() - 1);
 					}
 					timeUnits -= speed;
-					List<?> scan = entityStore.listSystemEntities(system, shipLocation);
-					entities.addAll(scan);
+					if(log.isDebugEnabled()) {
+						log.debug(ship + " moved to " + shipLocation + " from " + previous + " : " + timeUnits + " TU reminaing " + speed + " speed");
+					}
 				}
 				ship.setLocation(shipLocation);
 				ship.setTimeUnitsRemaining((int)timeUnits);
-				OrderReport report = new OrderReport(order);
+				entityStore.update(ship);
+				OrderReport report = new OrderReport(order,null,ship);
 				report.add(ship.getName());
 				report.add(ship.getID());
 				report.add(shipLocation.getQuadrant());
 				report.add(shipLocation.getOrbit());
 				report.add(system.getName());
 				report.add(system.getID());
-				report.addScannedEntities(entities);
+				List<?> scan = entityStore.listSystemEntities(system, shipLocation,ship);
+				if(log.isDebugEnabled()) {
+					for(Object o : scan) {
+						log.debug("Scanned: " + o);
+					}
+				}
+				report.addScannedEntities(scan);
 				order.setReport(report);
 			}
 		}
