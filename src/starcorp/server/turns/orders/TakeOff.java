@@ -57,6 +57,7 @@ public class TakeOff extends AOrderProcessor {
 				report.add(ship.getID());
 				report.add(planet.getName());
 				report.add(planet.getID());
+				report.add(ship.getTimeUnitsRemaining());
 				report.addScannedEntities(entityStore.listShipsInOrbit(planet.getID(),ship.getID()));
 				report.addScannedEntities(entityStore.listColoniesByPlanet(planet.getID()));
 				order.setReport(report);

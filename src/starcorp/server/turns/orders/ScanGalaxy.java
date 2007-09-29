@@ -64,6 +64,7 @@ public class ScanGalaxy extends AOrderProcessor {
 			OrderReport report = new OrderReport(order,null,ship);
 			report.addScannedEntities(systems);
 			report.add(systems.size());
+			report.add(ship.getTimeUnitsRemaining());
 			order.setReport(report);
 		}
 		

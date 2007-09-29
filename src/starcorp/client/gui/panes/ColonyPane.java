@@ -84,7 +84,8 @@ public class ColonyPane extends AEntityPane {
 		createPlanetLink(grp, widgets, planet, planet.getDisplayName() + " @ " + colony.getLocation());
 
 		createColonyMarket(getParent(), widgets);
-		
+
+		// TODO actions to move a starship to this location
 	}
 
 	protected void loadPage(int page) {

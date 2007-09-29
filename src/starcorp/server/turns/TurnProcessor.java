@@ -100,7 +100,7 @@ public class TurnProcessor extends AServerTask {
 						String message = "Please find your reports file attached.  Save to a convenient location and open it with your StarCorp client.";
 						String from = ServerConfiguration.SERVER_EMAIL_TURNS;
 						sendEmail.send(to, null, null, subject, message, from, filename);
-						turns[i].deleteOnExit();
+						turns[i].delete();
 					}
 					catch(Exception e) {
 						log.error(this + ": Error sending report for " + turn + " because " + e.getMessage(),e);
@@ -256,15 +256,20 @@ public class TurnProcessor extends AServerTask {
 		// TODO make this configurable esp starting colony
 		StarshipDesign design = new StarshipDesign();
 		design.setDesignDate(ServerConfiguration.getCurrentDate());
-		design.setName("Surveyer");
+		design.setName("Explorer");
 		design.setOwner(corp.getID());
 		design.setHulls(new Items(AItemType.getType("command-deck"),1));
-		design.setHulls(new Items(AItemType.getType("crew-deck"),2));
-		design.setHulls(new Items(AItemType.getType("impulse-drive"),1));
+		design.setHulls(new Items(AItemType.getType("crew-deck"),4));
+		design.setHulls(new Items(AItemType.getType("impulse-drive"),2));
 		design.setHulls(new Items(AItemType.getType("warp-drive-I"),1));
-		design.setHulls(new Items(AItemType.getType("lab"),1));
 		design.setHulls(new Items(AItemType.getType("light-cargo"),1));
+		design.setHulls(new Items(AItemType.getType("living-quarters"),1));
+		design.setHulls(new Items(AItemType.getType("reinforced-cargo"),1));
+		design.setHulls(new Items(AItemType.getType("tanker"),1));
+		design.setHulls(new Items(AItemType.getType("gas-collector"),1));
+		design.setHulls(new Items(AItemType.getType("mining-platform"),1));
 		design.setHulls(new Items(AItemType.getType("scanner"),1));
+		design.setHulls(new Items(AItemType.getType("lab"),1));
 		design.setHulls(new Items(AItemType.getType("probe"),1));
 		design = (StarshipDesign) entityStore.create(design);
 		List<Colony> colonies = entityStore.listColonies();

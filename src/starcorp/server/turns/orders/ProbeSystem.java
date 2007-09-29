@@ -54,6 +54,7 @@ public class ProbeSystem extends AOrderProcessor {
 			OrderReport report = new OrderReport(order,entity,ship);
 			report.add(entity.getName());
 			report.add(entity.getID());
+			report.add(ship.getTimeUnitsRemaining());
 			report.addScannedEntities(entityStore.listDeposits(entity.getID()));
 			order.setReport(report);
 		}

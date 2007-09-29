@@ -53,6 +53,7 @@ public class ProbePlanet extends AOrderProcessor {
 			OrderReport report = new OrderReport(order,null,ship);
 			report.add(planet.getName());
 			report.add(planet.getID());
+			report.add(ship.getTimeUnitsRemaining());
 			report.setMappedPlanet(planet);
 			order.setReport(report);
 		}

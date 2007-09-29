@@ -224,8 +224,31 @@ public class Util {
 	private static final String[] corpNamePrefixes = new String[15];
 	private static final String[] corpNameMiddles = new String[35];
 	private static final String[] corpNameSuffixes = new String[20];
+	
+	private static final String[] govtSuffixes = new String[20];
 
 	static {
+		govtSuffixes[0] = " Federation";
+		govtSuffixes[1] = " Empire";
+		govtSuffixes[2] = " Technocracy";
+		govtSuffixes[3] = " Republic";
+		govtSuffixes[4] = " Kingdom";
+		govtSuffixes[5] = " Emirates";
+		govtSuffixes[6] = " Alliance";
+		govtSuffixes[7] = " People's Republic";
+		govtSuffixes[8] = " Federal Republic";
+		govtSuffixes[9] = " Theocracy";
+		govtSuffixes[10] = " Union";
+		govtSuffixes[11] = " Sultanates";
+		govtSuffixes[12] = " Free Republic";
+		govtSuffixes[13] = " Dominion";
+		govtSuffixes[14] = " Singularity";
+		govtSuffixes[15] = " Matrix";
+		govtSuffixes[16] = " Cooperative";
+		govtSuffixes[17] = " Free Holdings";
+		govtSuffixes[18] = " Commune";
+		govtSuffixes[19] = " Collective";
+
 		corpNamePrefixes[0] = "New ";
 		corpNamePrefixes[1] = "Interstellar ";
 		corpNamePrefixes[2] = "Advanced ";
@@ -412,6 +435,10 @@ public class Util {
 		colonyNameSuffixes[36] = "point";
 		colonyNameSuffixes[37] = "warren";
 		colonyNameSuffixes[38] = " Gulch";
+	}
+	
+	public static String getRandomGovernmentName(String systemName) {
+		return systemName + govtSuffixes[rnd.nextInt(govtSuffixes.length)];
 	}
 	
 	public static String getRandomColonyName() {

@@ -53,41 +53,225 @@ import starcorp.common.types.GalacticDate;
  */
 public class MainWindow extends AWindow {
 
-	private Menu menu;
-	private Toolbar toolbar;
-	private TreeBrowser treeBrowser;
+	private static final String[] FILTER_EXTS = { "*.xml", "*.*"};
+	private static final String[] FILTER_NAMES = {
+	      "Turn Reports (*.xml)",
+	      "All Files (*.*)"};
 	private ADataPane currentDataPane;
-	private int historyIndex = -1;
+	private Turn currentTurn;
+	private Composite dataPanel;
 	private List<ADataPane> history = new ArrayList<ADataPane>();
 	
-	PlanetMapWindow mapWindow;
-	TurnOrderWindow turnWindow;
-	SearchMarketWindow searchMarketWindow;
-	SearchItemsWindow searchItemsWindow;
-	SearchLawsWindow searchLawsWindow;
-	StarshipDesignWindow designWindow;
-	
+	private int historyIndex = -1;
+	private Menu menu;
 	private Composite panel;
-	private Composite dataPanel;
+	private Toolbar toolbar;
+	private TreeBrowser treeBrowser;
+	private boolean turnDirty;
 	
 	private TurnReport turnReport;
-	private Turn currentTurn;
+	StarshipDesignWindow designWindow;
 	
-	private boolean turnDirty;
+	PlanetMapWindow mapWindow;
+	SearchItemsWindow searchItemsWindow;
+	
+	SearchLawsWindow searchLawsWindow;
+	
+	SearchMarketWindow searchMarketWindow;
+	
+	TurnOrderWindow turnWindow;
 	
 	public MainWindow() {
 		super(new Display());
 	}
-	
-	public void run() {
-		open(shell);
-		while (!shell.isDisposed()) {
-		    if (!display.readAndDispatch())
-		        display.sleep();
+
+	private void loadReport(String fileName) {
+		setCurrentTurn(null);
+		closeChildWindows();
+		if(fileName != null) {
+			try {
+				turnReport = new TurnReport(new FileInputStream(fileName));
+			} catch (FileNotFoundException e) {
+				int buttonID = messageBox("File Not Found", "Could not find " + fileName, SWT.ICON_ERROR | SWT.ABORT | SWT.RETRY);
+				if(SWT.RETRY == buttonID) {
+					loadReport(fileName);
+				}
+			} catch (Throwable e) {
+				messageBox("Invalid Report", fileName + " is not a valid StarCorp turn report", SWT.ICON_ERROR | SWT.OK);
+			}
 		}
-		dispose();
+		if(turnReport != null) {
+			treeBrowser.setReport(turnReport);
+			menu.setHasReport(true);
+			toolbar.setHasReport(true);
+			ADataPane corpPane =new CorporationPane(this, turnReport.getTurn().getCorporation());
+			set(corpPane);
+			clearHistory();
+			Turn turn = turnReport.getTurn();
+			Corporation corp = turn == null ? null : turn.getCorporation();
+			GalacticDate date = turn == null ? null : turn.getProcessedDate();
+			StringBuffer sb = new StringBuffer("StarCorp");
+			if(corp != null) {
+				sb.append(": ");
+				sb.append(corp.getDisplayName());
+			}
+			if(date != null) {
+				sb.append(": ");
+				sb.append(date.toString());
+			}
+			shell.setText(sb.toString());
+			redraw();
+		}
+	}
+
+	private void loadTurn(String fileName) {
+		setCurrentTurn(null);
+		if(fileName != null) {
+			try {
+				currentTurn = new Turn(new FileInputStream(fileName));
+			} catch (FileNotFoundException e) {
+				int buttonID = messageBox("Error Loading Turn", fileName + " not found.", SWT.ICON_ERROR | SWT.RETRY | SWT.ABORT);
+				if(buttonID == SWT.RETRY) {
+					loadTurn(fileName);
+				}
+			} catch (DocumentException e) {
+				e.printStackTrace();
+				int buttonID = messageBox("Error Loading Turn", fileName + " not valid turn format.", SWT.ICON_ERROR | SWT.RETRY | SWT.ABORT);
+				if(buttonID == SWT.RETRY) {
+					loadTurn(fileName);
+				}
+			}
+			setTurnDirty(false);
+		}
 	}
 	
+	private void saveTurn(String fileName) {
+		if(fileName != null) {
+			try {
+				currentTurn.write(new FileWriter(fileName));
+				setTurnDirty(false);
+			} catch (IOException e) {
+				int buttonID = messageBox("File Save Error", "Could not save to " + fileName + " because " + e.getMessage(), SWT.ICON_ERROR | SWT.ABORT | SWT.RETRY);
+				if(SWT.RETRY == buttonID) {
+					saveTurn(fileName);
+				}
+			}
+		}
+	}
+	
+	private void toggleToolbarDirections() {
+		if(historyIndex > 0) {
+			toolbar.setBackwards(true);
+		}
+		else {
+			toolbar.setBackwards(false);
+		}
+		if(historyIndex + 1 < history.size()) {
+			toolbar.setForwards(true);
+		}
+		else {
+			toolbar.setForwards(false);
+		}
+	}
+
+	public void addTurnOrder(TurnOrder order) {
+		openTurnWindow();
+		currentTurn.add(order);
+		setTurnDirty(true);
+		turnWindow.turnOrdersReload();
+	}
+	
+	public void addTurnOrders(List<TurnOrder> orders) {
+		openTurnWindow();
+		for(TurnOrder order : orders) {
+			currentTurn.add(order);
+		}
+		turnWindow.turnOrdersReload();
+	}
+
+	public void back() {
+//		System.out.println("back: " + historyIndex + " (" + history.size() + ")");
+		if(historyIndex > 0) {
+			ADataPane dataPane = history.get(historyIndex - 1);
+			if(dataPane.equals(this.currentDataPane))
+				return;
+			if(this.currentDataPane != null) {
+				this.currentDataPane.dispose();
+			}
+			dataPane.open(dataPanel);
+			this.currentDataPane = dataPane;
+			historyIndex--;
+			redraw();
+		}
+		toggleToolbarDirections();
+	}
+	public void clearHistory() {
+		historyIndex = -1;
+		history.clear();
+		toolbar.setBackwards(false);
+		toolbar.setForwards(false);
+	}
+	
+	public void close() {
+		setCurrentTurn(null);
+		closeChildWindows();
+		super.close();
+		System.exit(0);
+	}
+	
+	public void closeChildWindows() {
+		if(mapWindow != null) {
+			mapWindow.dispose();
+			mapWindow = null;
+		}
+		if(turnWindow != null) {
+			turnWindow.dispose();
+			turnWindow = null;
+		}
+		if(searchMarketWindow != null) {
+			searchMarketWindow.dispose();
+			searchMarketWindow = null;
+		}
+		if(searchItemsWindow != null) {
+			searchItemsWindow.dispose();
+			searchItemsWindow = null;
+		}
+		if(searchLawsWindow != null) {
+			searchLawsWindow.dispose();
+			searchLawsWindow = null;
+		}
+		if(designWindow != null) {
+			designWindow.dispose();
+			designWindow = null;
+		}
+	}
+	
+	public Point computeSize() {
+		int width;
+		int height;
+		
+		Point pTree = treeBrowser.computeSize();
+		Point pData = currentDataPane == null ? new Point(0,0) : currentDataPane.computeSize();
+		Point pToolbar = toolbar.computeSize();
+		
+		width = pTree.x + pData.x + 50;
+		height = pToolbar.y + pTree.y + pData.y + 50;
+		
+		if(pToolbar.x > width) width = pToolbar.x;
+		
+		return new Point(width,height);
+	}
+	
+	public void createNewAccount() {
+		Corporation corp = promptCredentials();
+		if(corp != null) {
+			Turn turn = new Turn();
+			turn.setCorporation(corp);
+			setCurrentTurn(turn);
+			submitTurn();
+		}
+	}
+
 	public void dispose() {
 		menu.dispose();
 		toolbar.dispose();
@@ -105,7 +289,55 @@ public class MainWindow extends AWindow {
 			designWindow.dispose();
 		display.dispose();
 	}
+	
+	public void forward() {
+//		System.out.println("forward: " + historyIndex + " (" + history.size() + ")");
+		if(historyIndex + 1 < history.size()) {
+			ADataPane dataPane = history.get(historyIndex + 1);
+			if(dataPane.equals(this.currentDataPane))
+				return;
+			if(this.currentDataPane != null) {
+				this.currentDataPane.dispose();
+			}
+			dataPane.open(dataPanel);
+			this.currentDataPane = dataPane;
+			historyIndex++;
+			redraw();
+		}
+		toggleToolbarDirections();
+	}
+	
+	public Corporation getCorporation() {
+		if(currentTurn != null && currentTurn.getCorporation() != null) {
+			return currentTurn.getCorporation();
+		}
+		else if(turnReport != null && turnReport.getTurn() != null) {
+			return turnReport.getTurn().getCorporation();
+		}
+		return null;
+	}
 
+	public Turn getCurrentTurn() {
+		return currentTurn;
+	}
+	
+	public ADataPane getDataPane() {
+		return currentDataPane;
+	}
+	
+	@Override
+	public MainWindow getMainWindow() {
+		return this;
+	}
+	
+	public TurnReport getTurnReport() {
+		return turnReport;
+	}
+	
+	public boolean isTurnDirty() {
+		return this.currentTurn != null && turnDirty;
+	}
+	
 	public void open(Composite parent) {
 		shell.setLayout(new GridLayout(1,true));
 		shell.setText("StarCorp");
@@ -149,6 +381,82 @@ public class MainWindow extends AWindow {
 		shell.open();
 	}
 
+	public void openLoadReport() {
+		FileDialog dialog = new FileDialog(shell, SWT.OPEN);
+		dialog.setFilterNames(FILTER_NAMES);
+		dialog.setFilterExtensions(FILTER_EXTS);
+		String fileName = dialog.open();
+		loadReport(fileName);
+	}
+	
+	public void openLoadTurn() {
+		FileDialog dialog = new FileDialog(shell, SWT.OPEN);
+		dialog.setFilterNames(FILTER_NAMES);
+		dialog.setFilterExtensions(FILTER_EXTS);
+		String fileName = dialog.open();
+		loadTurn(fileName);
+		if(currentTurn != null) {
+			openTurnWindow();
+		}
+	}
+	
+	public PlanetMapWindow openPlanetMap(Planet planet) {
+//		System.out.println("Open map " + planet);
+		if(mapWindow != null) {
+			mapWindow.dispose();
+		}
+		mapWindow = new PlanetMapWindow(this,planet);
+		mapWindow.open(shell);
+		return mapWindow;
+	}
+	
+	public void openSaveTurn() {
+		FileDialog dialog = new FileDialog(shell, SWT.SAVE);
+		Corporation corp = currentTurn.getCorporation();
+		GalacticDate date = turnReport == null ? null : turnReport.getTurn().getProcessedDate();
+		String file = "turn-" + corp.getPlayerEmail() + "-" + (date == null ? "new" : date);
+		dialog.setFileName( file);
+		dialog.setFilterNames(FILTER_NAMES);
+		dialog.setFilterExtensions(FILTER_EXTS);
+		String fileName = dialog.open();
+		saveTurn(fileName);
+	}
+	
+	public void openSearchItemsWindow() {
+		// TODO open search items window
+	}
+
+	public void openSearchLawWindow() {
+		// TODO open search law window
+	}
+
+	public void openSearchMarketWindow() {
+		// TODO open search market window
+	}
+	
+	public void openStarshipDesignWindow() {
+		// TODO open starship design window
+	}
+
+	public TurnOrderWindow openTurnWindow() {
+		if(turnWindow == null) {
+			turnWindow = new TurnOrderWindow(this);
+			turnWindow.open(turnWindow.getShell());
+			turnWindow.focus();
+		}
+		else {
+			turnWindow.focus();
+		}
+		return turnWindow;
+	}
+
+	public Corporation promptCredentials() {
+		Corporation existing = getCorporation();
+		CredentialsDialog dialog = new CredentialsDialog(shell,existing);
+		
+		return dialog.open();
+	}
+	
 	public void redraw() {
 //		System.out.println("MainWindow pack");
 		
@@ -166,38 +474,62 @@ public class MainWindow extends AWindow {
 		super.redraw();
 	}
 	
-	public void close() {
-		setCurrentTurn(null);
-		closeChildWindows();
-		super.close();
-		System.exit(0);
+	public void run() {
+		open(shell);
+		while (!shell.isDisposed()) {
+		    if (!display.readAndDispatch())
+		        display.sleep();
+		}
+		dispose();
+	}
+
+	public void set(ADataPane dataPane) {
+		if(dataPane == null)
+			return;
+		if(dataPane.equals(this.currentDataPane))
+			return;
+		if(this.currentDataPane != null) {
+			this.currentDataPane.dispose();
+		}
+		dataPane.open(dataPanel);
+		this.currentDataPane = dataPane;
+		history.add(dataPane);
+		historyIndex = history.size() - 1;
+		toggleToolbarDirections();
+//		System.out.println("set: " + historyIndex);
+		redraw();
+	}
+
+	public void setCurrentTurn(Turn currentTurn) {
+		if(isTurnDirty()) {
+			int buttonID = messageBox("Save Current Turn", "Do you wish to save the current turn first?", SWT.ICON_WARNING | SWT.YES | SWT.NO | SWT.CANCEL);
+			if(buttonID == SWT.CANCEL) {
+				return;
+			}
+			else if(buttonID == SWT.YES) {
+				openSaveTurn();
+			}
+		}
+		this.currentTurn = currentTurn;
+		menu.setEnableSave(currentTurn != null);
+		menu.setEnableSubmit(currentTurn != null);
+		toolbar.setEnableSave(currentTurn != null);
+		toolbar.setEnableSubmit(currentTurn != null);
+	}
+
+	public void setTurnDirty(boolean turnDirty) {
+		this.turnDirty = turnDirty;
+		menu.setEnableSave(turnDirty);
+		toolbar.setEnableSave(turnDirty);
+	}
+
+	public void setTurnReport(TurnReport turnReport) {
+		this.turnReport = turnReport;
 	}
 	
-	public void closeChildWindows() {
-		if(mapWindow != null) {
-			mapWindow.dispose();
-			mapWindow = null;
-		}
-		if(turnWindow != null) {
-			turnWindow.dispose();
-			turnWindow = null;
-		}
-		if(searchMarketWindow != null) {
-			searchMarketWindow.dispose();
-			searchMarketWindow = null;
-		}
-		if(searchItemsWindow != null) {
-			searchItemsWindow.dispose();
-			searchItemsWindow = null;
-		}
-		if(searchLawsWindow != null) {
-			searchLawsWindow.dispose();
-			searchLawsWindow = null;
-		}
-		if(designWindow != null) {
-			designWindow.dispose();
-			designWindow = null;
-		}
+	public void showAboutDialog() {
+		String aboutMessage = "StarCorp © 2007 Seyed Razavi.\n";
+		messageBox("About", aboutMessage, SWT.ICON_INFORMATION | SWT.OK);
 	}
 
 	public void submitTurn() {
@@ -237,335 +569,6 @@ public class MainWindow extends AWindow {
 			}
 		}
 		
-	}
-	
-	public void showAboutDialog() {
-		String aboutMessage = "StarCorp © 2007 Seyed Razavi.\n";
-		messageBox("About", aboutMessage, SWT.ICON_INFORMATION | SWT.OK);
-	}
-
-	private static final String[] FILTER_NAMES = {
-	      "Turn Reports (*.xml)",
-	      "All Files (*.*)"};
-	private static final String[] FILTER_EXTS = { "*.xml", "*.*"};
-	
-	private void saveTurn(String fileName) {
-		if(fileName != null) {
-			try {
-				currentTurn.write(new FileWriter(fileName));
-				setTurnDirty(false);
-			} catch (IOException e) {
-				int buttonID = messageBox("File Save Error", "Could not save to " + fileName + " because " + e.getMessage(), SWT.ICON_ERROR | SWT.ABORT | SWT.RETRY);
-				if(SWT.RETRY == buttonID) {
-					saveTurn(fileName);
-				}
-			}
-		}
-	}
-	
-	private void loadTurn(String fileName) {
-		setCurrentTurn(null);
-		if(fileName != null) {
-			try {
-				currentTurn = new Turn(new FileInputStream(fileName));
-			} catch (FileNotFoundException e) {
-				int buttonID = messageBox("Error Loading Turn", fileName + " not found.", SWT.ICON_ERROR | SWT.RETRY | SWT.ABORT);
-				if(buttonID == SWT.RETRY) {
-					loadTurn(fileName);
-				}
-			} catch (DocumentException e) {
-				e.printStackTrace();
-				int buttonID = messageBox("Error Loading Turn", fileName + " not valid turn format.", SWT.ICON_ERROR | SWT.RETRY | SWT.ABORT);
-				if(buttonID == SWT.RETRY) {
-					loadTurn(fileName);
-				}
-			}
-			setTurnDirty(false);
-		}
-	}
-	
-	private void loadReport(String fileName) {
-		setCurrentTurn(null);
-		closeChildWindows();
-		if(fileName != null) {
-			try {
-				turnReport = new TurnReport(new FileInputStream(fileName));
-			} catch (FileNotFoundException e) {
-				int buttonID = messageBox("File Not Found", "Could not find " + fileName, SWT.ICON_ERROR | SWT.ABORT | SWT.RETRY);
-				if(SWT.RETRY == buttonID) {
-					loadReport(fileName);
-				}
-			} catch (Throwable e) {
-				messageBox("Invalid Report", fileName + " is not a valid StarCorp turn report", SWT.ICON_ERROR | SWT.OK);
-			}
-		}
-		if(turnReport != null) {
-			treeBrowser.setReport(turnReport);
-			menu.setHasReport(true);
-			toolbar.setHasReport(true);
-			ADataPane corpPane =new CorporationPane(this, turnReport.getTurn().getCorporation());
-			set(corpPane);
-			clearHistory();
-			Turn turn = turnReport.getTurn();
-			Corporation corp = turn == null ? null : turn.getCorporation();
-			GalacticDate date = turn == null ? null : turn.getProcessedDate();
-			StringBuffer sb = new StringBuffer("StarCorp");
-			if(corp != null) {
-				sb.append(": ");
-				sb.append(corp.getDisplayName());
-			}
-			if(date != null) {
-				sb.append(": ");
-				sb.append(date.toString());
-			}
-			shell.setText(sb.toString());
-			redraw();
-		}
-	}
-	
-	public Corporation promptCredentials() {
-		Corporation existing = getCorporation();
-		CredentialsDialog dialog = new CredentialsDialog(shell,existing);
-		
-		return dialog.open();
-	}
-
-	public void createNewAccount() {
-		Corporation corp = promptCredentials();
-		if(corp != null) {
-			Turn turn = new Turn();
-			turn.setCorporation(corp);
-			setCurrentTurn(turn);
-			submitTurn();
-		}
-	}
-	
-	public void openLoadReport() {
-		FileDialog dialog = new FileDialog(shell, SWT.OPEN);
-		dialog.setFilterNames(FILTER_NAMES);
-		dialog.setFilterExtensions(FILTER_EXTS);
-		String fileName = dialog.open();
-		loadReport(fileName);
-	}
-	
-	public void openLoadTurn() {
-		FileDialog dialog = new FileDialog(shell, SWT.OPEN);
-		dialog.setFilterNames(FILTER_NAMES);
-		dialog.setFilterExtensions(FILTER_EXTS);
-		String fileName = dialog.open();
-		loadTurn(fileName);
-		if(currentTurn != null) {
-			openTurnWindow();
-		}
-	}
-
-	public void openSaveTurn() {
-		FileDialog dialog = new FileDialog(shell, SWT.SAVE);
-		dialog.setFileName("turn-submission.xml");
-		dialog.setFilterNames(FILTER_NAMES);
-		dialog.setFilterExtensions(FILTER_EXTS);
-		String fileName = dialog.open();
-		saveTurn(fileName);
-	}
-	
-	public TurnOrderWindow openTurnWindow() {
-		if(turnWindow == null) {
-			turnWindow = new TurnOrderWindow(this);
-			turnWindow.open(turnWindow.getShell());
-			turnWindow.focus();
-		}
-		else {
-			turnWindow.focus();
-		}
-		return turnWindow;
-	}
-	
-	public void openSearchMarketWindow() {
-		// TODO open search market window
-	}
-	
-	public void openSearchLawWindow() {
-		// TODO open search law window
-	}
-	
-	public void openSearchItemsWindow() {
-		// TODO open search items window
-	}
-	
-	public void openStarshipDesignWindow() {
-		// TODO open starship design window
-	}
-
-	public ADataPane getDataPane() {
-		return currentDataPane;
-	}
-	
-	public void clearHistory() {
-		historyIndex = -1;
-		history.clear();
-		toolbar.setBackwards(false);
-		toolbar.setForwards(false);
-	}
-	
-	public void forward() {
-//		System.out.println("forward: " + historyIndex + " (" + history.size() + ")");
-		if(historyIndex + 1 < history.size()) {
-			ADataPane dataPane = history.get(historyIndex + 1);
-			if(dataPane.equals(this.currentDataPane))
-				return;
-			if(this.currentDataPane != null) {
-				this.currentDataPane.dispose();
-			}
-			dataPane.open(dataPanel);
-			this.currentDataPane = dataPane;
-			historyIndex++;
-			redraw();
-		}
-		toggleToolbarDirections();
-	}
-	
-	public void back() {
-//		System.out.println("back: " + historyIndex + " (" + history.size() + ")");
-		if(historyIndex > 0) {
-			ADataPane dataPane = history.get(historyIndex - 1);
-			if(dataPane.equals(this.currentDataPane))
-				return;
-			if(this.currentDataPane != null) {
-				this.currentDataPane.dispose();
-			}
-			dataPane.open(dataPanel);
-			this.currentDataPane = dataPane;
-			historyIndex--;
-			redraw();
-		}
-		toggleToolbarDirections();
-	}
-	
-	private void toggleToolbarDirections() {
-		if(historyIndex > 0) {
-			toolbar.setBackwards(true);
-		}
-		else {
-			toolbar.setBackwards(false);
-		}
-		if(historyIndex + 1 < history.size()) {
-			toolbar.setForwards(true);
-		}
-		else {
-			toolbar.setForwards(false);
-		}
-	}
-
-	public void set(ADataPane dataPane) {
-		if(dataPane == null)
-			return;
-		if(dataPane.equals(this.currentDataPane))
-			return;
-		if(this.currentDataPane != null) {
-			this.currentDataPane.dispose();
-		}
-		dataPane.open(dataPanel);
-		this.currentDataPane = dataPane;
-		history.add(dataPane);
-		historyIndex = history.size() - 1;
-		toggleToolbarDirections();
-//		System.out.println("set: " + historyIndex);
-		redraw();
-	}
-
-	public Point computeSize() {
-		int width;
-		int height;
-		
-		Point pTree = treeBrowser.computeSize();
-		Point pData = currentDataPane == null ? new Point(0,0) : currentDataPane.computeSize();
-		Point pToolbar = toolbar.computeSize();
-		
-		width = pTree.x + pData.x + 50;
-		height = pToolbar.y + pTree.y + pData.y + 50;
-		
-		if(pToolbar.x > width) width = pToolbar.x;
-		
-		return new Point(width,height);
-	}
-	
-	public PlanetMapWindow openPlanetMap(Planet planet) {
-//		System.out.println("Open map " + planet);
-		if(mapWindow != null) {
-			mapWindow.dispose();
-		}
-		mapWindow = new PlanetMapWindow(this,planet);
-		mapWindow.open(shell);
-		return mapWindow;
-	}
-
-	public TurnReport getTurnReport() {
-		return turnReport;
-	}
-
-	public void setTurnReport(TurnReport turnReport) {
-		this.turnReport = turnReport;
-	}
-	
-	public void addTurnOrder(TurnOrder order) {
-		openTurnWindow();
-		currentTurn.add(order);
-		setTurnDirty(true);
-		turnWindow.turnOrdersReload();
-	}
-	
-	public void addTurnOrders(List<TurnOrder> orders) {
-		openTurnWindow();
-		for(TurnOrder order : orders) {
-			currentTurn.add(order);
-		}
-		turnWindow.turnOrdersReload();
-	}
-
-	public Turn getCurrentTurn() {
-		return currentTurn;
-	}
-
-	public void setCurrentTurn(Turn currentTurn) {
-		if(isTurnDirty()) {
-			int buttonID = messageBox("Save Current Turn", "Do you wish to save the current turn first?", SWT.ICON_WARNING | SWT.YES | SWT.NO | SWT.CANCEL);
-			if(buttonID == SWT.CANCEL) {
-				return;
-			}
-			else if(buttonID == SWT.YES) {
-				openSaveTurn();
-			}
-		}
-		this.currentTurn = currentTurn;
-		menu.setEnableSave(currentTurn != null);
-		menu.setEnableSubmit(currentTurn != null);
-		toolbar.setEnableSave(currentTurn != null);
-		toolbar.setEnableSubmit(currentTurn != null);
-	}
-
-	public boolean isTurnDirty() {
-		return this.currentTurn != null && turnDirty;
-	}
-
-	public void setTurnDirty(boolean turnDirty) {
-		this.turnDirty = turnDirty;
-		menu.setEnableSave(turnDirty);
-		toolbar.setEnableSave(turnDirty);
-	}
-	
-	public Corporation getCorporation() {
-		if(currentTurn != null && currentTurn.getCorporation() != null) {
-			return currentTurn.getCorporation();
-		}
-		else if(turnReport != null && turnReport.getTurn() != null) {
-			return turnReport.getTurn().getCorporation();
-		}
-		return null;
-	}
-
-	@Override
-	public MainWindow getMainWindow() {
-		return this;
 	}
 	
 }

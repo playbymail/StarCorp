@@ -295,6 +295,7 @@ public class Starship extends StarSystemEntity {
 	@Override
 	public void readXML(Element e) {
 		super.readXML(e);
+		this.timeUnitsUsed = Integer.parseInt(e.attributeValue("TU","0"));
 		this.owner = Long.parseLong(e.attributeValue("owner","0"));
 		this.planet = Long.parseLong(e.attributeValue("planet","0"));
 		Element eLoc = e.element("planet-location");

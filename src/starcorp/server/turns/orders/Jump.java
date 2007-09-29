@@ -75,6 +75,7 @@ public class Jump extends AOrderProcessor {
 					report.add(ship.getID());
 					report.add(system.getName());
 					report.add(system.getID());
+					report.add(ship.getTimeUnitsRemaining());
 					report.addScannedEntities(entityStore.listSystemEntities(system.getID(), ship.getLocation()));
 					order.setReport(report);
 				}

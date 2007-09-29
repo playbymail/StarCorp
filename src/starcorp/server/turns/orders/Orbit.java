@@ -62,6 +62,7 @@ public class Orbit extends AOrderProcessor {
 				report.add(ship.getID());
 				report.add(planet.getName());
 				report.add(planet.getID());
+				report.add(ship.getTimeUnitsRemaining());
 				report.addScannedEntities(entityStore.listShipsInOrbit(planet.getID(),ship.getID()));
 				report.addScannedEntities(entityStore.listColoniesByPlanet(ship.getPlanet()));
 				order.setReport(report);

@@ -74,6 +74,7 @@ public class DockAtPlanet extends AOrderProcessor {
 					report.add(x);
 					report.add(y);
 					report.add(sq.getTerrainType().getName());
+					report.add(ship.getTimeUnitsRemaining());
 					report.addScannedEntity(entityStore.getColony(planet.getID(), location));
 					report.addScannedEntities(entityStore.listShipsDocked(planet.getID(), location,ship.getID()));
 					order.setReport(report);

@@ -51,6 +51,7 @@ public class ScanSystem extends AOrderProcessor {
 			List<?> entities = entityStore.listSystemEntities(system.getID(),ship.getID());
 			report.addScannedEntities(entities);
 			report.add(entities.size());
+			report.add(ship.getTimeUnitsRemaining());
 			order.setReport(report);
 		}
 		

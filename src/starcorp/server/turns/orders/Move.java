@@ -71,6 +71,7 @@ public class Move extends AOrderProcessor {
 					log.debug("!shipLocation.equals(targetLocation) = " + !shipLocation.equals(targetLocation));
 					log.debug("timeUnits >= speed = " + (timeUnits >= speed));
 				}
+				OrderReport report = new OrderReport(order,null,ship);
 				while(!shipLocation.equals(targetLocation) && timeUnits >= speed) {
 					CoordinatesPolar previous = new CoordinatesPolar(shipLocation.getQuadrant(),shipLocation.getOrbit());
 					if(shipLocation.getQuadrant() < targetLocation.getQuadrant()) {
@@ -85,6 +86,8 @@ public class Move extends AOrderProcessor {
 					else if(shipLocation.getOrbit() > targetLocation.getOrbit()) {
 						shipLocation.setOrbit(shipLocation.getOrbit() - 1);
 					}
+					List<?> scan = entityStore.listSystemEntities(system.getID(), shipLocation,ship.getID());
+					report.addScannedEntities(scan);
 					timeUnits -= speed;
 					if(log.isDebugEnabled()) {
 						log.debug(ship + " moved to " + shipLocation + " from " + previous + " : " + timeUnits + " TU reminaing " + speed + " speed");
@@ -93,20 +96,13 @@ public class Move extends AOrderProcessor {
 				ship.setLocation(shipLocation);
 				ship.setTimeUnitsRemaining((int)timeUnits);
 				entityStore.update(ship);
-				OrderReport report = new OrderReport(order,null,ship);
 				report.add(ship.getName());
 				report.add(ship.getID());
 				report.add(shipLocation.getQuadrant());
 				report.add(shipLocation.getOrbit());
 				report.add(system.getName());
 				report.add(system.getID());
-				List<?> scan = entityStore.listSystemEntities(system.getID(), shipLocation,ship.getID());
-				if(log.isDebugEnabled()) {
-					for(Object o : scan) {
-						log.debug("Scanned: " + o);
-					}
-				}
-				report.addScannedEntities(scan);
+				report.add(ship.getTimeUnitsRemaining());
 				order.setReport(report);
 			}
 		}

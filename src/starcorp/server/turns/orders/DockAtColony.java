@@ -80,6 +80,7 @@ public class DockAtColony extends AOrderProcessor {
 				report.add(ship.getID());
 				report.add(colony.getName());
 				report.add(colony.getID());
+				report.add(ship.getTimeUnitsRemaining());
 				report.addScannedEntity(colony);
 				report.addScannedEntities(entityStore.listFacilities(colony.getID()));
 				report.addScannedEntities(entityStore.listShipsDocked(colony.getID(),ship.getID()));

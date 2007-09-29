@@ -58,6 +58,7 @@ public class Prospect extends AOrderProcessor {
 			report.setScannedLocation(planet.get(ship.getPlanetLocation()));
 			report.addScannedEntities(deposits);
 			report.add(deposits.size());
+			report.add(ship.getTimeUnitsRemaining());
 			order.setReport(report);
 		}
 		

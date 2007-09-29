@@ -39,7 +39,7 @@ public class Populated extends Standard {
 		StarSystem system = super.create(location, name);
 		Corporation govt = new Corporation();
 		govt.setFoundedDate(ServerConfiguration.getCurrentDate());
-		govt.setName(name + " Federation");
+		govt.setName(Util.getRandomGovernmentName(name));
 		govt.add(system.getID());
 		entityStore.create(govt);
 		log.info("Created " + govt);

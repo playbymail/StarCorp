@@ -56,6 +56,7 @@ public class LeaveOrbit extends AOrderProcessor {
 				report.add(ship.getID());
 				report.add(planet.getName());
 				report.add(planet.getID());
+				report.add(ship.getTimeUnitsRemaining());
 				report.addScannedEntities(entityStore.listSystemEntities(planet.getSystem(), ship.getLocation(),ship.getID()));
 				order.setReport(report);
 			}

@@ -48,7 +48,7 @@ public class SystemEntityPane extends AEntityPane {
 	@Override
 	protected void createWidgets(List<Widget> widgets) {
 		super.createWidgets(widgets);
-		
+		// TODO actions to move a starship to this location
 		createLabel(getParent(), widgets, "System:");
 		StarSystem system = getTurnReport().getSystem(entity.getSystem());
 		if(system == null)

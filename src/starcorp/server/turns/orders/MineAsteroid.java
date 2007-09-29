@@ -71,6 +71,7 @@ public class MineAsteroid extends AOrderProcessor {
 			report.addScannedEntities(entityStore.listSystemEntities(ship.getSystem(),ship.getLocation(),ship.getID()));
 			report.add(asteroid.getName());
 			report.add(asteroid.getID());
+			report.add(ship.getTimeUnitsRemaining());
 			order.setReport(report);
 		}
 		
