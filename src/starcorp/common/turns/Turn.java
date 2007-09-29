@@ -82,8 +82,8 @@ public class Turn {
 	}
 	
 	public void write(Writer writer) throws IOException {
-		OutputFormat format = OutputFormat.createCompactFormat();
-		// OutputFormat format = OutputFormat.createPrettyPrint();
+		// OutputFormat format = OutputFormat.createCompactFormat();
+		OutputFormat format = OutputFormat.createPrettyPrint();
 		XMLWriter xmlWriter = new XMLWriter(
 			writer, format
 		);

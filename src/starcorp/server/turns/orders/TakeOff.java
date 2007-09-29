@@ -36,23 +36,20 @@ public class TakeOff extends AOrderProcessor {
 		
 		Starship ship = (Starship) entityStore.load(Starship.class, starshipId);
 		
-		if(ship == null || !ship.getOwner().equals(corp)) {
+		if(ship == null || ship.getOwner() != corp.getID()) {
 			error = new TurnError(TurnError.INVALID_SHIP,order);
 		}
 		else if(!ship.enoughTimeUnits(TIME_UNITS)) {
 			error = new TurnError(TurnError.INSUFFICIENT_TIME,order);
 		}
 		else {
-			Planet planet = ship.getPlanet();
-			if(planet == null || ship.getPlanetLocation() == null) {
+			if(!ship.isDocked()) {
 				error = new TurnError(TurnError.INVALID_LOCATION,order);
 			}
-			else if(planet.getGravityRating() > ship.getDesign().getMaxDockGravity()){
-				error = new TurnError(TurnError.GRAVITY_TOO_HIGH,order);
-			}
 			else {
+				Planet planet = (Planet) entityStore.load(Planet.class, ship.getPlanet());
 				ship.setPlanetLocation(null);
-				ship.setColony(null);
+				ship.setColony(0);
 				ship.incrementTimeUnitsUsed(TIME_UNITS);
 				entityStore.update(ship);
 				OrderReport report = new OrderReport(order,planet,ship);
@@ -60,8 +57,8 @@ public class TakeOff extends AOrderProcessor {
 				report.add(ship.getID());
 				report.add(planet.getName());
 				report.add(planet.getID());
-				report.addScannedEntities(entityStore.listShips(planet,ship));
-				report.addScannedEntities(entityStore.listColonies(planet));
+				report.addScannedEntities(entityStore.listShipsInOrbit(planet.getID(),ship.getID()));
+				report.addScannedEntities(entityStore.listColoniesByPlanet(planet.getID()));
 				order.setReport(report);
 			}
 		}

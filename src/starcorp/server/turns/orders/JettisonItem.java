@@ -10,24 +10,14 @@
  */
 package starcorp.server.turns.orders;
 
-import java.util.List;
-
-import starcorp.common.entities.CashTransaction;
-import starcorp.common.entities.Colony;
 import starcorp.common.entities.Corporation;
-import starcorp.common.entities.Facility;
-import starcorp.common.entities.MarketItem;
-import starcorp.common.entities.Planet;
 import starcorp.common.entities.Starship;
 import starcorp.common.turns.OrderReport;
 import starcorp.common.turns.TurnError;
 import starcorp.common.turns.TurnOrder;
 import starcorp.common.types.AItemType;
-import starcorp.common.types.ColonyHub;
 import starcorp.common.types.Items;
-import starcorp.common.types.OrbitalDock;
 import starcorp.common.types.OrderType;
-import starcorp.server.ServerConfiguration;
 import starcorp.server.turns.AOrderProcessor;
 
 /**
@@ -49,7 +39,7 @@ public class JettisonItem extends AOrderProcessor {
 		Starship ship = (Starship) entityStore.load(Starship.class, starshipId);
 		AItemType type = AItemType.getType(itemTypeKey);
 		
-		if(ship == null || !ship.getOwner().equals(corp)) {
+		if(ship == null || ship.getOwner() != corp.getID()) {
 			error = new TurnError(TurnError.INVALID_SHIP,order);
 		}
 		else {

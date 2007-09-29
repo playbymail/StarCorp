@@ -6,7 +6,7 @@
     <class name="starcorp.common.entities.ResourceDeposit" table="RESOURCE_DEPOSITS" lazy="false">
     	<id name="ID"><generator class="native"/></id>
     	<version name="version"/>
-   		<property name="systemEntityID"/>
+   		<property name="systemEntity"/>
    		<component name="location">
    			<property name="x"/>
    			<property name="y"/>

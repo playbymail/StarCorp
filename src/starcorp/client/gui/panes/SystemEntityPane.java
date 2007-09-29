@@ -16,7 +16,6 @@ import java.util.Set;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Widget;
 
@@ -24,9 +23,9 @@ import starcorp.client.gui.AEntityPane;
 import starcorp.client.gui.windows.MainWindow;
 import starcorp.common.entities.Colony;
 import starcorp.common.entities.Planet;
+import starcorp.common.entities.StarSystem;
 import starcorp.common.entities.StarSystemEntity;
 import starcorp.common.types.PlanetMapSquare;
-import sun.reflect.ReflectionFactory.GetReflectionFactoryAction;
 
 /**
  * starcorp.client.gui.SystemEntityPane
@@ -51,8 +50,10 @@ public class SystemEntityPane extends AEntityPane {
 		super.createWidgets(widgets);
 		
 		createLabel(getParent(), widgets, "System:");
-		// TODO replace with name + ID
-		createLabel(getParent(), widgets, format(entity.getSystemID()));
+		StarSystem system = getTurnReport().getSystem(entity.getSystem());
+		if(system == null)
+			throw new NullPointerException("Invalid system: " + entity.getSystem());
+		createLabel(getParent(), widgets, system.getDisplayName());
 		
 		createLabel(getParent(), widgets, "Location:");
 		createLabel(getParent(), widgets, entity.getLocation().toString());
@@ -70,10 +71,10 @@ public class SystemEntityPane extends AEntityPane {
 		
 		if(entity instanceof Planet) {
 			Planet planet = (Planet) entity;
-			if(planet.getOrbitingID() > 0) {
-				// TODO replace with name + ID
+			if(planet.getOrbiting() > 0) {
 				createLabel(getParent(), widgets, "Orbiting:");
-				createLabel(getParent(), widgets, format(planet.getOrbitingID()));
+				Planet orbit = getTurnReport().getPlanet(planet.getOrbiting());
+				createPlanetLink(getParent(), widgets, orbit, null);
 			}
 			createLabel(getParent(),widgets,"Atmosphere:");
 			createLabel(getParent(), widgets, planet.getAtmosphereTypeClass().getName());
@@ -89,7 +90,7 @@ public class SystemEntityPane extends AEntityPane {
 				createPlanetMapLink(getParent(), widgets, planet, "View Map");
 			}
 			
-			Set<Colony> colonies = mainWindow.getTurnReport().getKnownColonies(planet);
+			Set<Colony> colonies = mainWindow.getTurnReport().getColoniesByPlanet(planet.getID());
 			if(colonies != null && colonies.size() > 0) {
 				Group grp = createGroup(getParent(), widgets, "Colonies");
 				grp.setLayout(new GridLayout(3,true));

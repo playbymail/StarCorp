@@ -18,9 +18,4 @@ package starcorp.common.entities;
  */
 public class Unemployed extends AColonists {
 
-	@Override
-	public Corporation getEmployer() {
-		return null;
-	}
-
 }

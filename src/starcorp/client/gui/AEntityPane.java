@@ -27,7 +27,6 @@ import starcorp.common.entities.StellarAnomoly;
 import starcorp.common.turns.TurnOrder;
 import starcorp.common.turns.TurnReport;
 import starcorp.common.types.AItemType;
-import starcorp.common.types.Items;
 import starcorp.common.types.OrderType;
 
 /**
@@ -47,7 +46,7 @@ public abstract class AEntityPane extends ADataPane {
 
 	@Override
 	protected void createWidgets(List<Widget> widgets) {
-		System.out.println("AEntityPane createWidgets: " + entity);
+//		System.out.println("AEntityPane createWidgets: " + entity);
 		super.getParent().setText(entity.getDisplayName());
 	}
 
@@ -99,11 +98,11 @@ public abstract class AEntityPane extends ADataPane {
 		return order;
 	}
 	
-	protected TurnOrder sellOrder(Starship ship, Colony colony, AItemType type, int qty, int price) {
+	protected TurnOrder sellOrder(Starship ship, long colony, AItemType type, int qty, int price) {
 		TurnOrder order = new TurnOrder();
 		order.setType(OrderType.getType(OrderType.SHIP_SELL_ITEM));
 		order.add(ship.getID());
-		order.add(colony.getID());
+		order.add(colony);
 		order.add(type.getKey());
 		order.add(qty);
 		order.add(price);
@@ -241,7 +240,7 @@ public abstract class AEntityPane extends ADataPane {
 		TurnOrder order = new TurnOrder();
 		order.setType(OrderType.getType(OrderType.SHIP_BUY_ITEM));
 		order.add(ship.getID());
-		order.add(item.getColony().getID());
+		order.add(item.getColony());
 		order.add(item.getItem().getType());
 		order.add(qty);
 		return order;
@@ -250,7 +249,7 @@ public abstract class AEntityPane extends ADataPane {
 	protected TurnOrder buyOrder(MarketItem item, int qty) {
 		TurnOrder order = new TurnOrder();
 		order.setType(OrderType.getType(OrderType.CORP_BUY_ITEM));
-		order.add(item.getColony().getID());
+		order.add(item.getColony());
 		order.add(item.getItem().getType());
 		order.add(qty);
 		return order;

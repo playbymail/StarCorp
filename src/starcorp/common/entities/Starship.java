@@ -34,11 +34,10 @@ import starcorp.common.types.StarshipHulls;
  */
 public class Starship extends StarSystemEntity {
 	public static final int TIME_UNITS_PER_TURN = 100;
-	
-	private Corporation owner;
-	private Planet planet;
+	private long owner;
+	private long planet;
 	private Coordinates2D planetLocation;
-	private Colony colony;
+	private long colony;
 	private StarshipDesign design;
 	private Set<Items> cargo = new HashSet<Items>();
 	private GalacticDate builtDate;
@@ -49,63 +48,21 @@ public class Starship extends StarSystemEntity {
 	}
 	
 	public boolean isDocked() {
-		return getPlanetLocation() != null || getColony() != null;
+		return getPlanetLocation() != null || getColony() > 0;
 	}
 	
 	public boolean inOrbit() {
-		return getPlanetLocation() == null && getColony() == null && getPlanet() != null;
+		return getPlanetLocation() == null && getColony() == 0 && getPlanet() != 0;
 	}
 	
 	public boolean isOrbiting(Planet planet) {
-		return getPlanetLocation() == null && getColony() == null && planet.equals(getPlanet());
+		return isOrbiting(planet.getID());
 	}
 	
-	public boolean isOrbiting(long planetID) {
-		return getPlanetLocation() == null && getColony() == null && getPlanet() != null && getPlanet().getID() == planetID;
+	public boolean isOrbiting(long planet) {
+		return getPlanetLocation() == null && getColony() == 0 && this.planet == planet;
 	}
 
-	public String getLocationDescription() {
-		StringBuffer loc = new StringBuffer();
-		
-		if(getColony() != null) {
-			loc.append("Docked at ");
-			loc.append(getColony().getName());
-			loc.append(" [");
-			loc.append(getColony().getID());
-			loc.append("] on ");
-			loc.append(getPlanet().getName());
-			loc.append(" [");
-			loc.append(getPlanet().getID());
-			loc.append("]");
-		}
-		else if(getPlanet() != null) {
-			if(getPlanetLocation() != null) {
-				loc.append("Docked at");
-				loc.append(getPlanetLocation());
-				loc.append(" on ");
-				loc.append(getPlanet().getName());
-				loc.append(" [");
-				loc.append(getPlanet().getID());
-				loc.append("]");
-			}
-			else {
-				loc.append("Orbiting ");
-				loc.append(getPlanet().getName());
-				loc.append(" [");
-				loc.append(getPlanet().getID());
-				loc.append("]");
-			}
-		}
-		else {
-			loc.append("At ");
-			loc.append(getLocation());
-			loc.append(" in system ");
-			loc.append(getSystemID());
-		}
-		
-		return loc.toString();
-	}
-	
 	public int getCargoConsumerGoodsMass() {
 		int mass = 0;
 		Iterator<Items> i = cargo.iterator();
@@ -266,16 +223,16 @@ public class Starship extends StarSystemEntity {
 		return qty;
 	}
 	
-	public Corporation getOwner() {
+	public long getOwner() {
 		return owner;
 	}
-	public void setOwner(Corporation owner) {
+	public void setOwner(long owner) {
 		this.owner = owner;
 	}
-	public Planet getPlanet() {
+	public long getPlanet() {
 		return planet;
 	}
-	public void setPlanet(Planet planet) {
+	public void setPlanet(long planet) {
 		this.planet = planet;
 	}
 	public Coordinates2D getPlanetLocation() {
@@ -303,11 +260,11 @@ public class Starship extends StarSystemEntity {
 		this.builtDate = builtDate;
 	}
 	
-	public Colony getColony() {
+	public long getColony() {
 		return colony;
 	}
 
-	public void setColony(Colony colony) {
+	public void setColony(long colony) {
 		this.colony = colony;
 	}
 
@@ -338,26 +295,13 @@ public class Starship extends StarSystemEntity {
 	@Override
 	public void readXML(Element e) {
 		super.readXML(e);
-		this.owner = new Corporation();
-		this.owner.readXML(e.element("owner").element("entity"));
-		String sTU = e.attributeValue("TU");
-		if(sTU != null) {
-			timeUnitsUsed = Integer.parseInt(sTU);
-		}
-		Element ePlanet = e.element("planet");
-		if(ePlanet != null) {
-			this.planet = new Planet();
-			this.planet.readXML(ePlanet.element("entity"));
-		}
+		this.owner = Long.parseLong(e.attributeValue("owner","0"));
+		this.planet = Long.parseLong(e.attributeValue("planet","0"));
 		Element eLoc = e.element("planet-location");
 		if(eLoc != null) {
 			this.planetLocation = new Coordinates2D(eLoc);
 		}
-		Element eCol = e.element("colony");
-		if(eCol != null) {
-			this.colony = new Colony();
-			this.colony.readXML(eCol.element("entity"));
-		}
+		this.colony = Long.parseLong(e.attributeValue("colony","0"));
 		this.design = new StarshipDesign();
 		this.design.readXML(e.element("design").element("entity"));
 		this.builtDate = new GalacticDate(e.element("built").element("date"));
@@ -373,13 +317,11 @@ public class Starship extends StarSystemEntity {
 	@Override
 	public Element toBasicXML(Element parent) {
 		Element e = super.toBasicXML(parent);
-		owner.toBasicXML(e.addElement("owner"));
-		if(planet != null)
-			planet.toBasicXML(e.addElement("planet"));
+		e.addAttribute("owner", String.valueOf(owner));
+		e.addAttribute("planet", String.valueOf(planet));
 		if(planetLocation != null)
 			planetLocation.toXML(e.addElement("planet-location"));
-		if(colony != null)
-			colony.toBasicXML(e.addElement("colony"));
+		e.addAttribute("colony", String.valueOf(colony));
 		design.toBasicXML(e.addElement("design"));
 		builtDate.toXML(e.addElement("built"));
 		return e;
@@ -399,7 +341,7 @@ public class Starship extends StarSystemEntity {
 
 	@Override
 	public String toString() {
-		return super.toString() + " [" + design.getName() + "}" + (planet == null ? "" : " " + planet.getName() + " (" + planet.getID() + ")") + (planetLocation == null ? "" : " " + planetLocation) + (colony == null ? "" : " " + colony.getName() + " (" + colony.getID() + ")");
+		return super.toString() + " {" + design.getName() + "}";
 	} 
 
 }

@@ -46,13 +46,13 @@ public class IssueColonistGrant extends AOrderProcessor {
 		else if(popClass == null) {
 			error = new TurnError(TurnError.INVALID_POP_CLASS,order);
 		}
-		else if(!colony.getGovernment().equals(corp)){
+		else if(colony.getGovernment() != corp.getID()){
 			error = new TurnError(TurnError.INVALID_COLONY,order);
 		}
 		else {
 			ColonistGrant grant = new ColonistGrant();
 			grant.setAvailable(true);
-			grant.setColony(colony);
+			grant.setColony(colony.getID());
 			grant.setCredits(credit);
 			grant.setIssuedDate(ServerConfiguration.getCurrentDate());
 			grant.setPopClass(popClass);

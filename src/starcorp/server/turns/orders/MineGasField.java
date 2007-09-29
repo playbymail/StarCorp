@@ -14,7 +14,6 @@ import java.util.Iterator;
 import java.util.List;
 import starcorp.common.entities.Corporation;
 import starcorp.common.entities.ResourceDeposit;
-import starcorp.common.entities.StarSystem;
 import starcorp.common.entities.StarSystemEntity;
 import starcorp.common.entities.Starship;
 import starcorp.common.turns.OrderReport;
@@ -42,20 +41,23 @@ public class MineGasField extends AOrderProcessor {
 		Starship ship = (Starship) entityStore.load(Starship.class, starshipId);
 		StarSystemEntity gasfield = (StarSystemEntity) entityStore.load(StarSystemEntity.class, gasFieldId);
 		
-		if(ship == null || !ship.getOwner().equals(corp)) {
+		if(ship == null || ship.getOwner() != corp.getID()) {
 			error = new TurnError(TurnError.INVALID_SHIP,order);
 		}
 		else if(!ship.enoughTimeUnits(TIME_UNITS)) {
 			error = new TurnError(TurnError.INSUFFICIENT_TIME,order);
 		}
-		else if(gasfield == null || !gasfield.isGasfield() || gasfield.getSystemID() != ship.getSystemID() || !gasfield.getLocation().equals(ship.getLocation()) || ship.getPlanet() != null) {
+		else if(gasfield == null || !gasfield.isGasfield() || 
+				gasfield.getSystem() != ship.getSystem() || 
+				!gasfield.getLocation().equals(ship.getLocation()) || 
+				ship.getPlanet() != 0) {
 			error = new TurnError(TurnError.INVALID_LOCATION,order);
 		}
 		else if(!ship.getDesign().canMineGasField()) {
 			error = new TurnError(TurnError.INVALID_SHIP,order);
 		}
 		else {
-			List<?> deposits = entityStore.listDeposits(gasfield);
+			List<?> deposits = entityStore.listDeposits(gasfield.getID());
 			Iterator<?> i = deposits.iterator();
 			while(i.hasNext()) {
 				ResourceDeposit y = (ResourceDeposit) i.next();
@@ -66,8 +68,7 @@ public class MineGasField extends AOrderProcessor {
 			ship.incrementTimeUnitsUsed(TIME_UNITS);
 			entityStore.update(ship);
 			OrderReport report = new OrderReport(order,gasfield,ship);
-			StarSystem system = (StarSystem) entityStore.load(StarSystem.class, ship.getSystemID());
-			report.addScannedEntities(entityStore.listSystemEntities(system,ship.getLocation()));
+			report.addScannedEntities(entityStore.listSystemEntities(ship.getSystem(),ship.getLocation(),ship.getID()));
 			report.add(gasfield.getName());
 			report.add(gasfield.getID());
 			order.setReport(report);

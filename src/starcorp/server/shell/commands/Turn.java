@@ -85,26 +85,13 @@ public class Turn extends ACommand {
 			private void save() throws Exception {
 				starcorp.common.turns.Turn turn = (starcorp.common.turns.Turn) getProperty("starcorp.turn");
 				TurnReport report = (TurnReport) getProperty("starcorp.report");
+				out.println();
 				if (turn != null) {
-					Document doc = DocumentHelper.createDocument();
-					turn.toXML(doc.addElement("starcorp"));
-					OutputFormat format = OutputFormat.createPrettyPrint();
-					XMLWriter writer = new XMLWriter(
-							new FileWriter("turn.xml"), format);
-					writer.write(doc);
-					writer.close();
-					out.println();
+					turn.write(new FileWriter("turn.xml"));
 					out.println("Turn saved.");
 				}
 				if (report != null) {
-					Document doc = DocumentHelper.createDocument();
-					report.toXML(doc.addElement("starcorp"));
-					OutputFormat format = OutputFormat.createPrettyPrint();
-					XMLWriter writer = new XMLWriter(new FileWriter(
-							"report.xml"), format);
-					writer.write(doc);
-					writer.close();
-					out.println();
+					report.write(new FileWriter("report.xml"));
 					out.println("Report saved.");
 				}
 			}

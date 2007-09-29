@@ -25,10 +25,10 @@ public class MarketItem extends ACorporateItem {
 	private GalacticDate issuedDate;
 	private GalacticDate soldDate;
 	
-	public Corporation getSeller() {
+	public long getSeller() {
 		return getOwner();
 	}
-	public void setSeller(Corporation seller) {
+	public void setSeller(long seller) {
 		setOwner(seller);
 	}
 	public int getCostPerItem() {

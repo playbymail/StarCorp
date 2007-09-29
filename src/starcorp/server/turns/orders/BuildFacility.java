@@ -64,30 +64,30 @@ public class BuildFacility extends AOrderProcessor {
 		}
 		else {
 			if(facilityType instanceof OrbitalDock) {
-				if(entityStore.listFacilities(colony, OrbitalDock.class).size() > 0) {
+				if(entityStore.listFacilities(colony.getID(), OrbitalDock.class).size() > 0) {
 					return new TurnError(TurnError.INVALID_FACILITY_TYPE,order);
 				}
 			}
 			Facility facility = new Facility();
 			facility.setTypeClass(facilityType);
-			facility.setColony(colony);
-			facility.setOwner(corp);
+			facility.setColony(colony.getID());
+			facility.setOwner(corp.getID());
 			facility.setBuiltDate(ServerConfiguration.getCurrentDate());
 			facility.setOpen(true);
 			
-			FacilityLease lease = entityStore.getLease(colony, corp, facilityType, true);
+			FacilityLease lease = entityStore.getLease(colony.getID(), corp.getID(), facilityType, true);
 			
 			if(lease == null) {
 				error = new TurnError(TurnError.NO_LEASE,order);
 			}
 			else {
-				DevelopmentGrant grant = entityStore.getDevelopmentGrant(colony, facilityType, true);
+				DevelopmentGrant grant = entityStore.getDevelopmentGrant(colony.getID(), facilityType, true);
 				
 				boolean hasNeededModules = true;
 				Iterator<Items> i = facilityType.getBuildingRequirement().iterator();
 				while(i.hasNext()) {
 					Items item = i.next();
-					ColonyItem colonyItem =  entityStore.getItem(colony, corp, item.getTypeClass());
+					ColonyItem colonyItem =  entityStore.getItem(colony.getID(), corp.getID(), item.getTypeClass());
 					if(colonyItem == null || colonyItem.getItem().getQuantity() < item.getQuantity()) {
 						error = new TurnError(TurnError.INSUFFICIENT_BUILDING_MODULES,order);
 						hasNeededModules = false;
@@ -100,7 +100,7 @@ public class BuildFacility extends AOrderProcessor {
 					
 					while(i.hasNext()) {
 						Items item = i.next();
-						ColonyItem colonyItem = entityStore.getItem(colony, corp, item.getTypeClass());
+						ColonyItem colonyItem = entityStore.getItem(colony.getID(), corp.getID(), item.getTypeClass());
 						if(colonyItem != null || !(colonyItem.getItem().getQuantity() < item.getQuantity())) {
 							colonyItem.getItem().remove(item.getQuantity());
 						}
@@ -112,7 +112,9 @@ public class BuildFacility extends AOrderProcessor {
 					if(grant != null) {
 						Object[] args = {facilityType.getName(), colony.getName(), String.valueOf(colony.getID())};
 						String desc = CashTransaction.getDescription(CashTransaction.GRANT_PAID, args);
-						entityStore.transferCredits(grant.getColony().getGovernment(), corp, grant.getGrant(), desc);
+						Colony c = (Colony) entityStore.load(Colony.class, grant.getColony()); 
+						long govt = c.getGovernment();
+						entityStore.transferCredits(govt, corp.getID(), grant.getGrant(), desc);
 					}
 					
 					entityStore.create(facility);
@@ -120,8 +122,8 @@ public class BuildFacility extends AOrderProcessor {
 					// need to create workers with zero quantity otherwise population updater will not hire any new workers!
 					for(PopulationClass popClass : facilityType.getWorkerRequirement().keySet()) {
 						Workers w = new Workers();
-						w.setColony(colony);
-						w.setFacility(facility);
+						w.setColony(colony.getID());
+						w.setFacility(facility.getID());
 						w.setHappiness(0.0);
 						w.setPopClass(popClass);
 						w.setSalary(popClass.getNPCSalary());

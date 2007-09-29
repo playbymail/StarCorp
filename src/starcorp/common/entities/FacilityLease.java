@@ -22,7 +22,7 @@ import starcorp.common.types.AFacilityType;
  */
 public class FacilityLease extends AGovernmentLaw {
 	private AFacilityType type;
-	private Corporation licensee;
+	private long licensee;
 	private int price;
 
 	public String getType() {
@@ -37,10 +37,10 @@ public class FacilityLease extends AGovernmentLaw {
 	public void setTypeClass(AFacilityType type) {
 		this.type = type;
 	}
-	public Corporation getLicensee() {
+	public long getLicensee() {
 		return licensee;
 	}
-	public void setLicensee(Corporation licensee) {
+	public void setLicensee(long licensee) {
 		this.licensee = licensee;
 	}
 	public int getPrice() {
@@ -53,20 +53,14 @@ public class FacilityLease extends AGovernmentLaw {
 	@Override
 	public void readXML(Element e) {
 		super.readXML(e);
-		this.licensee = new Corporation();
-		Element eLicensee =e.element("licensee");
-		if(eLicensee != null) {
-			licensee.readXML(eLicensee.element("entity"));
-		}
+		this.licensee = Long.parseLong(e.attributeValue("licensee","0"));
 		this.type = AFacilityType.getType(e.attributeValue("type"));
 		this.price = Integer.parseInt(e.attributeValue("price","0"));
 	}
 	@Override
 	public Element toBasicXML(Element parent) {
 		Element e = super.toBasicXML(parent);
-		if(licensee != null) {
-			licensee.toBasicXML(e.addElement("licensee"));
-		}
+		e.addAttribute("licensee", String.valueOf(licensee));
 		e.addAttribute("type", type.getKey());
 		e.addAttribute("price",String.valueOf(price));
 		return e;

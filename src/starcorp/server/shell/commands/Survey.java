@@ -44,7 +44,7 @@ public class Survey extends ACommand {
 	public static Set<starcorp.server.Util.SuitableLocation> findSuitableLocations(StarSystem system, IEntityStore entityStore, List<AItemType> types) {
 		List<AtmosphereType> atmospheres = AtmosphereType.listTypes(1.0);
 		TreeSet<starcorp.server.Util.SuitableLocation> sorted = new TreeSet<starcorp.server.Util.SuitableLocation>();
-		List<?> planets = entityStore.listPlanets(system, 5, atmospheres);
+		List<?> planets = entityStore.listPlanets(system.getID(), 5, atmospheres);
 		for(Object o : planets) {
 			Planet planet = (Planet) o;
 			findSuitableLocations(planet, entityStore, types, sorted);
@@ -58,7 +58,7 @@ public class Survey extends ACommand {
 
 	private static Set<starcorp.server.Util.SuitableLocation> findSuitableLocations(Planet planet, IEntityStore entityStore, List<AItemType> types, TreeSet<starcorp.server.Util.SuitableLocation> sorted) {
 		Map<Coordinates2D, List<ResourceDeposit>> map = new HashMap<Coordinates2D, List<ResourceDeposit>>();
-		List<?> list = entityStore.listDeposits(planet, types, 10000);
+		List<?> list = entityStore.listDeposits(planet.getID(), types, 10000);
 		for(Object o : list) {
 			ResourceDeposit deposit = (ResourceDeposit) o;
 			if(map.containsKey(deposit.getLocation())) {

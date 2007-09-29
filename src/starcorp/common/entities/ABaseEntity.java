@@ -36,7 +36,7 @@ public abstract class ABaseEntity implements IEntity, Comparable<ABaseEntity> {
 	 * @see starcorp.common.entities.IEntity#readXML(org.dom4j.Element)
 	 */
 	public void readXML(Element e) {
-		this.ID = Integer.parseInt(e.attributeValue("ID","0"));
+		this.ID = Long.parseLong(e.attributeValue("ID","0"));
 	}
 	
 	/* (non-Javadoc)

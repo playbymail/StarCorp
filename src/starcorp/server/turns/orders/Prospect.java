@@ -13,6 +13,7 @@ package starcorp.server.turns.orders;
 import java.util.List;
 
 import starcorp.common.entities.Corporation;
+import starcorp.common.entities.Planet;
 import starcorp.common.entities.Starship;
 import starcorp.common.turns.OrderReport;
 import starcorp.common.turns.TurnError;
@@ -38,13 +39,13 @@ public class Prospect extends AOrderProcessor {
 		
 		Starship ship = (Starship) entityStore.load(Starship.class, starshipId);
 		
-		if(ship == null || !ship.getOwner().equals(corp)) {
+		if(ship == null || ship.getOwner() != corp.getID()) {
 			error = new TurnError(TurnError.INVALID_SHIP,order);
 		}
 		else if(!ship.enoughTimeUnits(TIME_UNITS)) {
 			error = new TurnError(TurnError.INSUFFICIENT_TIME,order);
 		}
-		else if(ship.getPlanet() == null || ship.getPlanetLocation() == null) {
+		else if(!ship.isDocked()) {
 			error = new TurnError(TurnError.INVALID_LOCATION,order);
 		}
 		else {
@@ -52,8 +53,9 @@ public class Prospect extends AOrderProcessor {
 			entityStore.update(ship);
 			OrderReport report = new OrderReport(order,null,ship);
 			// TODO filter deposits by ship's available labs
-			List<?> deposits = entityStore.listDeposits(ship.getPlanet().getID(), ship.getPlanetLocation());
-			report.setScannedLocation(ship.getPlanet().get(ship.getPlanetLocation()));
+			Planet planet = (Planet) entityStore.load(Planet.class, ship.getPlanet());
+			List<?> deposits = entityStore.listDeposits(ship.getPlanet(), ship.getPlanetLocation());
+			report.setScannedLocation(planet.get(ship.getPlanetLocation()));
 			report.addScannedEntities(deposits);
 			report.add(deposits.size());
 			order.setReport(report);

@@ -106,14 +106,6 @@ public abstract class AWindowPane implements IComponent {
 		return NumberFormat.getNumberInstance().format(number);
 	}
 	
-	protected String formatPercentage(double number) {
-		return NumberFormat.getPercentInstance().format(number);
-	}
-	
-	protected String formatPercentage(long number) {
-		return NumberFormat.getPercentInstance().format(number);
-	}
-
 	protected Button createCheckbox(Composite parent, List<Widget> widgets, String label) {
 		createLabel(parent, widgets, label);
 		Button btn = new Button(parent, SWT.CHECK);
@@ -249,7 +241,7 @@ public abstract class AWindowPane implements IComponent {
 		});
 		return lnk;
 	}
-
+	
 	protected Hyperlink createCorporationLink(Composite parent, List<Widget> widgets, final Corporation corp, String label) {
 		if(label == null) {
 			label = corp.getDisplayName();
@@ -285,7 +277,7 @@ public abstract class AWindowPane implements IComponent {
 		});
 		return lnk;
 	}
-
+	
 	protected Hyperlink createColonyLink(Composite parent, List<Widget> widgets, final Colony colony, String label) {
 		if(label == null) {
 			label = colony.getDisplayName();

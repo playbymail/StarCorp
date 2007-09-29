@@ -134,10 +134,18 @@ public class CredentialsDialog extends Dialog {
 		});
 		    
 		if(credentials != null) {
-			txtCorpName.setText(credentials.getName());
-			txtPlayerName.setText(credentials.getPlayerName());
-			txtPlayerEmail.setText(credentials.getPlayerEmail());
-			txtPlayerPassword.setText(credentials.getPlayerPassword());
+			String name = credentials.getName();
+			if(name == null) name = "";
+			String playerName = credentials.getPlayerName();
+			if(playerName == null) playerName = "";
+			String email = credentials.getPlayerEmail();
+			if(email == null) email = "";
+			String password = credentials.getPlayerPassword();
+			if(password == null) password = "";
+			txtCorpName.setText(name);
+			txtPlayerName.setText(playerName);
+			txtPlayerEmail.setText(email);
+			txtPlayerPassword.setText(password);
 		}
 		
 		shell.setDefaultButton(ok);

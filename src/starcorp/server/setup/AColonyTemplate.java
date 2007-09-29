@@ -97,17 +97,17 @@ public abstract class AColonyTemplate {
 			System.out.println("Invalid location");
 			return null;
 		}
-		if(entityStore.getColony(planet, location) != null) {
+		if(entityStore.getColony(planet.getID(), location) != null) {
 			System.out.println("Colony already exists at location!");
 			return null;
 		}
 		Colony colony = new Colony();
 		colony.setFoundedDate(ServerConfiguration.getCurrentDate());
-		colony.setGovernment(govt);
+		colony.setGovernment(govt.getID());
 		colony.setHazardLevel(planet.getAtmosphereTypeClass().getHazardLevel() + sq.getTerrainType().getHazardLevel());
 		colony.setLocation(location);
 		colony.setName(name);
-		colony.setPlanetID(planet.getID());
+		colony.setPlanet(planet.getID());
 		colony = (Colony) entityStore.create(colony);
 		log.info("Created " + colony);
 		List<Facility> facilities = createFacilities(colony, corporations);
@@ -140,21 +140,21 @@ public abstract class AColonyTemplate {
 		int required = facility.getTypeClass().getPowerRequirement();
 		required *= 100;
 //		log.info("CREATE POWER x " + required);
-		addItem(colony,facility.getOwner(),"nuclear-power",required);
+		addItem(colony.getID(),facility.getOwner(),"nuclear-power",required);
 	}
 	
 	protected MarketItem createItem(Colony colony, Corporation corp, AItemType type, int quantity, int price) {
 		MarketItem item = new MarketItem();
-		item.setColony(colony);
+		item.setColony(colony.getID());
 		item.setCostPerItem(price);
 		item.setItem(new Items(type,quantity));
-		item.setSeller(corp);
+		item.setSeller(corp.getID());
 		entityStore.create(item);
 		if(log.isDebugEnabled())log.debug("Created " + item);
 		return item;
 	}
 	
-	protected ColonyItem addItem(Colony colony, Corporation owner, String type, int quantity) {
+	protected ColonyItem addItem(long colony, long owner, String type, int quantity) {
 		ColonyItem item = entityStore.getItem(colony, owner, AItemType.getType(type)); 
 		if(item == null) {
 			item = new ColonyItem();
@@ -233,7 +233,7 @@ public abstract class AColonyTemplate {
 	protected Workers createWorker(Facility facility, Population pop) {
 		Workers worker = new Workers();
 		worker.setColony(facility.getColony());
-		worker.setFacility(facility);
+		worker.setFacility(facility.getID());
 		worker.setSalary(pop.getPopClass().getNPCSalary());
 		worker.setPopClass(pop.getPopClass());
 		worker.setQuantity(pop.getQuantity());
@@ -302,9 +302,9 @@ public abstract class AColonyTemplate {
 	protected Facility createFacility(Colony colony, Corporation corp, String type) {
 		Facility facility = new Facility();
 		facility.setBuiltDate(ServerConfiguration.getCurrentDate());
-		facility.setColony(colony);
+		facility.setColony(colony.getID());
 		facility.setOpen(true);
-		facility.setOwner(corp);
+		facility.setOwner(corp.getID());
 		facility.setType(type);
 		facility.setPowered(true);
 		facility = (Facility) entityStore.create(facility);

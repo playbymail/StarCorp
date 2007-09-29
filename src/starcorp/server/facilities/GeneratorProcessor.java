@@ -18,11 +18,10 @@ import org.apache.commons.logging.LogFactory;
 import starcorp.common.entities.AColonists;
 import starcorp.common.entities.Colony;
 import starcorp.common.entities.ColonyItem;
-import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Facility;
 import starcorp.common.entities.ResourceDeposit;
 import starcorp.common.types.AFacilityType;
-import starcorp.common.types.Coordinates2D;
+import starcorp.common.types.ICoordinates;
 import starcorp.common.types.Items;
 import starcorp.common.types.ResourceGenerator;
 import starcorp.server.engine.AServerTask;
@@ -44,7 +43,7 @@ public class GeneratorProcessor extends AServerTask {
 		List<Facility> list = entityStore.listFacilitiesPowered(AFacilityType.listTypes(ResourceGenerator.class));
 		log.info(this +": " + list.size() + " generators to process");
 		for(Facility facility : list) {
-			List<AColonists> workers = entityStore.listWorkers(facility);
+			List<AColonists> workers = entityStore.listWorkersByFacility(facility.getID());
 			processGenerator(facility, workers);
 			Thread.yield();
 		}
@@ -61,10 +60,10 @@ public class GeneratorProcessor extends AServerTask {
 	private void processGenerator(Facility generator, List<?> workers) {
 		if(log.isDebugEnabled())
 			log.debug(this + ": " + generator + " started generating.");
-		Corporation owner = generator.getOwner();
-		Colony colony = generator.getColony();
-		Coordinates2D location = colony.getLocation();
-		List<ResourceDeposit> deposits = entityStore.listDeposits(colony.getPlanetID(), location);
+		long owner = generator.getOwner();
+		Colony colony = (Colony) entityStore.load(Colony.class, generator.getColony());
+		ICoordinates location = colony.getLocation();
+		List<ResourceDeposit> deposits = entityStore.listDeposits(colony.getPlanet(), location);
 		double efficiency = generator.getEfficiency(workers);
 		ResourceGenerator type = (ResourceGenerator) generator.getTypeClass();
 		
@@ -77,10 +76,10 @@ public class GeneratorProcessor extends AServerTask {
 				if(qty > deposit.getTotalQuantity()) {
 					qty = deposit.getTotalQuantity();
 				}
-				ColonyItem item = entityStore.getItem(colony, owner, deposit.getTypeClass());
+				ColonyItem item = entityStore.getItem(colony.getID(), owner, deposit.getTypeClass());
 				if(item == null) {
 					item = new ColonyItem();
-					item.setColony(colony);
+					item.setColony(colony.getID());
 					item.setItem(new Items(deposit.getTypeClass()));
 					item.setOwner(owner);
 					entityStore.create(item);

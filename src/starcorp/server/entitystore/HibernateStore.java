@@ -26,7 +26,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
 import starcorp.common.entities.AColonists;
-import starcorp.common.entities.ACorporateItem;
 import starcorp.common.entities.AGovernmentLaw;
 import starcorp.common.entities.CashTransaction;
 import starcorp.common.entities.CreditAccount;
@@ -51,9 +50,9 @@ import starcorp.common.entities.Workers;
 import starcorp.common.types.AFacilityType;
 import starcorp.common.types.AItemType;
 import starcorp.common.types.AtmosphereType;
-import starcorp.common.types.Coordinates2D;
 import starcorp.common.types.Coordinates3D;
 import starcorp.common.types.CoordinatesPolar;
+import starcorp.common.types.ICoordinates;
 import starcorp.common.types.PopulationClass;
 import starcorp.server.ServerConfiguration;
 
@@ -148,15 +147,6 @@ public class HibernateStore implements IEntityStore {
 		List<Facility> list = new ArrayList<Facility>();
 		for (Object o : objects) {
 			list.add((Facility) o);
-		}
-		commit();
-		return list;
-	}
-
-	private List<ColonistGrant> copyGrants(List<?> objects) {
-		List<ColonistGrant> list = new ArrayList<ColonistGrant>();
-		for (Object o : objects) {
-			list.add((ColonistGrant) o);
 		}
 		commit();
 		return list;
@@ -270,28 +260,28 @@ public class HibernateStore implements IEntityStore {
 	private void deleteColony(Colony colony) {
 		beginTransaction();
 		String q = "delete from AColonists where colony = :colony";
-		Query query = createQuery(q, "colony", colony);
+		Query query = createQuery(q, "colony", colony.getID());
 		query.executeUpdate();
 		q = "delete from ColonistGrant where colony = :colony";
-		query = createQuery(q, "colony", colony);
+		query = createQuery(q, "colony", colony.getID());
 		query.executeUpdate();
 		q = "delete from ColonyItem where colony = :colony";
-		query = createQuery(q, "colony", colony);
+		query = createQuery(q, "colony", colony.getID());
 		query.executeUpdate();
 		q = "delete from DevelopmentGrant where colony = :colony";
-		query = createQuery(q, "colony", colony);
+		query = createQuery(q, "colony", colony.getID());
 		query.executeUpdate();
 		q = "delete from ColonyItem where colony = :colony";
-		query = createQuery(q, "colony", colony);
+		query = createQuery(q, "colony", colony.getID());
 		query.executeUpdate();
 		q = "delete from FacilityLease where colony = :colony";
-		query = createQuery(q, "colony", colony);
+		query = createQuery(q, "colony", colony.getID());
 		query.executeUpdate();
 		q = "delete from MarketItem where colony = :colony";
-		query = createQuery(q, "colony", colony);
+		query = createQuery(q, "colony", colony.getID());
 		query.executeUpdate();
 		commit();
-		List<Facility> facilities = listFacilities(colony);
+		List<Facility> facilities = listFacilities(colony.getID());
 		for (Object o : facilities) {
 			deleteFacility((Facility) o);
 		}
@@ -301,27 +291,27 @@ public class HibernateStore implements IEntityStore {
 	}
 
 	private void deleteCorp(Corporation corp) {
-		List<Colony> colonies = listColonies(corp);
+		List<Colony> colonies = listColoniesByGovernment(corp.getID());
 		for (Object o : colonies) {
 			deleteColony((Colony) o);
 		}
-		List<Starship> ships = listShips(corp);
+		List<Starship> ships = listShips(corp.getID());
 		for (Object o : ships) {
 			deleteSystemEntity((Starship) o);
 		}
-		List<Facility> facilities = listFacilities(corp);
+		List<Facility> facilities = listFacilities(corp.getID());
 		for (Object o : facilities) {
 			deleteFacility((Facility) o);
 		}
 		beginTransaction();
 		String q = "delete from MarketItem where owner = :corp";
-		Query query = createQuery(q, "corp", corp);
+		Query query = createQuery(q, "corp", corp.getID());
 		query.executeUpdate();
 		q = "delete from ColonyItem where owner = :corp";
-		query = createQuery(q, "corp", corp);
+		query = createQuery(q, "corp", corp.getID());
 		query.executeUpdate();
 		q = "delete from StarshipDesign where owner = :corp";
-		query = createQuery(q, "corp", corp);
+		query = createQuery(q, "corp", corp.getID());
 		query.executeUpdate();
 		getSession().delete(corp);
 		commit();
@@ -330,20 +320,20 @@ public class HibernateStore implements IEntityStore {
 	private void deleteFacility(Facility facility) {
 		beginTransaction();
 		String q = "delete from Workers where facility = :facility";
-		Query query = createQuery(q, "facility", facility);
+		Query query = createQuery(q, "facility", facility.getID());
 		query.executeUpdate();
 		getSession().delete(facility);
 		commit();
 	}
 
 	private void deletePlanet(Planet planet) {
-		List<Colony> colonies = listColonies(planet);
+		List<Colony> colonies = listColoniesByPlanet(planet.getID());
 		for (Object o : colonies) {
 			Colony c = (Colony) o;
 			deleteColony(c);
 		}
 		beginTransaction();
-		String q = "delete ResourceDeposit where systemEntityID = " + planet.getID();
+		String q = "delete ResourceDeposit where systemEntity = " + planet.getID();
 		Query query = createQuery(q);
 		query.executeUpdate();
 		getSession().delete(planet);
@@ -351,7 +341,7 @@ public class HibernateStore implements IEntityStore {
 	}
 
 	private void deleteSystem(StarSystem system) {
-		List<StarSystemEntity> entities = listSystemEntities(system);
+		List<StarSystemEntity> entities = listSystemEntities(system.getID());
 		for (Object o : entities) {
 			deleteSystemEntity((StarSystemEntity) o);
 		}
@@ -365,7 +355,7 @@ public class HibernateStore implements IEntityStore {
 			deletePlanet((Planet) entity);
 		} else {
 			beginTransaction();
-			String q = "delete ResourceDeposit where systemEntityID = " + entity.getID();
+			String q = "delete ResourceDeposit where systemEntity = " + entity.getID();
 			Query query = createQuery(q);
 			query.executeUpdate();
 			getSession().delete(entity);
@@ -388,9 +378,9 @@ public class HibernateStore implements IEntityStore {
 
 	private Object loadObject(final Class<?> objectClass,
 			final Serializable identifier) {
-		if (log.isDebugEnabled()) {
-			log.debug("Loading " + objectClass + " id: " + identifier);
-		}
+//		if (log.isDebugEnabled()) {
+//			log.debug("Loading " + objectClass + " id: " + identifier);
+//		}
 		try {
 			Object o = getSession().load(objectClass, identifier);
 			return o;
@@ -421,7 +411,7 @@ public class HibernateStore implements IEntityStore {
 		return prepareParameters(null, key, value);
 	}
 
-	private Query queryColonistGrants(Colony colony, boolean openOnly) {
+	private Query queryColonistGrants(long colony, boolean openOnly) {
 		String q = "from ColonistGrant where colony = :colony";
 		if (openOnly) {
 			q += " and available = true";
@@ -430,18 +420,18 @@ public class HibernateStore implements IEntityStore {
 	}
 
 	private Query queryFacilitiesByType (
-			Colony colony, List<AFacilityType> types){
-		String q = "select w from Workers as w left join w.facility as facility where w.colony = :colony and facility.type in (";
+			long colony, List<AFacilityType> types){
+		String q = "select w from Workers as w where w.colony = :colony and w.facility IN (select ID from Facility where type in (";
 		for (int i = 0; i < types.size(); i++) {
 			if (i > 0)
 				q += ", ";
 			q += "'" + types.get(i).getKey() + "'";
 		}
-		q += ")";
+		q += "))";
 		return createQuery(q,"colony",colony);
 	}
 
-	private Query queryMarket(Colony colony, List<AItemType> types,
+	private Query queryMarket(long colony, List<AItemType> types,
 			int minQty) {
 		String q = "from MarketItem where colony = :colony and item.quantity >= "
 					+ minQty + " and item.type in (";
@@ -454,20 +444,20 @@ public class HibernateStore implements IEntityStore {
 			return createQuery(q, "colony", colony);
 	}
 
-	public long addCredits(IEntity entity, long credits, String reason) {
+	public long addCredits(long entity, long credits, String reason) {
 		String q = "update versioned CreditAccount set credits = credits + " + 
-		credits + " where ID = " + entity.getID();
+		credits + " where ID = " + entity;
 		beginTransaction();
 		Query query = createQuery(q);
 		int updated = query.executeUpdate();
 		if(updated == 0) {
 			CreditAccount acct = new CreditAccount();
-			acct.setID(entity.getID());
+			acct.setID(entity);
 			acct.setCredits(credits);
 			getSession().save(acct);
 		}
 		CashTransaction transaction = new CashTransaction();
-		transaction.setAccountID(entity.getID());
+		transaction.setAccountID(entity);
 		transaction.setAmount(credits);
 		transaction.setDate(ServerConfiguration.getCurrentDate());
 		transaction.setDescription(reason);
@@ -503,7 +493,7 @@ public class HibernateStore implements IEntityStore {
 		}
 	}
 
-	public double getAverageHappiness(Colony colony, PopulationClass popClass) {
+	public double getAverageHappiness(long colony, PopulationClass popClass) {
 		String q = "select avg(col.happiness) from AColonists as col where col.colony = :colony and col.popClassType = '" + popClass.getKey() + "'";
 		beginTransaction();
 		Query query = createQuery(q, "colony", colony);
@@ -518,8 +508,8 @@ public class HibernateStore implements IEntityStore {
 		return avg;
 	}
 
-	public double getAveragePrice(Colony colony, AItemType type) {
-		if(type == null || colony == null)
+	public double getAveragePrice(long colony, AItemType type) {
+		if(type == null)
 			return 0.0;
 		String q = "select avg(costPerItem) from MarketItem where item.type = '" + type.getKey() +"' and colony = :colony";
 		beginTransaction();
@@ -535,13 +525,7 @@ public class HibernateStore implements IEntityStore {
 		return avg;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#getColonistGrant(starcorp.common.entities.Colony,
-	 *      starcorp.common.types.PopulationClass, boolean)
-	 */
-	public AGovernmentLaw getColonistGrant(Colony colony,
+	public AGovernmentLaw getColonistGrant(long colony,
 			PopulationClass popClass, boolean openOnly) {
 		String q = "from ColonistGrant where colony = :colony and popClassType = :popClass";
 		if (openOnly) {
@@ -555,14 +539,8 @@ public class HibernateStore implements IEntityStore {
 		return grant;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#getColony(starcorp.common.entities.Planet,
-	 *      starcorp.common.types.Coordinates2D)
-	 */
-	public Colony getColony(Planet planet, Coordinates2D location) {
-		String q = "from Colony where planetID = " + planet.getID() + " and location = :location";
+	public Colony getColony(long planet, ICoordinates location) {
+		String q = "from Colony where planet = " + planet + " and location = :location";
 		beginTransaction();
 		Colony colony = (Colony) loadObject(createQuery(q, "location", location));
 		commit();
@@ -577,12 +555,6 @@ public class HibernateStore implements IEntityStore {
 		return c;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#getCorporation(java.lang.String,
-	 *      java.lang.String)
-	 */
 	public Corporation getCorporation(String email, String password) {
 		String q = "from Corporation where playerEmail = :email and playerPassword = :password";
 		Map<String, Object> map = prepareParameters("email", email);
@@ -593,9 +565,9 @@ public class HibernateStore implements IEntityStore {
 		return c;
 	}
 
-	public long getCredits(IEntity entity) {
+	public long getCredits(long entity) {
 		beginTransaction();
-		String q = "from CreditAccount where ID = " + entity.getID();
+		String q = "from CreditAccount where ID = " + entity;
 		long credits = 0;
 		try {
 			CreditAccount acct = (CreditAccount) loadObject(createQuery(q));
@@ -609,13 +581,7 @@ public class HibernateStore implements IEntityStore {
 		return credits;
 	}
 	
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#getDevelopmentGrant(starcorp.common.entities.Colony,
-	 *      starcorp.common.types.AFacilityType, boolean)
-	 */
-	public DevelopmentGrant getDevelopmentGrant(Colony colony,
+	public DevelopmentGrant getDevelopmentGrant(long colony,
 			AFacilityType type, boolean openOnly) {
 		String q = "from DevelopmentGrant where colony = :colony and type = :type";
 		if (openOnly) {
@@ -629,13 +595,7 @@ public class HibernateStore implements IEntityStore {
 		return dev;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#getFacility(starcorp.common.entities.Colony,
-	 *      java.lang.Class)
-	 */
-	public Facility getFacility(Colony colony, Class<?> type) {
+	public Facility getFacility(long colony, Class<?> type) {
 		List<AFacilityType> types = AFacilityType.listTypes(type);
 		if (types.size() > 0) {
 			String q = "from Facility where colony = :colony and type in (";
@@ -653,13 +613,7 @@ public class HibernateStore implements IEntityStore {
 		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#getFacility(starcorp.common.entities.Colony,
-	 *      starcorp.common.entities.Corporation, java.lang.Class)
-	 */
-	public Facility getFacility(Colony colony, Corporation owner, Class<?> type) {
+	public Facility getFacility(long colony, long owner, Class<?> type) {
 		List<AFacilityType> types = AFacilityType.listTypes(type);
 		if (types.size() > 0) {
 			String q = "from Facility where colony = :colony and owner = :owner and type in (";
@@ -679,13 +633,7 @@ public class HibernateStore implements IEntityStore {
 		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#getItem(starcorp.common.entities.Colony,
-	 *      starcorp.common.types.AItemType)
-	 */
-	public ColonyItem getItem(Colony colony, AItemType type) {
+	public ColonyItem getItem(long colony, AItemType type) {
 		String q = "from ColonyItem where colony = :colony and item.type = :type";
 		Map<String, Object> map = prepareParameters("colony", colony);
 		prepareParameters(map, "type", type.getKey());
@@ -695,14 +643,7 @@ public class HibernateStore implements IEntityStore {
 		return i;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#getItem(starcorp.common.entities.Colony,
-	 *      starcorp.common.entities.Corporation,
-	 *      starcorp.common.types.AItemType)
-	 */
-	public ColonyItem getItem(Colony colony, Corporation owner, AItemType type) {
+	public ColonyItem getItem(long colony, long owner, AItemType type) {
 		String q = "from ColonyItem where colony = :colony and owner = :owner and item.type = :type";
 		Map<String, Object> map = prepareParameters("colony", colony);
 		prepareParameters(map, "owner", owner);
@@ -713,14 +654,7 @@ public class HibernateStore implements IEntityStore {
 		return i;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#getLease(starcorp.common.entities.Colony,
-	 *      starcorp.common.entities.Corporation,
-	 *      starcorp.common.types.AFacilityType, boolean)
-	 */
-	public FacilityLease getLease(Colony colony, Corporation owner,
+	public FacilityLease getLease(long colony, long owner,
 			AFacilityType type, boolean openOnly) {
 		String q = "from FacilityLease where colony = :colony and owner = :owner and type = :type";
 		if (openOnly) {
@@ -735,7 +669,7 @@ public class HibernateStore implements IEntityStore {
 		return lease;
 	}
 
-	public int getNextQueuePosition(Facility factory) {
+	public int getNextQueuePosition(long factory) {
 		String q = "select max(position) from FactoryQueueItem where factory = :factory";
 		beginTransaction();
 		Query query = createQuery(q,"factory",factory);
@@ -744,13 +678,7 @@ public class HibernateStore implements IEntityStore {
 		return max + 1;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#getUnemployed(starcorp.common.entities.Colony,
-	 *      starcorp.common.types.PopulationClass)
-	 */
-	public Unemployed getUnemployed(Colony colony, PopulationClass popClass) {
+	public Unemployed getUnemployed(long colony, PopulationClass popClass) {
 		String q = "from Unemployed where colony = :colony and popClassType = :popClass";
 		Map<String, Object> map = prepareParameters("colony", colony);
 		prepareParameters(map, "popClass", popClass.getKey());
@@ -760,13 +688,7 @@ public class HibernateStore implements IEntityStore {
 		return u;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#getWorkers(starcorp.common.entities.Facility,
-	 *      starcorp.common.types.PopulationClass)
-	 */
-	public Workers getWorkers(Facility facility, PopulationClass popClass) {
+	public Workers getWorkers(long facility, PopulationClass popClass) {
 		String q = "from Workers where facility = :facility and popClassType = :popClass";
 		Map<String, Object> map = prepareParameters("facility", facility);
 		prepareParameters(map, "popClass", popClass.getKey());
@@ -782,132 +704,60 @@ public class HibernateStore implements IEntityStore {
 		return copyAccounts(listObject(createQuery(q)));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#listColonies()
-	 */
 	public List<Colony> listColonies() {
 		beginTransaction();
 		String q = "from Colony";
 		return copyColonies(listObject(createQuery(q)));
 	}
 
-	public List<Colony> listColonies(Corporation govt) {
+	public List<Colony> listColoniesByGovernment(long govt) {
 		String q = "from Colony where government = :govt";
 		beginTransaction();
 		return copyColonies(listObject(createQuery(q, "govt", govt)));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#listColonies(starcorp.common.entities.Planet)
-	 */
-	public List<Colony> listColonies(Planet planet) {
+	public List<Colony> listColoniesByPlanet(long planet) {
 		beginTransaction();
-		String q = "from Colony where planetID = " + planet.getID();
+		String q = "from Colony where planet = " + planet;
 		return copyColonies(listObject(createQuery(q)));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#listColonies(starcorp.common.entities.StarSystem)
-	 */
-	public List<Colony> listColonies(StarSystem excludeSystem) {
-		String q = "from Colony as col where col.planetID IN (select ID from Planet as p where p.systemID <> :systemID)";
+	public List<Colony> searchColonies(long excludeSystem) {
+		String q = "from Colony as col where col.planet IN (select ID from Planet as p where p.system <> :systemID)";
 		beginTransaction();
-		return copyColonies(listObject(createQuery(q, "systemID", excludeSystem.getID())));
+		return copyColonies(listObject(createQuery(q, "systemID", excludeSystem)));
 	}
 
-	// private List<StarSystem> copyStars(List<?> objects) {
-	// List<StarSystem> list = new ArrayList<StarSystem>();
-	// for(Object o : objects) {
-	// list.add((StarSystem)o);
-	// }
-	// commit();
-	// return list;
-	// }
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#listColonies(starcorp.common.entities.StarSystem,
-	 *      starcorp.common.types.CoordinatesPolar)
-	 */
-	public List<Colony> listColonies(StarSystem system,
+	public List<Colony> searchColonies(long system,
 			CoordinatesPolar excludeLocation) {
-		String q = "from Colony as col where col.planetID IN (select ID from Planet as p where p.location <> :location and p.systemID = " + system.getID() +")";
+		String q = "from Colony as col where col.planet IN (select ID from Planet as p where p.location <> :location and p.system = " + system +")";
 		beginTransaction();
 		return copyColonies(listObject(createQuery(q, "location", excludeLocation)));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#listColonies(starcorp.common.entities.StarSystem,
-	 *      starcorp.common.types.CoordinatesPolar,
-	 *      starcorp.common.entities.Planet)
-	 */
-	public List<Colony> listColonies(StarSystem system,
-			CoordinatesPolar location, Planet excludePlanet) {
-		String q = "from Colony as col where col.planetID IN " + 
-		"(select ID from Planet as p where p.ID <> :planetId and p.location <> :location and p.systemID = " + system.getID() + ")";
-		Map<String, Object> map = prepareParameters("planetId", excludePlanet
-				.getID());
+	public List<Colony> searchColonies(long system,
+			CoordinatesPolar location, long excludePlanet) {
+		String q = "from Colony as col where col.planet IN " + 
+		"(select ID from Planet as p where p.ID <> :planetId and p.location <> :location and p.systemID = " + system + ")";
+		Map<String, Object> map = prepareParameters("planetId", excludePlanet);
 		prepareParameters(map, "location", location);
 		beginTransaction();
 		return copyColonies(listObject(createQuery(q, map)));
 	}
 
-	public List<ColonistGrant> listColonistGrants(Colony colony,
-			boolean openOnly) {
-		beginTransaction();
-		return copyGrants(listObject(queryColonistGrants(colony, openOnly)));
-	}
-	
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#listColonistGrants(starcorp.common.entities.Corporation,
-	 *      boolean)
-	 */
-	public List<ColonistGrant> listColonistGrants(Corporation owner,
-			boolean openOnly) {
-		String q = "from ColonistGrant grant left join grant.colony as col where col.government = :owner";
-		if (openOnly) {
-			q = q + " and available = true";
-		}
-		Map<String, Object> map = prepareParameters("owner", owner);
-		beginTransaction();
-		return copyGrants(listObject(createQuery(q, map)));
-	}
-	
 	public List<AColonists> listColonists() {
 		String q = "from AColonists";
 		beginTransaction();
 		return copyColonists(listObject(createQuery(q)));
 	}
 	
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#listColonists(starcorp.common.entities.Colony)
-	 */
-	public List<AColonists> listColonists(Colony colony) {
+	public List<AColonists> listColonists(long colony) {
 		String q = "from AColonists where colony = :colony";
 		beginTransaction();
 		return copyColonists(listObject(createQuery(q, "colony", colony)));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#listColonists(starcorp.common.entities.Colony,
-	 *      starcorp.common.types.PopulationClass)
-	 */
-	public List<AColonists> listColonists(Colony colony,
+	public List<AColonists> listColonists(long colony,
 			PopulationClass popClass) {
 		String q = "from AColonists where colony = :colony and popClassType = '"
 				+ popClass.getKey() + "'";
@@ -916,16 +766,16 @@ public class HibernateStore implements IEntityStore {
 	}
 
 	public List<ResourceDeposit> listDeposits(long planetID,
-			Coordinates2D location) {
-		String q = "from ResourceDeposit where systemEntityID = " +
+			ICoordinates location) {
+		String q = "from ResourceDeposit where systemEntity = " +
 		planetID + " and location = :location";
 		beginTransaction();
 		return copyDeposits(listObject(createQuery(q, "location", location)));
 	}
 
-	public List<ResourceDeposit> listDeposits(Planet planet,
+	public List<ResourceDeposit> listDeposits(long planet,
 			List<AItemType> types, int minTotal) {
-		String q = "from ResourceDeposit where systemEntityID = " + planet.getID() + " and totalQuantity >= "
+		String q = "from ResourceDeposit where systemEntity = " + planet + " and totalQuantity >= "
 				+ minTotal;
 		int max = types == null ? 0 : types.size();
 		if (max > 0) {
@@ -944,35 +794,19 @@ public class HibernateStore implements IEntityStore {
 		return copyDeposits(listObject(createQuery(q)));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#listDeposits(starcorp.common.entities.StarSystemEntity)
-	 */
-	public List<ResourceDeposit> listDeposits(StarSystemEntity systemEntity) {
-		String q = "from ResourceDeposit where systemEntityID = " + systemEntity.getID();
+	public List<ResourceDeposit> listDeposits(long systemEntity) {
+		String q = "from ResourceDeposit where systemEntity = " + systemEntity;
 		beginTransaction();
 		return copyDeposits(listObject(createQuery(q)));
 	}
 	
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#listDesigns(starcorp.common.entities.Corporation)
-	 */
-	public List<StarshipDesign> listDesigns(Corporation owner) {
-		String q = "from StarshipDesign where owner = :owner";
+	public List<StarshipDesign> listDesigns(long owner) {
+		String q = "select design from StarshipDesign as design where owner = :owner";
 		beginTransaction();
 		return copyDesigns(listObject(createQuery(q, "owner", owner)));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#listDevelopmentGrants(starcorp.common.entities.Corporation,
-	 *      boolean)
-	 */
-	public List<DevelopmentGrant> listDevelopmentGrants(Corporation owner,
+	public List<DevelopmentGrant> listDevelopmentGrants(long owner,
 			boolean openOnly) {
 		String q = "from DevelopmentGrant where colony.government = :owner";
 		if (openOnly) {
@@ -988,35 +822,19 @@ public class HibernateStore implements IEntityStore {
 		return copyObjects(listObject(createQuery(q)));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#listFacilities()
-	 */
 	public List<Facility> listFacilities() {
 		String q = "from Facility";
 		beginTransaction();
 		return copyFacilities(listObject(createQuery(q)));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#listFacilities(starcorp.common.entities.Colony)
-	 */
-	public List<Facility> listFacilities(Colony colony) {
+	public List<Facility> listFacilities(long colony) {
 		String q = "from Facility where colony = :colony";
 		beginTransaction();
 		return copyFacilities(listObject(createQuery(q, "colony", colony)));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#listFacilities(starcorp.common.entities.Colony,
-	 *      java.lang.Class)
-	 */
-	public List<Facility> listFacilities(Colony colony, Class<?> type) {
+	public List<Facility> listFacilities(long colony, Class<?> type) {
 		List<AFacilityType> types = AFacilityType.listTypes(type);
 		String q = "from Facility where colony = :colony and type in (";
 		for (int i = 0; i < types.size(); i++) {
@@ -1029,29 +847,10 @@ public class HibernateStore implements IEntityStore {
 		return copyFacilities(listObject(createQuery(q, "colony", colony)));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#listFacilities(starcorp.common.entities.Corporation)
-	 */
-	public List<Facility> listFacilities(Corporation owner) {
+	public List<Facility> listFacilitiesByOwner(long owner) {
 		String q = "from Facility where owner = :owner";
 		beginTransaction();
 		return copyFacilities(listObject(createQuery(q, "owner", owner)));
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#listFacilitiesBySalary(starcorp.common.entities.Colony,
-	 *      starcorp.common.types.PopulationClass)
-	 */
-	public List<Facility> listFacilitiesBySalary(PopulationClass popClass) {
-		String q = "select facility from Workers as w where w.popClassType = '"
-				+ popClass.getKey() + "' order by salary desc";
-		beginTransaction();
-		return copyFacilities(listObject(createQuery(q)));
-
 	}
 
 	public List<Facility> listFacilitiesPowered(List<AFacilityType> types) {
@@ -1071,24 +870,13 @@ public class HibernateStore implements IEntityStore {
 		return copyFacilities(listObject(createQuery(q)));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#listItems(starcorp.common.entities.Corporation)
-	 */
-	public List<ColonyItem> listItems(Corporation owner) {
+	public List<ColonyItem> listItems(long owner) {
 		String q = "from ColonyItem where owner = :owner";
 		beginTransaction();
 		return copyItems(listObject(createQuery(q, "owner", owner)));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#listItems(starcorp.common.entities.Corporation,
-	 *      starcorp.common.entities.Colony, java.util.List)
-	 */
-	public List<ColonyItem> listItems(Corporation owner, Colony colony,
+	public List<ColonyItem> listItems(long owner, long colony,
 			List<AItemType> types) {
 		String q = "from ColonyItem where owner = :owner and item.type in (";
 		for (int i = 0; i < types.size(); i++) {
@@ -1107,13 +895,7 @@ public class HibernateStore implements IEntityStore {
 		return copyLaws(listObject(createQuery(q)));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#listLeases(starcorp.common.entities.Corporation,
-	 *      boolean)
-	 */
-	public List<FacilityLease> listLeases(Corporation corp, boolean openOnly) {
+	public List<FacilityLease> listLeases(long corp, boolean openOnly) {
 		String q = "from FacilityLease where licensee = :corp";
 		if (openOnly) {
 			q += " and available = true";
@@ -1122,51 +904,34 @@ public class HibernateStore implements IEntityStore {
 		return copyLeases(listObject(createQuery(q, "corp", corp)));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#listMarket(starcorp.common.entities.Colony,
-	 *      int)
-	 */
-	public List<MarketItem> listMarket(Colony colony, int minQty) {
+	public List<MarketItem> listMarket(long colony, int minQty) {
 		String q = "from MarketItem where colony = :colony and item.quantity >= "
 				+ minQty;
 		beginTransaction();
 		return copyMarket(listObject(createQuery(q, "colony", colony)));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#listMarket(starcorp.common.entities.Colony,
-	 *      java.util.List, int)
-	 */
-	public List<MarketItem> listMarket(Colony colony, List<AItemType> types,
+	public List<MarketItem> listMarket(long colony, List<AItemType> types,
 			int minQty) {
 		beginTransaction();
 		return copyMarket(listObject(queryMarket(colony, types, minQty)));
 	}
 
-	public List<MarketItem> listMarket(Corporation seller, int minQty) {
+	public List<MarketItem> listMarketBySeller(long seller, int minQty) {
 		String q = "from MarketItem where item.quantity >= " + minQty + " and owner = :seller";
 		beginTransaction();
 		return copyMarket(listObject(createQuery(q, "seller", seller)));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#listMarket(int)
-	 */
 	public List<MarketItem> listMarket(int minQty) {
 		String q = "from MarketItem where item.quantity >= :minQty";
 		beginTransaction();
 		return copyMarket(listObject(createQuery(q, "minQty", minQty)));
 	}
 
-	public List<Planet> listPlanets(StarSystem star, int maxGravity,
+	public List<Planet> listPlanets(long star, int maxGravity,
 			List<AtmosphereType> atmospheres) {
-		String q = "from Planet where systemID = " + star.getID() +" and gravityRating <= " + maxGravity;
+		String q = "from Planet where system = " + star +" and gravityRating <= " + maxGravity;
 		int max = atmospheres == null ? 0 : atmospheres.size();
 		if (max > 0) {
 			q += " and atmosphereType in (";
@@ -1183,92 +948,76 @@ public class HibernateStore implements IEntityStore {
 		return copyPlanets(listObject(createQuery(q)));
 	}
 
-	public List<FactoryQueueItem> listQueue(Corporation corp) {
-		String q = "select queue from FactoryQueueItem as queue left outer join queue.factory as factory where factory.owner = :owner order by position desc";
+	public List<Planet> listPlanets(long star) {
+		String q = "from Planet where system = " + star;
+		beginTransaction();
+		return copyPlanets(listObject(createQuery(q)));
+	}
+
+	public List<FactoryQueueItem> listQueueByCorporation(long corp) {
+		String q = "select queue from FactoryQueueItem where queue.factory IN (select ID from Facility where owner = :corp) order by position desc";
 		beginTransaction();
 		return copyQueue(listObject(createQuery(q, "owner", corp)));
 	}
 
-	public List<FactoryQueueItem> listQueue(Facility facility) {
+	public List<FactoryQueueItem> listQueue(long facility) {
 		String q = "from FactoryQueueItem where factory = :facility order by position desc";
 		beginTransaction();
 		return copyQueue(listObject(createQuery(q, "facility", facility)));
 	}
 
-	public List<Starship> listShips(Colony docked, Starship excludeShip) {
-		String q = "from Starship where colony = :docked and ID <> " + excludeShip.getID();
+	public List<Starship> listShipsDocked(long docked, long excludeShip) {
+		String q = "from Starship where colony = :docked and ID <> " + excludeShip;
 		beginTransaction();
 		return copyShips(listObject(createQuery(q, "docked", docked)));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#listShips(starcorp.common.entities.Corporation)
-	 */
-	public List<Starship> listShips(Corporation owner) {
+	public List<Starship> listShips(long owner) {
 		String q = "from Starship where owner = :owner";
 		beginTransaction();
 		return copyShips(listObject(createQuery(q, "owner", owner)));
 	}
 
-	public List<Starship> listShips(Planet planet, Coordinates2D location, Starship exclude) {
-		String q = "from Starship where planet = :planet and planetLocation = :location and ID <> " + exclude.getID();
+	public List<Starship> listShipsDocked(long planet, ICoordinates location, long exclude) {
+		String q = "from Starship where planet = :planet and planetLocation = :location and ID <> " + exclude;
 		Map<String, Object> map = prepareParameters("planet", planet);
 		prepareParameters(map, "location", location);
 		beginTransaction();
 		return copyShips(listObject(createQuery(q, map)));
 	}
 
-	public List<Starship> listShips(Planet orbiting, Starship exclude) {
-		String q = "from Starship where planet = :orbiting and planetLocation.x < 1 and planetLocation.y < 1 and ID <> " + exclude.getID();
+	public List<Starship> listShipsInOrbit(long orbiting, long exclude) {
+		String q = "from Starship where planet = :orbiting and planetLocation.x < 1 and planetLocation.y < 1 and ID <> " + exclude;
 		beginTransaction();
 		return copyShips(listObject(createQuery(q, "orbiting", orbiting)));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#listSystemEntities(starcorp.common.entities.StarSystem)
-	 */
-	public List<StarSystemEntity> listSystemEntities(StarSystem star) {
-		String q = "from StarSystemEntity where systemID = " + star.getID();
+	public List<StarSystemEntity> listSystemEntities(long star) {
+		String q = "from StarSystemEntity where system = " + star;
 		beginTransaction();
 		return copySystemEntities(listObject(createQuery(q)));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#listSystemEntities(starcorp.common.entities.StarSystem,
-	 *      starcorp.common.types.CoordinatesPolar)
-	 */
-	public List<StarSystemEntity> listSystemEntities(StarSystem star,
+	public List<StarSystemEntity> listSystemEntities(long star,
 			CoordinatesPolar location) {
-		String q = "from StarSystemEntity where systemID = " + star.getID() +" and location = :location";
+		String q = "from StarSystemEntity where system = " + star +" and location = :location";
 		beginTransaction();
 		return copySystemEntities(listObject(createQuery(q, "location", location)));
 	}
 
-	public List<StarSystemEntity> listSystemEntities(StarSystem star,
-			CoordinatesPolar location, StarSystemEntity exclude) {
-		String q = "from StarSystemEntity where systemID = " + star.getID() +" and location = :location and ID <> " + exclude.getID();
+	public List<StarSystemEntity> listSystemEntities(long star,
+			CoordinatesPolar location, long exclude) {
+		String q = "from StarSystemEntity where system = " + star +" and location = :location and ID <> " + exclude;
 		beginTransaction();
 		return copySystemEntities(listObject(createQuery(q, "location", location)));
 	}
-	public List<StarSystemEntity> listSystemEntities(StarSystem star,
-			StarSystemEntity exclude) {
-		String q = "from StarSystemEntity where systemID = " + star.getID() + " and ID <> " + exclude.getID();
+	public List<StarSystemEntity> listSystemEntities(long star,
+			long exclude) {
+		String q = "from StarSystemEntity where system = " + star + " and ID <> " + exclude;
 		beginTransaction();
 		return copySystemEntities(listObject(createQuery(q)));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#listSystems(starcorp.common.types.Coordinates3D,
-	 *      int)
-	 */
 	public List<StarSystem> listSystems(Coordinates3D origin, int range) {
 		String q = "from StarSystem where location <> :location";
 		beginTransaction();
@@ -1291,48 +1040,32 @@ public class HibernateStore implements IEntityStore {
 		return copyColonists(listObject(createQuery(q)));
 	}
 
-	public List<AColonists> listUnemployed(Colony colony) {
+	public List<AColonists> listUnemployed(long colony) {
 		String q = "from Unemployed where colony = :colony";
 		beginTransaction();
 		return copyColonists(listObject(createQuery(q, "colony", colony)));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#listWorkers(starcorp.common.entities.Colony)
-	 */
-	public List<AColonists> listWorkers(Colony colony) {
+	public List<AColonists> listWorkersByColony(long colony) {
 		String q = "from Workers where colony = :colony";
 		beginTransaction();
 		return copyColonists(listObject(createQuery(q, "colony", colony)));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#listWorkers(starcorp.common.entities.Colony,
-	 *      starcorp.common.types.PopulationClass)
-	 */
-	public List<AColonists> listWorkers(Colony colony, PopulationClass popClass) {
+	public List<AColonists> listWorkersByColony(long colony, PopulationClass popClass) {
 		String q = "from Workers where colony = :colony and popClassType = '"
 				+ popClass.getKey() + "'";
 		beginTransaction();
 		return copyColonists(listObject(createQuery(q, "colony", colony)));
 	}
 
-	public List<AColonists> listWorkers(Corporation corp) {
-		String q = "select w from Workers as w left join w.facility as fac where fac.owner = :owner";
+	public List<AColonists> listWorkersByEmployer(long corp) {
+		String q = "select w from Workers as w where w.facility IN (select ID from Facility where owner = :owner)";
 		beginTransaction();
 		return copyColonists(listObject(createQuery(q, "owner", corp)));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#listWorkers(starcorp.common.entities.Facility)
-	 */
-	public List<AColonists> listWorkers(Facility facility) {
+	public List<AColonists> listWorkersByFacility(long facility) {
 		String q = "from Workers where facility = :facility";
 		beginTransaction();
 		return copyColonists((listObject(createQuery(q, "facility", facility))));
@@ -1346,7 +1079,7 @@ public class HibernateStore implements IEntityStore {
 	}
 
 	public Map<PopulationClass, ColonistGrant> mapColonistGrantsByPopClass(
-			Colony colony, boolean openOnly) {
+			long colony, boolean openOnly) {
 		beginTransaction();
 		Map<PopulationClass, ColonistGrant> map = new HashMap<PopulationClass, ColonistGrant>();
 		Query q = queryColonistGrants(colony, openOnly);
@@ -1358,14 +1091,9 @@ public class HibernateStore implements IEntityStore {
 		return map;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see starcorp.server.entitystore.IEntityStore#listFacilitiesWithWorkers(starcorp.common.entities.Colony,
-	 *      java.util.List)
-	 */
+	
 	public Map<Facility, List<AColonists>> mapFacilitiesWithWorkers(
-			Colony colony, List<AFacilityType> types) {
+			long colony, List<AFacilityType> types) {
 		Map<Facility, List<AColonists>> result = new HashMap<Facility, List<AColonists>>();
 		
 		beginTransaction();
@@ -1377,21 +1105,22 @@ public class HibernateStore implements IEntityStore {
 				list = new ArrayList<AColonists>();
 			}
 			list.add(w);
-			result.put(w.getFacility(), list);
+			result.put((Facility) loadObject(Facility.class,w.getFacility()), list);
 		}
 		commit();
 		return result;
 	}
 
 	public Map<AFacilityType, Map<Facility, List<AColonists>>> mapFacilitiesWithWorkersByType(
-			Colony colony, List<AFacilityType> types) {
+			long colony, List<AFacilityType> types) {
 		Map<AFacilityType, Map<Facility, List<AColonists>>> result = new HashMap<AFacilityType, Map<Facility,List<AColonists>>>();
 		
 		beginTransaction();
 		List<?> workers = listObject(queryFacilitiesByType(colony, types));
 		for(Object o : workers) {
 			Workers w = (Workers) o;
-			AFacilityType ft = w.getFacility().getTypeClass();
+			Facility facility = (Facility) load(Facility.class, w.getFacility());
+			AFacilityType ft = facility.getTypeClass();
 			Map<Facility, List<AColonists>> m = result.get(ft);
 			if(m == null) {
 				m = new HashMap<Facility, List<AColonists>>();
@@ -1402,13 +1131,13 @@ public class HibernateStore implements IEntityStore {
 				list = new ArrayList<AColonists>();
 			}
 			list.add(w);
-			m.put(w.getFacility(), list);
+			m.put((Facility) loadObject(Facility.class,w.getFacility()), list);
 		}
 		commit();
 		return result;
 	}
 
-	public Map<AItemType, List<MarketItem>> mapMarketByItemType(Colony colony,
+	public Map<AItemType, List<MarketItem>> mapMarketByItemType(long colony,
 			List<AItemType> types) {
 		Map<AItemType, List<MarketItem>> market = new HashMap<AItemType, List<MarketItem>>();
 		beginTransaction();
@@ -1431,7 +1160,7 @@ public class HibernateStore implements IEntityStore {
 		return copyObjects(listObject(createQuery(hql)));
 	}
 
-	public long removeCredits(IEntity entity, long credits, String reason) {
+	public long removeCredits(long entity, long credits, String reason) {
 		addCredits(entity, (0 - credits), reason);
 		return getCredits(entity);
 	}
@@ -1455,7 +1184,7 @@ public class HibernateStore implements IEntityStore {
 		sessionFactory.close();
 	}
 
-	public long transferCredits(IEntity from, IEntity to, long credits,
+	public long transferCredits(long from, long to, long credits,
 			String reason) {
 		long total = addCredits(to, credits, reason);
 		removeCredits(from, credits, reason);

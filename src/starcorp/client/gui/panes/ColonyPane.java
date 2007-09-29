@@ -33,8 +33,10 @@ import starcorp.client.gui.AEntityPane;
 import starcorp.client.gui.widgets.Hyperlink;
 import starcorp.client.gui.windows.MainWindow;
 import starcorp.common.entities.Colony;
+import starcorp.common.entities.Corporation;
 import starcorp.common.entities.IEntity;
 import starcorp.common.entities.MarketItem;
+import starcorp.common.entities.Planet;
 import starcorp.common.entities.Starship;
 import starcorp.common.turns.TurnOrder;
 import starcorp.common.types.AItemType;
@@ -71,13 +73,15 @@ public class ColonyPane extends AEntityPane {
 		grp.setLayoutData(data);
 		
 		createLabel(grp, widgets, "Government:");
-		createCorporationLink(grp, widgets, colony.getGovernment(), null);
+		Corporation c = getTurnReport().getCorporation(colony.getGovernment());
+		createCorporationLink(grp, widgets, c, null);
 		
-		createLabel(grp, widgets, "Hazard Level:");
-		createLabel(grp, widgets, format(colony.getHazardLevel()));
+		createLabel(grp, widgets, "Hazard Level: " + format(colony.getHazardLevel()));
+		createLabel(grp, widgets, "Founded: " + colony.getFoundedDate());
 		
-		createLabel(grp, widgets, "Founded:");
-		createLabel(grp, widgets, colony.getFoundedDate().toString());
+		Planet planet = getTurnReport().getPlanet(colony.getPlanet());
+		createLabel(grp,widgets,"Location: ");
+		createPlanetLink(grp, widgets, planet, planet.getDisplayName() + " @ " + colony.getLocation());
 
 		createColonyMarket(getParent(), widgets);
 		
@@ -98,7 +102,7 @@ public class ColonyPane extends AEntityPane {
 		createLabel(grp,widgets, "Price (ea.)");
 		createLabel(grp, widgets, "");
 		
-		Set<MarketItem> set = getTurnReport().getMarketByColony().get(colony);
+		Set<MarketItem> set = getTurnReport().getMarketByColony().get(colony.getID());
 		if(set != null) {
 			Iterator<MarketItem> i = set.iterator();
 			for(int count = 0; i.hasNext() && count < (MARKET_ITEMS_PER_PAGE * (page - 1));count++) {
@@ -114,8 +118,7 @@ public class ColonyPane extends AEntityPane {
 				String name = item.getItem().getTypeClass().getName();
 				String qty = format(item.getItem().getQuantity());
 				String price = "\u20a1 " + format(item.getCostPerItem());
-				Hyperlink lnk = createItemLink(grp, widgets, type, name); // 1
-				lnk.setToolTipText("Seller: " + item.getSeller().getDisplayName());
+				createItemLink(grp, widgets, type, name); // 1
 				createLabel(grp, widgets, qty).setLayoutData(data); // 2
 				createLabel(grp,widgets, price).setLayoutData(data); // 3
 				if(item != null && mainWindow.getCorporation() != null) {

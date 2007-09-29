@@ -10,6 +10,7 @@
  */
 package starcorp.server.turns.orders;
 
+import java.util.Iterator;
 import java.util.List;
 
 import starcorp.common.entities.Corporation;
@@ -38,7 +39,7 @@ public class ScanGalaxy extends AOrderProcessor {
 		
 		Starship ship = (Starship) entityStore.load(Starship.class, starshipId);
 		
-		if(ship == null || !ship.getOwner().equals(corp)) {
+		if(ship == null || ship.getOwner() != corp.getID()) {
 			error = new TurnError(TurnError.INVALID_SHIP,order);
 		}
 		else if(!ship.enoughTimeUnits(TIME_UNITS)) {
@@ -47,10 +48,20 @@ public class ScanGalaxy extends AOrderProcessor {
 		else {
 			ship.incrementTimeUnitsUsed(TIME_UNITS);
 			entityStore.update(ship);
+			StarSystem system = (StarSystem) entityStore.load(StarSystem.class, ship.getSystem());
 			int range = ship.getDesign().getScanGalaxyRange();
+			// TODO fix - not going into known systems or corp isn't updating
+			List<StarSystem> systems = entityStore.listSystems(system.getLocation(), range);
+			Iterator<StarSystem> i = systems.iterator();
+			while(i.hasNext()) {
+				StarSystem sys = i.next();
+				corp.add(system.getID());
+				if(sys.equals(system))
+					i.remove();
+			}
+			entityStore.update(corp);
+
 			OrderReport report = new OrderReport(order,null,ship);
-			StarSystem system = (StarSystem) entityStore.load(StarSystem.class, ship.getSystemID());
-			List<?> systems = entityStore.listSystems(system.getLocation(), range);
 			report.addScannedEntities(systems);
 			report.add(systems.size());
 			order.setReport(report);

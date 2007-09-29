@@ -74,7 +74,7 @@ public class Updater extends ACommand {
 			out.println("NPC not implemented yet!");
 			out.print(Shell.PROMPT);
 			out.flush();
-			// TODO npc processor implementation
+			// TODO npc processor
 		}
 		else if("fac".equalsIgnoreCase(type)) {
 			return new FacilityProcessor();
@@ -102,7 +102,7 @@ public class Updater extends ACommand {
 					entityStore.resetShipTimeUnits();
 					engine.scheduleAndWait(new PopulationProcessor());
 					engine.scheduleAndWait(new FacilityProcessor());
-					// TODO add npc proc
+					// TODO npc processor
 					engine.scheduleAndWait(new TurnFetcher());
 					engine.scheduleAndWait(new TurnProcessor());
 					out.println();

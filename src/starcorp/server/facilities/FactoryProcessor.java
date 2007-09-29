@@ -17,9 +17,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import starcorp.common.entities.AColonists;
-import starcorp.common.entities.Colony;
 import starcorp.common.entities.ColonyItem;
-import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Facility;
 import starcorp.common.entities.FactoryQueueItem;
 import starcorp.common.types.AFacilityType;
@@ -44,7 +42,7 @@ public class FactoryProcessor extends AServerTask {
 		Factory type = (Factory) factory.getTypeClass();
 		int maxCapacity = factory.isPowered() ? type.getCapacity(workers) : 0;
 		int capacityUsed = 0;
-		Iterator<FactoryQueueItem> i = entityStore.listQueue(factory).iterator();
+		Iterator<FactoryQueueItem> i = entityStore.listQueue(factory.getID()).iterator();
 		while(capacityUsed < maxCapacity && i.hasNext()) {
 			Items item = build(factory, i.next(), maxCapacity);
 			if(item != null) {
@@ -91,7 +89,7 @@ public class FactoryProcessor extends AServerTask {
 		return new Items(item.getTypeClass(),qty);
 	}
 	
-	private int hasMaterials(Colony colony, Corporation owner, AFactoryItem type) {
+	private int hasMaterials(long colony, long owner, AFactoryItem type) {
 		int max = 0;
 		for(Items item : type.getComponent()) {
 			ColonyItem cItem = entityStore.getItem(colony, owner, item.getTypeClass());
@@ -103,7 +101,7 @@ public class FactoryProcessor extends AServerTask {
 		return max;
 	}
 	
-	private void useMaterials(Colony colony, Corporation owner, AFactoryItem type, int quantity) {
+	private void useMaterials(long colony, long owner, AFactoryItem type, int quantity) {
 		for(Items item : type.getComponent()) {
 			ColonyItem cItem = entityStore.getItem(colony, owner, item.getTypeClass());
 			int qty = item.getQuantity() * quantity;
@@ -121,7 +119,7 @@ public class FactoryProcessor extends AServerTask {
 		List<Facility> list = entityStore.listFacilitiesPowered(AFacilityType.listTypes(Factory.class));
 		log.info(this +": " + list.size() + " factories to process");
 		for(Facility facility : list) {
-			List<AColonists> workers = entityStore.listWorkers(facility);
+			List<AColonists> workers = entityStore.listWorkersByFacility(facility.getID());
 			processFactory(facility, workers);
 		}
 	}

@@ -21,28 +21,27 @@ import org.dom4j.Element;
  */
 public class Workers extends AColonists {
 
-	private Facility facility;
+	private long facility;
 	private int salary;
 	
 	@Override
 	public void readXML(Element e) {
 		super.readXML(e);
-		this.facility = new Facility();
-		this.facility.readXML(e.element("facility").element("entity"));
+		this.facility = Long.parseLong(e.attributeValue("facility","0"));
 		this.salary = Integer.parseInt(e.attributeValue("salary","0"));
 	}
 	@Override
 	public Element toBasicXML(Element parent) {
 		Element e = super.toBasicXML(parent);
-		facility.toBasicXML(e.addElement("facility"));
+		e.addAttribute("facility", String.valueOf(facility));
 		e.addAttribute("salary", String.valueOf(salary));
 		return e;
 	}
 
-	public Facility getFacility() {
+	public long getFacility() {
 		return facility;
 	}
-	public void setFacility(Facility facility) {
+	public void setFacility(long facility) {
 		this.facility = facility;
 	}
 	public int getSalary() {
@@ -51,13 +50,6 @@ public class Workers extends AColonists {
 	public void setSalary(int salary) {
 		this.salary = salary;
 	}
-	@Override
-	public Corporation getEmployer() {
-		return facility.getOwner();
-	}
-	@Override
-	public String toString() {
-		return super.toString() + " [Employer: " + facility.getType() + "]";
-	}
+	
 	
 }

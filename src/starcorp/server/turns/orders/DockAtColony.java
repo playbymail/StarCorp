@@ -47,7 +47,7 @@ public class DockAtColony extends AOrderProcessor {
 		if(log.isDebugEnabled())
 			log.debug(ship + " : " + colony);
 		
-		if(ship == null || !ship.getOwner().equals(corp)) {
+		if(ship == null || ship.getOwner() != corp.getID()) {
 			error = new TurnError(TurnError.INVALID_SHIP,order);
 		}
 		else if(colony == null) {
@@ -57,22 +57,22 @@ public class DockAtColony extends AOrderProcessor {
 			error = new TurnError(TurnError.INSUFFICIENT_TIME,order);
 		}
 		else {
-			Planet planet = ship.getPlanet();
-			Planet colonyPlanet = ((Planet) entityStore.load(Planet.class, colony.getPlanetID()));
+			long planet = ship.getPlanet();
+			Planet colonyPlanet = ((Planet) entityStore.load(Planet.class, colony.getPlanet()));
 			if(log.isDebugEnabled())
 				log.debug(planet + " : " + colonyPlanet);
-			if(planet == null) {
+			if(planet == 0) {
 				error = new TurnError(TurnError.INVALID_LOCATION,order);
 			}
-			else if(!colonyPlanet.equals(planet)) {
+			else if(colonyPlanet.getID() != planet) {
 				error = new TurnError(TurnError.INVALID_LOCATION,order);
 			}
-			else if(planet.getGravityRating() > ship.getDesign().getMaxDockGravity()){
+			else if(colonyPlanet.getGravityRating() > ship.getDesign().getMaxDockGravity()){
 				error = new TurnError(TurnError.GRAVITY_TOO_HIGH,order);
 			}
 			else {
 				ship.setPlanetLocation(colony.getLocation());
-				ship.setColony(colony);
+				ship.setColony(colony.getID());
 				ship.incrementTimeUnitsUsed(TIME_UNITS);
 				entityStore.update(ship);
 				OrderReport report = new OrderReport(order,colony,ship);
@@ -81,8 +81,8 @@ public class DockAtColony extends AOrderProcessor {
 				report.add(colony.getName());
 				report.add(colony.getID());
 				report.addScannedEntity(colony);
-				report.addScannedEntities(entityStore.listFacilities(colony));
-				report.addScannedEntities(entityStore.listShips(colony,ship));
+				report.addScannedEntities(entityStore.listFacilities(colony.getID()));
+				report.addScannedEntities(entityStore.listShipsDocked(colony.getID(),ship.getID()));
 				order.setReport(report);
 			}
 		}

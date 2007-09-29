@@ -20,7 +20,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
@@ -61,7 +60,6 @@ public class TreeBrowser implements IComponent  {
 	private Tree tree;
 	private List<TreeItem> listItemOrders = new ArrayList<TreeItem>();
 	private List<TreeItem> listItemShips = new ArrayList<TreeItem>();
-	private List<TreeItem> listItemDesigns = new ArrayList<TreeItem>();
 	private List<TreeItem> listItemFacilities = new ArrayList<TreeItem>();
 	
 	private TurnReport report;
@@ -72,7 +70,6 @@ public class TreeBrowser implements IComponent  {
 	
 	public void setReport(TurnReport report) {
 		this.report = report;
-		dispose(listItemDesigns);
 		dispose(listItemOrders);
 		dispose(listItemShips);
 		dispose(listItemFacilities);
@@ -120,13 +117,13 @@ public class TreeBrowser implements IComponent  {
 			Set<StarshipDesign> designs = report.getPlayerDesigns();
 			if(designs.size() > 0) {
 				TreeItem itemDesigns = new TreeItem(tree,SWT.NONE);
-				itemDesigns.setText("Designs");
+				itemDesigns.setText("Starships");
 				for(StarshipDesign design : designs) {
 					TreeItem shipItem = new TreeItem(itemDesigns,SWT.NONE);
 					tree.addListener(SWT.Selection, listenDesign(design));
 					shipItem.setText(design.getName() +" [" + design.getID() +"]");
 					shipItem.setData(design);
-					listItemDesigns.add(shipItem);
+					listItemShips.add(shipItem);
 					// TODO context menu: build ship
 					Set<Starship> ships = mainWindow.getTurnReport().getPlayerStarships(design);
 					if(ships != null && ships.size() > 0) {
@@ -135,43 +132,31 @@ public class TreeBrowser implements IComponent  {
 							tree.addListener(SWT.Selection, listenShip(ship));
 							item.setText(ship.getName() +" [" + ship.getID() +"]");
 							item.setData(ship);
-							listItemDesigns.add(item);
+							listItemShips.add(item);
 							// TODO context menu with suitable orders for ships
 						}
 					}
 				}
 			}
-			Set<Starship> ships = report.getPlayerStarships();
-			if(ships.size() > 0) {
-				TreeItem itemShips = new TreeItem(tree,SWT.NONE);
-				itemShips.setText("Starships");
-				for(Starship ship : ships) {
-					TreeItem item = new TreeItem(itemShips,SWT.NONE);
-					tree.addListener(SWT.Selection, listenShip(ship));
-					item.setText(ship.getName() +" [" + ship.getID() +"]");
-					item.setData(ship);
-					listItemShips.add(item);
-					// TODO context menu with suitable orders for ships
-				}
-			}
 			if(report.getPlayerFacilities().size() > 0) {
 				TreeItem itemFacilities = new TreeItem(tree,SWT.NONE);
 				itemFacilities.setText("Facilities");	
-				Map<AFacilityType,Map<Colony,Set<Facility>>> map = report.getPlayerFacilitiesByTypeAndColony();
+				Map<AFacilityType,Map<Long,Set<Facility>>> map = report.getPlayerFacilitiesByTypeAndColony();
 				for(AFacilityType type : map.keySet()) {
 					TreeItem itemType = new TreeItem(itemFacilities,SWT.NONE);
 					itemType.setText(type.getName());
 					itemType.setData(type);
 					listItemFacilities.add(itemType);
 					tree.addListener(SWT.Selection, listenFacilityType(type));
-					Map<Colony,Set<Facility>> subMap = map.get(type);
-					for(Colony colony : subMap.keySet()) {
+					Map<Long,Set<Facility>> subMap = map.get(type);
+					for(Long colonyID : subMap.keySet()) {
 						TreeItem itemColony = new TreeItem(itemType,SWT.NONE);
-						itemColony.setText(colony.getName() +" [" + colony.getID() +"]");
+						Colony colony = report.getColony(colonyID);
+						itemColony.setText(colony.getDisplayName());
 						itemColony.setData(colony);
 						tree.addListener(SWT.Selection, listenColony(colony));
 						listItemFacilities.add(itemColony);
-						for(Facility facility : subMap.get(colony)) {
+						for(Facility facility : subMap.get(colony.getID())) {
 							TreeItem item = new TreeItem(itemColony,SWT.NONE);
 							tree.addListener(SWT.Selection, listenFacility(facility));
 							item.setText(facility.getTypeClass().getName() +" [" + facility.getID() +"]");
@@ -198,7 +183,6 @@ public class TreeBrowser implements IComponent  {
 	
 	public void dispose() {
 		dispose(listItemFacilities);
-		dispose(listItemDesigns);
 		dispose(listItemShips);
 		dispose(listItemOrders);
 		if(tree != null && !tree.isDisposed())

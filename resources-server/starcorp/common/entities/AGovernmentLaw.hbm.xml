@@ -6,7 +6,7 @@
     <class name="starcorp.common.entities.AGovernmentLaw" table="ALL_LAWS" lazy="false">
     	<id name="ID"><generator class="native"/></id>
     	<version name="version"/>
-   		<many-to-one name="colony" lazy="false"/>
+   		<property name="colony"/>
    		<property name="available"/>
    		<component name="issuedDate">
    			<property name="year" column="issuedYear"/>
@@ -33,7 +33,7 @@
     	<joined-subclass name="starcorp.common.entities.FacilityLease" table="FACILITY_LEASES" lazy="false">
     		<key column="LAW_ID"/>
     		<property name="type" column="facilityType"/>
-    		<many-to-one name="licensee" lazy="false"/>
+    		<property name="licensee"/>
     		<property name="price"/>
     	</joined-subclass> <!-- FacilityLease -->
     	

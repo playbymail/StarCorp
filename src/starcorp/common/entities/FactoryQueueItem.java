@@ -22,14 +22,14 @@ import starcorp.common.types.GalacticDate;
  */
 public class FactoryQueueItem extends ACorporateItem {
 
-	private Facility factory;
+	private long factory;
 	private GalacticDate queuedDate;
 	private int position;
 	
-	public Facility getFactory() {
+	public long getFactory() {
 		return factory;
 	}
-	public void setFactory(Facility factory) {
+	public void setFactory(long factory) {
 		this.factory = factory;
 	}
 	public GalacticDate getQueuedDate() {
@@ -42,21 +42,20 @@ public class FactoryQueueItem extends ACorporateItem {
 	public void readXML(Element e) {
 		super.readXML(e);
 		position = Integer.parseInt(e.attributeValue("position","0"));
-		factory = new Facility();
-		factory.readXML(e.element("factory").element("entity"));
+		factory = Long.parseLong(e.attributeValue("factory","0"));
 		queuedDate = new GalacticDate(e.element("queued").element("date"));
 	}
 	@Override
 	public Element toBasicXML(Element parent) {
 		Element e = super.toBasicXML(parent);
 		e.addAttribute("position", String.valueOf(position));
-		factory.toBasicXML(e.addElement("factory"));
+		e.addAttribute("factory", String.valueOf(factory));
 		queuedDate.toXML(e.addElement("queued"));
 		return e;
 	}
 	@Override
 	public String toString() {
-		return "Factory ["+ factory.getID() + "] Queue [" + position +"] "+ super.toString();
+		return "Factory ["+ factory + "] Queue [" + position +"] "+ super.toString();
 	}
 	public int getPosition() {
 		return position;
@@ -64,12 +63,11 @@ public class FactoryQueueItem extends ACorporateItem {
 	public void setPosition(int position) {
 		this.position = position;
 	}
-	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((factory == null) ? 0 : factory.hashCode());
+		result = prime * result + (int) (factory ^ (factory >>> 32));
 		result = prime * result + position;
 		return result;
 	}
@@ -82,10 +80,7 @@ public class FactoryQueueItem extends ACorporateItem {
 		if (getClass() != obj.getClass())
 			return false;
 		final FactoryQueueItem other = (FactoryQueueItem) obj;
-		if (factory == null) {
-			if (other.factory != null)
-				return false;
-		} else if (!factory.equals(other.factory))
+		if (factory != other.factory)
 			return false;
 		if (position != other.position)
 			return false;

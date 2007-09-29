@@ -18,7 +18,7 @@ import org.dom4j.Element;
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 15 Sep 2007
  */
-public class Coordinates2D {
+public class Coordinates2D implements ICoordinates {
 	private int x;
 	private int y;
 	
@@ -37,6 +37,10 @@ public class Coordinates2D {
 	}
 	
 	public Coordinates2D(Element e) {
+		readXML(e);
+	}
+	
+	public void readXML(Element e) {
 		this.x = Integer.parseInt(e.attributeValue("x","0"));
 		this.y = Integer.parseInt(e.attributeValue("y","0"));
 	}
@@ -79,7 +83,8 @@ public class Coordinates2D {
 		return parent;
 	}
 	
-	public int getDistance(Coordinates2D other) {
+	public int getDistance(ICoordinates o) {
+		Coordinates2D other = (Coordinates2D)o;
 		int distance = 0;
 		Coordinates2D current = new Coordinates2D();
 		current.x = this.x;

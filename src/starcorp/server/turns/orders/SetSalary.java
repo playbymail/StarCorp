@@ -10,7 +10,6 @@
  */
 package starcorp.server.turns.orders;
 
-import starcorp.common.entities.Colony;
 import starcorp.common.entities.Facility;
 import starcorp.common.entities.Unemployed;
 import starcorp.common.entities.Workers;
@@ -46,8 +45,8 @@ public class SetSalary extends AOrderProcessor {
 			error = new TurnError(TurnError.INVALID_POP_CLASS,order);
 		}
 		else {
-			Colony colony = facility.getColony();
-			Workers workers = entityStore.getWorkers(facility, popClass);
+			long colony = facility.getColony();
+			Workers workers = entityStore.getWorkers(facility.getID(), popClass);
 			if(workers == null) {
 				error = new TurnError(TurnError.INVALID_POP_CLASS,order);
 			}
@@ -61,12 +60,12 @@ public class SetSalary extends AOrderProcessor {
 						unemployed.setPopClass(popClass);
 						unemployed = (Unemployed) entityStore.create(unemployed);
 					}
-					long credits = entityStore.getCredits(workers);
+					long credits = entityStore.getCredits(workers.getID());
 					int qty = workers.getQuantity();
 					unemployed.addPopulation(qty);
 					workers.setQuantity(0);
 					entityStore.update(unemployed);
-					entityStore.transferCredits(workers, unemployed, credits, "");
+					entityStore.transferCredits(workers.getID(), unemployed.getID(), credits, "");
 				}
 				
 				workers.setSalary(salary);

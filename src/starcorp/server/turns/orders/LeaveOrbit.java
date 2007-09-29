@@ -12,7 +12,6 @@ package starcorp.server.turns.orders;
 
 import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Planet;
-import starcorp.common.entities.StarSystem;
 import starcorp.common.entities.Starship;
 import starcorp.common.turns.OrderReport;
 import starcorp.common.turns.TurnError;
@@ -37,19 +36,19 @@ public class LeaveOrbit extends AOrderProcessor {
 		
 		Starship ship = (Starship) entityStore.load(Starship.class, starshipId);
 		
-		if(ship == null || !ship.getOwner().equals(corp)) {
+		if(ship == null || ship.getOwner() != corp.getID()) {
 			error = new TurnError(TurnError.INVALID_SHIP,order);
 		}
 		else if(!ship.enoughTimeUnits(TIME_UNITS)) {
 			error = new TurnError(TurnError.INSUFFICIENT_TIME,order);
 		}
 		else {
-			if(ship.getPlanet() == null || ship.getPlanetLocation() != null) {
+			if(ship.getPlanet() == 0 || ship.getPlanetLocation() != null) {
 				error = new TurnError(TurnError.INVALID_LOCATION,order);
 			}
 			else {
-				Planet planet = ship.getPlanet();
-				ship.setPlanet(null);
+				Planet planet = (Planet) entityStore.load(Planet.class, ship.getPlanet());
+				ship.setPlanet(0);
 				ship.incrementTimeUnitsUsed(TIME_UNITS);
 				entityStore.update(ship);
 				OrderReport report = new OrderReport(order,planet,ship);
@@ -57,8 +56,7 @@ public class LeaveOrbit extends AOrderProcessor {
 				report.add(ship.getID());
 				report.add(planet.getName());
 				report.add(planet.getID());
-				StarSystem system = (StarSystem) entityStore.load(StarSystem.class,planet.getSystemID());
-				report.addScannedEntities(entityStore.listSystemEntities(system, ship.getLocation(),ship));
+				report.addScannedEntities(entityStore.listSystemEntities(planet.getSystem(), ship.getLocation(),ship.getID()));
 				order.setReport(report);
 			}
 		}

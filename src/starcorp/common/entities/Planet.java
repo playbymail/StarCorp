@@ -28,8 +28,7 @@ import starcorp.common.types.TerrainType;
  * @version 15 Sep 2007
  */
 public class Planet extends StarSystemEntity {
-	// TODO add orbiting planet name
-	private long orbitingID;
+	private long orbiting;
 	private AtmosphereType atmosphereType;
 	private int gravityRating;
 	private Set<PlanetMapSquare> map = new HashSet<PlanetMapSquare>();
@@ -46,6 +45,8 @@ public class Planet extends StarSystemEntity {
 		return sq.getTerrainType();
 	}
 	public PlanetMapSquare get(Coordinates2D location) {
+		if(location == null)
+			return null;
 		if(location.getX() < 0 || location.getY() < 0)
 			return null;
 		Iterator<PlanetMapSquare> i = map.iterator();
@@ -70,14 +71,14 @@ public class Planet extends StarSystemEntity {
 		return this;
 	}
 	
-	public long getOrbitingID() {
-		return orbitingID;
+	public long getOrbiting() {
+		return orbiting;
 	}
-	public void setOrbitingID(long orbiting) {
-		this.orbitingID = orbiting;
+	public void setOrbiting(long orbiting) {
+		this.orbiting = orbiting;
 	}
 	public void setOrbiting(Planet orbiting) {
-		this.orbitingID = orbiting == null ? 0 : orbiting.getID();
+		this.orbiting = orbiting == null ? 0 : orbiting.getID();
 	}
 	
 	public String getAtmosphereType() {
@@ -111,7 +112,7 @@ public class Planet extends StarSystemEntity {
 	public void readXML(Element e) {
 		super.readXML(e);
 		try {
-			this.orbitingID = Long.parseLong(e.attributeValue("orbiting"));
+			this.orbiting = Long.parseLong(e.attributeValue("orbiting"));
 		}
 		catch(NumberFormatException ex) { }
 		this.atmosphereType = AtmosphereType.getType(e.attributeValue("atmosphere"));
@@ -127,7 +128,7 @@ public class Planet extends StarSystemEntity {
 	@Override
 	public Element toBasicXML(Element parent) {
 		Element e = super.toBasicXML(parent);
-		e.addAttribute("orbiting", String.valueOf(orbitingID));
+		e.addAttribute("orbiting", String.valueOf(orbiting));
 		e.addAttribute("atmosphere", atmosphereType.getKey());
 		e.addAttribute("gravity", String.valueOf(gravityRating));
 		return e;
@@ -147,7 +148,7 @@ public class Planet extends StarSystemEntity {
 	@Override
 	public String toString() {
 		return super.toString() + 
-		" orbiting " + getOrbitingID() + 
+		" orbiting " + getOrbiting() + 
 		" : " + (atmosphereType == null ? "" : atmosphereType.getKey()) + 
 		" : " + gravityRating + "g";
 	}

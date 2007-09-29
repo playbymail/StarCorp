@@ -58,18 +58,22 @@ import starcorp.common.util.Util;
  */
 public class TurnReport {
 
-	private Turn turn;
-	private List<IEntity> playerEntities = new ArrayList<IEntity>();
-	private List<MarketItem> market;
-	private List<AGovernmentLaw> laws;
-	private List<ColonyItem> items;
-	private Set<StarSystem> knownSystems;
-	private List<AColonists> employees;
-	private List<FactoryQueueItem> factoryQueue; 
+	private Set<Colony> colonies = new HashSet<Colony>();
+	private Set<Planet> planets = new HashSet<Planet>();
+	private Set<StarSystem> systems = new HashSet<StarSystem>();
+	private Set<Facility> facilities = new HashSet<Facility>();
+	private Set<Corporation> corporations = new HashSet<Corporation>();
 	private long credits;
+	private List<AColonists> employees;
+	private List<FactoryQueueItem> factoryQueue;
+	private List<ColonyItem> items;
+	private List<AGovernmentLaw> laws;
+	private List<MarketItem> market; 
+	private List<IEntity> playerEntities = new ArrayList<IEntity>();
+	private Turn turn;
 	
-	public TurnReport(Turn turn) {
-		this.turn = turn;
+	public TurnReport(Element e) {
+		readXML(e);
 	}
 	
 	public TurnReport(InputStream is) throws DocumentException {
@@ -78,23 +82,382 @@ public class TurnReport {
 		readXML(doc.getRootElement().element("turn-report"));
 	}
 	
-	public void write(Writer writer) throws IOException {
-		Document doc = DocumentHelper.createDocument();
-		toXML(doc.addElement("starcorp"));
-		OutputFormat format = OutputFormat.createCompactFormat();
-		// OutputFormat format = OutputFormat.createPrettyPrint();
-		XMLWriter xmlWriter = new XMLWriter(
-			writer, format
-		);
+	public TurnReport(Turn turn) {
+		this.turn = turn;
+	}
+	
+	public void addScanned(Corporation corp) {
+		corporations.add(corp);
+	}
+
+	public void addScanned(Facility facility) {
+		facilities.add(facility);
+	}
+
+	public void addScanned(Colony colony) {
+		colonies.add(colony);
+	}
+	
+	public void addScanned(Planet planet) {
+		planets.add(planet);
+	}
+
+	public void addScanned(StarSystem system) {
+		systems.add(system);
+	}
+
+	public void addPlayerEntities(List<?> entities) {
+		for(Object o : entities) {
+			IEntity entity = (IEntity) o;
+			addPlayerEntity(entity);
+			
+		}
+	}
+	
+	public void addPlayerEntity(IEntity entity) {
+		playerEntities.add(entity);
+		if(entity instanceof Facility)
+			facilities.add((Facility)entity);
+	}
+	
+	public int countPlayerFacilities() {
+		int count = 0;
+		for(Object o : playerEntities) {
+			if(o instanceof Facility) {
+				count++;
+			}
+		}
+		return count;
+	}
+	
+	public int countPlayerStarships() {
+		return getPlayerStarships().size();
+	}
+	
+	public long getCredits() {
+		return credits;
+	}
+	
+	public List<AColonists> getEmployees() {
+		return employees;
+	}
+	
+	public Set<AColonists> getEmployees(Facility facility) {
+		Set<AColonists> set = new TreeSet<AColonists>();
+		for(AColonists colonist : employees) {
+			Workers w = (Workers) colonist;
+			if(facility.getID() == w.getFacility()) {
+				set.add(w);
+			}
+		}
+		return set;
+	}
+	
+	public List<FactoryQueueItem> getFactoryQueue() {
+		return factoryQueue;
+	}
+	
+	public List<ColonyItem> getItems() {
+		return items;
+	}
+	
+	public Set<Colony> getColonies() {
+		return colonies;
+	}
+	
+	public Set<Colony> getColoniesByPlanet(long planet) {
+		Set<Colony> colonies = new TreeSet<Colony>();
+		for(Colony colony : getColonies()) {
+			if(colony.getPlanet() == planet)
+				colonies.add(colony);
+		}
+		return colonies;
+	}
+	
+	public Colony getColony(long ID) {
+		if(colonies == null || ID < 1) {
+			return null;
+		}
+		for(Colony colony : getColonies()) {
+			if(colony.getID() == ID)
+				return colony;
+		}
+		return null;
+	}
+
+	public List<AGovernmentLaw> getLaws() {
+		return laws;
+	}
+
+	public List<MarketItem> getMarket() {
+		return market;
+	}
+
+	public Map<Long, Set<MarketItem>> getMarketByColony() {
+		Map<Long, Set<MarketItem>> map = new TreeMap<Long, Set<MarketItem>>();
+		for(MarketItem item : getMarket()) {
+			Set<MarketItem> list = map.get(item.getColony());
+			if(list == null) {
+				list = new TreeSet<MarketItem>();
+				map.put(item.getColony(),list);
+			}
+			list.add(item);
+		}
+		return map;
+	}
+	
+	public Map<Long, Set<MarketItem>> getMarketBySeller() {
+		Map<Long, Set<MarketItem>> map = new TreeMap<Long, Set<MarketItem>>();
+		for(MarketItem item : getMarket()) {
+			Set<MarketItem> list = map.get(item.getSeller());
+			if(list == null) {
+				list = new TreeSet<MarketItem>();
+				map.put(item.getSeller(),list);
+			}
+			list.add(item);
+		}
+		return map;
+	}
+	
+	public Set<StarshipDesign> getPlayerDesigns() {
+		Set<StarshipDesign> list = new TreeSet<StarshipDesign>();
+		for(Object o : playerEntities) {
+			if(o instanceof StarshipDesign)
+				list.add((StarshipDesign)o);
+		}
+		return list;
+	}
+	
+	public List<IEntity> getPlayerEntities() {
+		return playerEntities;
+	}
+	
+	public Set<Facility> getPlayerFacilities() {
+		Set<Facility> list = new TreeSet<Facility>();
+		for(Object o : playerEntities) {
+			if(o instanceof Facility) {
+				list.add((Facility)o);
+			}
+		}
+		return list;
+	}
+	
+	public Map<Long,Set<Facility>> getPlayerFacilitiesByColony() {
+		Map<Long, Set<Facility>> map = new TreeMap<Long, Set<Facility>>(); 
+		for(Object o : playerEntities) {
+			if(o instanceof Facility) {
+				Facility f = (Facility) o;
+				Set<Facility> list = map.get(f.getColony());
+				if(list == null) {
+					list = new TreeSet<Facility>();
+					map.put(f.getColony(), list);
+				}
+				list.add(f);
+			}
+		}
+		return map;
+	}
+	
+	public Set<Facility> getPlayerFacilitiesByType(Class clazz) {
+		Set<Facility> list = new TreeSet<Facility>();
+		for(Object o : playerEntities) {
+			if(o instanceof Facility) {
+				Facility f = (Facility) o;
+				if(f.getTypeClass().getClass().equals(clazz)) {
+					list.add(f);
+				}
+			}
+		}
+		return list;
+	}
+	
+	public Map<AFacilityType,Map<Long,Set<Facility>>> getPlayerFacilitiesByTypeAndColony() {
+		Map<AFacilityType,Map<Long,Set<Facility>>> facMap = new TreeMap<AFacilityType, Map<Long,Set<Facility>>>();
+		 
+		for(Object o : playerEntities) {
+			if(o instanceof Facility) {
+				Facility f = (Facility) o;
+				Map<Long, Set<Facility>> map = facMap.get(f.getTypeClass());
+				if(map == null) {
+					map = new TreeMap<Long, Set<Facility>>();
+					facMap.put(f.getTypeClass(), map);
+				}
+				Set<Facility> list = map.get(f.getColony());
+				if(list == null) {
+					list = new TreeSet<Facility>();
+					map.put(f.getColony(), list);
+				}
+				list.add(f);
+			}
+		}
+		return facMap;
+	}
+	
+	public Set<Starship> getPlayerOrbitingrStarships(Planet planet) {
+		Set<Starship> list = new TreeSet<Starship>();
+		for(Starship ship : getPlayerStarships() ) {
+			if(ship.isOrbiting(planet))
+				list.add(ship);
+		}
+		return list;
+	}
+	
+	public Set<Starship> getPlayerStarships() {
+		Set<Starship> list = new TreeSet<Starship>();
+		for(Object o : playerEntities) {
+			if(o instanceof Starship)
+				list.add((Starship)o);
+		}
+		return list;
+	}
+	
+	public Set<Starship> getPlayerStarships(Colony colony) {
+		Set<Starship> list = new TreeSet<Starship>();
+		for(Starship ship : getPlayerStarships() ) {
+			if(colony.equals(ship.getColony()))
+				list.add(ship);
+		}
+		return list;
+	}
+	
+	public Set<Starship> getPlayerStarships(StarshipDesign design) {
+		return getPlayerStarshipsByDesign().get(design);
+	}
+	
+	public Map<StarshipDesign,Set<Starship>> getPlayerStarshipsByDesign() {
+		Map<StarshipDesign,Set<Starship>> map = new TreeMap<StarshipDesign, Set<Starship>>();
 		
-		xmlWriter.write(doc);
-		xmlWriter.close();
+		for(Object o : playerEntities) {
+			if(o instanceof Starship) {
+				Starship ship = (Starship) o;
+				Set<Starship> list = map.get(ship.getDesign());
+				if(list == null) {
+					list = new TreeSet<Starship>();
+					map.put(ship.getDesign(),list);
+				}
+				list.add(ship);
+			}
+		}
+		return map;
+	}
+
+	public Set<Starship> getPlayerStarshipsInOrOrbitingColony(Colony colony) {
+		Set<Starship> list = new TreeSet<Starship>();
+		for(Starship ship : getPlayerStarships() ) {
+			if(colony.equals(ship.getColony()) || ship.isOrbiting(colony.getID()))
+				list.add(ship);
+		}
+		return list;
+	}
+
+	public List<FactoryQueueItem> getQueue(Facility facility) {
+		List<FactoryQueueItem> set = new ArrayList<FactoryQueueItem>();
+//		System.out.println("queue items: " + factoryQueue.size());
+		for(FactoryQueueItem item : factoryQueue) {
+//			System.out.println("queue items factory: " + item.getFactory());
+			if(facility.equals(item.getFactory())) {
+//				System.out.println("queue item matches!");
+				set.add(item);
+			}
+		}
+		System.out.println("queue items for " + facility + ": " + set.size());
+		return set;
 	}
 	
-	public TurnReport(Element e) {
-		readXML(e);
+	public Set<StellarAnomoly> getScannedAnomolies() {
+		Set<StellarAnomoly> list = new TreeSet<StellarAnomoly>();
+		for(Object o : turn.getScannedEntities(StellarAnomoly.class)) {
+			list.add((StellarAnomoly)o);
+		}
+		return list;
+	}
+	public Set<StellarAnomoly> getScannedAnomolies(CoordinatesPolar location) {
+		Set<StellarAnomoly> list = new TreeSet<StellarAnomoly>();
+		for(Object o : turn.getScannedEntities(StellarAnomoly.class)) {
+			StellarAnomoly anomoly = (StellarAnomoly)o;
+			if(anomoly.getLocation().equals(location))
+				list.add(anomoly);
+		}
+		return list;
+	}
+	public Set<StarSystemEntity> getScannedAsteroids() {
+		Set<StarSystemEntity> entities = new TreeSet<StarSystemEntity>();
+		for(Object o :turn.getScannedEntities(StarSystemEntity.class)) {
+			StarSystemEntity entity = (StarSystemEntity)o;
+			if(entity.isAsteroid()) {
+				entities.add(entity);
+			}
+		}
+		return entities;
 	}
 	
+	public Set<StarSystemEntity> getScannedAsteroids(CoordinatesPolar location) {
+		Set<StarSystemEntity> entities = new TreeSet<StarSystemEntity>();
+		for(Object o :turn.getScannedEntities(StarSystemEntity.class)) {
+			StarSystemEntity entity = (StarSystemEntity)o;
+			if(entity.isAsteroid() && entity.getLocation().equals(location)) {
+				entities.add(entity);
+			}
+		}
+		return entities;
+	}
+	
+	public Set<StarSystemEntity> getScannedEntitiesExcludeShips(long systemID) {
+		Set<StarSystemEntity> entities = new TreeSet<StarSystemEntity>();
+		for(Object o :turn.getScannedEntities(StarSystemEntity.class)) {
+			StarSystemEntity p = (StarSystemEntity)o;
+			if(!(p.getClass().equals(Starship.class))) {
+				if(p.getSystem() == systemID)
+					entities.add(p);
+			}
+		}
+		return entities;
+	}
+
+	public Set<StarSystemEntity> getScannedGasFields() {
+		Set<StarSystemEntity> entities = new TreeSet<StarSystemEntity>();
+		for(Object o :turn.getScannedEntities(StarSystemEntity.class)) {
+			StarSystemEntity entity = (StarSystemEntity)o;
+			if(entity.isGasfield()) {
+				entities.add(entity);
+			}
+		}
+		return entities;
+	}
+
+	public Set<StarSystemEntity> getScannedGasFields(CoordinatesPolar location) {
+		Set<StarSystemEntity> entities = new TreeSet<StarSystemEntity>();
+		for(Object o :turn.getScannedEntities(StarSystemEntity.class)) {
+			StarSystemEntity entity = (StarSystemEntity)o;
+			if(entity.isGasfield() && entity.getLocation().equals(location)) {
+				entities.add(entity);
+			}
+		}
+		return entities;
+	}
+
+	public Set<Planet> getPlanetsBySystem(long systemID) {
+		Set<Planet> entities = new TreeSet<Planet>();
+		for(Planet p : planets) {
+			if(p.getSystem() == systemID)
+				entities.add(p);
+		}
+		return entities;
+	}
+
+	public Set<Planet> getPlanetsByLocation(long systemID, CoordinatesPolar location) {
+		Set<Planet> entities = new TreeSet<Planet>();
+		for(Planet p : planets) {
+			if(p.getSystem() == systemID && p.getLocation().equals(location))
+				entities.add(p);
+		}
+		return entities;
+	}
+
+	public Turn getTurn() {
+		return turn;
+	}
+
 	public void readXML(Element e) {
 		this.turn = new Turn(e.element("turn"));
 		for(Iterator<?> i = e.element("player-entities").elementIterator("entity"); i.hasNext();) {
@@ -110,6 +473,51 @@ public class TurnReport {
 				FactoryQueueItem item  = (FactoryQueueItem) Util.fromXML((Element)i.next());
 				if(item != null)
 					factoryQueue.add(item);
+			}
+		}
+		facilities = new HashSet<Facility>();
+		Element eFacility = e.element("facilities");
+		if(eFacility != null) {
+			for(Iterator<?> i = eFacility.elementIterator("entity"); i.hasNext();) {
+				Facility f = (Facility) Util.fromXML((Element)i.next());
+				if(f != null)
+					facilities.add(f);
+			}
+		}
+		corporations = new HashSet<Corporation>();
+		Element eCorps = e.element("corporations");
+		if(eCorps != null) {
+			for(Iterator<?> i = eCorps.elementIterator("entity"); i.hasNext();) {
+				Corporation c = (Corporation) Util.fromXML((Element)i.next());
+				if(c != null)
+					corporations.add(c);
+			}
+		}
+		systems = new HashSet<StarSystem>();
+		Element eSystems = e.element("systems");
+		if(eSystems != null) {
+			for(Iterator<?> i = eSystems.elementIterator("entity"); i.hasNext();) {
+				StarSystem system = (StarSystem) Util.fromXML((Element)i.next());
+				if(system != null)
+					systems.add(system);
+			}
+		}
+		planets = new HashSet<Planet>();
+		Element ePlanets = e.element("planets");
+		if(ePlanets != null) {
+			for(Iterator<?> i = ePlanets.elementIterator("entity"); i.hasNext();) {
+				Planet planet = (Planet) Util.fromXML((Element)i.next());
+				if(planet != null)
+					planets.add(planet);
+			}
+		}
+		colonies = new HashSet<Colony>();
+		Element eColonies = e.element("colonies");
+		if(eColonies != null) {
+			for(Iterator<?> i = eColonies.elementIterator("entity"); i.hasNext();) {
+				Colony colony = (Colony) Util.fromXML((Element)i.next());
+				if(colony != null)
+					colonies.add(colony);
 			}
 		}
 		employees = new ArrayList<AColonists>();
@@ -148,17 +556,40 @@ public class TurnReport {
 					items.add(item);
 			}
 		}
-		knownSystems = new TreeSet<StarSystem>();
-		Element eSystems = e.element("systems");
-		if(eSystems != null) {
-			for(Iterator<?> i = eSystems.elementIterator("entity"); i.hasNext();) {
-				StarSystem item = (StarSystem) Util.fromXML((Element)i.next());
-				if(item != null)
-					knownSystems.add(item);
-			}
-		}
 	}
-	
+
+	public void setColonies(Set<Colony> colonies) {
+		this.colonies = colonies;
+	}
+
+	public void setCredits(long credits) {
+		this.credits = credits;
+	}
+
+	public void setEmployees(List<AColonists> employees) {
+		this.employees = employees;
+	}
+
+	public void setFactoryQueue(List<FactoryQueueItem> factoryQueue) {
+		this.factoryQueue = factoryQueue;
+	}
+
+	public void setItems(List<ColonyItem> items) {
+		this.items = items;
+	}
+
+	public void setLaws(List<AGovernmentLaw> laws) {
+		this.laws = laws;
+	}
+
+	public void setMarket(List<MarketItem> market) {
+		this.market = market;
+	}
+
+	public void setTurn(Turn turn) {
+		this.turn = turn;
+	}
+
 	public Element toXML(Element parent) {
 		Element root = parent.addElement("turn-report");
 		root.addAttribute("credits", String.valueOf(credits));
@@ -168,6 +599,41 @@ public class TurnReport {
 		for(Iterator<?> i = playerEntities.iterator(); i.hasNext();) {
 			IEntity entity = (IEntity) i.next();
 			entity.toFullXML(e);
+		}
+		e = root.addElement("corporations");
+		if(corporations != null) {
+			e.addAttribute("size", String.valueOf(corporations.size()));
+			for(Corporation c : corporations) {
+				if(c != null)c.toBasicXML(e);
+			}
+		}
+		e = root.addElement("facilities");
+		if(facilities != null) {
+			e.addAttribute("size", String.valueOf(facilities.size()));
+			for(Facility f : facilities) {
+				if(f != null)f.toBasicXML(e);
+			}
+		}
+		e = root.addElement("systems");
+		if(systems != null) {
+			e.addAttribute("size", String.valueOf(systems.size()));
+			for(StarSystem s : systems) {
+				if(s != null)s.toBasicXML(e);
+			}
+		}
+		e = root.addElement("planets");
+		if(planets != null) {
+			e.addAttribute("size", String.valueOf(planets.size()));
+			for(Planet p : planets) {
+				if(p != null)p.toBasicXML(e);
+			}
+		}
+		e = root.addElement("colonies");
+		if(colonies != null) {
+			e.addAttribute("size", String.valueOf(colonies.size()));
+			for(Colony c : colonies) {
+				if(c != null)c.toBasicXML(e);
+			}
 		}
 		e = root.addElement("factory-queue");
 		if(factoryQueue != null) {
@@ -205,406 +671,95 @@ public class TurnReport {
 			}
 		}
 		e = root.addElement("systems");
-		if(knownSystems != null) {
-			e.addAttribute("size", String.valueOf(knownSystems.size()));
-			for(StarSystem system : knownSystems) {
-				system.toBasicXML(e);
-			}
-		}
 		return root;
 	}
-	
-	public Turn getTurn() {
-		return turn;
-	}
-	public void setTurn(Turn turn) {
-		this.turn = turn;
-	}
-	
-	public int countPlayerStarships() {
-		return getPlayerStarships().size();
-	}
-	
-	public int countPlayerFacilities() {
-		int count = 0;
-		for(Object o : playerEntities) {
-			if(o instanceof Facility) {
-				count++;
-			}
-		}
-		return count;
-	}
-	
-	public Set<StellarAnomoly> getScannedAnomolies() {
-		Set<StellarAnomoly> list = new TreeSet<StellarAnomoly>();
-		for(Object o : turn.getScannedEntities(StellarAnomoly.class)) {
-			list.add((StellarAnomoly)o);
-		}
-		return list;
-	}
-	
-	public Set<StellarAnomoly> getScannedAnomolies(CoordinatesPolar location) {
-		Set<StellarAnomoly> list = new TreeSet<StellarAnomoly>();
-		for(Object o : turn.getScannedEntities(StellarAnomoly.class)) {
-			StellarAnomoly anomoly = (StellarAnomoly)o;
-			if(anomoly.getLocation().equals(location))
-				list.add(anomoly);
-		}
-		return list;
-	}
-	
-	public Set<Colony> getKnownColonies() {
-		Set<Colony> colonies = new TreeSet<Colony>();
-		colonies.addAll(getPlayerFacilitiesByColony().keySet());
-		colonies.addAll(getMarketByColony().keySet());
-		for(Object o : turn.getScannedEntities(Colony.class)) {
-			colonies.add((Colony)o);
-		}
-		for(Starship ship : getPlayerStarships()) {
-			if(ship.getColony() != null)
-				colonies.add(ship.getColony());
-		}
-		return colonies;
-	}
-	
-	public Set<Colony> getKnownColonies(Planet planet) {
-		Set<Colony> colonies = new TreeSet<Colony>();
-		for(Colony colony : getKnownColonies()) {
-			if(colony.getPlanetID() == planet.getID())
-				colonies.add(colony);
-		}
-		return colonies;
-	}
-	
-	public Set<Planet> getScannedPlanets() {
-		Set<Planet> entities = new TreeSet<Planet>();
-		for(Object o :turn.getScannedEntities(Planet.class)) {
-			Planet p = (Planet)o;
-			entities.add(p);
-		}
-		return entities;
-	}
-	
-	public Set<Planet> getScannedPlanets(long systemID, CoordinatesPolar location) {
-		Set<Planet> entities = new TreeSet<Planet>();
-		for(Object o :turn.getScannedEntities(Planet.class)) {
-			Planet p = (Planet)o;
-			if(p.getSystemID() == systemID && p.getLocation().equals(location))
-				entities.add(p);
-		}
-		return entities;
-	}
 
-	public Set<Planet> getScannedPlanets(long systemID) {
-		Set<Planet> entities = new TreeSet<Planet>();
-		for(Object o :turn.getScannedEntities(Planet.class)) {
-			Planet p = (Planet)o;
-			if(p.getSystemID() == systemID)
-				entities.add(p);
-		}
-		return entities;
-	}
-
-	public Set<StarSystemEntity> getScannedEntitiesExcludeShips(long systemID) {
-		Set<StarSystemEntity> entities = new TreeSet<StarSystemEntity>();
-		for(Object o :turn.getScannedEntities(StarSystemEntity.class)) {
-			StarSystemEntity p = (StarSystemEntity)o;
-			if(!(p.getClass().equals(Starship.class))) {
-				if(p.getSystemID() == systemID)
-					entities.add(p);
-			}
-		}
-		return entities;
-	}
-
-	public Set<StarSystemEntity> getScannedAsteroids() {
-		Set<StarSystemEntity> entities = new TreeSet<StarSystemEntity>();
-		for(Object o :turn.getScannedEntities(StarSystemEntity.class)) {
-			StarSystemEntity entity = (StarSystemEntity)o;
-			if(entity.isAsteroid()) {
-				entities.add(entity);
-			}
-		}
-		return entities;
-	}
-	
-	public Set<StarSystemEntity> getScannedAsteroids(CoordinatesPolar location) {
-		Set<StarSystemEntity> entities = new TreeSet<StarSystemEntity>();
-		for(Object o :turn.getScannedEntities(StarSystemEntity.class)) {
-			StarSystemEntity entity = (StarSystemEntity)o;
-			if(entity.isAsteroid() && entity.getLocation().equals(location)) {
-				entities.add(entity);
-			}
-		}
-		return entities;
-	}
-	
-	public Set<StarSystemEntity> getScannedGasFields() {
-		Set<StarSystemEntity> entities = new TreeSet<StarSystemEntity>();
-		for(Object o :turn.getScannedEntities(StarSystemEntity.class)) {
-			StarSystemEntity entity = (StarSystemEntity)o;
-			if(entity.isGasfield()) {
-				entities.add(entity);
-			}
-		}
-		return entities;
-	}
-	
-	public Set<StarSystemEntity> getScannedGasFields(CoordinatesPolar location) {
-		Set<StarSystemEntity> entities = new TreeSet<StarSystemEntity>();
-		for(Object o :turn.getScannedEntities(StarSystemEntity.class)) {
-			StarSystemEntity entity = (StarSystemEntity)o;
-			if(entity.isGasfield() && entity.getLocation().equals(location)) {
-				entities.add(entity);
-			}
-		}
-		return entities;
-	}
-	
-	public Set<Starship> getPlayerStarships(StarshipDesign design) {
-		return getPlayerStarshipsByDesign().get(design);
-	}
-	
-	public Map<StarshipDesign,Set<Starship>> getPlayerStarshipsByDesign() {
-		Map<StarshipDesign,Set<Starship>> map = new TreeMap<StarshipDesign, Set<Starship>>();
+	public void write(Writer writer) throws IOException {
+		Document doc = DocumentHelper.createDocument();
+		toXML(doc.addElement("starcorp"));
+		// OutputFormat format = OutputFormat.createCompactFormat();
+		OutputFormat format = OutputFormat.createPrettyPrint();
+		XMLWriter xmlWriter = new XMLWriter(
+			writer, format
+		);
 		
-		for(Object o : playerEntities) {
-			if(o instanceof Starship) {
-				Starship ship = (Starship) o;
-				Set<Starship> list = map.get(ship.getDesign());
-				if(list == null) {
-					list = new TreeSet<Starship>();
-					map.put(ship.getDesign(),list);
-				}
-				list.add(ship);
-			}
-		}
-		return map;
+		xmlWriter.write(doc);
+		xmlWriter.close();
 	}
 	
-	public Set<Starship> getPlayerOrbitingrStarships(Planet planet) {
-		Set<Starship> list = new TreeSet<Starship>();
-		for(Starship ship : getPlayerStarships() ) {
-			if(ship.isOrbiting(planet))
-				list.add(ship);
+	public Planet getPlanet(long ID) {
+		if(planets == null || ID < 1) 
+			return null;
+		for(Planet p : planets) {
+			if(p.getID() == ID)
+				return p;
 		}
-		return list;
+		return null;
 	}
-	
-	public Set<Starship> getPlayerStarships(Colony colony) {
-		Set<Starship> list = new TreeSet<Starship>();
-		for(Starship ship : getPlayerStarships() ) {
-			if(colony.equals(ship.getColony()))
-				list.add(ship);
+
+	public Set<Planet> getPlanets() {
+		return planets;
+	}
+
+	public void setPlanets(Set<Planet> planets) {
+		this.planets = planets;
+	}
+
+	public StarSystem getSystem(long ID) {
+		if(systems == null || ID < 1)
+			return null;
+		for(StarSystem system : systems) {
+			if(system.getID() == ID)
+				return system;
 		}
-		return list;
+		return null;
 	}
-	
-	public Set<Starship> getPlayerStarshipsInOrOrbitingColony(Colony colony) {
-		Set<Starship> list = new TreeSet<Starship>();
-		for(Starship ship : getPlayerStarships() ) {
-			if(colony.equals(ship.getColony()) || ship.isOrbiting(colony.getID()))
-				list.add(ship);
+
+	public Set<StarSystem> getSystems() {
+		return systems;
+	}
+
+	public void setSystems(Set<StarSystem> systems) {
+		this.systems = systems;
+	}
+
+	public Facility getFacility(long ID) {
+		if(facilities == null || ID < 1) {
+			return null;
 		}
-		return list;
-	}
-	
-	public Set<Starship> getPlayerStarships() {
-		Set<Starship> list = new TreeSet<Starship>();
-		for(Object o : playerEntities) {
-			if(o instanceof Starship)
-				list.add((Starship)o);
+		for(Facility f : facilities) {
+			if(f.getID() == ID)
+				return f;
 		}
-		return list;
+		return null;
 	}
-	
-	public Map<Colony,Set<Facility>> getPlayerFacilitiesByColony() {
-		Map<Colony, Set<Facility>> map = new TreeMap<Colony, Set<Facility>>(); 
-		for(Object o : playerEntities) {
-			if(o instanceof Facility) {
-				Facility f = (Facility) o;
-				Set<Facility> list = map.get(f.getColony());
-				if(list == null) {
-					list = new TreeSet<Facility>();
-					map.put(f.getColony(), list);
-				}
-				list.add(f);
-			}
+
+	public Set<Facility> getFacilities() {
+		return facilities;
+	}
+
+	public void setFacilities(Set<Facility> facilities) {
+		this.facilities = facilities;
+	}
+
+	public Corporation getCorporation(long ID) {
+		if(turn.getCorporation().getID() == ID)
+			return turn.getCorporation();
+		if(corporations == null || ID < 1) {
+			return null;
 		}
-		return map;
-	}
-	
-	public Map<AFacilityType,Map<Colony,Set<Facility>>> getPlayerFacilitiesByTypeAndColony() {
-		Map<AFacilityType,Map<Colony,Set<Facility>>> facMap = new TreeMap<AFacilityType, Map<Colony,Set<Facility>>>();
-		 
-		for(Object o : playerEntities) {
-			if(o instanceof Facility) {
-				Facility f = (Facility) o;
-				Map<Colony, Set<Facility>> map = facMap.get(f.getTypeClass());
-				if(map == null) {
-					map = new TreeMap<Colony, Set<Facility>>();
-					facMap.put(f.getTypeClass(), map);
-				}
-				Set<Facility> list = map.get(f.getColony());
-				if(list == null) {
-					list = new TreeSet<Facility>();
-					map.put(f.getColony(), list);
-				}
-				list.add(f);
-			}
+		for(Corporation c : corporations) {
+			if(c.getID() == ID)
+				return c;
 		}
-		return facMap;
-	}
-	
-	public Set<Facility> getPlayerFacilities() {
-		Set<Facility> list = new TreeSet<Facility>();
-		for(Object o : playerEntities) {
-			if(o instanceof Facility) {
-				list.add((Facility)o);
-			}
-		}
-		return list;
+		return null;
 	}
 
-	public Set<Facility> getPlayerFacilitiesByType(Class clazz) {
-		Set<Facility> list = new TreeSet<Facility>();
-		for(Object o : playerEntities) {
-			if(o instanceof Facility) {
-				Facility f = (Facility) o;
-				if(f.getTypeClass().getClass().equals(clazz)) {
-					list.add(f);
-				}
-			}
-		}
-		return list;
+	public Set<Corporation> getCorporations() {
+		return corporations;
 	}
 
-	public Set<StarshipDesign> getPlayerDesigns() {
-		Set<StarshipDesign> list = new TreeSet<StarshipDesign>();
-		for(Object o : playerEntities) {
-			if(o instanceof StarshipDesign)
-				list.add((StarshipDesign)o);
-		}
-		return list;
-	}
-	
-	public List<IEntity> getPlayerEntities() {
-		return playerEntities;
-	}
-	public void addPlayerEntities(List<?> entities) {
-		for(Object o : entities) {
-			IEntity entity = (IEntity) o;
-			playerEntities.add(entity);
-		}
-	}
-	public void addPlayerEntity(IEntity entity) {
-		playerEntities.add(entity);
-	}
-	
-	public Map<Colony, Set<MarketItem>> getMarketByColony() {
-		Map<Colony, Set<MarketItem>> map = new TreeMap<Colony, Set<MarketItem>>();
-		for(MarketItem item : getMarket()) {
-			Set<MarketItem> list = map.get(item.getColony());
-			if(list == null) {
-				list = new TreeSet<MarketItem>();
-				map.put(item.getColony(),list);
-			}
-			list.add(item);
-		}
-		return map;
-	}
-	
-	public Map<Corporation, Set<MarketItem>> getMarketBySeller() {
-		Map<Corporation, Set<MarketItem>> map = new TreeMap<Corporation, Set<MarketItem>>();
-		for(MarketItem item : getMarket()) {
-			Set<MarketItem> list = map.get(item.getSeller());
-			if(list == null) {
-				list = new TreeSet<MarketItem>();
-				map.put(item.getSeller(),list);
-			}
-			list.add(item);
-		}
-		return map;
-	}
-
-	public List<MarketItem> getMarket() {
-		return market;
-	}
-
-	public void setMarket(List<MarketItem> market) {
-		this.market = market;
-	}
-
-	public List<AGovernmentLaw> getLaws() {
-		return laws;
-	}
-
-	public void setLaws(List<AGovernmentLaw> laws) {
-		this.laws = laws;
-	}
-
-	public List<ColonyItem> getItems() {
-		return items;
-	}
-
-	public void setItems(List<ColonyItem> items) {
-		this.items = items;
-	}
-
-	public Set<StarSystem> getKnownSystems() {
-		return knownSystems;
-	}
-
-	public void setKnownSystems(Set<StarSystem> knownSystems) {
-		this.knownSystems = knownSystems;
-	}
-
-	public Set<AColonists> getEmployees(Facility facility) {
-		Set<AColonists> set = new TreeSet<AColonists>();
-		for(AColonists colonist : employees) {
-			Workers w = (Workers) colonist;
-			if(facility.equals(w.getFacility())) {
-				set.add(w);
-			}
-		}
-		return set;
-	}
-
-	public List<AColonists> getEmployees() {
-		return employees;
-	}
-
-	public void setEmployees(List<AColonists> employees) {
-		this.employees = employees;
-	}
-
-	public List<FactoryQueueItem> getQueue(Facility facility) {
-		List<FactoryQueueItem> set = new ArrayList<FactoryQueueItem>();
-//		System.out.println("queue items: " + factoryQueue.size());
-		for(FactoryQueueItem item : factoryQueue) {
-//			System.out.println("queue items factory: " + item.getFactory());
-			if(facility.equals(item.getFactory())) {
-//				System.out.println("queue item matches!");
-				set.add(item);
-			}
-		}
-		System.out.println("queue items for " + facility + ": " + set.size());
-		return set;
-	}
-
-	public List<FactoryQueueItem> getFactoryQueue() {
-		return factoryQueue;
-	}
-
-	public void setFactoryQueue(List<FactoryQueueItem> factoryQueue) {
-		this.factoryQueue = factoryQueue;
-	}
-
-	public long getCredits() {
-		return credits;
-	}
-
-	public void setCredits(long credits) {
-		this.credits = credits;
+	public void setCorporations(Set<Corporation> corporations) {
+		this.corporations = corporations;
 	}
 }

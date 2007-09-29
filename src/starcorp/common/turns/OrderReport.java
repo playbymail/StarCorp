@@ -15,7 +15,6 @@ import java.util.Iterator;
 import java.util.List;
 import org.dom4j.Element;
 
-import starcorp.common.entities.ABaseEntity;
 import starcorp.common.entities.IEntity;
 import starcorp.common.entities.Planet;
 import starcorp.common.types.OrderType;
@@ -29,7 +28,7 @@ import starcorp.common.util.Util;
  * @version 17 Sep 2007
  */
 public class OrderReport {
-
+	
 	private OrderType type;
 	private IEntity target;
 	private IEntity subject;
@@ -134,13 +133,23 @@ public class OrderReport {
 	public List<?> getScannedEntities() {
 		return scannedEntities;
 	}
+	public List<?> getScannedEntities(Class clazz) {
+		List list = new ArrayList();
+		if(scannedEntities != null) {
+			for(Object o : scannedEntities) {
+				if(clazz.isAssignableFrom(o.getClass()))
+					list.add(o);
+			}
+		}
+		return list;
+	}
 	public void addScannedEntities(List<?> scanned) {
 		scannedEntities.addAll(scanned);
 	}
 	public void addScannedEntity(IEntity entity) {
 		scannedEntities.add(entity);
 	}
-
+	
 	public PlanetMapSquare getScannedLocation() {
 		return scannedLocation;
 	}

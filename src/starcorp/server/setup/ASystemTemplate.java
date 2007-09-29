@@ -145,7 +145,7 @@ public abstract class ASystemTemplate {
 	
 	protected ResourceDeposit createDeposit(StarSystemEntity entity, String itemKey) {
 		ResourceDeposit deposit = new ResourceDeposit();
-		deposit.setSystemEntityID(entity.getID());
+		deposit.setSystemEntity(entity.getID());
 		deposit.setTotalQuantity(rnd.nextInt(10000000));
 		deposit.setType(itemKey);
 		deposit.setYield(rnd.nextInt(100) + 1);
@@ -178,7 +178,7 @@ public abstract class ASystemTemplate {
 			field.setAsteroid(true);
 			field.setLocation(location);
 			field.setName("Asteroid " + location);
-			field.setSystemID(system.getID());
+			field.setSystem(system.getID());
 			field = (StarSystemEntity) entityStore.create(field);
 			log.info("Created " + field);
 			generateResources(field);
@@ -188,7 +188,7 @@ public abstract class ASystemTemplate {
 			field.setGasfield(true);
 			field.setLocation(location);
 			field.setName("Gas Field " + location);
-			field.setSystemID(system.getID());
+			field.setSystem(system.getID());
 			field = (StarSystemEntity) entityStore.create(field);
 			log.info("Created " + field);
 			generateResources(field);

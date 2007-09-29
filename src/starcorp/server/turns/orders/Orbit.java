@@ -37,7 +37,7 @@ public class Orbit extends AOrderProcessor {
 		Starship ship = (Starship) entityStore.load(Starship.class, starshipId);
 		Planet planet = (Planet) entityStore.load(Planet.class, planetId);
 		
-		if(ship == null || !ship.getOwner().equals(corp)) {
+		if(ship == null || ship.getOwner() != corp.getID()) {
 			error = new TurnError(TurnError.INVALID_SHIP,order);
 		}
 		else if(planet == null) {
@@ -47,14 +47,14 @@ public class Orbit extends AOrderProcessor {
 			error = new TurnError(TurnError.INSUFFICIENT_TIME,order);
 		}
 		else {
-			if(ship.getPlanet() != null) {
+			if(ship.getPlanet() != 0) {
 				error = new TurnError(TurnError.INVALID_LOCATION,order);
 			}
 			else if(planet.getGravityRating() > ship.getDesign().getMaxOrbitGravity()){
 				error = new TurnError(TurnError.GRAVITY_TOO_HIGH,order);
 			}
 			else {
-				ship.setPlanet(planet);
+				ship.setPlanet(planet.getID());
 				ship.incrementTimeUnitsUsed(TIME_UNITS);
 				entityStore.update(ship);
 				OrderReport report = new OrderReport(order,planet,ship);
@@ -62,8 +62,8 @@ public class Orbit extends AOrderProcessor {
 				report.add(ship.getID());
 				report.add(planet.getName());
 				report.add(planet.getID());
-				report.addScannedEntities(entityStore.listShips(planet,ship));
-				report.addScannedEntities(entityStore.listColonies(ship.getPlanet()));
+				report.addScannedEntities(entityStore.listShipsInOrbit(planet.getID(),ship.getID()));
+				report.addScannedEntities(entityStore.listColoniesByPlanet(ship.getPlanet()));
 				order.setReport(report);
 			}
 		}

@@ -14,9 +14,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import starcorp.common.entities.Colony;
 import starcorp.common.entities.ColonyItem;
-import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Facility;
 import starcorp.common.entities.MarketItem;
 import starcorp.common.types.AItemType;
@@ -60,8 +58,8 @@ public class FacilityProcessor extends AServerTask {
 		int required = facility.getTypeClass().getPowerRequirement();
 		if(log.isDebugEnabled())
 			log.debug(facility + " requires " + required + " power");
-		Corporation owner = facility.getOwner();
-		Colony colony = facility.getColony();
+		long owner = facility.getOwner();
+		long colony = facility.getColony();
 		List<AItemType> types = IndustrialGoods.listPower();
 		List<ColonyItem> items = entityStore.listItems(owner, colony, types);
 		if(ColonyItem.count(items) < required) {

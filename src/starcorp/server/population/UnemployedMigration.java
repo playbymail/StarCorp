@@ -46,14 +46,15 @@ public class UnemployedMigration extends AServerTask {
 	private void doMigration(Unemployed unemployed) {
 		if (unemployed.getQuantity() < 1)
 			return;
-		Planet planet = (Planet) entityStore.load(Planet.class, unemployed.getColony().getPlanetID());
-		StarSystem system = planet == null ? null : (StarSystem) entityStore.load(StarSystem.class, planet.getSystemID());
+		Colony colony = (Colony) entityStore.load(Colony.class, unemployed.getColony());
+		Planet planet = (Planet) entityStore.load(Planet.class, colony.getPlanet());
+		StarSystem system = planet == null ? null : (StarSystem) entityStore.load(StarSystem.class, planet.getSystem());
 		CoordinatesPolar location = planet.getLocation();
 		
-		List<Colony> samePlanet = entityStore.listColonies(planet);
-		List<Colony> sameLocation =  entityStore.listColonies(system, location, planet);
-		List<Colony> sameSystem =  entityStore.listColonies(system, location);
-		List<Colony> others =  entityStore.listColonies(system);
+		List<Colony> samePlanet = entityStore.searchColonies(planet.getID());
+		List<Colony> sameLocation =  entityStore.searchColonies(system.getID(), location, planet.getID());
+		List<Colony> sameSystem =  entityStore.searchColonies(system.getID(), location);
+		List<Colony> others =  entityStore.searchColonies(system.getID());
 		doMigration(unemployed, samePlanet, MIGRATION_DISTANCE_SAME_PLANET);
 		doMigration(unemployed, sameLocation, MIGRATION_DISTANCE_SAME_LOCATION);
 		doMigration(unemployed, sameSystem, MIGRATION_DISTANCE_SAME_SYSTEM);
@@ -65,7 +66,7 @@ public class UnemployedMigration extends AServerTask {
 			double distanceModifier) {
 		if (unemployed.getQuantity() < 1)
 			return;
-		double happiness = entityStore.getAverageHappiness(colony, unemployed.getPopClass());
+		double happiness = entityStore.getAverageHappiness(colony.getID(), unemployed.getPopClass());
 //		if(log.isDebugEnabled()) {
 //			log.debug(this + ": " + colony + " has avg happiness " + happiness +". Unemployed happiness " + unemployed.getHappiness());
 //		}
@@ -81,12 +82,12 @@ public class UnemployedMigration extends AServerTask {
 		int migrate = (int) (unemployed.getQuantity() * (migrationRate / 100.0));
 
 		if (migrate > 0) {
-			long creditsPerPerson = entityStore.getCredits(unemployed) / unemployed.getQuantity();
+			long creditsPerPerson = entityStore.getCredits(unemployed.getID()) / unemployed.getQuantity();
 			long credits = migrate * creditsPerPerson;
 			Unemployed other = getUnemployed(colony, unemployed.getPopClass());
 			other.addPopulation(migrate);
 			unemployed.removePopulation(migrate);
-			entityStore.removeCredits(unemployed, credits, "");
+			entityStore.removeCredits(unemployed.getID(), credits, "");
 			if (log.isDebugEnabled())
 				log.debug(migrate + " of " + unemployed.getPopClass()
 						+ " migrated to " + other);
@@ -102,7 +103,7 @@ public class UnemployedMigration extends AServerTask {
 		Unemployed u = map.get(popClass);
 		if(u == null) {
 			u = new Unemployed();
-			u.setColony(colony);
+			u.setColony(colony.getID());
 			u.setPopClass(popClass);
 			u = (Unemployed) entityStore.create(u);
 			map.put(popClass,u);
@@ -126,7 +127,7 @@ public class UnemployedMigration extends AServerTask {
 	protected void doJob() throws Exception {
 		List<AColonists> unemployed = entityStore.listUnemployed();
 		for(AColonists col : unemployed) {
-			Colony colony = col.getColony();
+			Colony colony = (Colony) entityStore.load(Colony.class,col.getColony());
 			PopulationClass popClass = col.getPopClass();
 			Unemployed u = (Unemployed) col;
 			Map<PopulationClass, Unemployed> entry =

@@ -23,7 +23,6 @@ import starcorp.common.turns.OrderReport;
 import starcorp.common.turns.TurnError;
 import starcorp.common.turns.TurnOrder;
 import starcorp.common.types.AItemType;
-import starcorp.common.types.ColonyHub;
 import starcorp.common.types.Items;
 import starcorp.common.types.OrbitalDock;
 import starcorp.common.types.OrderType;
@@ -50,20 +49,18 @@ public class DeliverItem extends AOrderProcessor {
 		Colony colony = (Colony) entityStore.load(Colony.class, colonyId);
 		Planet planet = null;
 		if(colony != null)
-			planet = ((Planet) entityStore.load(Planet.class, colony.getPlanetID()));
+			planet = ((Planet) entityStore.load(Planet.class, colony.getPlanet()));
 		AItemType type = AItemType.getType(itemTypeKey);
 		ColonyItem item = null;
 		if(type != null) {
-			item = entityStore.getItem(colony, type);
+			item = entityStore.getItem(colony.getID(), type);
 		}
 		
-		Facility colonyHub = colony == null ? null : entityStore.getFacility(colony, colony.getGovernment(), ColonyHub.class);
-		Facility orbitalDock = colony == null ? null : entityStore.getFacility(colony, OrbitalDock.class);
+		Facility orbitalDock = colony == null ? null : entityStore.getFacility(colony.getID(), OrbitalDock.class);
 		
-		List<?> hubWorkers = colonyHub == null ? null : entityStore.listWorkers(colonyHub);
-		List<?> dockWorkers = orbitalDock == null ? null : entityStore.listWorkers(orbitalDock);
+		List<?> dockWorkers = orbitalDock == null ? null : entityStore.listWorkersByFacility(orbitalDock.getID());
 		
-		if(ship == null || !ship.getOwner().equals(corp)) {
+		if(ship == null || ship.getOwner() != corp.getID()) {
 			error = new TurnError(TurnError.INVALID_SHIP,order);
 		}
 		else if(item == null) {
@@ -72,22 +69,16 @@ public class DeliverItem extends AOrderProcessor {
 		else if(colony == null) {
 			error = new TurnError(TurnError.INVALID_COLONY,order);
 		}
-		else if(ship.getPlanet() == null || !ship.getPlanet().equals(planet)) {
+		else if(ship.getPlanet() == 0 || ship.getPlanet() != planet.getID()) {
 			error = new TurnError(TurnError.INVALID_LOCATION,order);
 		}
-		else if(ship.getColony() != null && !ship.getColony().equals(colony)) {
+		else if(ship.getColony() > 0 && ship.getColony() != colony.getID()) {
 			error = new TurnError(TurnError.INVALID_COLONY,order);
 		}
-		else if(ship.getColony() == null && orbitalDock == null) {
+		else if(ship.getColony() == 0 && orbitalDock == null) {
 			error = new TurnError(TurnError.INVALID_LOCATION,order);
 		}
-		else if(colonyHub == null) {
-			error = new TurnError(TurnError.INVALID_COLONY,order);
-		}
-		else if(colonyHub.getTransactionsRemaining(hubWorkers) < 1) {
-			error = new TurnError(TurnError.MARKET_OUT_OF_TRANSACTIONS,order);
-		}
-		else if(orbitalDock != null && ship.getColony() == null && orbitalDock.getTransactionsRemaining(dockWorkers) < 1) {
+		else if(orbitalDock != null && ship.getColony() == 0 && orbitalDock.getTransactionsRemaining(dockWorkers) < 1) {
 			error = new TurnError(TurnError.MARKET_OUT_OF_TRANSACTIONS,order);
 		}
 		else {
@@ -99,22 +90,18 @@ public class DeliverItem extends AOrderProcessor {
 				item = new ColonyItem();
 				item.setItem(new Items());
 				item.getItem().setTypeClass(type);
-				item.setColony(colony);
-				item.setOwner(corp);
+				item.setColony(colony.getID());
+				item.setOwner(corp.getID());
 				entityStore.create(item);
 			}
 			item.getItem().add(quantity);
 			ship.removeCargo(type, quantity);
 			entityStore.update(ship);
-			Object[] args2 = {colonyHub.getTypeClass().getName(), colony.getName(), String.valueOf(colony.getID())};
-			String desc = CashTransaction.getDescription(CashTransaction.MARKET_FEES, args2);
-			entityStore.removeCredits(corp, colonyHub.getServiceCharge(), desc);
-			colonyHub.incTransactionCount();
-			entityStore.update(colonyHub);
-			if(orbitalDock != null && ship.getColony() == null) {
-				args2[0] = orbitalDock.getTypeClass().getName();
-				desc = CashTransaction.getDescription(CashTransaction.MARKET_FEES, args2);
-				entityStore.removeCredits(corp, orbitalDock.getServiceCharge(), desc);
+
+			if(orbitalDock != null && ship.getColony() == 0) {
+				Object[] args2 = {orbitalDock.getTypeClass().getName(), colony.getName(), String.valueOf(colony.getID())};
+				String desc = CashTransaction.getDescription(CashTransaction.MARKET_FEES, args2);
+				entityStore.transferCredits(corp.getID(), orbitalDock.getOwner(),orbitalDock.getServiceCharge(), desc);
 				orbitalDock.incTransactionCount();
 				entityStore.update(orbitalDock);
 			}

@@ -77,7 +77,7 @@ public class PlanetMapSquare {
 		location.setY(y);
 	}
 	
-	public Coordinates2D getLocation() {
+	public ICoordinates getLocation() {
 		return location;
 	}
 	public void setLocation(Coordinates2D location) {

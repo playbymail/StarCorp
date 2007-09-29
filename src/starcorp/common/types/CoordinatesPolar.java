@@ -18,7 +18,7 @@ import org.dom4j.Element;
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 15 Sep 2007
  */
-public class CoordinatesPolar {
+public class CoordinatesPolar implements ICoordinates {
 	private int quadrant;
 	private int orbit;
 	
@@ -32,6 +32,10 @@ public class CoordinatesPolar {
 	}
 	
 	public CoordinatesPolar(Element e) {
+		readXML(e);
+	}
+	
+	public void readXML(Element e) {
 		this.quadrant = Integer.parseInt(e.attributeValue("quadrant","0"));
 		this.orbit = Integer.parseInt(e.attributeValue("orbit","0"));
 	}
@@ -42,7 +46,8 @@ public class CoordinatesPolar {
 		return parent;
 	}
 	
-	public int getDistance(CoordinatesPolar other) {
+	public int getDistance(ICoordinates o) {
+		CoordinatesPolar other = (CoordinatesPolar) o;
 		int distance = 0;
 		CoordinatesPolar current = new CoordinatesPolar();
 		current.quadrant = this.quadrant;

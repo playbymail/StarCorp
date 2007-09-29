@@ -46,14 +46,8 @@ public class GasGiant extends APlanetTemplate {
 		return 20;
 	}
 
-	@Override
-	protected int getHeight() {
-		return 0;
-	}
-
-	@Override
-	protected int getWidth() {
-		return 0;
+	protected int getSize() {
+		return 0; // no planet map for gas giants
 	}
 
 	@Override

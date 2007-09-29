@@ -201,16 +201,13 @@ public class OrderBuilder extends ABuilderPane {
 			createIntegerInput(widgets, 2, "Y");
 		}
 		else if(type.equals(OrderType.TAKE_OFF)){
-			// TODO filter to landed ships
 			createShipDropDown(widgets, 0);
 		}
 		else if(type.equals(OrderType.MINE_ASTEROID)){
-			// TODO filter to ships in same location as a known asteroid
 			createShipDropDown(widgets, 0);
 			createAsteroidDropDown(widgets, 1);
 		}
 		else if(type.equals(OrderType.MINE_GAS_FIELD)){
-			// TODO filter to ships in same location as a known gas field
 			createShipDropDown(widgets, 0);
 			createGasFieldDropDown(widgets, 1);
 		}
@@ -291,7 +288,7 @@ public class OrderBuilder extends ABuilderPane {
 			String val = null;
 			if(o instanceof IEntity) {
 				IEntity entity = (IEntity) o;
-				val = format(entity.getID());
+				val = String.valueOf(entity.getID());
 			}
 			else if(o instanceof ABaseType) {
 				ABaseType type = (ABaseType) o;
@@ -336,7 +333,7 @@ public class OrderBuilder extends ABuilderPane {
 	
 	private void createColonyDropDown(List<Widget> widgets, int index) {
 		if(report != null)
-			setContents(index,createEntitySelection(orderArgumentPanels[index], widgets, report.getKnownColonies(), null),"Colony");
+			setContents(index,createEntitySelection(orderArgumentPanels[index], widgets, report.getColonies(), null),"Colony");
 		else
 			createErrorLabel(widgets, index, "Colony", "No report loaded");
 	}
@@ -397,14 +394,14 @@ public class OrderBuilder extends ABuilderPane {
 	
 	private void createStarSystemDropDown(List<Widget> widgets, int index) {
 		if(report != null)
-			setContents(index,createEntitySelection(orderArgumentPanels[index], widgets, report.getKnownSystems(), null),"Star System");
+			setContents(index,createEntitySelection(orderArgumentPanels[index], widgets, report.getSystems(), null),"Star System");
 		else
 			createErrorLabel(widgets, index, "Star System", "No report loaded");
 	}
 	
 	private void createPlanetDropDown(List<Widget> widgets, int index) {
 		if(report != null)
-			setContents(index,createEntitySelection(orderArgumentPanels[index], widgets, report.getScannedPlanets(), null),"Planet");
+			setContents(index,createEntitySelection(orderArgumentPanels[index], widgets, report.getPlanets(), null),"Planet");
 		else
 			createErrorLabel(widgets, index, "Planet", "No report loaded");
 	}

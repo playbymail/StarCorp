@@ -28,8 +28,8 @@ import starcorp.common.types.ServiceFacility;
  */
 public class Facility extends ABaseEntity {
 
-	private Corporation owner;
-	private Colony colony;
+	private long owner;
+	private long colony;
 	private AFacilityType type;
 	private boolean powered;
 	private int serviceCharge;
@@ -60,16 +60,16 @@ public class Facility extends ABaseEntity {
 		}
 	}
 	
-	public Corporation getOwner() {
+	public long getOwner() {
 		return owner;
 	}
-	public void setOwner(Corporation owner) {
+	public void setOwner(long owner) {
 		this.owner = owner;
 	}
-	public Colony getColony() {
+	public long getColony() {
 		return colony;
 	}
-	public void setColony(Colony colony) {
+	public void setColony(long colony) {
 		this.colony = colony;
 	}
 	public String getType() {
@@ -130,10 +130,8 @@ public class Facility extends ABaseEntity {
 	@Override
 	public void readXML(Element e) {
 		super.readXML(e);
-		this.owner = new Corporation();
-		this.owner.readXML(e.element("owner").element("entity"));
-		this.colony = new Colony();
-		this.colony.readXML(e.element("colony").element("entity"));
+		this.owner = Long.parseLong(e.attributeValue("owner","0"));
+		this.colony = Long.parseLong(e.attributeValue("colony","0"));
 		this.type = AFacilityType.getType(e.attributeValue("type"));
 		this.powered = Boolean.parseBoolean(e.attributeValue("powered","false"));
 		this.serviceCharge =Integer.parseInt(e.attributeValue("charge","0"));
@@ -144,8 +142,8 @@ public class Facility extends ABaseEntity {
 	@Override
 	public Element toBasicXML(Element parent) {
 		Element e = super.toBasicXML(parent);
-		owner.toBasicXML(e.addElement("owner"));
-		colony.toBasicXML(e.addElement("colony"));
+		e.addAttribute("owner", String.valueOf(owner));
+		e.addAttribute("colony", String.valueOf(colony));
 		e.addAttribute("type", type.getKey());
 		e.addAttribute("powered", powered ? "true" : "false");
 		e.addAttribute("charge", String.valueOf(serviceCharge));
@@ -156,7 +154,7 @@ public class Facility extends ABaseEntity {
 
 	@Override
 	public String toString() {
-		return type.getKey() + " " + super.toString() + " @ " + colony.getName() + " (" + colony.getID() + ")";
+		return type.getKey() + " " + super.toString();
 	}
 
 	public String getDisplayName() {

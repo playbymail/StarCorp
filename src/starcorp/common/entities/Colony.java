@@ -22,17 +22,16 @@ import starcorp.common.types.GalacticDate;
  * @version 15 Sep 2007
  */
 public class Colony extends ANamedEntity {
-	// TODO add planet name
-	private Corporation government;
-	private long planetID;
+	private long government;
+	private long planet;
 	private Coordinates2D location;
 	private double hazardLevel;
 	private GalacticDate foundedDate;
 	
-	public Corporation getGovernment() {
+	public long getGovernment() {
 		return government;
 	}
-	public void setGovernment(Corporation government) {
+	public void setGovernment(long government) {
 		this.government = government;
 	}
 	public Coordinates2D getLocation() {
@@ -56,13 +55,8 @@ public class Colony extends ANamedEntity {
 	@Override
 	public void readXML(Element e) {
 		super.readXML(e);
-		this.government = new Corporation();
-		this.government.readXML(e.element("government").element("entity"));
-//		this.planet = new Planet();
-//		this.planet.readXML(e.element("planet").element("entity"));
-		Element planet= e.element("planet");
-		if(planet != null)
-			this.planetID = Integer.parseInt(planet.attributeValue("ID","0"));
+		this.government = Long.parseLong(e.attributeValue("government","0"));
+		this.planet = Long.parseLong(e.attributeValue("planet","0"));
 		this.location = new Coordinates2D(e);
 		this.foundedDate = new GalacticDate(e.element("founded").element("date"));
 		this.hazardLevel = Double.parseDouble(e.attributeValue("hazard","0.0"));
@@ -70,23 +64,23 @@ public class Colony extends ANamedEntity {
 	@Override
 	public Element toBasicXML(Element parent) {
 		Element e = super.toBasicXML(parent);
-		government.toBasicXML(e.addElement("government"));
-		Element planet = e.addElement("planet");
-		planet.addAttribute("ID", String.valueOf(planetID));
-		location.toXML(e);
+		e.addAttribute("government", String.valueOf(government));
+		e.addAttribute("planet",String.valueOf(planet));
+		if(location != null)
+			location.toXML(e);
 		e.addAttribute("hazard", String.valueOf(hazardLevel));
 		foundedDate.toXML(e.addElement("founded"));
 		return e;
 	}
 	@Override
 	public String toString() {
-		return super.toString() + " @ " + planetID + ") " + location;
+		return super.toString() + " @ " + planet + ") " + location;
 	}
-	public long getPlanetID() {
-		return planetID;
+	public long getPlanet() {
+		return planet;
 	}
-	public void setPlanetID(long planetID) {
-		this.planetID = planetID;
+	public void setPlanet(long planet) {
+		this.planet = planet;
 	}
 	
 }

@@ -48,14 +48,14 @@ public class IssueLease extends AOrderProcessor {
 		else if(type == null) {
 			error = new TurnError(TurnError.INVALID_FACILITY_TYPE,order);
 		}
-		else if(!colony.getGovernment().equals(corp)){
+		else if(colony.getGovernment() != corp.getID()){
 			error = new TurnError(TurnError.INVALID_COLONY,order);
 		}
 		else {
 			FacilityLease lease = new FacilityLease();
-			lease.setColony(colony);
+			lease.setColony(colony.getID());
 			lease.setIssuedDate(ServerConfiguration.getCurrentDate());
-			lease.setLicensee(licensee);
+			lease.setLicensee(licensee.getID());
 			lease.setPrice(price);
 			lease.setTypeClass(type);
 			

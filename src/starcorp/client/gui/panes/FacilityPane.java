@@ -26,6 +26,7 @@ import org.eclipse.swt.widgets.Widget;
 import starcorp.client.gui.AEntityPane;
 import starcorp.client.gui.windows.MainWindow;
 import starcorp.common.entities.AColonists;
+import starcorp.common.entities.Colony;
 import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Facility;
 import starcorp.common.entities.FactoryQueueItem;
@@ -53,10 +54,12 @@ public class FacilityPane extends AEntityPane {
 		super.createWidgets(widgets);
 		
 		createLabel(getParent(), widgets, "Colony:");
-		createColonyLink(getParent(), widgets, facility.getColony(), null);
+		Colony colony = getTurnReport().getColony(facility.getColony());
+		createColonyLink(getParent(), widgets, colony, null);
 
 		createLabel(getParent(), widgets, "Owner:");
-		createCorporationLink(getParent(), widgets, facility.getOwner(), null);
+		Corporation corp = getTurnReport().getCorporation(facility.getOwner());
+		createCorporationLink(getParent(), widgets, corp, null);
 
 		createLabel(getParent(), widgets, "Type:");
 		createFacilityTypeLink(getParent(), widgets, facility.getTypeClass(), null);
@@ -75,28 +78,8 @@ public class FacilityPane extends AEntityPane {
 			createLabel(getParent(), widgets, "\u20a1 " + format(facility.getServiceCharge()));
 		}
 		
-		if(facility.getTypeClass() instanceof Factory) {
-			Group grp = createGroup(getParent(), widgets, "Factory Orders");
-			GridData data = new GridData();
-			data.horizontalSpan=2;
-			grp.setLayoutData(data);
-			grp.setLayout(new GridLayout(5,false));
-			List<AItemType> types = ((Factory)facility.getTypeClass()).canBuild();
-			final Combo c = createTypeSelection(grp, widgets, types, "Item:");
-			final Text txt = createIntegerInput(grp, widgets, "Quantity:");
-			Button add = createButton(grp, widgets, "Add");
-			add.addListener(SWT.Selection, new Listener() {
-				public void handleEvent (Event event) {
-					AItemType type = (AItemType) getComboValue(c);
-					int qty = getIntegerTextValue(txt);
-					TurnOrder order = buildOrder(facility, type, qty);
-					mainWindow.addTurnOrder(order);
-				}
-			});
-		}
-		
 		Corporation player = getTurnReport().getTurn().getCorporation();
-		if(player.equals(facility.getOwner())) {
+		if(player.getID() == facility.getOwner()) {
 			Group grp = createGroup(getParent(), widgets, "Employees");
 			GridData data = new GridData();
 			data.minimumWidth=100;
@@ -117,9 +100,27 @@ public class FacilityPane extends AEntityPane {
 				createColonistLink(grp, widgets, colonist, null);
 			}
 			
-			createLabel(grp, widgets, "Efficiency: " + formatPercentage(efficiency) + "%");
+			createLabel(grp, widgets, "Efficiency: " + format(efficiency) + "%");
 
 			if(facility.getTypeClass() instanceof Factory) {
+				grp = createGroup(getParent(), widgets, "Factory Orders");
+				data = new GridData();
+				data.horizontalSpan=2;
+				grp.setLayoutData(data);
+				grp.setLayout(new GridLayout(5,false));
+				List<AItemType> types = ((Factory)facility.getTypeClass()).canBuild();
+				final Combo c = createTypeSelection(grp, widgets, types, "Item:");
+				final Text txt = createIntegerInput(grp, widgets, "Quantity:");
+				Button add = createButton(grp, widgets, "Add");
+				add.addListener(SWT.Selection, new Listener() {
+					public void handleEvent (Event event) {
+						AItemType type = (AItemType) getComboValue(c);
+						int qty = getIntegerTextValue(txt);
+						TurnOrder order = buildOrder(facility, type, qty);
+						mainWindow.addTurnOrder(order);
+					}
+				});
+
 				data = new GridData();
 				data.verticalAlignment=SWT.TOP;
 				data.minimumWidth=100;

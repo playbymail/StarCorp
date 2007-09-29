@@ -16,7 +16,6 @@ import java.util.Set;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Event;
@@ -53,6 +52,27 @@ public class StarshipPane extends AEntityPane {
 		this.ship = ship;
 	}
 	
+	private String getLocationDescription(Starship ship) {
+		String desc;
+		if(ship.inOpenSpace()) {
+			StarSystem system = getTurnReport().getSystem(ship.getSystem());
+			desc = ship.getLocation() + " in " + system.getDisplayName();
+		}
+		else if(ship.inOrbit()) {
+			Planet planet = getTurnReport().getPlanet(ship.getPlanet());
+			desc = "Orbiting " + planet.getDisplayName();
+		}
+		else if(ship.getColony() != 0) {
+			Colony colony = getTurnReport().getColony(ship.getColony());
+			desc = "Docked at " + colony.getDisplayName();
+		}
+		else {
+			Planet planet = getTurnReport().getPlanet(ship.getPlanet());
+			desc = "Docked at " + ship.getPlanetLocation() + " on " + planet.getDisplayName();
+		}
+		return desc;
+	}
+	
 	private void createDataGroup(List<Widget> widgets) {
 		Group grp = createGroup(getParent(), widgets, ""); 
 		grp.setLayout(new GridLayout(2,false));
@@ -63,13 +83,15 @@ public class StarshipPane extends AEntityPane {
 		
 		createLabel(grp, widgets, "Location:");
 		
-		String locDesc = ship.getLocationDescription();
+		String locDesc = getLocationDescription(ship);
 		
-		if(ship.getColony() != null) {
-			createColonyLink(grp, widgets, ship.getColony(), locDesc);
+		if(ship.getColony() > 0) {
+			Colony colony = getTurnReport().getColony(ship.getColony());
+			createColonyLink(grp, widgets, colony, locDesc);
 		}
-		else if(ship.getPlanet() != null) {
-			createPlanetLink(grp, widgets, ship.getPlanet(), locDesc);
+		else if(ship.getPlanet() > 0) {
+			Planet planet = getTurnReport().getPlanet(ship.getPlanet());
+			createPlanetLink(grp, widgets, planet, locDesc);
 		}
 		else {
 			createLabel(grp, widgets, locDesc);
@@ -97,8 +119,9 @@ public class StarshipPane extends AEntityPane {
 		
 		if(ship.inOrbit() && design.canProbePlanet()) {
 			hasSpecialAction = true;
-			TurnOrder order = probePlanetOrder(ship, ship.getPlanet());
-			createOrderLink(grpActions, widgets, order, "Probe " + ship.getPlanet().getDisplayName());
+			Planet planet = getTurnReport().getPlanet(ship.getPlanet());
+			TurnOrder order = probePlanetOrder(ship, planet);
+			createOrderLink(grpActions, widgets, order, "Probe " + planet.getDisplayName());
 		}
 		else if(ship.isDocked()) {
 			hasSpecialAction = true;
@@ -160,13 +183,13 @@ public class StarshipPane extends AEntityPane {
 		Group grpMove = createGroup(getParent(), widgets, "Movement");
 		grpMove.setLayout(new GridLayout(5,false));
 		grpMove.setLayoutData(new GridData(SWT.LEFT,SWT.TOP,true,true,2,1));
-		if(ship.getColony() != null || (ship.getPlanet() != null && ship.getPlanetLocation() != null)) {
+		if(ship.isDocked()) {
 			// take off
 			final TurnOrder takeOff = takeOffOrder(ship);
 			createOrderLink(grpMove, widgets, takeOff, "Take Off")
 			.setLayoutData(new GridData(SWT.CENTER,SWT.TOP,true,true,5,1));
 			final TurnOrder leaveOrbit = leaveOrbitOrder(ship);
-			Set<Colony> colonies = getTurnReport().getKnownColonies(ship.getPlanet());
+			Set<Colony> colonies = getTurnReport().getColoniesByPlanet(ship.getPlanet());
 			final Combo c = createEntitySelection(grpMove, widgets, colonies, "Colony:");
 			c.setLayoutData(new GridData(SWT.CENTER,SWT.TOP,true,true,3,1));
 			final Button btnDockColony = createButton(grpMove, widgets, "Dock");
@@ -178,7 +201,7 @@ public class StarshipPane extends AEntityPane {
 					mainWindow.addTurnOrder(order);
 				}
 			});
-			Set<StarSystemEntity> entities = getTurnReport().getScannedEntitiesExcludeShips(ship.getSystemID());
+			Set<StarSystemEntity> entities = getTurnReport().getScannedEntitiesExcludeShips(ship.getSystem());
 			if(entities.size() > 0) {
 				final Combo cEntities = createEntitySelection(grpMove, widgets, entities, "In Star System:");
 				cEntities.setLayoutData(new GridData(SWT.CENTER,SWT.TOP,true,true,3,1));
@@ -210,7 +233,7 @@ public class StarshipPane extends AEntityPane {
 					mainWindow.addTurnOrder(order);
 				}
 			});
-			Set<StarSystem> systems = getTurnReport().getKnownSystems();
+			Set<StarSystem> systems = getTurnReport().getSystems();
 			final Combo cSystems = createEntitySelection(grpMove, widgets, systems, "Systems:");
 			cSystems.setLayoutData(new GridData(SWT.CENTER,SWT.TOP,true,true,3,1));
 			final Button btnJump = createButton(grpMove, widgets, "Jump");
@@ -224,7 +247,7 @@ public class StarshipPane extends AEntityPane {
 				}
 			});
 		}
-		else if(ship.getPlanet() != null) {
+		else if(ship.inOrbit()) {
 			// dock or leave orbit
 			final TurnOrder leaveOrbit = leaveOrbitOrder(ship);
 			createOrderLink(grpMove, widgets, leaveOrbit, "Leave Orbit")
@@ -240,7 +263,7 @@ public class StarshipPane extends AEntityPane {
 					mainWindow.addTurnOrder(order);
 				}
 			});
-			Set<Colony> colonies = getTurnReport().getKnownColonies(ship.getPlanet());
+			Set<Colony> colonies = getTurnReport().getColoniesByPlanet(ship.getPlanet());
 			final Combo c = createEntitySelection(grpMove, widgets, colonies, "Colony:");
 			c.setLayoutData(new GridData(SWT.CENTER,SWT.TOP,true,true,3,1));
 			final Button btnDockColony = createButton(grpMove, widgets, "Dock");
@@ -251,7 +274,7 @@ public class StarshipPane extends AEntityPane {
 					mainWindow.addTurnOrder(order);
 				}
 			});
-			Set<StarSystemEntity> entities = getTurnReport().getScannedEntitiesExcludeShips(ship.getSystemID());
+			Set<StarSystemEntity> entities = getTurnReport().getScannedEntitiesExcludeShips(ship.getSystem());
 			if(entities.size() > 0) {
 				final Combo cEntities = createEntitySelection(grpMove, widgets, entities, "In Star System:");
 				cEntities.setLayoutData(new GridData(SWT.CENTER,SWT.TOP,true,true,3,1));
@@ -281,7 +304,7 @@ public class StarshipPane extends AEntityPane {
 					mainWindow.addTurnOrder(order);
 				}
 			});
-			Set<StarSystem> systems = getTurnReport().getKnownSystems();
+			Set<StarSystem> systems = getTurnReport().getSystems();
 			final Combo cSystems = createEntitySelection(grpMove, widgets, systems, "Systems:");
 			cSystems.setLayoutData(new GridData(SWT.CENTER,SWT.TOP,true,true,3,1));
 			final Button btnJump = createButton(grpMove, widgets, "Jump");
@@ -296,7 +319,7 @@ public class StarshipPane extends AEntityPane {
 		}
 		else {
 			// orbit, move or jump
-			Set<Planet> planets = getTurnReport().getScannedPlanets(ship.getSystemID(), ship.getLocation());
+			Set<Planet> planets = getTurnReport().getPlanetsByLocation(ship.getSystem(), ship.getLocation());
 			if(planets.size() > 0) {
 				final Combo cPlanets = createEntitySelection(grpMove, widgets, planets, "Nearby Planets:");
 				cPlanets.setLayoutData(new GridData(SWT.CENTER,SWT.TOP,true,true,3,1));
@@ -309,7 +332,7 @@ public class StarshipPane extends AEntityPane {
 					}
 				});
 			}
-			Set<StarSystemEntity> entities = getTurnReport().getScannedEntitiesExcludeShips(ship.getSystemID());
+			Set<StarSystemEntity> entities = getTurnReport().getScannedEntitiesExcludeShips(ship.getSystem());
 			if(entities.size() > 0) {
 				final Combo cEntities = createEntitySelection(grpMove, widgets, entities, "In Star System:");
 				cEntities.setLayoutData(new GridData(SWT.CENTER,SWT.TOP,true,true,3,1));
@@ -337,7 +360,7 @@ public class StarshipPane extends AEntityPane {
 					mainWindow.addTurnOrder(order);
 				}
 			});
-			Set<StarSystem> systems = getTurnReport().getKnownSystems();
+			Set<StarSystem> systems = getTurnReport().getSystems();
 			final Combo cSystems = createEntitySelection(grpMove, widgets, systems, "Systems:");
 			cSystems.setLayoutData(new GridData(SWT.CENTER,SWT.TOP,true,true,3,1));
 			final Button btnJump = createButton(grpMove, widgets, "Jump");
@@ -406,7 +429,7 @@ public class StarshipPane extends AEntityPane {
 					}
 				}
 			});
-			if(ship.getColony() != null) {
+			if(ship.getColony() > 0) {
 				final Text txtQty = createTextInput(grpCargoActions, widgets, "Quantity:");
 				final Text txtPrice = createTextInput(grpCargoActions, widgets, "Price:");
 				final Button btnSell = createButton(grpCargoActions, widgets, "Sell");
@@ -425,7 +448,7 @@ public class StarshipPane extends AEntityPane {
 				});
 			}
 			else if(ship.inOrbit()) {
-				Set<Colony> colonies = getTurnReport().getKnownColonies(ship.getPlanet());
+				Set<Colony> colonies = getTurnReport().getColoniesByPlanet(ship.getPlanet());
 				if(colonies.size() > 0) {
 					final Combo c = createEntitySelection(grpCargoActions, widgets, colonies, "Colony:");
 					c.setLayoutData(new GridData(SWT.LEFT,SWT.TOP,false,false,4,1));
@@ -440,7 +463,7 @@ public class StarshipPane extends AEntityPane {
 							for(int i = 0; i < size; i++) {
 								if(checkboxes[i] != null && checkboxes[i].getSelection()) {
 									Items item = (Items) checkboxes[i].getData();
-									TurnOrder order = sellOrder(ship, colony,item.getTypeClass(), qty,price);
+									TurnOrder order = sellOrder(ship, colony.getID(),item.getTypeClass(), qty,price);
 									mainWindow.addTurnOrder(order);
 								}
 							}

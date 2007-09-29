@@ -15,7 +15,7 @@ public abstract class AGovernmentLaw implements IEntity {
 
 	private long ID;
 	private int version;
-	private Colony colony;
+	private long colony;
 	private boolean available;
 	private GalacticDate issuedDate;
 	private GalacticDate closedDate;
@@ -24,11 +24,11 @@ public abstract class AGovernmentLaw implements IEntity {
 		super();
 	}
 
-	public Colony getColony() {
+	public long getColony() {
 		return colony;
 	}
 
-	public void setColony(Colony colony) {
+	public void setColony(long colony) {
 		this.colony = colony;
 	}
 
@@ -49,9 +49,8 @@ public abstract class AGovernmentLaw implements IEntity {
 	}
 
 	public void readXML(Element e) {
-		this.ID = Integer.parseInt(e.attributeValue("ID","0"));
-		this.colony = new Colony();
-		colony.readXML(e.element("colony").element("entity"));
+		this.ID = Long.parseLong(e.attributeValue("ID","0"));
+		this.colony = Long.parseLong(e.attributeValue("colony","0"));
 		this.available = Boolean.parseBoolean(e.attributeValue("available","false"));
 		this.issuedDate = new GalacticDate(e.element("issued").element("date"));
 	}
@@ -60,7 +59,7 @@ public abstract class AGovernmentLaw implements IEntity {
 		Element root = parent.addElement("law");
 		root.addAttribute("ID", String.valueOf(ID));
 		root.addAttribute("class", getClass().getSimpleName());
-		colony.toBasicXML(root.addElement("colony"));
+		root.addAttribute("colony", String.valueOf(colony));
 		root.addAttribute("available",String.valueOf(available));
 		issuedDate.toXML(root.addElement("issued"));
 		return root;
@@ -72,7 +71,7 @@ public abstract class AGovernmentLaw implements IEntity {
 
 	@Override
 	public String toString() {
-		return "(" + getClass().getSimpleName() + ": " + ID + ") @ " + colony.getName() + " (" + colony.getID() + ")"; 
+		return "(" + getClass().getSimpleName() + ": " + ID + ")"; 
 	}
 
 	public long getID() {
@@ -134,7 +133,7 @@ public abstract class AGovernmentLaw implements IEntity {
 	}
 
 	public String getDisplayName() {
-		return getClass().getSimpleName() +" [" + getID() +"] @ " + colony.getName() + "[" + colony.getID() +"]";
+		return getClass().getSimpleName() +" [" + getID() +"]";
 	}
 
 }

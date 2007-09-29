@@ -153,7 +153,7 @@ public class Create extends ACommand {
 					corp.setFoundedDate(ServerConfiguration.getCurrentDate());
 					corp.setName(args.concat(2));
 					corp = (Corporation) entityStore.create(corp);
-					entityStore.addCredits(corp, credits, "NPC Setup");
+					entityStore.addCredits(corp.getID(), credits, "NPC Setup");
 					out.println("Created " + corp);
 				} else if ("colony".equalsIgnoreCase(function)) {
 					String templateName = args.get(1);
@@ -189,7 +189,7 @@ public class Create extends ACommand {
 						design.setDesignDate(ServerConfiguration
 								.getCurrentDate());
 						design.setName(name);
-						design.setOwner(corp);
+						design.setOwner(corp.getID());
 						for (int i = 3; i < args.count(); i++) {
 							design.addHulls(args.get(i));
 						}
@@ -224,13 +224,13 @@ public class Create extends ACommand {
 						Starship ship = new Starship();
 						ship.setBuiltDate(ServerConfiguration.getCurrentDate());
 						ship.setDesign(design);
-						Planet planet = ((Planet) entityStore.load(Planet.class, colony.getPlanetID()));
+						Planet planet = ((Planet) entityStore.load(Planet.class, colony.getPlanet()));
 						ship.setLocation(planet.getLocation());
 						ship.setName(name);
-						ship.setOwner(corp);
-						ship.setPlanet(planet);
-						ship.setSystemID(planet.getSystemID());
-						ship.setColony(colony);
+						ship.setOwner(corp.getID());
+						ship.setPlanet(planet.getID());
+						ship.setSystem(planet.getSystem());
+						ship.setColony(colony.getID());
 						entityStore.create(ship);
 						out.println();
 						out.println("Created " + ship);
@@ -253,9 +253,9 @@ public class Create extends ACommand {
 						Facility facility = new Facility();
 						facility.setBuiltDate(ServerConfiguration
 								.getCurrentDate());
-						facility.setColony(colony);
+						facility.setColony(colony.getID());
 						facility.setOpen(true);
-						facility.setOwner(corp);
+						facility.setOwner(corp.getID());
 						facility.setTypeClass(type);
 						entityStore.create(facility);
 						out.println();

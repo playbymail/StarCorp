@@ -56,9 +56,9 @@ public class CorporationSellItem extends AOrderProcessor {
 			error = new TurnError(TurnError.INVALID_ITEM,order);
 		}
 		else {
-			Facility colonyHub = entityStore.getFacility(colony, colony.getGovernment(), ColonyHub.class);
-			ColonyItem colonyItem = entityStore.getItem(colony, corp, type);
-			List<?> workers = colonyHub == null ? null : entityStore.listWorkers(colonyHub);
+			Facility colonyHub = entityStore.getFacility(colony.getID(), colony.getGovernment(), ColonyHub.class);
+			ColonyItem colonyItem = entityStore.getItem(colony.getID(), corp.getID(), type);
+			List<?> workers = colonyHub == null ? null : entityStore.listWorkersByFacility(colonyHub.getID());
 			if(colonyItem == null) {
 				error = new TurnError(TurnError.INVALID_ITEM,order);
 			}
@@ -75,17 +75,17 @@ public class CorporationSellItem extends AOrderProcessor {
 				item.setTypeClass(type);
 				
 				MarketItem marketItem = new MarketItem();
-				marketItem.setColony(colony);
+				marketItem.setColony(colony.getID());
 				marketItem.setCostPerItem(price);
 				marketItem.setIssuedDate(ServerConfiguration.getCurrentDate());
-				marketItem.setSeller(corp);
+				marketItem.setSeller(corp.getID());
 				marketItem.setItem(item);
 				
 				entityStore.create(marketItem);
 				
 				Object[] args2 = {colonyHub.getTypeClass().getName(), colony.getName(), String.valueOf(colony.getID())};
 				String desc = CashTransaction.getDescription(CashTransaction.MARKET_FEES, args2);
-				entityStore.removeCredits(corp, colonyHub.getServiceCharge(), desc);
+				entityStore.transferCredits(corp.getID(), colonyHub.getOwner(), colonyHub.getServiceCharge(), desc);
 				colonyHub.incTransactionCount();
 				entityStore.update(colonyHub);
 				report = new OrderReport(order,colony,corp);

@@ -36,7 +36,7 @@ public class DesignShip extends AOrderProcessor {
 		StarshipDesign design = new StarshipDesign();
 		design.setDesignDate(ServerConfiguration.getCurrentDate());
 		design.setName(name);
-		design.setOwner(corp);
+		design.setOwner(corp.getID());
 		for(int i = 1; i < max; i++) {
 			design.addHulls(order.get(i));
 		}

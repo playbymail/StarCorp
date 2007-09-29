@@ -46,12 +46,12 @@ public class IssueDevelopmentGrant extends AOrderProcessor {
 		else if(type == null) {
 			error = new TurnError(TurnError.INVALID_FACILITY_TYPE,order);
 		}
-		else if(!colony.getGovernment().equals(corp)){
+		else if(colony.getGovernment() != corp.getID()){
 			error = new TurnError(TurnError.INVALID_COLONY,order);
 		}
 		else {
 			DevelopmentGrant grant = new DevelopmentGrant();
-			grant.setColony(colony);
+			grant.setColony(colony.getID());
 			grant.setGrant(credit);
 			grant.setIssuedDate(ServerConfiguration.getCurrentDate());
 			grant.setTypeClass(type);

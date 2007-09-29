@@ -5,8 +5,7 @@ import org.dom4j.Element;
 import starcorp.common.types.CoordinatesPolar;
 
 public class StarSystemEntity extends ANamedEntity {
-	// TODO add system name
-	protected long systemID;
+	protected long system;
 	protected CoordinatesPolar location;
 	protected boolean asteroid;
 	protected boolean gasfield;
@@ -25,12 +24,7 @@ public class StarSystemEntity extends ANamedEntity {
 	@Override
 	public void readXML(Element e) {
 		super.readXML(e);
-		try {
-			this.systemID = Long.parseLong(e.attributeValue("system"));
-		}
-		catch(NumberFormatException ex) {
-			// ignore
-		}
+		this.system = Long.parseLong(e.attributeValue("system","0"));
 		this.location = new CoordinatesPolar(e);
 		if("true".equals(e.attributeValue("asteroid")))
 			asteroid = true;
@@ -41,7 +35,7 @@ public class StarSystemEntity extends ANamedEntity {
 	@Override
 	public Element toBasicXML(Element parent) {
 		Element e =super.toBasicXML(parent);
-		e.addAttribute("system", String.valueOf(systemID));
+		e.addAttribute("system", String.valueOf(system));
 		if(isAsteroid()) e.addAttribute("asteroid", "true");
 		if(isGasfield()) e.addAttribute("gasfield", "true");
 		location.toXML(e);
@@ -50,7 +44,7 @@ public class StarSystemEntity extends ANamedEntity {
 
 	@Override
 	public String toString() {
-		return super.toString() + " @ system " + systemID + " " + location;
+		return super.toString() + " @ system " + system + " " + location;
 	}
 
 	public boolean isAsteroid() {
@@ -69,12 +63,12 @@ public class StarSystemEntity extends ANamedEntity {
 		this.gasfield = gasfield;
 	}
 
-	public long getSystemID() {
-		return systemID;
+	public long getSystem() {
+		return system;
 	}
 
-	public void setSystemID(long systemID) {
-		this.systemID = systemID;
+	public void setSystem(long system) {
+		this.system = system;
 	}
 	
 }

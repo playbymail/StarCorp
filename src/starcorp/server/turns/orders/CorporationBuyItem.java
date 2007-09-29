@@ -13,6 +13,7 @@ package starcorp.server.turns.orders;
 import java.util.ArrayList;
 import java.util.List;
 
+import starcorp.common.entities.AColonists;
 import starcorp.common.entities.CashTransaction;
 import starcorp.common.entities.Colony;
 import starcorp.common.entities.ColonyItem;
@@ -53,9 +54,9 @@ public class CorporationBuyItem extends AOrderProcessor {
 		Colony colony = (Colony) entityStore.load(Colony.class, colonyId);
 		AItemType type = AItemType.getType(itemTypeKey);
 		
-		Facility colonyHub = entityStore.getFacility(colony, colony.getGovernment(), ColonyHub.class);
+		Facility colonyHub = entityStore.getFacility(colony.getID(), colony.getGovernment(), ColonyHub.class);
 		
-		List<?> workers = entityStore.listWorkers(colonyHub);
+		List<AColonists> workers = entityStore.listWorkersByFacility(colonyHub.getID());
 		
 		if(colony == null) {
 			error = new TurnError(TurnError.INVALID_COLONY,order);
@@ -71,29 +72,29 @@ public class CorporationBuyItem extends AOrderProcessor {
 		}
 		else {	
 			List<MarketItem> marketItems = new ArrayList<MarketItem>();
-			for(Object o : entityStore.listMarket(colony, 1)) {
+			for(Object o : entityStore.listMarket(colony.getID(), 1)) {
 				marketItems.add((MarketItem)o);
 			}
-			ColonyItem colonyItem = entityStore.getItem(colony, corp, type);
+			ColonyItem colonyItem = entityStore.getItem(colony.getID(), corp.getID(), type);
 			if(colonyItem == null) {
 				colonyItem = new ColonyItem();
 				Items item = new Items();
 				item.setTypeClass(type);
-				colonyItem.setColony(colony);
+				colonyItem.setColony(colony.getID());
 				colonyItem.setItem(item);
-				colonyItem.setOwner(corp);
+				colonyItem.setOwner(corp.getID());
 				entityStore.create(colonyItem);
 			}
-			Util.BuyResult result = Util.buy(ServerConfiguration.getCurrentDate(), marketItems, quantity, entityStore.getCredits(corp),entityStore);
+			Util.BuyResult result = Util.buy(ServerConfiguration.getCurrentDate(), marketItems, quantity, entityStore.getCredits(corp.getID()),entityStore);
 			Object[] args = {String.valueOf(result.quantityBought), type.getName(),colony.getName(),String.valueOf(colony.getID())};
 			String desc = CashTransaction.getDescription(CashTransaction.ITEM_BOUGHT, args);
 			colonyItem.getItem().add(result.quantityBought);
-			entityStore.removeCredits(corp, result.totalPrice, desc);
+			entityStore.removeCredits(corp.getID(), result.totalPrice, desc);
 			
 			entityStore.update(colonyItem);
 			Object[] args2 = {colonyHub.getTypeClass().getName(), colony.getName(), String.valueOf(colony.getID())};
 			desc = CashTransaction.getDescription(CashTransaction.MARKET_FEES, args2);
-			entityStore.removeCredits(corp, colonyHub.getServiceCharge(), desc);
+			entityStore.transferCredits(corp.getID(), colonyHub.getOwner(), colonyHub.getServiceCharge(), desc);
 			colonyHub.incTransactionCount();
 			entityStore.update(colonyHub);
 			report = new OrderReport(order,colony,corp);

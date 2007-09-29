@@ -295,7 +295,7 @@ public class MainWindow extends AWindow {
 				if(SWT.RETRY == buttonID) {
 					loadReport(fileName);
 				}
-			} catch (DocumentException e) {
+			} catch (Throwable e) {
 				messageBox("Invalid Report", fileName + " is not a valid StarCorp turn report", SWT.ICON_ERROR | SWT.OK);
 			}
 		}
@@ -408,7 +408,7 @@ public class MainWindow extends AWindow {
 	}
 	
 	public void forward() {
-		System.out.println("forward: " + historyIndex + " (" + history.size() + ")");
+//		System.out.println("forward: " + historyIndex + " (" + history.size() + ")");
 		if(historyIndex + 1 < history.size()) {
 			ADataPane dataPane = history.get(historyIndex + 1);
 			if(dataPane.equals(this.currentDataPane))
@@ -425,7 +425,7 @@ public class MainWindow extends AWindow {
 	}
 	
 	public void back() {
-		System.out.println("back: " + historyIndex + " (" + history.size() + ")");
+//		System.out.println("back: " + historyIndex + " (" + history.size() + ")");
 		if(historyIndex > 0) {
 			ADataPane dataPane = history.get(historyIndex - 1);
 			if(dataPane.equals(this.currentDataPane))
@@ -469,7 +469,7 @@ public class MainWindow extends AWindow {
 		history.add(dataPane);
 		historyIndex = history.size() - 1;
 		toggleToolbarDirections();
-		System.out.println("set: " + historyIndex);
+//		System.out.println("set: " + historyIndex);
 		redraw();
 	}
 
@@ -490,7 +490,7 @@ public class MainWindow extends AWindow {
 	}
 	
 	public PlanetMapWindow openPlanetMap(Planet planet) {
-		System.out.println("Open map " + planet);
+//		System.out.println("Open map " + planet);
 		if(mapWindow != null) {
 			mapWindow.dispose();
 		}

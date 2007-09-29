@@ -27,11 +27,13 @@ import starcorp.server.engine.AServerTask;
  */
 public class CommandParser {
 
+	private final Shell shell;
 	private Map<String, ACommand> commands = new HashMap<String, ACommand>();
 	private PrintWriter out = new PrintWriter(System.out);
 	
-	public CommandParser() {
+	public CommandParser(Shell shell) {
 		initializeCommands();
+		this.shell = shell;
 	}
 	
 	public Iterator<String> listCommands() {
@@ -79,6 +81,10 @@ public class CommandParser {
 		String[] commandArgs = new String[args.length - 1];
 		System.arraycopy(args, 1, commandArgs, 0, commandArgs.length);
 		return command.task(new ACommand.Arguments(commandArgs), out);
+	}
+
+	public Shell getShell() {
+		return shell;
 	}
 	
 }

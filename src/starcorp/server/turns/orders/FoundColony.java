@@ -47,20 +47,20 @@ public class FoundColony extends AOrderProcessor {
 		
 		Starship ship = (Starship) entityStore.load(Starship.class, starshipId);
 		ColonyHub hubType = (ColonyHub) AFacilityType.getType(hubTypeKey);
-		if(ship == null || !ship.getOwner().equals(corp)) {
+		if(ship == null || ship.getOwner() != corp.getID()) {
 			error = new TurnError(TurnError.INVALID_SHIP,order);
 		}
 		else if(hubType == null) {
 			error = new TurnError(TurnError.INVALID_FACILITY_TYPE,order);
 		}
 		else {
-			Planet planet = ship.getPlanet();
+			Planet planet = (Planet) entityStore.load(Planet.class, ship.getPlanet());
 			Coordinates2D location = ship.getPlanetLocation();
 			if(planet == null || location == null) {
 				error = new TurnError(TurnError.INVALID_LOCATION,order);
 			}
 			else {
-				Colony colony = entityStore.getColony(planet, location);
+				Colony colony = entityStore.getColony(planet.getID(), location);
 				if(colony != null) {
 					error = new TurnError(TurnError.INVALID_LOCATION,order);
 				}
@@ -71,7 +71,7 @@ public class FoundColony extends AOrderProcessor {
 					Facility hub = new Facility();
 					hub.setBuiltDate(ServerConfiguration.getCurrentDate());
 					hub.setOpen(true);
-					hub.setOwner(corp);
+					hub.setOwner(corp.getID());
 					hub.setTypeClass(hubType);
 					
 					boolean hasNeededModules = true;
@@ -101,14 +101,14 @@ public class FoundColony extends AOrderProcessor {
 					
 						colony = new Colony();
 						colony.setFoundedDate(ServerConfiguration.getCurrentDate());
-						colony.setGovernment(corp);
+						colony.setGovernment(corp.getID());
 						colony.setHazardLevel(hazardLevel);
 						colony.setLocation(location);
 						colony.setName(name);
-						colony.setPlanetID(planet.getID());
+						colony.setPlanet(planet.getID());
 				
 						entityStore.create(colony);
-						hub.setColony(colony);
+						hub.setColony(colony.getID());
 						entityStore.create(hub);
 						entityStore.update(ship);
 						OrderReport report = new OrderReport(order,colony,ship);

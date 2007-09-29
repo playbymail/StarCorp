@@ -84,13 +84,13 @@ public class Inject extends ACommand {
 					else {
 						for(AItemType itemType : types) {
 							MarketItem item = new MarketItem();
-							int price = (int) (entityStore.getAveragePrice(colony, itemType) * 1.10);
-							item.setColony(colony);
+							int price = (int) (entityStore.getAveragePrice(colony.getID(), itemType) * 1.10);
+							item.setColony(colony.getID());
 							item.setCostPerItem(price);
 							item.setIssuedDate(ServerConfiguration.getCurrentDate());
 							item.setItem(new Items(itemType));
 							item.add(Util.rnd.nextInt(10000));
-							item.setSeller(corp);
+							item.setSeller(corp.getID());
 							entityStore.create(item);
 							log.info("Created " + item);
 						}
@@ -109,10 +109,10 @@ public class Inject extends ACommand {
 					else {
 						for(AItemType itemType : types) {
 							ColonyItem item = new ColonyItem();
-							item.setColony(colony);
+							item.setColony(colony.getID());
 							item.setItem(new Items(itemType));
 							item.add(Util.rnd.nextInt(10000));
-							item.setOwner(corp);
+							item.setOwner(corp.getID());
 							entityStore.create(item);
 							log.info("Created " + item);
 						}

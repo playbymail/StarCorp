@@ -40,9 +40,10 @@ public class Populated extends Standard {
 		Corporation govt = new Corporation();
 		govt.setFoundedDate(ServerConfiguration.getCurrentDate());
 		govt.setName(name + " Federation");
+		govt.add(system.getID());
 		entityStore.create(govt);
 		log.info("Created " + govt);
-		entityStore.addCredits(govt, STARTING_NPC_CREDITS, "NPC Setup");
+		entityStore.addCredits(govt.getID(), STARTING_NPC_CREDITS, "NPC Setup");
 		int otherCorps = Util.rnd.nextInt(10) + 5;
 		List<Corporation> tradingCompanies = new ArrayList<Corporation>();
 		tradingCompanies.add(govt);
@@ -50,9 +51,11 @@ public class Populated extends Standard {
 			Corporation corp = new Corporation();
 			corp.setFoundedDate(ServerConfiguration.getCurrentDate());
 			corp.setName(Util.getRandomCorporationName());
+			corp.add(system.getID());
 			corp = (Corporation) entityStore.create(corp);
 			log.info("Created " + corp);
-			entityStore.addCredits(corp, STARTING_NPC_CREDITS, "NPC Setup");
+			entityStore.addCredits(corp.getID(), STARTING_NPC_CREDITS, "NPC Setup");
+			tradingCompanies.add(corp);
 		}
 		Set<starcorp.server.Util.SuitableLocation> suitableLocations = Survey.findSuitableLocations(system, entityStore, AItemType.listTypes(Resources.class));
 		boolean capitol = false;

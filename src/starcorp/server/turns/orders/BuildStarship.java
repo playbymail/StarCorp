@@ -57,20 +57,20 @@ public class BuildStarship extends AOrderProcessor {
 			Starship ship = new Starship();
 			ship.setBuiltDate(ServerConfiguration.getCurrentDate());
 			ship.setDesign(design);
-			Planet planet = ((Planet) entityStore.load(Planet.class, colony.getPlanetID()));
-			ship.setPlanet(planet);
+			Planet planet = ((Planet) entityStore.load(Planet.class, colony.getPlanet()));
+			ship.setPlanet(planet.getID());
 			ship.setName(name);
-			ship.setOwner(corp);
+			ship.setOwner(corp.getID());
 			ship.setPlanetLocation(colony.getLocation());
-			ship.setColony(colony);
-			ship.setSystemID(planet.getSystemID());
+			ship.setColony(colony.getID());
+			ship.setSystem(planet.getSystem());
 			
 			boolean hasNeededHulls = true;
 			Iterator<Items> i = design.getHulls().iterator();
 			
 			while(i.hasNext()) {
 				Items item = i.next();
-				ColonyItem colonyItem = entityStore.getItem(colony, corp, item.getTypeClass());
+				ColonyItem colonyItem = entityStore.getItem(colony.getID(), corp.getID(), item.getTypeClass());
 				if(colonyItem == null || colonyItem.getItem().getQuantity() < item.getQuantity()) {
 					error = new TurnError(TurnError.INSUFFICIENT_SHIP_HULLS,order);
 					hasNeededHulls = false;
@@ -83,7 +83,7 @@ public class BuildStarship extends AOrderProcessor {
 				
 				while(i.hasNext()) {
 					Items item = i.next();
-					ColonyItem colonyItem = entityStore.getItem(colony, corp, item.getTypeClass());
+					ColonyItem colonyItem = entityStore.getItem(colony.getID(), corp.getID(), item.getTypeClass());
 					if(colonyItem != null || !(colonyItem.getItem().getQuantity() < item.getQuantity())) {
 						colonyItem.getItem().remove(item.getQuantity());
 					}

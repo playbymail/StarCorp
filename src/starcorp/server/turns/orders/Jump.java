@@ -43,7 +43,7 @@ public class Jump extends AOrderProcessor {
 		Starship ship = (Starship) entityStore.load(Starship.class, starshipId);
 		StarSystem system = (StarSystem) entityStore.load(StarSystem.class, systemId);
 		
-		if(ship == null || !ship.getOwner().equals(corp)) {
+		if(ship == null || ship.getOwner() != corp.getID()) {
 			error = new TurnError(TurnError.INVALID_SHIP,order);
 		}
 		else if(system == null) {
@@ -53,11 +53,11 @@ public class Jump extends AOrderProcessor {
 			error = new TurnError(TurnError.INSUFFICIENT_TIME,order);
 		}
 		else {
-			if(ship.getPlanet() != null) {
+			if(ship.getPlanet() != 0) {
 				error = new TurnError(TurnError.INVALID_LOCATION,order);
 			}
 			else {
-				StarSystem currentSystem = (StarSystem) entityStore.load(StarSystem.class, ship.getSystemID());
+				StarSystem currentSystem = (StarSystem) entityStore.load(StarSystem.class, ship.getSystem());
 				Coordinates3D currentLocation = currentSystem.getLocation();
 				Coordinates3D targetLocation = system.getLocation();
 				int distance = targetLocation.getDistance(currentLocation);
@@ -65,15 +65,17 @@ public class Jump extends AOrderProcessor {
 					error = new TurnError(TurnError.OUT_OF_RANGE,order);
 				}
 				else {
-					ship.setSystemID(system.getID());
+					ship.setSystem(system.getID());
 					ship.incrementTimeUnitsUsed(TIME_UNITS);
 					entityStore.update(ship);
+					corp.add(system.getID());
+					entityStore.update(corp);
 					OrderReport report = new OrderReport(order,system,ship);
 					report.add(ship.getName());
 					report.add(ship.getID());
 					report.add(system.getName());
 					report.add(system.getID());
-					report.addScannedEntities(entityStore.listSystemEntities(system, ship.getLocation()));
+					report.addScannedEntities(entityStore.listSystemEntities(system.getID(), ship.getLocation()));
 					order.setReport(report);
 				}
 			}

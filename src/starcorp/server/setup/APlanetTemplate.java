@@ -100,7 +100,7 @@ public abstract class APlanetTemplate {
 		if(p == null) {
 			return null;
 		}
-		return create((StarSystem)entityStore.load(StarSystem.class, p.getSystemID()),p,p.getLocation(),name);
+		return create((StarSystem)entityStore.load(StarSystem.class, p.getSystem()),p,p.getLocation(),name);
 	}
 	
 	public Planet create(StarSystem system, Planet orbiting, CoordinatesPolar location, String name) {
@@ -110,10 +110,11 @@ public abstract class APlanetTemplate {
 		planet.setLocation(location);
 		planet.setName(name);
 		planet.setOrbiting(orbiting);
-		planet.setSystemID(system.getID());
+		planet.setSystem(system.getID());
 		planet = (Planet) entityStore.create(planet);
 		log.info("Created " + planet);
-		generateMap(planet, getWidth(), getHeight());
+		int size = getSize();
+		generateMap(planet, size, size);
 		return planet;
 	}
 	
@@ -121,11 +122,7 @@ public abstract class APlanetTemplate {
 		return Util.rnd.nextInt(4) + 1;
 	}
 
-	protected int getHeight() {
-		return Util.rnd.nextInt(25) + 1;
-	}
-
-	protected int getWidth() {
+	protected int getSize() {
 		return Util.rnd.nextInt(25) + 1;
 	}
 
@@ -189,7 +186,7 @@ public abstract class APlanetTemplate {
 				int yield = Util.rnd.nextInt(20) + 1;
 				ResourceDeposit deposit = new ResourceDeposit();
 				deposit.setLocation(location);
-				deposit.setSystemEntityID(planet.getID());
+				deposit.setSystemEntity(planet.getID());
 				deposit.setTotalQuantity(totalQuantity);
 				deposit.setType(type);
 				deposit.setYield(yield);
@@ -200,7 +197,7 @@ public abstract class APlanetTemplate {
 	}
 	
 	private void generateMap(Planet planet, int width, int height) {
-		if(planet.getOrbitingID() > 0 ) {
+		if(planet.getOrbiting() > 0 ) {
 			width /= 10;
 			width = width > 1 ? width : 1;
 			height /= 10;

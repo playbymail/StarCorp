@@ -10,6 +10,10 @@
  */
 package starcorp.common.entities;
 
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
 import org.dom4j.Element;
 
 import starcorp.common.types.GalacticDate;
@@ -27,6 +31,8 @@ public class Corporation extends ANamedEntity {
 	private String playerPassword;
 	private GalacticDate foundedDate;
 	private GalacticDate lastTurnDate;
+	
+	private Set<Long> knownSystems = new HashSet<Long>();
 	
 	public Corporation() {
 		
@@ -46,6 +52,13 @@ public class Corporation extends ANamedEntity {
 			this.playerName = player.attributeValue("name");
 			this.playerPassword = player.attributeValue("password");
 		}
+		Element eKnown = e.element("known-systems");
+		if(eKnown != null) {
+			for(Iterator i = eKnown.elementIterator("system"); i.hasNext();) {
+				long sysID = Long.parseLong(((Element)i.next()).attributeValue("ID","0"));
+				add(sysID);
+			}
+		}
 		Element eDate = e.element("founded");
 		if(eDate != null) {
 			this.foundedDate = new GalacticDate(eDate.element("date"));
@@ -62,11 +75,23 @@ public class Corporation extends ANamedEntity {
 		p.addAttribute("email", playerEmail);
 		p.addAttribute("name", playerName);
 		p.addAttribute("password", playerPassword);
+		Element e = root.addElement("known-systems");
+		for(Long system : knownSystems) {
+			e.addElement("system").addAttribute("ID", String.valueOf(system));
+		}
 		if(foundedDate != null)
 			foundedDate.toXML(root.addElement("founded"));
 		if(lastTurnDate != null)
 			lastTurnDate.toXML(root.addElement("last-turn"));
 		return root;
+	}
+	
+	public void add(long system) {
+		knownSystems.add(system);
+	}
+	
+	public boolean isKnown(StarSystem system) {
+		return knownSystems.contains(system);
 	}
 	
 	public String getPlayerName() {
@@ -102,6 +127,14 @@ public class Corporation extends ANamedEntity {
 
 	public void setLastTurnDate(GalacticDate lastTurnDate) {
 		this.lastTurnDate = lastTurnDate;
+	}
+
+	public Set<Long> getKnownSystems() {
+		return knownSystems;
+	}
+
+	public void setKnownSystems(Set<Long> knownSystems) {
+		this.knownSystems = knownSystems;
 	}
 
 }

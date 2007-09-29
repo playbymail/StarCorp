@@ -31,7 +31,7 @@ import starcorp.common.types.Coordinates2D;
 public class ResourceDeposit implements IEntity {
 	private long ID;
 	private int version;
-	private long systemEntityID;
+	private long systemEntity;
 	private Coordinates2D location;
 	private AItemType type;
 	private int totalQuantity;
@@ -132,12 +132,12 @@ public class ResourceDeposit implements IEntity {
 		this.totalQuantity = totalQuantity;
 	}
 
-	public long getSystemEntityID() {
-		return systemEntityID;
+	public long getSystemEntity() {
+		return systemEntity;
 	}
 
-	public void setSystemEntityID(long systemEntity) {
-		this.systemEntityID = systemEntity;
+	public void setSystemEntity(long systemEntity) {
+		this.systemEntity = systemEntity;
 	}
 
 	public Coordinates2D getLocation() {
@@ -153,8 +153,8 @@ public class ResourceDeposit implements IEntity {
 	}
 
 	public void readXML(Element e) {
-		this.ID = Integer.parseInt(e.attributeValue("ID","0"));
-		this.systemEntityID = Long.parseLong(e.attributeValue("entity","0"));
+		this.ID = Long.parseLong(e.attributeValue("ID","0"));
+		this.systemEntity = Long.parseLong(e.attributeValue("entity","0"));
 		this.location = new Coordinates2D(e);
 		this.type = AItemType.getType(e.attributeValue("type"));
 		this.totalQuantity = Integer.parseInt(e.attributeValue("total","0"));
@@ -165,7 +165,7 @@ public class ResourceDeposit implements IEntity {
 		Element root = parent.addElement("entity");
 		root.addAttribute("ID", String.valueOf(ID));
 		root.addAttribute("class", getClass().getSimpleName());
-		root.addAttribute("entity",String.valueOf(systemEntityID));
+		root.addAttribute("entity",String.valueOf(systemEntity));
 		if(location != null) location.toXML(root);
 		root.addAttribute("type", type.getKey());
 		root.addAttribute("total", String.valueOf(totalQuantity));
@@ -175,7 +175,7 @@ public class ResourceDeposit implements IEntity {
 
 	@Override
 	public String toString() {
-		return type.getKey() + " x " + totalQuantity + " [" + getID() + "] @ " + systemEntityID + ") " + location;
+		return type.getKey() + " x " + totalQuantity + " [" + getID() + "] @ " + systemEntity + ") " + location;
 	}
 
 	public long getID() {

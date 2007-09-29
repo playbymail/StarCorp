@@ -44,7 +44,7 @@ public class FactoryBuild extends AOrderProcessor {
 		if(factory == null || !(factory.getTypeClass() instanceof Factory)) {
 			error = new TurnError(TurnError.INVALID_FACILITY,order);
 		}
-		else if(!factory.getOwner().equals(corp)) {
+		else if(factory.getOwner() != corp.getID()) {
 			error = new TurnError(TurnError.INVALID_FACILITY,order);
 		}
 		else if(type == null || !(type instanceof AFactoryItem)) {
@@ -53,11 +53,11 @@ public class FactoryBuild extends AOrderProcessor {
 		else {
 			Factory facType = (Factory) factory.getTypeClass();
 			if(facType.canBuild(type)) {
-				int position = entityStore.getNextQueuePosition(factory);
+				int position = entityStore.getNextQueuePosition(factory.getID());
 				FactoryQueueItem queueItem = new FactoryQueueItem();
-				queueItem.setOwner(corp);
+				queueItem.setOwner(corp.getID());
 				queueItem.setColony(factory.getColony());
-				queueItem.setFactory(factory);
+				queueItem.setFactory(factory.getID());
 				queueItem.setItem(new Items(type,quantity));
 				queueItem.setPosition(position);
 				queueItem.setQueuedDate(ServerConfiguration.getCurrentDate());

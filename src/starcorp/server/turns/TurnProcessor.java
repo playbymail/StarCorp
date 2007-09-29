@@ -12,6 +12,7 @@ package starcorp.server.turns;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -20,7 +21,10 @@ import org.dom4j.Document;
 import org.dom4j.io.SAXReader;
 import starcorp.common.entities.Colony;
 import starcorp.common.entities.Corporation;
+import starcorp.common.entities.Facility;
+import starcorp.common.entities.MarketItem;
 import starcorp.common.entities.Planet;
+import starcorp.common.entities.StarSystem;
 import starcorp.common.entities.Starship;
 import starcorp.common.entities.StarshipDesign;
 import starcorp.common.turns.Turn;
@@ -120,6 +124,38 @@ public class TurnProcessor extends AServerTask {
 		log.info(this + ": Finished processing turns.");
 	}
 	
+	private void addPlanet(TurnReport report, long planetID) {
+		if(report.getPlanet(planetID) == null) {
+			Planet planet = (Planet)entityStore.load(Planet.class,planetID);
+			report.addScanned(planet);
+			if(planet.getOrbiting() > 0)
+				addPlanet(report,planet.getOrbiting());
+		}
+	}
+	
+	private void addColony(TurnReport report, long colonyID) {
+		if(report.getColony(colonyID) == null) {
+			Colony colony = (Colony)entityStore.load(Colony.class, colonyID);
+			report.addScanned(colony);
+			addCorporation(report, colony.getGovernment());
+			addPlanet(report, colony.getPlanet());
+		}
+	}
+	
+	private void addCorporation(TurnReport report, long corpID) {
+		if(corpID != report.getTurn().getCorporation().getID() && 
+				report.getCorporation(corpID) == null) {
+			report.addScanned((Corporation)entityStore.load(Corporation.class,corpID));
+		}
+	}
+	
+	private void addFacility(TurnReport report, long facilityID) {
+		Facility f = (Facility) entityStore.load(Facility.class, facilityID);
+		report.addScanned(f);
+		addColony(report,f.getColony());
+		addCorporation(report,f.getOwner());
+	}
+	
 	public TurnReport process(Turn turn) {
 		if(log.isDebugEnabled()) {
 			log.debug(turn);
@@ -136,22 +172,66 @@ public class TurnProcessor extends AServerTask {
 				if(error != null) {
 					turn.add(error);
 				}
+				else {
+					for(Object o : order.getReport().getScannedEntities(Colony.class)) {
+						Colony c = (Colony)o;
+						addColony(report, c.getID());
+					}
+					for(Object o : order.getReport().getScannedEntities(Planet.class)) {
+						addPlanet(report,((Planet)o).getID());
+					}
+					for(Object o : order.getReport().getScannedEntities(Facility.class)) {
+						Facility f = (Facility)o;
+						addFacility(report, f.getID());
+					}
+					for(Object o : order.getReport().getScannedEntities(Corporation.class)) {
+						addCorporation(report,((Corporation)o).getID());
+					}
+				}
 				if(log.isDebugEnabled())
 					log.debug("Processed " + order + " : error = " + error);
 			}
 			turn.setProcessedDate(ServerConfiguration.getCurrentDate());
-			report.addPlayerEntities(entityStore.listDesigns(corp));
-			report.addPlayerEntities(entityStore.listFacilities(corp));
-			report.addPlayerEntities(entityStore.listShips(corp));
-			report.setMarket(entityStore.listMarket(1));
+			corp = (Corporation) entityStore.load(Corporation.class, corp.getID());
+			turn.setCorporation(corp);
+			report.addPlayerEntities(entityStore.listDesigns(corp.getID()));
+			List<Facility> facilities = entityStore.listFacilitiesByOwner(corp.getID());
+			for(Facility facility : facilities) {
+				addFacility(report, facility.getID());
+			}
+			
+			report.addPlayerEntities(facilities);
+			List<Starship> ships = entityStore.listShips(corp.getID());
+			for(Starship ship : ships) {
+				if(ship.getColony() != 0) {
+					addColony(report, ship.getColony());
+				}
+				if(ship.getPlanet() != 0) {
+					addPlanet(report, ship.getPlanet());
+				}
+			}
+			report.addPlayerEntities(ships);
 			report.setLaws(entityStore.listLaws());
-			report.setItems(entityStore.listItems(turn.getCorporation()));
-			report.setEmployees(entityStore.listWorkers(corp));
-			report.setFactoryQueue(entityStore.listQueue(corp));
-			report.setCredits(entityStore.getCredits(corp));
+			report.setItems(entityStore.listItems(turn.getCorporation().getID()));
+			report.setEmployees(entityStore.listWorkersByEmployer(corp.getID()));
+			report.setFactoryQueue(entityStore.listQueue(corp.getID()));
+			report.setCredits(entityStore.getCredits(corp.getID()));
+			List<MarketItem> market = new ArrayList<MarketItem>();
+			for(Long system : corp.getKnownSystems()) {
+				StarSystem ss = (StarSystem) entityStore.load(StarSystem.class, system);
+				report.addScanned(ss);
+				for(Planet planet : entityStore.listPlanets(system)) {
+					for(Colony colony : entityStore.listColoniesByPlanet(planet.getID())) {
+						for(MarketItem item : entityStore.listMarket(colony.getID(),1)) {
+							market.add(item);
+							addCorporation(report,item.getSeller());
+						}
+						addColony(report,colony.getID());
+					}
+				}
+			}
+			report.setMarket(market);
 			// TODO add recent CashTransaction for corporation to report
-			// TODO add known systems (requires changes to entities)
-			// TODO filter market items to known systems
 		}
 		log.info(this + ": Processed turn from " + turn.getCorporation() + ". Order: " + turn.getOrders().size() + ". Errors: " + turn.getErrors().size());
 		processed++;
@@ -163,8 +243,8 @@ public class TurnProcessor extends AServerTask {
 		if(existing == null) {
 			corp.setFoundedDate(ServerConfiguration.getCurrentDate());
 			entityStore.create(corp);
-			entityStore.addCredits(corp, ServerConfiguration.SETUP_INITIAL_CREDITS, ServerConfiguration.SETUP_DESCRIPTION);
-			createStartingPosition(corp);
+			entityStore.addCredits(corp.getID(), ServerConfiguration.SETUP_INITIAL_CREDITS, ServerConfiguration.SETUP_DESCRIPTION);
+			corp = createStartingPosition(corp);
 			return corp;
 		}
 		else {
@@ -172,12 +252,12 @@ public class TurnProcessor extends AServerTask {
 		}
 	}
 	
-	private void createStartingPosition(Corporation corp){
+	private Corporation createStartingPosition(Corporation corp){
 		// TODO make this configurable esp starting colony
 		StarshipDesign design = new StarshipDesign();
 		design.setDesignDate(ServerConfiguration.getCurrentDate());
 		design.setName("Surveyer");
-		design.setOwner(corp);
+		design.setOwner(corp.getID());
 		design.setHulls(new Items(AItemType.getType("command-deck"),1));
 		design.setHulls(new Items(AItemType.getType("crew-deck"),2));
 		design.setHulls(new Items(AItemType.getType("impulse-drive"),1));
@@ -187,20 +267,24 @@ public class TurnProcessor extends AServerTask {
 		design.setHulls(new Items(AItemType.getType("scanner"),1));
 		design.setHulls(new Items(AItemType.getType("probe"),1));
 		design = (StarshipDesign) entityStore.create(design);
+		List<Colony> colonies = entityStore.listColonies();
+		Colony colony = colonies.get(Util.rnd.nextInt(colonies.size()));
+		Planet planet = (Planet) entityStore.load(Planet.class, colony.getPlanet());
+		corp.add(planet.getSystem());
+		entityStore.update(corp);
 		Starship ship = new Starship();
 		ship.setBuiltDate(ServerConfiguration.getCurrentDate());
 		ship.setDesign(design);
 		ship.setName("SS " + corp.getName());
-		List<Colony> colonies = entityStore.listColonies();
-		Colony colony = colonies.get(Util.rnd.nextInt(colonies.size()));
-		Planet planet = (Planet) entityStore.load(Planet.class, colony.getPlanetID());
-		ship.setColony(colony);
-		ship.setPlanet(planet);
+		ship.setColony(colony.getID());
+		ship.setPlanet(planet.getID());
 		ship.setPlanetLocation(colony.getLocation());
-		ship.setSystemID(planet.getSystemID());
+		ship.setSystem(planet.getSystem());
 		ship.setLocation(planet.getLocation());
-		ship.setOwner(corp);
+		ship.setOwner(corp.getID());
+		
 		entityStore.create(ship);
+		return corp;
 	}
 	
 	private Corporation authorize(Corporation corp) {

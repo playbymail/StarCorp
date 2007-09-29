@@ -22,7 +22,6 @@ import starcorp.common.entities.AColonists;
 import starcorp.common.entities.CashTransaction;
 import starcorp.common.entities.ColonistGrant;
 import starcorp.common.entities.Colony;
-import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Facility;
 import starcorp.common.entities.Unemployed;
 import starcorp.common.entities.Workers;
@@ -99,16 +98,16 @@ public class ColonyUpdater extends AServerTask {
 		int qty = colonists.getQuantity();
 		Util.BuyResult result = Util.buy(ServerConfiguration
 				.getCurrentDate(), 
-				entityStore.listMarket(colony, types, 1),
+				entityStore.listMarket(colony.getID(), types, 1),
 				qty, 
-				entityStore.getCredits(colonists),entityStore);
+				entityStore.getCredits(colonists.getID()),entityStore);
 		double ratio = qty > 0 ?
 				(double) result.quantityBought / (double) qty
 				: 0.0;
 		double happiness = ratio * happinessRating;
 		colonists.addHappiness(happiness);
 		entityStore.update(colonists);
-		entityStore.removeCredits(colonists, result.totalPrice, "");
+		entityStore.removeCredits(colonists.getID(), result.totalPrice, "");
 		if (log.isDebugEnabled())
 			log.debug(this + ": CONSUME : " + colonists + " bought " + result.quantityBought
 					+ " consumer goods");
@@ -125,17 +124,18 @@ public class ColonyUpdater extends AServerTask {
 	private void doConsumerNeeds(PopulationClass popClass) {
 		int quality = popClass.getConsumerQualityRequired();
 		List<AItemType> foodTypes = ConsumerGoods.listFood(quality);
-		doConsumerNeeds(entityStore.listColonists(colony, popClass), foodTypes, HAPPINESS_FOOD);
+		doConsumerNeeds(entityStore.listColonists(colony.getID(), popClass), foodTypes, HAPPINESS_FOOD);
 		List<AItemType> drinkTypes = ConsumerGoods.listDrink(quality);
-		doConsumerNeeds(entityStore.listColonists(colony, popClass), drinkTypes, HAPPINESS_DRINK);
+		doConsumerNeeds(entityStore.listColonists(colony.getID(), popClass), drinkTypes, HAPPINESS_DRINK);
 		List<AItemType> intoxicantTypes = ConsumerGoods.listIntoxicant(quality);
-		doConsumerNeeds(entityStore.listColonists(colony, popClass), intoxicantTypes, HAPPINESS_INTOXICANT);
+		doConsumerNeeds(entityStore.listColonists(colony.getID(), popClass), intoxicantTypes, HAPPINESS_INTOXICANT);
 		List<AItemType> clothesTypes = ConsumerGoods.listClothes(quality);
-		doConsumerNeeds(entityStore.listColonists(colony, popClass), clothesTypes, HAPPINESS_CLOTHES);
+		doConsumerNeeds(entityStore.listColonists(colony.getID(), popClass), clothesTypes, HAPPINESS_CLOTHES);
 	}
 	
 	private void doDeaths(AColonists colonist) {
-		double deathRate = colonist.getColony().getHazardLevel();
+		Colony colony = (Colony) entityStore.load(Colony.class,colonist.getColony());
+		double deathRate = colony.getHazardLevel();
 		int qty = colonist.getQuantity();
 		int deaths = (int) (qty * deathRate);
 		if (deaths > 0) {
@@ -155,30 +155,30 @@ public class ColonyUpdater extends AServerTask {
 	private void doServiceNeeds(PopulationClass popClass) {
 		int quality = popClass.getServiceQualityRequired();
 		List<AFacilityType> medicalTypes = ServiceFacility.listMedical(quality);
-		doServiceNeeds(entityStore.listColonists(colony, popClass), medicalTypes, HAPPINESS_MEDICAL);
+		doServiceNeeds(entityStore.listColonists(colony.getID(), popClass), medicalTypes, HAPPINESS_MEDICAL);
 		List<AFacilityType> fitnessTypes = ServiceFacility.listFitness(quality);
-		doServiceNeeds(entityStore.listColonists(colony, popClass), fitnessTypes, HAPPINESS_FITNESS);
+		doServiceNeeds(entityStore.listColonists(colony.getID(), popClass), fitnessTypes, HAPPINESS_FITNESS);
 		List<AFacilityType> entTypes = ServiceFacility
 				.listEntertainment(quality);
-		doServiceNeeds(entityStore.listColonists(colony, popClass), entTypes, HAPPINESS_ENTERTAINMENT);
+		doServiceNeeds(entityStore.listColonists(colony.getID(), popClass), entTypes, HAPPINESS_ENTERTAINMENT);
 		List<AFacilityType> eduTypes = ServiceFacility.listEducation(quality);
-		doServiceNeeds(entityStore.listColonists(colony, popClass), eduTypes, HAPPINESS_EDUCATION);
+		doServiceNeeds(entityStore.listColonists(colony.getID(), popClass), eduTypes, HAPPINESS_EDUCATION);
 	}
 	private void doServiceNeeds(AColonists colonists,
 			List<AFacilityType> types, double happinessRating) {
 		int qty = colonists.getQuantity();
 		Util.ServiceResult result = Util.service(ServerConfiguration
 				.getCurrentDate(), 
-				entityStore.mapFacilitiesWithWorkers(colony, types),
+				entityStore.mapFacilitiesWithWorkers(colony.getID(), types),
 				qty,
-				entityStore.getCredits(colonists),entityStore);
+				entityStore.getCredits(colonists.getID()),entityStore);
 		double ratio = qty > 0 ? 
 					(double) result.quantityServiced / (double) qty 
 					: 0.0;
 		double happiness = ratio * happinessRating;
 		colonists.addHappiness(happiness);
 		entityStore.update(colonists);
-		entityStore.removeCredits(colonists, result.totalCost, "");
+		entityStore.removeCredits(colonists.getID(), result.totalCost, "");
 		if (log.isDebugEnabled())
 			log.debug(this + ": SERVICE : " + colonists + " used " + result.quantityServiced
 					+ " services");
@@ -193,11 +193,11 @@ public class ColonyUpdater extends AServerTask {
 	}
 
 	private Unemployed getUnemployed(PopulationClass popClass) {
-		Unemployed unemployed = entityStore.getUnemployed(colony, popClass);
+		Unemployed unemployed = entityStore.getUnemployed(colony.getID(), popClass);
 		if(unemployed == null) {
 			unemployed = new Unemployed();
 			unemployed.setPopClass(popClass);
-			unemployed.setColony(colony);
+			unemployed.setColony(colony.getID());
 			unemployed = (Unemployed) entityStore.create(unemployed);
 		}
 		return unemployed;
@@ -210,7 +210,7 @@ public class ColonyUpdater extends AServerTask {
 	}
 
 	private void hireWorkers(Workers workers) {
-		Facility facility = workers.getFacility();
+		Facility facility = (Facility) entityStore.load(Facility.class,workers.getFacility());
 		PopulationClass popClass = workers.getPopClass();
 		Population required = facility.getTypeClass().getWorkerRequirement(
 				popClass);
@@ -228,13 +228,13 @@ public class ColonyUpdater extends AServerTask {
 			}
 			if (qty > 0) {
 				int colonistCount = unemployed.getQuantity();
-				long cashPerPerson = colonistCount == 0 ? 0 : entityStore.getCredits(unemployed) / colonistCount;
+				long cashPerPerson = colonistCount == 0 ? 0 : entityStore.getCredits(unemployed.getID()) / colonistCount;
 				long cash = qty * cashPerPerson;
 				workers.addPopulation(qty);
 				unemployed.removePopulation(qty);
 				entityStore.update(workers);
 				entityStore.update(unemployed);
-				entityStore.transferCredits(unemployed, workers, cash, "");
+				entityStore.transferCredits(unemployed.getID(), workers.getID(), cash, "");
 				if (log.isDebugEnabled())
 					log.debug(this + ": HIRING : " + facility + " hired " + qty + " of "
 							+ popClass);
@@ -246,7 +246,8 @@ public class ColonyUpdater extends AServerTask {
 	private void payGrants(AColonists colonists) {
 		ColonistGrant grant = grants.get(colonists.getPopClass());
 		if (grant != null) {
-			Corporation govt = grant.getColony().getGovernment();
+			Colony colony = (Colony) entityStore.load(Colony.class,grant.getColony());
+			long govt = colony.getGovernment();
 			int qty = colonists.getQuantity();
 			int cash = grant.getCredits() * qty;
 			long avail = entityStore.getCredits(govt);
@@ -257,7 +258,7 @@ public class ColonyUpdater extends AServerTask {
 					String.valueOf(qty) };
 			String desc = CashTransaction.getDescription(
 					CashTransaction.GRANT_PAID, args);
-			entityStore.transferCredits(govt, colonists, cash, desc);
+			entityStore.transferCredits(govt, colonists.getID(), cash, desc);
 			if (log.isDebugEnabled())
 				log.debug(this + ": GRANTS : " + colonists + " paid grant of " + cash);
 		}
@@ -278,7 +279,8 @@ public class ColonyUpdater extends AServerTask {
 	private void payWorkers(Workers workers) {
 		if(workers.getSalary() == 0)
 			return;
-		Corporation employer = workers.getFacility().getOwner();
+		Facility facility = (Facility) entityStore.load(Facility.class, workers.getFacility());
+		long employer = facility.getOwner();
 		long credits = entityStore.getCredits(employer);
 		long salaryAvail = credits / workers.getSalary();
 		int qty = workers.getQuantity();
@@ -303,7 +305,7 @@ public class ColonyUpdater extends AServerTask {
 					String.valueOf(qty) };
 			String desc = CashTransaction.getDescription(
 					CashTransaction.SALARY_PAID, args);
-			entityStore.transferCredits(employer, workers, salaryPaid, desc);
+			entityStore.transferCredits(employer, workers.getID(), salaryPaid, desc);
 			if (log.isDebugEnabled())
 				log.debug(this + ": PAYING : " + workers + " paid " + salaryPaid);
 		}
@@ -316,7 +318,7 @@ public class ColonyUpdater extends AServerTask {
 	}
 
 	private void quitWorkers(Workers workers) {
-		Facility facility = workers.getFacility();
+		Facility facility = (Facility) entityStore.load(Facility.class,workers.getFacility());
 		double quitChance = 100.0 - workers.getHappiness();
 		if(quitChance < 0.0)
 			quitChance = 0.0;
@@ -329,14 +331,14 @@ public class ColonyUpdater extends AServerTask {
 		if (quitters > 0) {
 			Unemployed unemployed = getUnemployed(workers.getPopClass());
 			int colonistCount = unemployed.getQuantity();
-			long cashPerPerson = colonistCount == 0 ? 0 : entityStore.getCredits(workers) / colonistCount;
+			long cashPerPerson = colonistCount == 0 ? 0 : entityStore.getCredits(workers.getID()) / colonistCount;
 			long cash = quitters * cashPerPerson;
 			workers.removePopulation(quitters);
 			unemployed.addPopulation(quitters);
 			entityStore.update(workers);
 			entityStore.update(unemployed);
 			if (cash > 0) {
-				entityStore.transferCredits(workers, unemployed, cash, "");
+				entityStore.transferCredits(workers.getID(), unemployed.getID(), cash, "");
 			}
 		}
 	}
@@ -346,35 +348,35 @@ public class ColonyUpdater extends AServerTask {
 	@Override
 	protected void doJob() throws Exception {
 		grants =
-			entityStore.mapColonistGrantsByPopClass(colony, true);
-		List<AColonists> colonists = entityStore.listWorkers(colony);
+			entityStore.mapColonistGrantsByPopClass(colony.getID(), true);
+		List<AColonists> colonists = entityStore.listWorkersByColony(colony.getID());
 		int size = colonists.size();
 		log.info(this + ": HIRING : " + size + " workers to check for hiring @ " + colony);
 		hireWorkers(colonists);
 		
-		colonists = entityStore.listWorkers(colony);
+		colonists = entityStore.listWorkersByColony(colony.getID());
 		size = colonists.size();
 		log.info(this + ": PAYING : " + size + " workers to pay @ " + colony);
 		payWorkers(colonists);
 		
-		colonists = entityStore.listColonists(colony);
+		colonists = entityStore.listColonists(colony.getID());
 		size = colonists.size();
 		log.info(this + ": GRANTS : " + size + " colonists to pay grants @ " + colony);
 		payGrants(colonists);
 		
 		doNeeds();
 		
-		colonists = entityStore.listWorkers(colony);
+		colonists = entityStore.listWorkersByColony(colony.getID());
 		size = colonists.size();
 		log.info(this + ": QUITTING : " + size + " workers to check for quitting @ " + colony);
 		quitWorkers(colonists);
 		
-		colonists = entityStore.listColonists(colony);
+		colonists = entityStore.listColonists(colony.getID());
 		size = colonists.size();
 		log.info(this + ": BIRTHS : " + size + " colonists to check for births @ " + colony);
 		doBirths(colonists);
 
-		colonists = entityStore.listColonists(colony);
+		colonists = entityStore.listColonists(colony.getID());
 		size = colonists.size();
 		log.info(this + ": DEATHS : " + size + " colonists to check for deaths @ " + colony);
 		doDeaths(colonists);

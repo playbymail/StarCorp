@@ -8,7 +8,7 @@
     	<version name="version"/>
     	<joined-subclass name="starcorp.common.entities.AColonists" table="COLONISTS" lazy="false">
     		<key column="ENTITY_ID"/>
-    		<many-to-one name="colony" lazy="false"/>
+    		<property name="colony"/>
    			<property name="quantity"/>
    			<property name="popClassType"/>
     		<property name="happiness"/>
@@ -19,7 +19,7 @@
 
     		<joined-subclass name="starcorp.common.entities.Workers" table="WORKERS" lazy="false">
     			<key column="ENTITY_ID"/>
-    			<many-to-one name="facility" lazy="false"/>
+    			<property name="facility"/>
     			<property name="salary"/>
     		</joined-subclass> <!-- Workers -->
 
@@ -33,7 +33,7 @@
     			<key column="ENTITY_ID"/>
     			<property name="asteroid"/>
     			<property name="gasfield"/>
-    			<property name="systemID"/>
+    			<property name="system"/>
     			<component name="location">
     				<property name="quadrant"/>
     				<property name="orbit"/>
@@ -41,7 +41,7 @@
     			
     			<joined-subclass name="starcorp.common.entities.Planet" table="PLANETS" lazy="false">
 					<key column="ENTITY_ID"/>
-					<property name="orbitingID"/>
+					<property name="orbiting"/>
 					<property name="atmosphereType"/>
 					<property name="gravityRating"/>
 					<set name="map" table="planet_map" lazy="false">
@@ -56,9 +56,9 @@
 				
 				<joined-subclass name="starcorp.common.entities.Starship" table="STARSHIPS" lazy="false">
     				<key column="ENTITY_ID"/>
-    				<many-to-one name="owner" lazy="false"/>
-    				<many-to-one name="planet" lazy="false"/>
-    				<many-to-one name="colony" lazy="false"/>
+    				<property name="owner"/>
+    				<property name="planet"/>
+    				<property name="colony"/>
     				<many-to-one name="design" lazy="false"/>
     				<component name="planetLocation">
     					<property name="x"/>
@@ -88,8 +88,8 @@
     		
     		<joined-subclass name="starcorp.common.entities.Colony" table="COLONIES" lazy="false">
     			<key column="ENTITY_ID"/>
-    			<many-to-one name="government" lazy="false"/>
-    			<property name="planetID"/>
+    			<property name="government"/>
+    			<property name="planet"/>
     			<component name="location">
     				<property name="x"/>
     				<property name="y"/>
@@ -114,11 +114,15 @@
     				<property name="year" column="lastTurnYear"/>
     				<property name="month" column="lastTurnMonth"/>
     			</component>
+    			<set name="knownSystems" table="KNOWN_SYSTEMS" lazy="false">
+    					<key column="ENTITY_ID"/>
+    					<element column="SYSTEM_ID" type="long"/>
+    			</set>
     		</joined-subclass> <!-- Corporation -->
     		
     		<joined-subclass name="starcorp.common.entities.StarshipDesign" table="SHIP_DESIGNS" lazy="false">
     			<key column="ENTITY_ID"/>
-    			<many-to-one name="owner" lazy="false"/>
+    			<property name="owner"/>
     			<component name="designDate">
     				<property name="year" column="designYear"/>
     				<property name="month" column="designMonth"/>
@@ -146,8 +150,8 @@
     	
     	<joined-subclass name="starcorp.common.entities.Facility" table="FACILITIES" lazy="false">
     		<key column="ENTITY_ID"/>
-    		<many-to-one name="owner" lazy="false"/>
-    		<many-to-one name="colony" lazy="false"/>
+    		<property name="owner"/>
+    		<property name="colony"/>
     		<property name="type" column="facilityType"/>
     		<property name="powered"/>
     		<property name="serviceCharge"/>

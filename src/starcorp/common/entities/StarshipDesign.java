@@ -29,7 +29,7 @@ import starcorp.common.types.StarshipHulls;
  */
 public class StarshipDesign extends ANamedEntity {
 
-	private Corporation owner;
+	private long owner;
 	private GalacticDate designDate;
 	private Set<Items> hulls = new HashSet<Items>();
 	
@@ -292,10 +292,10 @@ public class StarshipDesign extends ANamedEntity {
 		return false;
 	}
 
-	public Corporation getOwner() {
+	public long getOwner() {
 		return owner;
 	}
-	public void setOwner(Corporation owner) {
+	public void setOwner(long owner) {
 		this.owner = owner;
 	}
 	
@@ -371,8 +371,7 @@ public class StarshipDesign extends ANamedEntity {
 	@Override
 	public void readXML(Element e) {
 		super.readXML(e);
-		this.owner = new Corporation();
-		this.owner.readXML(e.element("owner").element("entity"));
+		this.owner = Long.parseLong(e.attributeValue("owner","0"));
 		this.designDate = new GalacticDate(e.element("designed").element("date"));
 		
 		for(Iterator i = e.element("hulls").elementIterator("item"); i.hasNext();) {
@@ -383,7 +382,7 @@ public class StarshipDesign extends ANamedEntity {
 	@Override
 	public Element toBasicXML(Element parent) {
 		Element e = super.toBasicXML(parent);
-		owner.toBasicXML(e.addElement("owner"));
+		e.addAttribute("owner", String.valueOf(owner));
 		designDate.toXML(e.addElement("designed"));
 		Element eHulls = e.addElement("hulls");
 		Iterator<Items> i = hulls.iterator();

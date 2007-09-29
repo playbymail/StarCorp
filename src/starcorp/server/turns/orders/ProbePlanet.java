@@ -11,6 +11,7 @@
 package starcorp.server.turns.orders;
 
 import starcorp.common.entities.Corporation;
+import starcorp.common.entities.Planet;
 import starcorp.common.entities.Starship;
 import starcorp.common.turns.OrderReport;
 import starcorp.common.turns.TurnError;
@@ -36,22 +37,23 @@ public class ProbePlanet extends AOrderProcessor {
 		
 		Starship ship = (Starship) entityStore.load(Starship.class, starshipId);
 		
-		if(ship == null || !ship.getOwner().equals(corp)) {
+		if(ship == null || ship.getOwner() != corp.getID()) {
 			error = new TurnError(TurnError.INVALID_SHIP,order);
 		}
 		else if(!ship.enoughTimeUnits(TIME_UNITS)) {
 			error = new TurnError(TurnError.INSUFFICIENT_TIME,order);
 		}
-		else if(ship.getPlanet() == null || ship.getPlanetLocation() != null) {
+		else if(ship.getPlanet() == 0 || ship.getPlanetLocation() != null) {
 			error = new TurnError(TurnError.INVALID_LOCATION,order);
 		}
 		else {
+			Planet planet = (Planet) entityStore.load(Planet.class, ship.getPlanet());
 			ship.incrementTimeUnitsUsed(TIME_UNITS);
 			entityStore.update(ship);
 			OrderReport report = new OrderReport(order,null,ship);
-			report.add(ship.getPlanet().getName());
-			report.add(ship.getPlanet().getID());
-			report.setMappedPlanet(ship.getPlanet());
+			report.add(planet.getName());
+			report.add(planet.getID());
+			report.setMappedPlanet(planet);
 			order.setReport(report);
 		}
 		

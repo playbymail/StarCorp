@@ -13,12 +13,12 @@ package starcorp.server.shell;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import starcorp.common.types.GalacticDate;
-import starcorp.server.ServerConfiguration;
 import starcorp.server.engine.AServerTask;
 import starcorp.server.engine.ServerEngine;
 import starcorp.server.entitystore.HibernateStore;
@@ -46,10 +46,12 @@ public class Shell {
 	private final IEntityStore entityStore;
 	private final BufferedReader input;
 	
+	private LinkedList<String> history = new LinkedList<String>();
+	
 	public Shell(String[] args) {
 		entityStore = new HibernateStore();
 		engine = new ServerEngine(entityStore);
-		parser = new CommandParser();
+		parser = new CommandParser(this);
 		input = new BufferedReader(new InputStreamReader(System.in));
 		System.out.println("Welcome to Starcorp server!");
 		System.out.flush();
@@ -82,6 +84,10 @@ public class Shell {
 		if(task == null) {
 			return;
 		}
+		if(history.size() > 10) {
+			history.remove();
+		}
+		history.add(text);
 		try {
 			engine.schedule(task);
 			
@@ -104,6 +110,10 @@ public class Shell {
 		}
 		while(line == null);
 		return line;
+	}
+
+	public List<String> getHistory() {
+		return history;
 	}
 	
 }

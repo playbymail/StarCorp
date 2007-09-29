@@ -15,26 +15,28 @@ import java.io.PrintWriter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import starcorp.server.ServerConfiguration;
+import starcorp.common.types.Coordinates2D;
+import starcorp.common.types.Coordinates3D;
+import starcorp.common.types.ICoordinates;
 import starcorp.server.engine.AServerTask;
 import starcorp.server.shell.ACommand;
 import starcorp.server.shell.Shell;
 
 /**
- * starcorp.server.shell.commands.Date
+ * starcorp.server.shell.commands.History
  *
  * @author Seyed Razavi <monkeyx@gmail.com>
- * @version 27 Sep 2007
+ * @version 29 Sep 2007
  */
-public class Date extends ACommand {
-	private static final Log log = LogFactory.getLog(Date.class);
-	
+public class History extends ACommand {
+	private static final Log log = LogFactory.getLog(History.class);
+
 	/* (non-Javadoc)
 	 * @see starcorp.server.shell.ACommand#getHelpText()
 	 */
 	@Override
 	public String getHelpText() {
-		return "date (Month) (Year)\n\nDisplays the current game date or sets it to the specified values.";
+		return "history\n\nDisplays last 10 commands run this session";
 	}
 
 	/* (non-Javadoc)
@@ -42,7 +44,7 @@ public class Date extends ACommand {
 	 */
 	@Override
 	public String getName() {
-		return "date";
+		return "history";
 	}
 
 	/* (non-Javadoc)
@@ -55,29 +57,38 @@ public class Date extends ACommand {
 				return super.toString() + (args.count() > 0 ?  " [" + args + "]" : "");
 			}
 			protected String getName() {
-				return "date";
+				return "history";
 			}
-
 			protected Log getLog() {
 				return log;
 			}
-
 			protected void doJob() throws Exception {
-				int month = args.getAsInt(0);
-				int year = args.getAsInt(1);
-				
-				if(month > 0 && year > 0) {
-					out.println();
-					out.println("Current Date: " + ServerConfiguration.setDate(month, year));
-				}
-				else {
-					out.println();
-					out.println("Current Date: " + ServerConfiguration.getCurrentDate());
+				out.println();
+				for(String s : parser.getShell().getHistory()) {
+					out.println(s);
 				}
 				out.print(Shell.PROMPT);
 				out.flush();
 			}
 		};
+	}
+			
+	
+	private ICoordinates parseCoordinates(String s) {
+		if(s==null)
+			return null;
+		if(s.startsWith("("))
+			s = s.substring(1);
+		if(s.endsWith(")"))
+			s = s.substring(0, s.length()-1);
+		String[] strarr = s.split(",");
+		if(strarr.length == 2) {
+			return new Coordinates2D(Integer.parseInt(strarr[0]),Integer.parseInt(strarr[1]));
+		}
+		else if(strarr.length == 3) {
+			return new Coordinates3D(Integer.parseInt(strarr[0]),Integer.parseInt(strarr[1]),Integer.parseInt(strarr[2]));
+		}
+		return null;
 	}
 
 }

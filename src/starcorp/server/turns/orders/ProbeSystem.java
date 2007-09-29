@@ -10,11 +10,7 @@
  */
 package starcorp.server.turns.orders;
 
-import java.util.Iterator;
-import java.util.List;
-
 import starcorp.common.entities.Planet;
-import starcorp.common.entities.StarSystem;
 import starcorp.common.entities.StarSystemEntity;
 import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Starship;
@@ -43,7 +39,7 @@ public class ProbeSystem extends AOrderProcessor {
 		Starship ship = (Starship) entityStore.load(Starship.class, starshipId);
 		StarSystemEntity entity = (StarSystemEntity) entityStore.load(StarSystemEntity.class, entityId);
 		
-		if(ship == null || !ship.getOwner().equals(corp)) {
+		if(ship == null || ship.getOwner() != corp.getID()) {
 			error = new TurnError(TurnError.INVALID_SHIP,order);
 		}
 		else if(!ship.enoughTimeUnits(TIME_UNITS)) {
@@ -58,7 +54,7 @@ public class ProbeSystem extends AOrderProcessor {
 			OrderReport report = new OrderReport(order,entity,ship);
 			report.add(entity.getName());
 			report.add(entity.getID());
-			report.addScannedEntities(entityStore.listDeposits(entity));
+			report.addScannedEntities(entityStore.listDeposits(entity.getID()));
 			order.setReport(report);
 		}
 		

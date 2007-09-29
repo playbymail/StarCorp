@@ -22,15 +22,13 @@ import starcorp.common.types.PopulationClass;
  * @version 18 Sep 2007
  */
 public abstract class AColonists extends ABaseEntity {
-	private Colony colony;
+	private long colony;
 	private Population population;
 	private double happiness;
 
 	public AColonists() {
 		super();
 	}
-	
-	public abstract Corporation getEmployer();
 	
 	public String getPopClassType() {
 		return population == null ? null : population.getPopClassType();
@@ -81,11 +79,11 @@ public abstract class AColonists extends ABaseEntity {
 		population.setQuantity(qty);
 	}
 	
-	public Colony getColony() {
+	public long getColony() {
 		return colony;
 	}
 
-	public void setColony(Colony colony) {
+	public void setColony(long colony) {
 		this.colony = colony;
 	}
 
@@ -100,8 +98,7 @@ public abstract class AColonists extends ABaseEntity {
 	@Override
 	public void readXML(Element e) {
 		super.readXML(e);
-		this.colony = new Colony();
-		colony.readXML(e.element("colony").element("entity"));
+		this.colony = Long.parseLong(e.attributeValue("colony","0"));
 		this.population = new Population(e.element("population"));
 		this.happiness = Double.parseDouble(e.attributeValue("happiness","0.0"));
 	}
@@ -109,7 +106,7 @@ public abstract class AColonists extends ABaseEntity {
 	@Override
 	public Element toBasicXML(Element parent) {
 		Element e = super.toBasicXML(parent);
-		colony.toBasicXML(e.addElement("colony"));
+		e.addAttribute("colony", String.valueOf(colony));
 		e.addAttribute("happiness", String.valueOf(happiness));
 		population.toXML(e);
 		return e;
@@ -117,7 +114,7 @@ public abstract class AColonists extends ABaseEntity {
 
 	@Override
 	public String toString() {
-		return population + " " + super.toString() + " @ " + colony.getName() + " (" + colony.getID() + ")"; 
+		return population.toString(); 
 	}
 
 	public String getDisplayName() {

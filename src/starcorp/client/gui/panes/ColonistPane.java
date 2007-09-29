@@ -17,7 +17,8 @@ import org.eclipse.swt.widgets.Widget;
 import starcorp.client.gui.AEntityPane;
 import starcorp.client.gui.windows.MainWindow;
 import starcorp.common.entities.AColonists;
-import starcorp.common.entities.IEntity;
+import starcorp.common.entities.Colony;
+import starcorp.common.entities.Facility;
 import starcorp.common.entities.Workers;
 
 /**
@@ -43,7 +44,8 @@ public class ColonistPane extends AEntityPane {
 		super.createWidgets(widgets);
 		
 		createLabel(getParent(), widgets, "Colony:");
-		createColonyLink(getParent(), widgets, colonist.getColony(), null);
+		Colony colony = getTurnReport().getColony(colonist.getColony());
+		createColonyLink(getParent(), widgets, colony, null);
 		
 		createLabel(getParent(),widgets, "Type:");
 		createLabel(getParent(),widgets, colonist.getPopClass().getName());
@@ -52,12 +54,13 @@ public class ColonistPane extends AEntityPane {
 		createLabel(getParent(),widgets,format(colonist.getQuantity()));
 
 		createLabel(getParent(),widgets,"Happiness:");
-		createLabel(getParent(),widgets,formatPercentage(colonist.getHappiness()) + "%");
+		createLabel(getParent(),widgets,format(colonist.getHappiness()) + "%");
 		
 		if(colonist instanceof Workers) {
 			Workers w = (Workers) colonist;
 			createLabel(getParent(), widgets, "Employer:");
-			createFacilityLink(getParent(), widgets, w.getFacility(), null);
+			Facility f = getTurnReport().getFacility(w.getFacility());
+			createFacilityLink(getParent(), widgets, f, null);
 			
 			createLabel(getParent(), widgets, "Salary:");
 			createLabel(getParent(),widgets, "\u20a1 " + format(w.getSalary()));

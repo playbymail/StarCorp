@@ -30,8 +30,8 @@ import starcorp.common.types.Items;
 public abstract class ACorporateItem implements IEntity, Comparable<ACorporateItem> {
 	private long ID;
 	private int version;
-	private Corporation owner;
-	private Colony colony;
+	private long owner;
+	private long colony;
 	private Items item;
 	
 	public int getQuantity() {
@@ -52,16 +52,16 @@ public abstract class ACorporateItem implements IEntity, Comparable<ACorporateIt
 		return item.remove(qty);
 	}
 	
-	public Corporation getOwner() {
+	public long getOwner() {
 		return owner;
 	}
-	public void setOwner(Corporation owner) {
+	public void setOwner(long owner) {
 		this.owner = owner;
 	}
-	public Colony getColony() {
+	public long getColony() {
 		return colony;
 	}
-	public void setColony(Colony colony) {
+	public void setColony(long colony) {
 		this.colony = colony;
 	}
 	public Items getItem() {
@@ -72,15 +72,9 @@ public abstract class ACorporateItem implements IEntity, Comparable<ACorporateIt
 	}
 
 	public void readXML(Element e) {
-		this.ID = Integer.parseInt(e.attributeValue("ID","0"));
-		this.owner = new Corporation();
-		Element eOwner = e.element("owner");
-		if(eOwner != null)
-			this.owner.readXML(eOwner.element("entity"));
-		this.colony = new Colony();
-		Element eColony = e.element("colony");
-		if(eColony != null)
-			this.colony.readXML(eColony.element("entity"));
+		this.ID = Long.parseLong(e.attributeValue("ID","0"));
+		this.owner = Long.parseLong(e.attributeValue("owner","0"));
+		this.colony = Long.parseLong(e.attributeValue("colony","0"));
 		this.item = new Items(e);
 	}
 
@@ -88,10 +82,8 @@ public abstract class ACorporateItem implements IEntity, Comparable<ACorporateIt
 		Element root = parent.addElement("entity");
 		root.addAttribute("ID", String.valueOf(ID));
 		root.addAttribute("class", getClass().getSimpleName());
-		if(owner != null)
-			owner.toBasicXML(root.addElement("owner"));
-		if(colony != null)
-			colony.toBasicXML(root.addElement("colony"));
+		root.addAttribute("owner", String.valueOf(owner));
+		root.addAttribute("colony", String.valueOf(colony));
 		if(item != null)
 			item.toXML(root);
 		return root;

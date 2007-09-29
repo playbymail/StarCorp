@@ -119,7 +119,7 @@ public class Util {
 			}
 			AFacilityType type = facility.getTypeClass();
 			int price = qty * facility.getServiceCharge();
-			Colony colony = facility.getColony();
+			Colony colony = (Colony) entityStore.load(Colony.class,facility.getColony());
 			Object[] args = {type.getName(), String.valueOf(qty), colony.getName(), String.valueOf(colony.getID())};
 			String desc = CashTransaction.getDescription(CashTransaction.SERVICE_CHARGE, args);
 			entityStore.addCredits(facility.getOwner(), price, desc);
@@ -142,7 +142,7 @@ public class Util {
 			int avail = item.getQuantity();
 			if(avail < 1)
 				continue;
-			Colony colony = item.getColony();
+			Colony colony = (Colony) entityStore.load(Colony.class,item.getColony());
 			AItemType type = item.getItem().getTypeClass();
 			int qty = quantity - result.quantityBought;
 			long afford = cashAvailable / item.getCostPerItem();

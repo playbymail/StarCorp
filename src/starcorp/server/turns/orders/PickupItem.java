@@ -23,7 +23,6 @@ import starcorp.common.turns.OrderReport;
 import starcorp.common.turns.TurnError;
 import starcorp.common.turns.TurnOrder;
 import starcorp.common.types.AItemType;
-import starcorp.common.types.ColonyHub;
 import starcorp.common.types.OrbitalDock;
 import starcorp.common.types.OrderType;
 import starcorp.server.turns.AOrderProcessor;
@@ -49,37 +48,30 @@ public class PickupItem extends AOrderProcessor {
 		Colony colony = (Colony) entityStore.load(Colony.class, colonyId);
 		Planet colonyPlanet = null;
 		if(colony != null)
-			colonyPlanet = ((Planet) entityStore.load(Planet.class, colony.getPlanetID()));
+			colonyPlanet = ((Planet) entityStore.load(Planet.class, colony.getPlanet()));
 		AItemType type = AItemType.getType(itemTypeKey);
-		ColonyItem item = entityStore.getItem(colony, corp, type);
-		Facility colonyHub = entityStore.getFacility(colony, colony.getGovernment(), ColonyHub.class);
-		Facility orbitalDock = entityStore.getFacility(colony, OrbitalDock.class);
+		ColonyItem item = entityStore.getItem(colony.getID(), corp.getID(), type);
+
+		Facility orbitalDock = entityStore.getFacility(colony.getID(), OrbitalDock.class);
 		
-		List<?> hubWorkers = colonyHub == null ? null : entityStore.listWorkers(colonyHub);
-		List<?> dockWorkers = orbitalDock == null ? null : entityStore.listWorkers(orbitalDock);
+		List<?> dockWorkers = orbitalDock == null ? null : entityStore.listWorkersByFacility(orbitalDock.getID());
 		
-		if(ship == null || !ship.getOwner().equals(corp)) {
+		if(ship == null || ship.getOwner() != corp.getID()) {
 			error = new TurnError(TurnError.INVALID_SHIP,order);
 		}
 		else if(colony == null) {
 			error = new TurnError(TurnError.INVALID_COLONY,order);
 		}
-		else if(ship.getPlanet() == null || !ship.getPlanet().equals(colonyPlanet)) {
+		else if(ship.getPlanet() == 0 || ship.getPlanet() != colonyPlanet.getID()) {
 			error = new TurnError(TurnError.INVALID_LOCATION,order);
 		}
-		else if(ship.getColony() != null && !ship.getColony().equals(colony)) {
+		else if(ship.getColony() != 0 && ship.getColony() != colony.getID()) {
 			error = new TurnError(TurnError.INVALID_COLONY,order);
 		}
-		else if(ship.getColony() == null && orbitalDock == null) {
+		else if(ship.getColony() == 0 && orbitalDock == null) {
 			error = new TurnError(TurnError.INVALID_LOCATION,order);
 		}
-		else if(colonyHub == null) {
-			error = new TurnError(TurnError.INVALID_COLONY,order);
-		}
-		else if(colonyHub.getTransactionsRemaining(hubWorkers) < 1) {
-			error = new TurnError(TurnError.MARKET_OUT_OF_TRANSACTIONS,order);
-		}
-		else if(orbitalDock != null && ship.getColony() == null && orbitalDock.getTransactionsRemaining(dockWorkers) < 1) {
+		else if(orbitalDock != null && ship.getColony() == 0 && orbitalDock.getTransactionsRemaining(dockWorkers) < 1) {
 			error = new TurnError(TurnError.MARKET_OUT_OF_TRANSACTIONS,order);
 		}
 		else if(item == null || item.getItem().getQuantity() < 1) {
@@ -98,15 +90,11 @@ public class PickupItem extends AOrderProcessor {
 			entityStore.update(ship);
 			item.getItem().remove(quantity);
 			entityStore.update(item);
-			Object[] args2 = {colonyHub.getTypeClass().getName(), colony.getName(), String.valueOf(colony.getID())};
-			String desc = CashTransaction.getDescription(CashTransaction.MARKET_FEES, args2);
-			entityStore.removeCredits(corp, colonyHub.getServiceCharge(), desc);
-			colonyHub.incTransactionCount();
-			entityStore.update(colonyHub);
-			if(orbitalDock != null && ship.getColony() == null) {
-				args2[0] = orbitalDock.getTypeClass().getName();
-				 desc = CashTransaction.getDescription(CashTransaction.MARKET_FEES, args2);
-				 entityStore.removeCredits(corp, orbitalDock.getServiceCharge(), desc);
+
+			if(orbitalDock != null && ship.getColony() == 0) {
+				Object[] args2 = {orbitalDock.getTypeClass().getName(), colony.getName(), String.valueOf(colony.getID())};
+				String desc = CashTransaction.getDescription(CashTransaction.MARKET_FEES, args2);
+				entityStore.transferCredits(corp.getID(), orbitalDock.getOwner(),orbitalDock.getServiceCharge(), desc);
 				orbitalDock.incTransactionCount();
 				entityStore.update(orbitalDock);
 			}
