@@ -355,12 +355,12 @@ public class TurnReport {
 //		System.out.println("queue items: " + factoryQueue.size());
 		for(FactoryQueueItem item : factoryQueue) {
 //			System.out.println("queue items factory: " + item.getFactory());
-			if(facility.equals(item.getFactory())) {
+			if(facility.getID() == item.getFactory()) {
 //				System.out.println("queue item matches!");
 				set.add(item);
 			}
 		}
-		System.out.println("queue items for " + facility + ": " + set.size());
+//		System.out.println("queue items for " + facility + ": " + set.size());
 		return set;
 	}
 	
@@ -471,8 +471,9 @@ public class TurnReport {
 		if(eQueue != null) {
 			for(Iterator<?> i = eQueue.elementIterator("entity"); i.hasNext();) {
 				FactoryQueueItem item  = (FactoryQueueItem) Util.fromXML((Element)i.next());
-				if(item != null)
+				if(item != null) {
 					factoryQueue.add(item);
+				}
 			}
 		}
 		facilities = new HashSet<Facility>();

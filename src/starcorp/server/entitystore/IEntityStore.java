@@ -50,6 +50,7 @@ import starcorp.common.types.PopulationClass;
 public interface IEntityStore {
 	public abstract void shutdown();
 
+	public abstract void resetHappiness();
 	public abstract void resetFacilityTransactions();
 	public abstract void resetShipTimeUnits();
 	

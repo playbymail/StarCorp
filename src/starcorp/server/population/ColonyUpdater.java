@@ -135,7 +135,7 @@ public class ColonyUpdater extends AServerTask {
 	
 	private void doDeaths(AColonists colonist) {
 		Colony colony = (Colony) entityStore.load(Colony.class,colonist.getColony());
-		double deathRate = colony.getHazardLevel();
+		double deathRate = colony.getHazardLevel() / 100.0;
 		int qty = colonist.getQuantity();
 		int deaths = (int) (qty * deathRate);
 		if (deaths > 0) {

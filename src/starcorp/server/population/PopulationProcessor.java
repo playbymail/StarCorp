@@ -34,6 +34,7 @@ public class PopulationProcessor extends AServerTask {
 	@Override
 	protected void doJob() throws Exception {
 		log.info("Starting population processor");
+		entityStore.resetHappiness();
 		List<Colony> colonies = entityStore.listColonies();
 		int size = colonies.size();
 		int i = 1;

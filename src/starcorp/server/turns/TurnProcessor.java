@@ -11,9 +11,13 @@
 package starcorp.server.turns;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.mail.MessagingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,6 +40,7 @@ import starcorp.common.types.GalacticDate;
 import starcorp.common.types.Items;
 import starcorp.common.types.OrderType;
 import starcorp.common.util.SendEmail;
+import starcorp.common.util.ZipTools;
 import starcorp.server.ServerConfiguration;
 import starcorp.server.Util;
 import starcorp.server.engine.AServerTask;
@@ -61,9 +66,23 @@ public class TurnProcessor extends AServerTask {
 		}
 	}
 	
+	public void zipAndEmail(Corporation corp, File file) throws MessagingException, IOException {
+		GalacticDate date = ServerConfiguration.getCurrentDate();
+		File[] files = {file};
+		String zipFile = "report-" + date + ".zip";
+		if(log.isDebugEnabled()) {
+			log.debug("Zipping " + file + " to " + zipFile);
+		}
+		ZipTools.zip(files, zipFile);
+		String[] to = {corp.getPlayerName() + "<" + corp.getPlayerEmail() + ">"};
+		String subject = "Starcorp turn " + date.getMonth() + "." + date.getYear();
+		String message = "Please find your reports file attached.  Save to a convenient location and open it with your StarCorp client.";
+		String from = ServerConfiguration.SERVER_EMAIL_TURNS;
+		sendEmail.send(to, null, null, subject, message, from, zipFile);
+	}
+	
 	private void processFolder(File folder) {
 		File[] turns = folder.listFiles();
-		SAXReader reader = new SAXReader();
 		for(int i = 0; i < turns.length; i++) {
 			if(turns[i].isDirectory()) {
 				processFolder(turns[i]);
@@ -71,8 +90,7 @@ public class TurnProcessor extends AServerTask {
 			else {
 				Turn turn = null;
 				try {
-					Document doc = reader.read(turns[i]);
-					turn = new Turn(doc.getRootElement().element("turn"));
+					turn = new Turn(new FileInputStream(turns[i]));
 					Corporation corp = authorize(turn.getCorporation());
 					if(corp == null) {
 						corp = register(turn.getCorporation());
@@ -92,14 +110,10 @@ public class TurnProcessor extends AServerTask {
 						TurnReport report = process(turn);
 						GalacticDate date = ServerConfiguration.getCurrentDate();
 						Corporation corp = report.getTurn().getCorporation();
-						String filename = ServerConfiguration.REPORTS_FOLDER + "/" + corp.getPlayerEmail() + "-turn-" + date.getMonth() + "-" +  date.getYear() + ".xml";
-						report.write(new FileWriter(filename));
-						
-						String[] to = {corp.getPlayerName() + "<" + corp.getPlayerEmail() + ">"};
-						String subject = "Starcorp turn " + date.getMonth() + "." + date.getYear();
-						String message = "Please find your reports file attached.  Save to a convenient location and open it with your StarCorp client.";
-						String from = ServerConfiguration.SERVER_EMAIL_TURNS;
-						sendEmail.send(to, null, null, subject, message, from, filename);
+						String filename =  corp.getPlayerEmail() + "-turn-" + date.getMonth() + "-" +  date.getYear() + ".xml";
+						File file = new File(ServerConfiguration.REPORTS_FOLDER,filename); 
+						report.write(new FileWriter(file));
+						zipAndEmail(corp, file);
 						turns[i].delete();
 					}
 					catch(Exception e) {
@@ -214,7 +228,7 @@ public class TurnProcessor extends AServerTask {
 			report.setLaws(entityStore.listLaws());
 			report.setItems(entityStore.listItems(turn.getCorporation().getID()));
 			report.setEmployees(entityStore.listWorkersByEmployer(corp.getID()));
-			report.setFactoryQueue(entityStore.listQueue(corp.getID()));
+			report.setFactoryQueue(entityStore.listQueueByCorporation(corp.getID()));
 			report.setCredits(entityStore.getCredits(corp.getID()));
 			List<MarketItem> market = new ArrayList<MarketItem>();
 			for(Long system : corp.getKnownSystems()) {
@@ -242,7 +256,7 @@ public class TurnProcessor extends AServerTask {
 		Corporation existing = entityStore.getCorporation(corp.getPlayerEmail());
 		if(existing == null) {
 			corp.setFoundedDate(ServerConfiguration.getCurrentDate());
-			entityStore.create(corp);
+			corp = (Corporation) entityStore.create(corp);
 			entityStore.addCredits(corp.getID(), ServerConfiguration.SETUP_INITIAL_CREDITS, ServerConfiguration.SETUP_DESCRIPTION);
 			corp = createStartingPosition(corp);
 			return corp;

@@ -13,7 +13,7 @@
    		</component>
    		<property name="type" column="itemType"/>
    		<property name="totalQuantity"/>
-   		<property name="yield"/>
+   		<property name="yield" column="resourceYield"/>
 
     </class> <!-- ResourceDeposit -->
 </hibernate-mapping>

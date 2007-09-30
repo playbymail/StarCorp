@@ -10,6 +10,7 @@
  */
 package starcorp.client.gui.windows;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -44,6 +45,7 @@ import starcorp.common.turns.Turn;
 import starcorp.common.turns.TurnOrder;
 import starcorp.common.turns.TurnReport;
 import starcorp.common.types.GalacticDate;
+import starcorp.common.util.ZipTools;
 
 /**
  * starcorp.client.gui.MainWindow
@@ -53,10 +55,16 @@ import starcorp.common.types.GalacticDate;
  */
 public class MainWindow extends AWindow {
 
-	private static final String[] FILTER_EXTS = { "*.xml", "*.*"};
-	private static final String[] FILTER_NAMES = {
-	      "Turn Reports (*.xml)",
+	private static final String[] REPORT_FILTER_EXTS = { "*.zip","*.xml", "*.*"};
+	private static final String[] REPORT_FILTER_NAMES = {
+	      "Turn Reports (*.zip)",
+		  "Turn Reports (*.xml)",
 	      "All Files (*.*)"};
+	private static final String[] TURN_FILTER_EXTS = { "*.xml", "*.*"};
+	private static final String[] TURN_FILTER_NAMES = {
+	      "Turn Orders (*.xml)",
+	      "All Files (*.*)"};
+
 	private ADataPane currentDataPane;
 	private Turn currentTurn;
 	private Composite dataPanel;
@@ -84,8 +92,28 @@ public class MainWindow extends AWindow {
 	public MainWindow() {
 		super(new Display());
 	}
+	
+	private boolean extractZippedReport(String zipFile) {
+		String dir = zipFile.substring(0, zipFile.lastIndexOf("."));
+		File reports = new File(dir);
+		reports.mkdirs();
+		try {
+			ZipTools.unzip(zipFile, dir);
+			for(File f : reports.listFiles()) {
+				String name = f.getAbsolutePath();
+				if(loadReport(name))
+					return true;
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
 
-	private void loadReport(String fileName) {
+	private boolean loadReport(String fileName) {
+		if(fileName != null && fileName.endsWith(".zip")) {
+			return extractZippedReport(fileName);
+		}
 		setCurrentTurn(null);
 		closeChildWindows();
 		if(fileName != null) {
@@ -121,7 +149,9 @@ public class MainWindow extends AWindow {
 			}
 			shell.setText(sb.toString());
 			redraw();
+			return true;
 		}
+		return false;
 	}
 
 	private void loadTurn(String fileName) {
@@ -383,16 +413,16 @@ public class MainWindow extends AWindow {
 
 	public void openLoadReport() {
 		FileDialog dialog = new FileDialog(shell, SWT.OPEN);
-		dialog.setFilterNames(FILTER_NAMES);
-		dialog.setFilterExtensions(FILTER_EXTS);
+		dialog.setFilterNames(REPORT_FILTER_NAMES);
+		dialog.setFilterExtensions(REPORT_FILTER_EXTS);
 		String fileName = dialog.open();
 		loadReport(fileName);
 	}
 	
 	public void openLoadTurn() {
 		FileDialog dialog = new FileDialog(shell, SWT.OPEN);
-		dialog.setFilterNames(FILTER_NAMES);
-		dialog.setFilterExtensions(FILTER_EXTS);
+		dialog.setFilterNames(TURN_FILTER_NAMES);
+		dialog.setFilterExtensions(TURN_FILTER_EXTS);
 		String fileName = dialog.open();
 		loadTurn(fileName);
 		if(currentTurn != null) {
@@ -416,8 +446,8 @@ public class MainWindow extends AWindow {
 		GalacticDate date = turnReport == null ? null : turnReport.getTurn().getProcessedDate();
 		String file = "turn-" + corp.getPlayerEmail() + "-" + (date == null ? "new" : date);
 		dialog.setFileName( file);
-		dialog.setFilterNames(FILTER_NAMES);
-		dialog.setFilterExtensions(FILTER_EXTS);
+		dialog.setFilterNames(TURN_FILTER_NAMES);
+		dialog.setFilterExtensions(TURN_FILTER_EXTS);
 		String fileName = dialog.open();
 		saveTurn(fileName);
 	}

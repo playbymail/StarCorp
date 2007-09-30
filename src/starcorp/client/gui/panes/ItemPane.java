@@ -37,7 +37,7 @@ import starcorp.common.types.StarshipHulls;
  * @version 26 Sep 2007
  */
 public class ItemPane extends ATypePane {
-
+	// TODO add list of items it is used in production for
 	private AItemType type;
 	
 	/**

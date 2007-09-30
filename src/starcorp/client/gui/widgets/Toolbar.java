@@ -10,10 +10,14 @@
  */
 package starcorp.client.gui.widgets;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
@@ -23,6 +27,7 @@ import org.eclipse.swt.widgets.ToolItem;
 
 import starcorp.client.gui.IComponent;
 import starcorp.client.gui.windows.MainWindow;
+import starcorp.common.types.TerrainType;
 
 /**
  * starcorp.client.gui.Toolbar
@@ -45,25 +50,64 @@ public class Toolbar implements IComponent  {
 	
 	private ToolItem backwards;
 	private ToolItem forwards;
+	private Image[] icons = new Image[11];
+
 	
 	public Toolbar(MainWindow mainWindow) {
 		this.mainWindow = mainWindow;
 	}
 	
 	public void dispose() {
+		for(Image img : icons) {
+			if(img != null && !img.isDisposed())
+				img.dispose();
+		}
 		for(ToolItem item : items) {
 			item.dispose();
 		}
 		toolbar.dispose();
 	}
+	
+	private Image loadIcon(Composite parent, String imageFile) {
+		InputStream is = null;
+		Image img = null;
+		try {
+			is = new FileInputStream(imageFile);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		if(is != null) {
+			img = new Image(parent.getDisplay(),is);
+			System.out.println("Loaded " + imageFile);
+		}
+		else {
+			System.err.println("Could not load " + imageFile);
+		}
+		return img;
+	}
+	
+	private void loadIcons(Composite parent) {
+		icons[0] = loadIcon(parent,"images/icons/load-report.gif");
+		icons[1] = loadIcon(parent,"images/icons/new-turn.gif");
+		icons[2] = loadIcon(parent,"images/icons/open-turn.gif");
+		icons[3] = loadIcon(parent,"images/icons/save-turn.gif");
+		icons[4] = loadIcon(parent,"images/icons/submit-turn.gif");
+		icons[5] = loadIcon(parent,"images/icons/search-items.gif");
+		icons[6] = loadIcon(parent,"images/icons/search-market.gif");
+		icons[7] = loadIcon(parent,"images/icons/search-laws.gif");
+		icons[8] = loadIcon(parent,"images/icons/design-ship.gif");
+		icons[9] = loadIcon(parent,"images/icons/left.gif");
+		icons[10] = loadIcon(parent,"images/icons/right.gif");
+	}
 
 	public void open(Composite parent) {
 		toolbar = new ToolBar(parent,SWT.FLAT | SWT.WRAP);
 		
-		// TODO add images to tool items
+		loadIcons(toolbar);
 		
 		ToolItem loadTurnReport = new ToolItem(toolbar, SWT.PUSH);
-		loadTurnReport.setText("Load Report");
+		loadTurnReport.setImage(icons[0]);
+		loadTurnReport.setToolTipText("Load Report");
 		loadTurnReport.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event event) {
 				mainWindow.openLoadReport();
@@ -74,7 +118,8 @@ public class Toolbar implements IComponent  {
 		items.add(new ToolItem(toolbar, SWT.SEPARATOR));
 		
 		ToolItem newTurn = new ToolItem(toolbar, SWT.PUSH);
-		newTurn.setText("New Turn");
+		newTurn.setImage(icons[1]);
+		newTurn.setToolTipText("New Turn");
 		newTurn.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event event) {
 				mainWindow.setCurrentTurn(null);
@@ -84,7 +129,8 @@ public class Toolbar implements IComponent  {
 		items.add(newTurn);
 		
 		ToolItem loadTurn = new ToolItem(toolbar, SWT.PUSH);
-		loadTurn.setText("Load Turn");
+		loadTurn.setImage(icons[2]);
+		loadTurn.setToolTipText("Load Turn");
 		loadTurn.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event event) {
 				mainWindow.openLoadTurn();	
@@ -93,7 +139,8 @@ public class Toolbar implements IComponent  {
 		items.add(loadTurn);
 		
 		saveTurn = new ToolItem(toolbar, SWT.PUSH);
-		saveTurn.setText("Save current turn");
+		saveTurn.setImage(icons[3]);
+		saveTurn.setToolTipText("Save current turn");
 		saveTurn.setEnabled(false);
 		saveTurn.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event event) {
@@ -103,7 +150,8 @@ public class Toolbar implements IComponent  {
 		items.add(saveTurn);
 		
 		submitTurn = new ToolItem(toolbar, SWT.PUSH);
-		submitTurn.setText("Submit Turn");
+		submitTurn.setImage(icons[4]);
+		submitTurn.setToolTipText("Submit Turn");
 		submitTurn.setEnabled(false);
 		submitTurn.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event event) {
@@ -114,7 +162,8 @@ public class Toolbar implements IComponent  {
 		items.add(new ToolItem(toolbar, SWT.SEPARATOR));
 		
 		searchItems = new ToolItem(toolbar, SWT.PUSH);
-		searchItems.setText("Search Items");
+		searchItems.setToolTipText("Search Items");
+		searchItems.setImage(icons[5]);
 		searchItems.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event event) {
 				mainWindow.openSearchItemsWindow();
@@ -123,7 +172,8 @@ public class Toolbar implements IComponent  {
 		items.add(searchItems);
 		
 		searchMarket= new ToolItem(toolbar, SWT.PUSH);
-		searchMarket.setText("Search Market");
+		searchMarket.setImage(icons[6]);
+		searchMarket.setToolTipText("Search Market");
 		searchMarket.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event event) {
 				mainWindow.openSearchMarketWindow();
@@ -132,7 +182,8 @@ public class Toolbar implements IComponent  {
 		items.add(searchMarket);
 		
 		searchLaws = new ToolItem(toolbar, SWT.PUSH);
-		searchLaws.setText("Search Laws");
+		searchLaws.setImage(icons[7]);
+		searchLaws.setToolTipText("Search Laws");
 		searchLaws.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event event) {
 				mainWindow.openSearchLawWindow();
@@ -147,7 +198,8 @@ public class Toolbar implements IComponent  {
 		items.add(new ToolItem(toolbar, SWT.SEPARATOR));
 		
 		ToolItem designShip = new ToolItem(toolbar, SWT.PUSH);
-		designShip.setText("Design Ship");
+		designShip.setImage(icons[8]);
+		designShip.setToolTipText("Design Ship");
 		designShip.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event event) {
 				mainWindow.openStarshipDesignWindow();
@@ -158,8 +210,9 @@ public class Toolbar implements IComponent  {
 		items.add(new ToolItem(toolbar, SWT.SEPARATOR));
 		
 		backwards = new ToolItem(toolbar, SWT.PUSH);
+		backwards.setImage(icons[9]);
 		backwards.setEnabled(false);
-		backwards.setText("<");
+		backwards.setToolTipText("Back to previous data");
 		backwards.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event event) {
 				mainWindow.back();
@@ -168,8 +221,9 @@ public class Toolbar implements IComponent  {
 		items.add(backwards);
 		
 		forwards = new ToolItem(toolbar, SWT.PUSH);
+		forwards.setImage(icons[10]);
 		forwards.setEnabled(false);
-		forwards.setText(">");
+		forwards.setToolTipText("Forward to next data");
 		forwards.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event event) {
 				mainWindow.forward();

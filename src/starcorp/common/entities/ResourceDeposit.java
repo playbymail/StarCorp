@@ -82,20 +82,15 @@ public class ResourceDeposit implements IEntity {
 	 * @param qty
 	 * @return
 	 */
-	public int add(int qty) {
-		yield += qty;
-		return yield;
-	}
-	
 	/**
 	 * @param qty
 	 * @return
 	 */
 	public int remove(int qty) {
-		if(qty > yield) {
-			qty = yield;
+		if(qty > totalQuantity) {
+			qty = totalQuantity;
 		}
-		yield -= qty;
+		totalQuantity -= qty;
 		return qty;
 	}
 

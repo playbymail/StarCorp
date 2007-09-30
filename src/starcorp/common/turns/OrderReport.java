@@ -137,6 +137,8 @@ public class OrderReport {
 		List list = new ArrayList();
 		if(scannedEntities != null) {
 			for(Object o : scannedEntities) {
+				if(o == null)
+					continue;
 				if(clazz.isAssignableFrom(o.getClass()))
 					list.add(o);
 			}

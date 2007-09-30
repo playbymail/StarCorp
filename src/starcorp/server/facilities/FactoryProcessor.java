@@ -65,7 +65,9 @@ public class FactoryProcessor extends AServerTask {
 		if(qty > materials) {
 			qty = materials;
 		}
-		
+		if(qty < 1) {
+			return null;
+		}
 		ColonyItem cItem = entityStore.getItem(factory.getColony(), factory.getOwner(), type);
 		if(cItem == null) {
 			cItem = new ColonyItem();
@@ -93,6 +95,9 @@ public class FactoryProcessor extends AServerTask {
 		int max = 0;
 		for(Items item : type.getComponent()) {
 			ColonyItem cItem = entityStore.getItem(colony, owner, item.getTypeClass());
+			if(cItem == null) {
+				return 0;
+			}
 			int x = cItem.getQuantity() / item.getQuantity();
 			if(x < max) {
 				max = x;
@@ -104,9 +109,11 @@ public class FactoryProcessor extends AServerTask {
 	private void useMaterials(long colony, long owner, AFactoryItem type, int quantity) {
 		for(Items item : type.getComponent()) {
 			ColonyItem cItem = entityStore.getItem(colony, owner, item.getTypeClass());
-			int qty = item.getQuantity() * quantity;
-			cItem.remove(qty);
-			entityStore.update(cItem);
+			if(cItem == null) {
+				int qty = item.getQuantity() * quantity;
+				cItem.remove(qty);
+				entityStore.update(cItem);
+			}
 		}
 	}
 	

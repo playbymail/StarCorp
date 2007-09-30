@@ -50,12 +50,11 @@ public class ScanGalaxy extends AOrderProcessor {
 			entityStore.update(ship);
 			StarSystem system = (StarSystem) entityStore.load(StarSystem.class, ship.getSystem());
 			int range = ship.getDesign().getScanGalaxyRange();
-			// TODO fix - not going into known systems or corp isn't updating
 			List<StarSystem> systems = entityStore.listSystems(system.getLocation(), range);
 			Iterator<StarSystem> i = systems.iterator();
 			while(i.hasNext()) {
 				StarSystem sys = i.next();
-				corp.add(system.getID());
+				corp.add(sys.getID());
 				if(sys.equals(system))
 					i.remove();
 			}

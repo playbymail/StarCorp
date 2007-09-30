@@ -161,6 +161,7 @@ public class Turn extends ACommand {
 								+ report.getTurn().getErrors().size()
 								+ " errors.");
 						save();
+						processor.zipAndEmail(corp, new File("report.xml"));
 					}
 				} else {
 					out.println();

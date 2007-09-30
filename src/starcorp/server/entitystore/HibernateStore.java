@@ -673,9 +673,9 @@ public class HibernateStore implements IEntityStore {
 		String q = "select max(position) from FactoryQueueItem where factory = :factory";
 		beginTransaction();
 		Query query = createQuery(q,"factory",factory);
-		int max = (Integer) query.uniqueResult();
+		Integer max = (Integer) query.uniqueResult();
 		commit();
-		return max + 1;
+		return max == null ? 1 : max + 1;
 	}
 
 	public Unemployed getUnemployed(long colony, PopulationClass popClass) {
@@ -738,7 +738,7 @@ public class HibernateStore implements IEntityStore {
 	public List<Colony> searchColonies(long system,
 			CoordinatesPolar location, long excludePlanet) {
 		String q = "from Colony as col where col.planet IN " + 
-		"(select ID from Planet as p where p.ID <> :planetId and p.location <> :location and p.systemID = " + system + ")";
+		"(select ID from Planet as p where p.ID <> :planetId and p.location <> :location and p.system = " + system + ")";
 		Map<String, Object> map = prepareParameters("planetId", excludePlanet);
 		prepareParameters(map, "location", location);
 		beginTransaction();
@@ -767,7 +767,7 @@ public class HibernateStore implements IEntityStore {
 
 	public List<ResourceDeposit> listDeposits(long planetID,
 			ICoordinates location) {
-		String q = "from ResourceDeposit where systemEntity = " +
+		String q = "from ResourceDeposit where yield > 0 and systemEntity = " +
 		planetID + " and location = :location";
 		beginTransaction();
 		return copyDeposits(listObject(createQuery(q, "location", location)));
@@ -775,7 +775,7 @@ public class HibernateStore implements IEntityStore {
 
 	public List<ResourceDeposit> listDeposits(long planet,
 			List<AItemType> types, int minTotal) {
-		String q = "from ResourceDeposit where systemEntity = " + planet + " and totalQuantity >= "
+		String q = "from ResourceDeposit where systemEntity = " + planet + " and yield > 0 and totalQuantity >= "
 				+ minTotal;
 		int max = types == null ? 0 : types.size();
 		if (max > 0) {
@@ -955,7 +955,7 @@ public class HibernateStore implements IEntityStore {
 	}
 
 	public List<FactoryQueueItem> listQueueByCorporation(long corp) {
-		String q = "select queue from FactoryQueueItem where queue.factory IN (select ID from Facility where owner = :corp) order by position desc";
+		String q = "select queue from FactoryQueueItem as queue where queue.factory IN (select ID from Facility where owner = :owner) order by position desc";
 		beginTransaction();
 		return copyQueue(listObject(createQuery(q, "owner", corp)));
 	}
@@ -1203,6 +1203,13 @@ public class HibernateStore implements IEntityStore {
 		getSession().merge(deposit);
 		commit();
 		return deposit;
+	}
+
+	public void resetHappiness() {
+		String q = "update AColonists set happiness = 0.0";
+		beginTransaction();
+		createQuery(q).executeUpdate();
+		commit();
 	}
 
 }

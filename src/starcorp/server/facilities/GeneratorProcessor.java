@@ -72,7 +72,10 @@ public class GeneratorProcessor extends AServerTask {
 				continue;
 			}
 			if(type.canGenerate(deposit.getTypeClass())) {
-				int qty = (int) (deposit.getYield() * efficiency);
+				if(log.isDebugEnabled()) {
+					log.debug("Yield: " + deposit.getYield() + " Total: " + deposit.getTotalQuantity() + " Efficiency: " + efficiency);
+				}
+				int qty = (int) (deposit.getYield() * (efficiency/100.0));
 				if(qty > deposit.getTotalQuantity()) {
 					qty = deposit.getTotalQuantity();
 				}
@@ -87,7 +90,7 @@ public class GeneratorProcessor extends AServerTask {
 				item.add(qty);
 				deposit.remove(qty);
 				entityStore.update(item);
-				entityStore.update(deposit);
+				entityStore.update(deposit); // TODO deposit yield is being set to 0!
 				if(log.isDebugEnabled())
 					log.debug(this + ": " + generator + " generated " + qty + " x " + deposit.getType());
 			}
