@@ -17,8 +17,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
@@ -71,7 +70,7 @@ public abstract class ATablePane extends AWindowPane {
 	
 
 	protected void createWidgets(List<Widget> widgets) {
-		getParent().setText(getTableName());
+		getParent().setLayout(new RowLayout(SWT.HORIZONTAL));
 		table = new Table(getParent(),getTableStyle());
 		table.setHeaderVisible(isHeaderVisible());
 		table.setLinesVisible(isLinesVisible());
@@ -154,7 +153,7 @@ public abstract class ATablePane extends AWindowPane {
 	}
 	
 	protected void columnEdited(int row, int column, String value) {
-		
+		// do nothing
 	}
 
 	protected TableItem createRow(String[] values) {
@@ -164,12 +163,8 @@ public abstract class ATablePane extends AWindowPane {
 		return item;
 	}
 	
-	protected void deleteRow(int row) {
-		final TableItem item = items.get(row);
-		table.remove(row);
-		if(!item.isDisposed())
-			item.dispose();
-		items.remove(row);
+	public void clear() {
+		table.removeAll();
 	}
 	
 	protected void createTableEditor(Control c, int row, int column) {
@@ -185,9 +180,7 @@ public abstract class ATablePane extends AWindowPane {
 		return true;
 	}
 	
-	protected void populate() {}
-	
-	protected abstract String getTableName();
+	public void populate() {}
 	
 	protected abstract int countColumns();
 	
@@ -207,19 +200,11 @@ public abstract class ATablePane extends AWindowPane {
 
 	public void redraw() {
 		table.pack();
+		table.redraw();
 	}
 
 	public Point computeSize() {
 		return table.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-	}
-
-	@Override
-	public void open(Composite parent) {
-		super.open(parent);
-		GridLayout layout = new GridLayout(1,false);
-		layout.marginWidth=20;
-		layout.marginHeight=10;
-		getParent().setLayout(layout);
 	}
 
 }

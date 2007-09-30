@@ -70,16 +70,6 @@ public class TurnOrderWindow extends ADataEntryWindow {
 		mainWindow.setTurnDirty(true);
 	}
 	
-	public void turnOrdersReload() {
-		builderPane.dispose();
-		builderPane = createBuilder();
-		builderPane.open(getTop());
-		tablePane.dispose();
-		tablePane = createTable();
-		tablePane.open(getBottom());
-		redraw();
-	}
-	
 	public Turn getTurn() {
 		return mainWindow.getCurrentTurn();
 	}

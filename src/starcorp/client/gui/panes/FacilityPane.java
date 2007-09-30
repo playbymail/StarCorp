@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
@@ -41,7 +40,7 @@ import starcorp.common.types.Factory;
  * @version 25 Sep 2007
  */
 public class FacilityPane extends AEntityPane {
-
+	// TODO add issue lease / grant to colony hub
 	private Facility facility;
 	
 	public FacilityPane(MainWindow mainWindow, Facility facility) {
@@ -53,65 +52,58 @@ public class FacilityPane extends AEntityPane {
 	protected void createWidgets(List<Widget> widgets) {
 		super.createWidgets(widgets);
 		
-		createLabel(getParent(), widgets, "Colony:");
+		Group grp = createGroup(getParent(), widgets, "");
+		GridLayout layout = new GridLayout(2,false);
+		layout.marginWidth=20;
+		layout.marginHeight=10;
+		grp.setLayout(layout);
+		
+		createLabel(grp, widgets, "Colony:");
 		Colony colony = getTurnReport().getColony(facility.getColony());
-		createColonyLink(getParent(), widgets, colony, null);
+		createColonyLink(grp, widgets, colony, null);
 
-		createLabel(getParent(), widgets, "Owner:");
+		createLabel(grp, widgets, "Owner:");
 		Corporation corp = getTurnReport().getCorporation(facility.getOwner());
-		createCorporationLink(getParent(), widgets, corp, null);
+		createCorporationLink(grp, widgets, corp, null);
 
-		createLabel(getParent(), widgets, "Type:");
-		createFacilityTypeLink(getParent(), widgets, facility.getTypeClass(), null);
+		createLabel(grp, widgets, "Type:");
+		createFacilityTypeLink(grp, widgets, facility.getTypeClass(), null);
 
-		createLabel(getParent(), widgets, "Open:");
-		createLabel(getParent(), widgets, facility.isOpen() ? "yes" : "no");
+		createLabel(grp, widgets, "Open:");
+		createLabel(grp, widgets, facility.isOpen() ? "yes" : "no");
 
-		createLabel(getParent(), widgets, "Powered:");
-		createLabel(getParent(), widgets, facility.isPowered() ? "yes" : "no");
+		createLabel(grp, widgets, "Powered:");
+		createLabel(grp, widgets, facility.isPowered() ? "yes" : "no");
 
-		createLabel(getParent(), widgets, "Built:");
-		createLabel(getParent(), widgets, facility.getBuiltDate().toString());
+		createLabel(grp, widgets, "Built:");
+		createLabel(grp, widgets, facility.getBuiltDate().toString());
 
 		if(facility.getServiceCharge() > 0) {
-			createLabel(getParent(), widgets, "Service Charge:");
-			createLabel(getParent(), widgets, "\u20a1 " + format(facility.getServiceCharge()));
+			createLabel(grp, widgets, "Service Charge:");
+			createLabel(grp, widgets, "\u20a1 " + format(facility.getServiceCharge()));
 		}
 		
 		Corporation player = getTurnReport().getTurn().getCorporation();
 		if(player.getID() == facility.getOwner()) {
-			Group grp = createGroup(getParent(), widgets, "Employees");
-			GridData data = new GridData();
-			data.minimumWidth=100;
-			data.minimumHeight=100;
-			data.verticalAlignment=SWT.TOP;
-			data.grabExcessHorizontalSpace=true;
-			data.grabExcessVerticalSpace=true;
-			if(!(facility.getTypeClass() instanceof Factory)) {
-				data.horizontalSpan=2;
-			}
-			grp.setLayoutData(data);
-			grp.setLayout(new GridLayout(1,false));
+			Group grpEmployees = createGroup(getParent(), widgets, "Employees");
+			grpEmployees.setLayout(new GridLayout(1,false));
 			
 			Set<AColonists> employees = getTurnReport().getEmployees(facility);
 			double efficiency = facility.getEfficiency(employees);
 
 			for(AColonists colonist : employees) {
-				createColonistLink(grp, widgets, colonist, null);
+				createColonistLink(grpEmployees, widgets, colonist, null);
 			}
 			
-			createLabel(grp, widgets, "Efficiency: " + format(efficiency) + "%");
+			createLabel(grpEmployees, widgets, "Efficiency: " + format(efficiency) + "%");
 
 			if(facility.getTypeClass() instanceof Factory) {
-				grp = createGroup(getParent(), widgets, "Factory Orders");
-				data = new GridData();
-				data.horizontalSpan=2;
-				grp.setLayoutData(data);
-				grp.setLayout(new GridLayout(5,false));
+				Group grpOrders = createGroup(getParent(), widgets, "Factory Orders");
+				grpOrders.setLayout(new GridLayout(5,false));
 				List<AItemType> types = ((Factory)facility.getTypeClass()).canBuild();
-				final Combo c = createTypeSelection(grp, widgets, types, "Item:");
-				final Text txt = createIntegerInput(grp, widgets, "Quantity:");
-				Button add = createButton(grp, widgets, "Add");
+				final Combo c = createTypeSelection(grpOrders, widgets, types, "Item:");
+				final Text txt = createIntegerInput(grpOrders, widgets, "Quantity:");
+				Button add = createButton(grpOrders, widgets, "Add");
 				add.addListener(SWT.Selection, new Listener() {
 					public void handleEvent (Event event) {
 						AItemType type = (AItemType) getComboValue(c);
@@ -120,22 +112,16 @@ public class FacilityPane extends AEntityPane {
 						mainWindow.addTurnOrder(order);
 					}
 				});
-
-				data = new GridData();
-				data.verticalAlignment=SWT.TOP;
-				data.minimumWidth=100;
-				data.minimumHeight=300;
-				data.grabExcessHorizontalSpace=true;
-				data.grabExcessVerticalSpace=true;
-				grp = createGroup(getParent(), widgets, "Factory Queue");
-				grp.setLayoutData(data);
-				grp.setLayout(new GridLayout(2,false));
-				
-				List<FactoryQueueItem> list = getTurnReport().getQueue(facility);
-				for(int i = (list.size() - 1); i > -1; i--) {
-					FactoryQueueItem item = list.get(i);
-					createLabel(grp, widgets, item.getPosition() + ":");
-					createItemLink(grp, widgets, item.getItem(), null);
+				List<FactoryQueueItem> queue = getTurnReport().getQueue(facility);
+				if(queue.size() > 0) {
+					Group grpQueue = createGroup(getParent(), widgets, "Factory Queue");
+					grpQueue.setLayout(new GridLayout(2,false));
+					
+					for(int i = (queue.size() - 1); i > -1; i--) {
+						FactoryQueueItem item = queue.get(i);
+						createLabel(grpQueue, widgets, item.getPosition() + ":");
+						createItemLink(grpQueue, widgets, item.getItem(), null);
+					}
 				}
 			}
 		}

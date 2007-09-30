@@ -13,8 +13,6 @@ package starcorp.client.gui.panes;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Widget;
@@ -49,54 +47,59 @@ public class SystemEntityPane extends AEntityPane {
 	protected void createWidgets(List<Widget> widgets) {
 		super.createWidgets(widgets);
 		// TODO actions to move a starship to this location
-		createLabel(getParent(), widgets, "System:");
+		Group grp = createGroup(getParent(), widgets, "");
+		GridLayout layout = new GridLayout(2,false);
+		layout.marginWidth=20;
+		layout.marginHeight=10;
+		grp.setLayout(layout);
+		
+		createLabel(grp, widgets, "System:");
 		StarSystem system = getTurnReport().getSystem(entity.getSystem());
 		if(system == null)
 			throw new NullPointerException("Invalid system: " + entity.getSystem());
-		createLabel(getParent(), widgets, system.getDisplayName());
+		createLabel(grp, widgets, system.getDisplayName());
 		
-		createLabel(getParent(), widgets, "Location:");
-		createLabel(getParent(), widgets, entity.getLocation().toString());
+		createLabel(grp, widgets, "Location:");
+		createLabel(grp, widgets, entity.getLocation().toString());
 		
-		createLabel(getParent(),widgets, "Type:");
+		createLabel(grp,widgets, "Type:");
 		if(entity instanceof Planet) {
-			createLabel(getParent(), widgets, "Planet");
+			createLabel(grp, widgets, "Planet");
 		}
 		else if(entity.isAsteroid()) {
-			createLabel(getParent(), widgets, "Asteroid");
+			createLabel(grp, widgets, "Asteroid");
 		}
 		else if(entity.isGasfield()) {
-			createLabel(getParent(), widgets, "Gas Field");
+			createLabel(grp, widgets, "Gas Field");
 		}
 		
 		if(entity instanceof Planet) {
 			Planet planet = (Planet) entity;
 			if(planet.getOrbiting() > 0) {
-				createLabel(getParent(), widgets, "Orbiting:");
+				createLabel(grp, widgets, "Orbiting:");
 				Planet orbit = getTurnReport().getPlanet(planet.getOrbiting());
-				createPlanetLink(getParent(), widgets, orbit, null);
+				createPlanetLink(grp, widgets, orbit, null);
 			}
-			createLabel(getParent(),widgets,"Atmosphere:");
-			createLabel(getParent(), widgets, planet.getAtmosphereTypeClass().getName());
+			createLabel(grp,widgets,"Atmosphere:");
+			createLabel(grp, widgets, planet.getAtmosphereTypeClass().getName());
 			
-			createLabel(getParent(),widgets,"Base Hazard Level:");
-			createLabel(getParent(), widgets, format(planet.getAtmosphereTypeClass().getHazardLevel()));
+			createLabel(grp,widgets,"Base Hazard Level:");
+			createLabel(grp, widgets, format(planet.getAtmosphereTypeClass().getHazardLevel()));
 			
-			createLabel(getParent(), widgets, "Gravity:");
-			createLabel(getParent(), widgets, planet.getGravityRating() + "g");
+			createLabel(grp, widgets, "Gravity:");
+			createLabel(grp, widgets, planet.getGravityRating() + "g");
 			
 			Set<PlanetMapSquare> squares = planet.getMap();
 			if(squares == null || squares.size() > 0) {
-				createPlanetMapLink(getParent(), widgets, planet, "View Map");
+				createPlanetMapLink(grp, widgets, planet, "View Map");
 			}
 			
 			Set<Colony> colonies = mainWindow.getTurnReport().getColoniesByPlanet(planet.getID());
 			if(colonies != null && colonies.size() > 0) {
-				Group grp = createGroup(getParent(), widgets, "Colonies");
-				grp.setLayout(new GridLayout(3,true));
-				grp.setLayoutData(new GridData(SWT.DEFAULT,SWT.DEFAULT,true,true,2,1));
+				Group grpColonies = createGroup(getParent(), widgets, "Colonies");
+				grpColonies.setLayout(new GridLayout(3,true));
 				for(Colony colony : colonies) {
-					createColonyLink(grp, widgets, colony, null);
+					createColonyLink(grpColonies, widgets, colony, null);
 				}
 			}
 		}

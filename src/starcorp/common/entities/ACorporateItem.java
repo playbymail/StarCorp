@@ -131,4 +131,38 @@ public abstract class ACorporateItem implements IEntity, Comparable<ACorporateIt
 		return (o == null) ? 0 : o.item.compareTo(this.item);
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (int) (ID ^ (ID >>> 32));
+		result = prime * result + (int) (colony ^ (colony >>> 32));
+		result = prime * result + ((item == null) ? 0 : item.hashCode());
+		result = prime * result + (int) (owner ^ (owner >>> 32));
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		final ACorporateItem other = (ACorporateItem) obj;
+		if (ID != other.ID)
+			return false;
+		if (colony != other.colony)
+			return false;
+		if (item == null) {
+			if (other.item != null)
+				return false;
+		} else if (!item.equals(other.item))
+			return false;
+		if (owner != other.owner)
+			return false;
+		return true;
+	}
+
 }

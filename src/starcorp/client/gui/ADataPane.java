@@ -10,8 +10,8 @@
  */
 package starcorp.client.gui;
 
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.widgets.Composite;
 
 import starcorp.client.gui.windows.MainWindow;
@@ -34,9 +34,9 @@ public abstract class ADataPane extends AWindowPane {
 	@Override
 	public void open(Composite parent) {
 		super.open(parent);
-		RowData data = new RowData(500,500);
+		GridData data = new GridData(500,500);
 		getParent().setLayoutData(data);
-		GridLayout layout = new GridLayout(2,false);
+		GridLayout layout = new GridLayout(1,false);
 		layout.marginWidth=20;
 		layout.marginHeight=10;
 		getParent().setLayout(layout);

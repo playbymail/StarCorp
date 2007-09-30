@@ -41,32 +41,18 @@ public class TurnOrdersTable extends ATablePane {
 	}
 	
 	@Override
-	protected String getTableName() {
-		return "Turn Orders";
-	}
-
-	@Override
 	protected int countColumns() {
 		return 7;
 	}
 
 	@Override
 	protected String getColumnName(int index) {
-		switch(index) {
-		case 0:
-		case 1:
-		case 2:
-		case 3:
-		case 4:
-		case 5:
-		case 6:
-			return "";
-		}
-		return null;
+		// no header
+		return "";
 	}
 
 	@Override
-	protected void populate() {
+	public void populate() {
 		for(TurnOrder order : turn.getOrders()) {
 			if(order.getType() == null)
 				continue;
@@ -96,12 +82,9 @@ public class TurnOrdersTable extends ATablePane {
 	protected void createWidgets(List<Widget> widgets) {
 		super.createWidgets(widgets);
 		Group grp = createGroup(getParent(), widgets, "");
-		RowLayout layout = new RowLayout();
+		RowLayout layout = new RowLayout(SWT.VERTICAL);
 		layout.marginWidth=10;
 		layout.marginHeight=5;
-		layout.justify=true;
-		layout.fill=true;
-		layout.spacing=480;
 		grp.setLayout(layout);
 		createButton(grp, widgets, "Clear")
 		.addListener(SWT.Selection, new Listener() {
@@ -115,6 +98,11 @@ public class TurnOrdersTable extends ATablePane {
 				window.getMainWindow().submitTurn();
 			}
 		});
+	}
+
+	@Override
+	protected boolean isHeaderVisible() {
+		return false;
 	}
 
 }

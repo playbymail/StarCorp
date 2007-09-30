@@ -12,6 +12,11 @@ package starcorp.client.gui.panes;
 
 import starcorp.client.gui.ADataEntryWindow;
 import starcorp.client.gui.ATablePane;
+import starcorp.client.gui.windows.SearchItemsWindow;
+import starcorp.client.gui.windows.SearchMarketWindow;
+import starcorp.common.entities.Colony;
+import starcorp.common.entities.MarketItem;
+import starcorp.common.types.Items;
 
 /**
  * starcorp.client.gui.MarketTable
@@ -21,26 +26,72 @@ import starcorp.client.gui.ATablePane;
  */
 public class MarketTable extends ATablePane {
 
+	private final SearchMarketWindow searchWindow;
+	
 	public MarketTable(ADataEntryWindow mainWindow) {
 		super(mainWindow);
-		// TODO Auto-generated constructor stub
-	}
-	
-	@Override
-	protected String getTableName() {
-		return "Colony Markets";
+		this.searchWindow = (SearchMarketWindow) mainWindow;
 	}
 
 	@Override
 	protected int countColumns() {
-		// TODO Auto-generated method stub
-		return 0;
+		return 4;
 	}
 
 	@Override
 	protected String getColumnName(int index) {
-		// TODO Auto-generated method stub
-		return null;
+		switch(index) {
+		case 0 : return "Type";
+		case 1 : return "Quantity";
+		case 2 : return "Price (ea.)";
+		case 3 : return "Colony";
+		}
+		return "";
 	}
 
+	@Override
+	protected boolean isEditable() {
+		return false;
+	}
+
+	@Override
+	public void populate() {
+		int total = searchWindow.countFilteredItems();
+		if(total < 1) {
+			String[] values = {"No items found"};
+			createRow(values);
+		}
+		else {
+			int page = searchWindow.getPage();
+			int start = (page - 1) * SearchItemsWindow.ITEMS_PER_PAGE;
+			int end = start + SearchItemsWindow.ITEMS_PER_PAGE;
+			System.out.println("ItemsTable populate: " + total + " total " + page + " page " + start + " start " + end + " end");
+			if(start < 0) start = 0;
+			if(end > total) end = total;
+			for(int n = start; n < end; n++) {
+				MarketItem item = searchWindow.get(n);
+				if(item == null)
+					return;
+				Items items = item.getItem();
+				Colony colony = searchWindow.getReport().getColony(item.getColony()); 
+				String[] values = new String[countColumns()];
+				values[0] = items.getTypeClass().getName();
+				values[1] = format(items.getQuantity());
+				values[2] =  "\u20a1 " + format(item.getCostPerItem());
+				values[3] = colony.getDisplayName();
+				createRow(values);
+			}
+		}
+	}
+
+	@Override
+	protected int getColumnWidth(int index) {
+		switch(index) {
+		case 0 : return 120;
+		case 1 : return 80;
+		case 2 : return 80;
+		case 3 : return 200;
+		}
+		return super.getColumnWidth(index);
+	}
 }

@@ -12,6 +12,8 @@ package starcorp.client.gui;
 
 import java.util.List;
 
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Widget;
 
 import starcorp.client.gui.windows.MainWindow;
@@ -25,6 +27,7 @@ import starcorp.common.types.ABaseType;
  */
 public class ATypePane extends ADataPane {
 
+	private Group typeGroup;
 	private final ABaseType type;
 	
 	/**
@@ -40,9 +43,11 @@ public class ATypePane extends ADataPane {
 	 */
 	@Override
 	protected void createWidgets(List<Widget> widgets) {
-		System.out.println("ATypePane createWidgets: " + type);
-		if(type != null && type.getName() != null)
-			super.getParent().setText(type.getName());
+		typeGroup = createGroup(super.getParent(), widgets, type.getName());
+		GridLayout layout = new GridLayout(2,false);
+		layout.marginWidth=20;
+		layout.marginHeight=10;
+		typeGroup.setLayout(layout);
 	}
 
 	@Override
@@ -68,6 +73,18 @@ public class ATypePane extends ADataPane {
 		} else if (!type.equals(other.type))
 			return false;
 		return true;
+	}
+
+	@Override
+	protected Group getParent() {
+		return typeGroup;
+	}
+	
+	@Override
+	public void redraw() {
+		typeGroup.pack();
+		typeGroup.redraw();
+		super.redraw();
 	}
 
 }

@@ -20,6 +20,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -63,7 +64,7 @@ import starcorp.common.types.Items;
  */
 public abstract class AWindowPane implements IComponent {
 	
-	private Group panel;
+	private Composite panel;
 	protected final AWindow window;
 	private List<Widget> widgets = new ArrayList<Widget>();
 	
@@ -85,10 +86,11 @@ public abstract class AWindowPane implements IComponent {
 
 	public void open(Composite parent) {
 		panel = new Group(parent, SWT.NONE);
+		panel.setLayout(new GridLayout(1,true));
 		createWidgets(widgets);
 	}
 	
-	protected Group getParent() {
+	protected Composite getParent() {
 		return panel;
 	}
 	
@@ -96,6 +98,7 @@ public abstract class AWindowPane implements IComponent {
 
 	public void redraw() {
 		panel.pack();
+		panel.redraw();
 	}
 	
 	protected String format(long number) {
@@ -423,7 +426,9 @@ public abstract class AWindowPane implements IComponent {
 	
 	protected Object getComboValue(Combo c) {
 		int index = c.getSelectionIndex();
-		int i = 0;
+		if(index < 1)
+			return null;
+		int i = 1;
 		for(Object o : (Collection<?>) c.getData()) {
 			if(i == index)
 				return o;
@@ -443,13 +448,20 @@ public abstract class AWindowPane implements IComponent {
 	}
 	
 	protected Combo createCombo(Composite parent, List<Widget> widgets, String[] items, Object values, String label) {
+		return createCombo(parent, widgets, items, values, -1, label);
+	}
+
+	protected Combo createCombo(Composite parent, List<Widget> widgets, String[] items, Object values, int selected, String label) {
 		createLabel(parent, widgets, label);
 		final Combo c = new Combo(parent,SWT.DROP_DOWN | SWT.READ_ONLY);
+		c.add("  ");
 		for(String s : items) {
 			c.add(s);
-//			System.out.println(s);
 		}
 		c.setData(values);
+		if(selected > -1) {
+			c.select(selected+1);
+		}
 		widgets.add(c);
 		return c;
 	}
@@ -462,20 +474,26 @@ public abstract class AWindowPane implements IComponent {
 		widgets.add(list);
 		return list;
 	}
-
+	
 	protected Combo createTypeSelection(Composite parent, List<Widget> widgets, Collection<?> types, String label) {
+		return createTypeSelection(parent, widgets, types, null, label);
+	}
+
+	protected Combo createTypeSelection(Composite parent, List<Widget> widgets, Collection<?> types, Object selected, String label) {
 		String[] items = new String[types.size()];
 		TreeSet<ABaseType> set = new TreeSet<ABaseType>();
 		for(Object o : types) {
 			ABaseType type = (ABaseType) o;
 			set.add(type);
 		}
+		int selection = -1;
 		int i = 0;
 		for(ABaseType type : set) {
 			items[i] = type.getName();
+			if(type.equals(selected)) selection = i;
 			i++;
 		}
-		return createCombo(parent, widgets, items, set, label);
+		return createCombo(parent, widgets, items, set, selection, label);
 	}
 	
 	protected org.eclipse.swt.widgets.List createTypeMultiSelection(Composite parent, List<Widget> widgets, Collection<?> types, String label) {
@@ -495,18 +513,24 @@ public abstract class AWindowPane implements IComponent {
 	}
 
 	protected Combo createEntitySelection(Composite parent, List<Widget> widgets, Collection<?> types, String label) {
+		return createEntitySelection(parent, widgets, types, null,label);
+	}
+	
+	protected Combo createEntitySelection(Composite parent, List<Widget> widgets, Collection<?> types, Object selected, String label) {
 		String[] items = new String[types.size()];
 		TreeSet<IEntity> set = new TreeSet<IEntity>();
 		for(Object o : types) {
 			IEntity type = (IEntity) o;
 			set.add(type);
 		}
+		int selection = -1;
 		int i = 0;
-		for(IEntity type : set) {
-			items[i] = type.getDisplayName();
+		for(IEntity entity : set) {
+			items[i] = entity.getDisplayName();
+			if(entity.equals(selected)) selection = i;
 			i++;
 		}
-		return createCombo(parent, widgets, items, set, label);
+		return createCombo(parent, widgets, items, set, selection, label);
 	}
 	
 	protected org.eclipse.swt.widgets.List createEntityMultiSelection(Composite parent, List<Widget> widgets, Collection<?> types, String label) {

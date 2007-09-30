@@ -57,7 +57,7 @@ public class CorporationPane extends AEntityPane {
 	protected void createWidgets(List<Widget> widgets) {
 		super.createWidgets(widgets);
 		Group grp = createGroup(getParent(), widgets, "");
-		grp.setLayoutData(new GridData(SWT.LEFT,SWT.TOP,true,true,2,1));
+//		grp.setLayoutData(new GridData(SWT.LEFT,SWT.TOP,true,true,2,1));
 		grp.setLayout(new GridLayout(2,false));
 		createLabel(grp, widgets, "Player:");
 		createLabel(grp, widgets, corp.getPlayerName() == null ? "NPC" : corp.getPlayerName());
@@ -95,6 +95,7 @@ public class CorporationPane extends AEntityPane {
 		}
 		Group grp = createGroup(parent, widgets, "Items on Sale");
 		grp.setLayout(new GridLayout(3,false));
+//		grp.setLayoutData(new GridData(SWT.LEFT,SWT.TOP,true,true,2,1));
 		
 		createLabel(grp, widgets, "Item");
 		createLabel(grp, widgets, "Colony");

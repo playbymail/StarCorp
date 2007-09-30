@@ -12,6 +12,8 @@ package starcorp.client.gui;
 
 import java.util.List;
 
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Widget;
 
 import starcorp.client.gui.windows.MainWindow;
@@ -38,6 +40,7 @@ import starcorp.common.types.OrderType;
 public abstract class AEntityPane extends ADataPane {
 
 	private final IEntity entity;
+	private Group entityGroup;
 	
 	public AEntityPane(MainWindow mainWindow, IEntity entity) {
 		super(mainWindow);
@@ -46,8 +49,12 @@ public abstract class AEntityPane extends ADataPane {
 
 	@Override
 	protected void createWidgets(List<Widget> widgets) {
-//		System.out.println("AEntityPane createWidgets: " + entity);
-		super.getParent().setText(entity.getDisplayName());
+		entityGroup = createGroup(super.getParent(), widgets, entity.getDisplayName());
+		GridLayout layout = new GridLayout(2,false);
+		layout.marginWidth=20;
+		layout.marginHeight=10;
+		entityGroup.setLayout(layout);
+		
 	}
 
 	@Override
@@ -253,6 +260,18 @@ public abstract class AEntityPane extends ADataPane {
 		order.add(item.getItem().getType());
 		order.add(qty);
 		return order;
+	}
+
+	@Override
+	protected Group getParent() {
+		return entityGroup;
+	}
+
+	@Override
+	public void redraw() {
+		entityGroup.pack();
+		entityGroup.redraw();
+		super.redraw();
 	}
 
 	

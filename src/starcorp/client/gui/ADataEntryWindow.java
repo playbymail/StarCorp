@@ -46,7 +46,16 @@ public abstract class ADataEntryWindow extends AWindow {
 		shell.dispose();
 		mainWindow.focus();
 	}
-
+	
+	public void reload() {
+		builderPane.dispose();
+		builderPane = createBuilder();
+		builderPane.open(getTop());
+		tablePane.clear();
+		tablePane.populate();
+		redraw();
+	}
+	
 	protected Composite getTop() {
 		return topPanel;
 	}
@@ -81,8 +90,10 @@ public abstract class ADataEntryWindow extends AWindow {
 	public void redraw() {
 		builderPane.redraw();
 		tablePane.redraw();
-		topPanel.pack();
-		bottomPanel.pack();
+		topPanel.pack(true);
+		topPanel.redraw();
+		bottomPanel.pack(true);
+		bottomPanel.redraw();
 		shell.pack();
 		center();
 	}

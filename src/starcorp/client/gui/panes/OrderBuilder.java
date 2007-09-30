@@ -49,7 +49,7 @@ import starcorp.common.types.PopulationClass;
  * @version 25 Sep 2007
  */
 public class OrderBuilder extends ABuilderPane {
-
+	// TODO replace Add, Clear and Submit buttons with icons
 	private final Turn turn;
 	private final TurnReport report;
 	private Group[] orderArgumentPanels = new Group[5];
@@ -63,6 +63,7 @@ public class OrderBuilder extends ABuilderPane {
 
 	@Override
 	protected void createWidgets(List<Widget> widgets) {
+		super.createWidgets(widgets);
 		getParent().setText("Order Builder");
 		getParent().setLayout(new RowLayout(SWT.HORIZONTAL));
 		
@@ -76,7 +77,7 @@ public class OrderBuilder extends ABuilderPane {
 				turn.add(order);
 				final TurnOrderWindow orderWindow = (TurnOrderWindow)mainWindow;
 				orderWindow.turnEdited();
-				orderWindow.turnOrdersReload();
+				orderWindow.reload();
 			}
 		});
 

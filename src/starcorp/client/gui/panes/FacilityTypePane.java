@@ -47,15 +47,20 @@ public class FacilityTypePane extends ATypePane {
 	@Override
 	protected void createWidgets(List<Widget> widgets) {
 		super.createWidgets(widgets);
+		Group grp = createGroup(getParent(), widgets, "");
+		GridLayout layout = new GridLayout(2,false);
+		layout.marginWidth=20;
+		layout.marginHeight=10;
+		grp.setLayout(layout);
 		
-		createLabel(getParent(), widgets, "Category:");
-		createLabel(getParent(), widgets, type.getCategory());
+		createLabel(grp, widgets, "Category:");
+		createLabel(grp, widgets, type.getCategory());
 		
-		createLabel(getParent(), widgets, "Sub-Category:");
-		createLabel(getParent(), widgets, type.getSubCategory());
+		createLabel(grp, widgets, "Sub-Category:");
+		createLabel(grp, widgets, type.getSubCategory());
 		
-		createLabel(getParent(),widgets,"Power Required:");
-		createLabel(getParent(), widgets, format(type.getPowerRequirement()));
+		createLabel(grp,widgets,"Power Required:");
+		createLabel(grp, widgets, format(type.getPowerRequirement()));
 		
 		Group grpWorkers = createGroup(getParent(), widgets, "Required Workers");
 		GridData data = new GridData();

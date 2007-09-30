@@ -12,8 +12,9 @@ package starcorp.client.gui.panes;
 
 import java.util.List;
 
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Widget;
 
 import starcorp.client.gui.ADataPane;
@@ -27,6 +28,7 @@ import starcorp.client.gui.windows.MainWindow;
  */
 public class SimpleTextPane extends ADataPane {
 
+	private Group textGroup;
 	private final String heading;
 	private final String text;
 	
@@ -41,11 +43,9 @@ public class SimpleTextPane extends ADataPane {
 	 */
 	@Override
 	protected void createWidgets(List<Widget> widgets) {
-		getParent().setText(heading);
-		GridData data = new GridData();
-		data.horizontalSpan=2;
-		Label lbl = createLabel(getParent(), widgets, text);
-		lbl.setLayoutData(data);
+		textGroup = createGroup(getParent(), widgets, heading);
+		textGroup.setLayout(new FillLayout(SWT.HORIZONTAL));
+		createLabel(textGroup, widgets, text);
 	}
 
 	@Override

@@ -11,11 +11,27 @@
 package starcorp.client.gui.panes;
 
 import java.util.List;
+import java.util.Set;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 
 import starcorp.client.gui.ABuilderPane;
 import starcorp.client.gui.ADataEntryWindow;
+import starcorp.client.gui.widgets.Hyperlink;
+import starcorp.client.gui.windows.SearchItemsWindow;
+import starcorp.common.entities.Colony;
+import starcorp.common.types.AItemType;
 
 /**
  * starcorp.client.gui.SearchItemsBuilder
@@ -24,15 +40,80 @@ import starcorp.client.gui.ADataEntryWindow;
  * @version 25 Sep 2007
  */
 public class SearchItemsBuilder extends ABuilderPane {
-
+	private final SearchItemsWindow searchWindow;
+	
 	public SearchItemsBuilder(ADataEntryWindow mainWindow) {
 		super(mainWindow);
-		// TODO Auto-generated constructor stub
+		this.searchWindow = (SearchItemsWindow) mainWindow;
+		
 	}
 
 	@Override
 	protected void createWidgets(List<Widget> widgets) {
-		// TODO Auto-generated method stub
+		super.createWidgets(widgets);
+		String show = "Showing " + searchWindow.countFilteredItems() + " of " + searchWindow.countAllItems();
+		getParent().setText(show);
 		
+		Group buttonPanel = createGroup(getParent(), widgets, null);
+		buttonPanel.setLayout(new RowLayout(SWT.HORIZONTAL));
+		
+		final Text txtName = createTextInput(buttonPanel, widgets, "Name:");
+		if(searchWindow.getFilterName() != null) {
+			txtName.setText(searchWindow.getFilterName());
+		}
+		txtName.setSize(100, 20);
+		List<AItemType> types = AItemType.listTypes();
+		final Combo typesCombo = createTypeSelection(buttonPanel, widgets, types, searchWindow.getFilterType(), "Type:");
+		Set<Colony> colonies = searchWindow.getReport().getColonies();
+		final Combo coloniesCombo = createEntitySelection(buttonPanel, widgets, colonies, searchWindow.getFilterColony(), "Colony:"); 
+		final Text txtQty = createIntegerInput(buttonPanel, widgets, "Min. Quantity:");
+		if(searchWindow.getFilterQuantity() > 0) {
+			txtQty.setText(String.valueOf(searchWindow.getFilterQuantity()));
+		}
+		txtQty.setSize(100, 20);
+
+		final Button btnClear = createButton(buttonPanel, widgets, "Clear");
+		btnClear.addListener(SWT.Selection, new Listener() {
+			public void handleEvent (Event event) {
+				searchWindow.set(0, "", null, null);
+			}
+		});
+
+		final Button btnFilter = createButton(buttonPanel, widgets, "Filter");
+		btnFilter.addListener(SWT.Selection, new Listener() {
+			public void handleEvent (Event event) {
+				String filterName = txtName.getText();
+				if(filterName != null && filterName.length() < 1) filterName = null;
+				int filterQuantity = getIntegerTextValue(txtQty);
+				AItemType filterType = (AItemType) getComboValue(typesCombo);
+				Colony filterColony = (Colony) getComboValue(coloniesCombo);
+				System.out.println("Filter: name=" + filterName + " : qty=" + filterQuantity + " : type=" + filterType + " : colony=" + filterColony );
+				searchWindow.set(filterQuantity, filterName, filterType, filterColony);
+			}
+		});
+		
+		
+		if(searchWindow.countPages() > 1) { 
+			Group grpPages = createGroup(getParent(), widgets, "Pages");
+			grpPages.setLayout(new GridLayout(searchWindow.countPages(),true));
+			for(int i = 1; i <= searchWindow.countPages(); i++) {
+				if(i == searchWindow.getPage()) {
+					createLabel(grpPages, widgets, String.valueOf(i));
+				}
+				else {
+					Hyperlink lnk = createHyperlink(grpPages, widgets, String.valueOf(i));
+					final int selected = i;
+					lnk.addSelectionListener(new SelectionListener() {
+						public void widgetDefaultSelected(SelectionEvent e) {
+							searchWindow.setPage(selected);
+						}
+						public void widgetSelected(SelectionEvent e) {
+							searchWindow.setPage(selected);
+						}
+					});
+				}
+			}
+		}
 	}
+	
 }

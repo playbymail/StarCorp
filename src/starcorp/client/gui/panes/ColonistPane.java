@@ -12,6 +12,8 @@ package starcorp.client.gui.panes;
 
 import java.util.List;
 
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Widget;
 
 import starcorp.client.gui.AEntityPane;
@@ -28,6 +30,7 @@ import starcorp.common.entities.Workers;
  * @version 28 Sep 2007
  */
 public class ColonistPane extends AEntityPane {
+	// TODO add set salary options
 	private final AColonists colonist;
 	
 	/**
@@ -42,28 +45,33 @@ public class ColonistPane extends AEntityPane {
 	@Override
 	protected void createWidgets(List<Widget> widgets) {
 		super.createWidgets(widgets);
+		Group grp = createGroup(getParent(), widgets, "");
+		GridLayout layout = new GridLayout(2,false);
+		layout.marginWidth=20;
+		layout.marginHeight=10;
+		grp.setLayout(layout);
 		
-		createLabel(getParent(), widgets, "Colony:");
+		createLabel(grp, widgets, "Colony:");
 		Colony colony = getTurnReport().getColony(colonist.getColony());
-		createColonyLink(getParent(), widgets, colony, null);
+		createColonyLink(grp, widgets, colony, null);
 		
-		createLabel(getParent(),widgets, "Type:");
-		createLabel(getParent(),widgets, colonist.getPopClass().getName());
+		createLabel(grp,widgets, "Type:");
+		createLabel(grp,widgets, colonist.getPopClass().getName());
 		
-		createLabel(getParent(),widgets,"Quantity:");
-		createLabel(getParent(),widgets,format(colonist.getQuantity()));
+		createLabel(grp,widgets,"Quantity:");
+		createLabel(grp,widgets,format(colonist.getQuantity()));
 
-		createLabel(getParent(),widgets,"Happiness:");
-		createLabel(getParent(),widgets,format(colonist.getHappiness()) + "%");
+		createLabel(grp,widgets,"Happiness:");
+		createLabel(grp,widgets,format(colonist.getHappiness()) + "%");
 		
 		if(colonist instanceof Workers) {
 			Workers w = (Workers) colonist;
-			createLabel(getParent(), widgets, "Employer:");
+			createLabel(grp, widgets, "Employer:");
 			Facility f = getTurnReport().getFacility(w.getFacility());
-			createFacilityLink(getParent(), widgets, f, null);
+			createFacilityLink(grp, widgets, f, null);
 			
-			createLabel(getParent(), widgets, "Salary:");
-			createLabel(getParent(),widgets, "\u20a1 " + format(w.getSalary()));
+			createLabel(grp, widgets, "Salary:");
+			createLabel(grp,widgets, "\u20a1 " + format(w.getSalary()));
 		}
 			
 		

@@ -10,6 +10,14 @@
  */
 package starcorp.client.gui;
 
+import java.util.List;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Widget;
+
 /**
  * starcorp.client.gui.ASearchPane
  *
@@ -20,9 +28,36 @@ public abstract class ABuilderPane extends AWindowPane {
 
 	protected final ADataEntryWindow mainWindow;
 	
+	private Group builderGroup;
+	
 	public ABuilderPane(ADataEntryWindow mainWindow) {
 		super(mainWindow);
 		this.mainWindow = mainWindow;
 	}
 	
+	/* (non-Javadoc)
+	 * @see starcorp.client.gui.AWindowPane#createWidgets(java.util.List)
+	 */
+	@Override
+	protected void createWidgets(List<Widget> widgets) {
+		builderGroup = createGroup(super.getParent(), widgets, "");
+		GridData data = new GridData(SWT.LEFT,SWT.TOP,true,true,1,1);
+		RowLayout layout = new RowLayout(SWT.VERTICAL);
+		layout.marginWidth=20;
+		layout.marginHeight=10;
+		builderGroup.setLayout(layout);
+		builderGroup.setLayoutData(data);
+	}
+	
+	@Override
+	protected Group getParent() {
+		return builderGroup;
+	}
+	
+	@Override
+	public void redraw() {
+		builderGroup.pack();
+		builderGroup.redraw();
+		super.redraw();
+	}
 }

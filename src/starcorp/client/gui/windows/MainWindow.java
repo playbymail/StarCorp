@@ -25,7 +25,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
@@ -208,7 +207,7 @@ public class MainWindow extends AWindow {
 		openTurnWindow();
 		currentTurn.add(order);
 		setTurnDirty(true);
-		turnWindow.turnOrdersReload();
+		turnWindow.reload();
 	}
 	
 	public void addTurnOrders(List<TurnOrder> orders) {
@@ -216,7 +215,7 @@ public class MainWindow extends AWindow {
 		for(TurnOrder order : orders) {
 			currentTurn.add(order);
 		}
-		turnWindow.turnOrdersReload();
+		turnWindow.reload();
 	}
 
 	public void back() {
@@ -384,7 +383,7 @@ public class MainWindow extends AWindow {
 		treeBrowser.open(panel);
 		
 		dataPanel = new Composite(panel, SWT.NONE);
-		dataPanel.setLayout(new RowLayout(SWT.VERTICAL));
+		dataPanel.setLayout(new GridLayout(1,true));
 		GridData data = new GridData();
 		data.verticalAlignment = SWT.TOP;
 		data.horizontalAlignment=SWT.LEFT;
@@ -453,7 +452,13 @@ public class MainWindow extends AWindow {
 	}
 	
 	public void openSearchItemsWindow() {
-		// TODO open search items window
+		if(searchItemsWindow != null) {
+			searchItemsWindow.focus();
+		}
+		else {
+			searchItemsWindow = new SearchItemsWindow(this);
+			searchItemsWindow.open(shell);
+		}
 	}
 
 	public void openSearchLawWindow() {
@@ -461,7 +466,13 @@ public class MainWindow extends AWindow {
 	}
 
 	public void openSearchMarketWindow() {
-		// TODO open search market window
+		if(searchMarketWindow != null) {
+			searchMarketWindow.focus();
+		}
+		else {
+			searchMarketWindow = new SearchMarketWindow(this);
+			searchMarketWindow.open(shell);
+		}
 	}
 	
 	public void openStarshipDesignWindow() {

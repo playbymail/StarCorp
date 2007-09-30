@@ -15,6 +15,7 @@ import java.util.Set;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Widget;
@@ -56,38 +57,44 @@ public class ItemPane extends ATypePane {
 	protected void createWidgets(List<Widget> widgets) {
 		super.createWidgets(widgets);
 		
-		createLabel(getParent(), widgets, "Key:");
-		createLabel(getParent(), widgets, type.getKey());
+		Group grp = createGroup(getParent(), widgets, "");
+		GridLayout layout = new GridLayout(2,false);
+		layout.marginWidth=20;
+		layout.marginHeight=10;
+		grp.setLayout(layout);
 		
-		createLabel(getParent(), widgets, "Mass:");
-		createLabel(getParent(), widgets, format(type.getMassUnits()));
+		createLabel(grp, widgets, "Key:");
+		createLabel(grp, widgets, type.getKey());
+		
+		createLabel(grp, widgets, "Mass:");
+		createLabel(grp, widgets, format(type.getMassUnits()));
 		
 		if(type instanceof ConsumerGoods) {
-			createLabel(getParent(), widgets, "Consumer Goods:");
+			createLabel(grp, widgets, "Consumer Goods:");
 		}
 		
 		if(type instanceof IndustrialGoods) {
-			createLabel(getParent(), widgets, "Industrial Goods:");
+			createLabel(grp, widgets, "Industrial Goods:");
 		}
 		
 		if(type instanceof Resources) {
-			createLabel(getParent(), widgets, "Resources:");
+			createLabel(grp, widgets, "Resources:");
 		}
 		
 		if(type instanceof StarshipHulls) {
-			createLabel(getParent(), widgets, "Starship Hulls:");
+			createLabel(grp, widgets, "Starship Hulls:");
 		}
 		
 		if(type instanceof BuildingModules) {
-			createLabel(getParent(), widgets, "Building Modules:");
+			createLabel(grp, widgets, "Building Modules:");
 		}
 		
-		createLabel(getParent(), widgets, type.getSubCategory());
+		createLabel(grp, widgets, type.getSubCategory());
 
 		if(type instanceof AFactoryItem) {
 			AFactoryItem f = (AFactoryItem) type;
 			Set<Items> components = f.getComponent();
-			Group grp = createGroup(getParent(), widgets, "Components");
+			grp = createGroup(getParent(), widgets, "Components");
 			grp.setLayout(new RowLayout(SWT.VERTICAL));
 			GridData data = new GridData();
 			data.horizontalSpan=2;

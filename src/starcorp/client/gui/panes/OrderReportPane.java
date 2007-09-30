@@ -56,7 +56,7 @@ public class OrderReportPane extends ADataPane {
 
 	@Override
 	protected void createWidgets(List<Widget> widgets) {
-		getParent().setText(order.toString());
+		createLabel(getParent(),widgets,order.toString());
 		
 		String txt = null;
 		if(report != null) {

@@ -13,6 +13,7 @@ package starcorp.client.gui.panes;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Widget;
@@ -32,6 +33,7 @@ import starcorp.common.types.GalacticDate;
  */
 public class TurnReportPane extends ADataPane {
 
+	private Group reportGroup;
 	private TurnReport report;
 	
 	public TurnReportPane(MainWindow mainWindow, TurnReport report) {
@@ -44,32 +46,33 @@ public class TurnReportPane extends ADataPane {
 	 */
 	@Override
 	protected void createWidgets(List<Widget> widgets) {
-		getParent().setText("Turn Report Summary");
+		reportGroup = createGroup(getParent(), widgets, "Turn Report Summary");
+		reportGroup.setLayout(new GridLayout(2,true));
 		
 		Turn turn = report.getTurn();
 		if(turn == null) {
-			createLabel(getParent(), widgets, "No turn data.");
+			createLabel(reportGroup, widgets, "No turn data.");
 		}
 		else {
 			GalacticDate turnDate = turn.getProcessedDate();
 			int orderCount = turn.getOrders().size();
 			int errorCount = turn.getErrors().size();
 			
-			createLabel(getParent(), widgets, "Galactic Date:");
+			createLabel(reportGroup, widgets, "Galactic Date:");
 			if(turnDate != null) {
-				createLabel(getParent(), widgets, turn.getProcessedDate().toString());
+				createLabel(reportGroup, widgets, turn.getProcessedDate().toString());
 			}
 			else {
-				createLabel(getParent(), widgets, "N/A");
+				createLabel(reportGroup, widgets, "N/A");
 			}
 			
-			createLabel(getParent(), widgets, "Orders:");
-			createLabel(getParent(), widgets, format(orderCount));
-			createLabel(getParent(), widgets, "Errors:");
-			createLabel(getParent(), widgets, format(errorCount));
+			createLabel(reportGroup, widgets, "Orders:");
+			createLabel(reportGroup, widgets, format(orderCount));
+			createLabel(reportGroup, widgets, "Errors:");
+			createLabel(reportGroup, widgets, format(errorCount));
 
 			if(errorCount > 0) {
-				Group grpErrors = createGroup(getParent(), widgets, "Errors");
+				Group grpErrors = createGroup(reportGroup, widgets, "Errors");
 				grpErrors.setLayout(new RowLayout(SWT.VERTICAL));
 				
 				for(TurnError error :  turn.getErrors()) {

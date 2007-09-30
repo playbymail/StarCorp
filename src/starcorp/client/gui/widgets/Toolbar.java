@@ -27,7 +27,6 @@ import org.eclipse.swt.widgets.ToolItem;
 
 import starcorp.client.gui.IComponent;
 import starcorp.client.gui.windows.MainWindow;
-import starcorp.common.types.TerrainType;
 
 /**
  * starcorp.client.gui.Toolbar
