@@ -11,6 +11,7 @@
 package starcorp.client.gui.panes;
 
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
@@ -18,6 +19,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Widget;
 
 import starcorp.client.gui.AEntityPane;
@@ -35,6 +37,25 @@ public class StarshipDesignPane extends AEntityPane {
 
 	private StarshipDesign design;
 	
+	private Label lblHullCount;
+	private Label lblMass;
+	private Label lblImpulse;
+	private Label lblJump;
+	private Label lblOrbit;
+	private Label lblDock;
+	private Label lblShortScan;
+	private Label lblLongScan;
+	
+	private Label lblCargoConsumer;
+	private Label lblCargoIndustrial;
+	private Label lblCargoModules;
+	private Label lblCargoOrganics;
+	private Label lblCargoLiquids;
+	
+	private Label lblSpecialAbilities;
+	
+	private Label lblHulls;
+	
 	public StarshipDesignPane(MainWindow mainWindow, StarshipDesign design) {
 		super(mainWindow, design);
 		this.design = design;
@@ -47,14 +68,14 @@ public class StarshipDesignPane extends AEntityPane {
 		Group grpData =  createGroup(getParent(), widgets, "Data");
 		grpData.setLayout(new GridLayout(2,true));
 		
-		createLabel(grpData, widgets, "Hulls: " +design.countHulls());
-		createLabel(grpData, widgets, "Mass: " +design.getTotalMass() + "mu");
-		createLabel(grpData, widgets, "Impulse Speed: " +design.getImpulseSpeed());
-		createLabel(grpData, widgets, "Jump Range: " +design.getJumpRange());
-		createLabel(grpData, widgets, "Orbit: " +design.getMaxOrbitGravity() + "g");
-		createLabel(grpData, widgets, "Dock: " +design.getMaxDockGravity() + "g");
-		createLabel(grpData, widgets, "Short Range Scanners: " +(design.canScanStarSystem() ? "yes" : "no"));
-		createLabel(grpData, widgets, "Long Range Scanners: " +design.getScanGalaxyRange());
+		lblHullCount = createLabel(grpData, widgets, "");
+		lblMass = createLabel(grpData, widgets, "");
+		lblImpulse = createLabel(grpData, widgets, "");
+		lblJump = createLabel(grpData, widgets, "");
+		lblOrbit = createLabel(grpData, widgets, "");
+		lblDock = createLabel(grpData, widgets, "");
+		lblShortScan = createLabel(grpData, widgets, "");
+		lblLongScan = createLabel(grpData, widgets, "");
 
 		Group grpCargo = createGroup(grpData, widgets, "Cargo Capacity");
 		grpCargo.setLayout(new RowLayout(SWT.VERTICAL));
@@ -63,11 +84,11 @@ public class StarshipDesignPane extends AEntityPane {
 		data.verticalAlignment=SWT.TOP;
 		grpCargo.setLayoutData(data);
 		
-		createLabel(grpCargo, widgets, "Consumer: " +design.getConsumerCapacity() + "mu");
-		createLabel(grpCargo, widgets, "Industrial: " +design.getIndustrialCapacity() + "mu");
-		createLabel(grpCargo, widgets, "Modules: " +design.getModulesCapacity() + "mu");
-		createLabel(grpCargo, widgets, "Organics: " +design.getOrganicsCapacity() + "mu");
-		createLabel(grpCargo, widgets, "Liquids / Gas: " +design.getLiquidGasCapacity() + "mu");
+		lblCargoConsumer = createLabel(grpCargo, widgets, "");
+		lblCargoIndustrial = createLabel(grpCargo, widgets, "");
+		lblCargoModules = createLabel(grpCargo, widgets, "");
+		lblCargoOrganics = createLabel(grpCargo, widgets, "");
+		lblCargoLiquids = createLabel(grpCargo, widgets, "");
 
 		Group grpAbilities = createGroup(grpData,widgets,"Special Abilities");
 		grpAbilities.setLayout(new FillLayout(SWT.VERTICAL));
@@ -75,34 +96,7 @@ public class StarshipDesignPane extends AEntityPane {
 		data.minimumWidth=250;
 		data.verticalAlignment=SWT.TOP;
 		grpAbilities.setLayoutData(data);
-		
-		if(design.canMineAsteroid()) {
-			createLabel(grpAbilities, widgets, "Mine Asteroids");
-		}
-		
-		if(design.canMineGasField()) {
-			createLabel(grpAbilities, widgets, "Mine Gas Fields");
-		}
-		
-		if(design.canProbeField()) {
-			createLabel(grpAbilities, widgets, "Probe Asteroids / Gas Fields");
-		}
-		
-		if(design.canProbePlanet()) {
-			createLabel(grpAbilities, widgets, "Probe Planets");
-		}
-		
-		if(design.hasBioLab()) {
-			createLabel(grpAbilities, widgets, "Prospect (Organics)");
-		}
-		
-		if(design.hasPhysicsLab()) {
-			createLabel(grpAbilities, widgets, "Prospect (Mineral / Metal / Fissile)");
-		}
-		
-		if(design.hasGeoLab()) {
-			createLabel(grpAbilities, widgets, "Prospect (Fuel / Gas / Metal / Liquid)");
-		}
+		lblSpecialAbilities = createLabel(grpAbilities, widgets, "");
 
 		Group grpHulls = createGroup(getParent(),widgets,"Hulls");
 		grpHulls.setLayout(new GridLayout(3,true));
@@ -111,11 +105,83 @@ public class StarshipDesignPane extends AEntityPane {
 		data.verticalAlignment=SWT.TOP;
 		data.horizontalSpan=2;
 		grpHulls.setLayoutData(data);
-
-		for(Items item : design.getHulls()) {
-			createItemLink(grpHulls, widgets, item, null);
-		}
+		lblHulls = createLabel(grpHulls, widgets, "");
 		
 		// TODO create build drop down filtered by colonies where sufficient hulls are available
 }
+
+	@Override
+	public void redraw() {
+		lblHullCount.setText("Hulls: " +design.countHulls());
+		lblMass.setText("Mass: " +design.getTotalMass() + "mu");
+		lblImpulse.setText("Impulse Speed: " +design.getImpulseSpeed());
+		lblJump.setText("Jump Range: " +design.getJumpRange());
+		lblOrbit.setText("Orbit: " +format(design.getMaxOrbitGravity()) + "g");
+		lblDock.setText("Dock: " +format(design.getMaxDockGravity()) + "g");
+		lblShortScan.setText("Short Range Scanners: " +(design.canScanStarSystem() ? "yes" : "no"));
+		lblLongScan.setText("Long Range Scanners: " +design.getScanGalaxyRange());
+		
+		lblCargoConsumer.setText("Consumer: " +design.getConsumerCapacity() + "mu");
+		lblCargoIndustrial.setText("Industrial: " +design.getIndustrialCapacity() + "mu");
+		lblCargoModules.setText("Modules: " +design.getModulesCapacity() + "mu");
+		lblCargoOrganics.setText("Organics: " +design.getOrganicsCapacity() + "mu");
+		lblCargoLiquids.setText("Liquids / Gas: " +design.getLiquidGasCapacity() + "mu");
+
+		String ability = "";
+		boolean hasAbility = false;
+		if(design.canMineAsteroid()) {
+			ability += "Mine Asteroids\n";
+			hasAbility = true;
+		}
+		
+		if(design.canMineGasField()) {
+			ability += "Mine Gas Fields\n";
+			hasAbility = true;
+		}
+		
+		if(design.canProbeField()) {
+			ability += "Probe Asteroids / Gas Fields\n";
+			hasAbility = true;
+		}
+		
+		if(design.canProbePlanet()) {
+			ability += "Probe Planets\n";
+			hasAbility = true;
+		}
+		
+		if(design.hasBioLab()) {
+			ability += "Prospect (Organics)\n";
+			hasAbility = true;
+		}
+		
+		if(design.hasPhysicsLab()) {
+			ability += "Prospect (Mineral / Metal / Fissile)\n";
+			hasAbility = true;
+		}
+		
+		if(design.hasGeoLab()) {
+			ability += "Prospect (Fuel / Gas / Metal / Liquid)\n";
+			hasAbility = true;
+		}
+		
+		if(!hasAbility) {
+			ability = "None";
+		}
+		
+		lblSpecialAbilities.setText(ability);
+		
+		String strHulls = "";
+		Set<Items> hulls = design.getHulls();
+		if(hulls != null && hulls.size() > 0) {
+			for(Items item : hulls) {
+				strHulls += item + "\n";
+			}
+		}
+		else {
+			strHulls = "None";
+		}
+		
+		lblHulls.setText(strHulls);
+		super.redraw();
+	}
 }

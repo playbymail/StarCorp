@@ -10,8 +10,17 @@
  */
 package starcorp.client.gui.panes;
 
+import java.util.List;
+
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Widget;
+
 import starcorp.client.gui.ADataEntryWindow;
 import starcorp.client.gui.ATablePane;
+import starcorp.client.gui.widgets.Hyperlink;
 import starcorp.client.gui.windows.SearchItemsWindow;
 import starcorp.client.gui.windows.SearchLawsWindow;
 import starcorp.common.entities.AGovernmentLaw;
@@ -83,5 +92,31 @@ public class LawTable extends ATablePane {
 		case 1 : return 300;
 		}
 		return super.getColumnWidth(index);
+	}
+
+	@Override
+	protected void createWidgets(List<Widget> widgets) {
+		super.createWidgets(widgets);
+		if(searchWindow.countPages() > 1) { 
+			Group grpPages = createGroup(getParent(), widgets, "Pages");
+			grpPages.setLayout(new GridLayout(searchWindow.countPages(),true));
+			for(int i = 1; i <= searchWindow.countPages(); i++) {
+				if(i == searchWindow.getPage()) {
+					createLabel(grpPages, widgets, String.valueOf(i));
+				}
+				else {
+					Hyperlink lnk = createHyperlink(grpPages, widgets, String.valueOf(i));
+					final int selected = i;
+					lnk.addSelectionListener(new SelectionListener() {
+						public void widgetDefaultSelected(SelectionEvent e) {
+							searchWindow.setPage(selected);
+						}
+						public void widgetSelected(SelectionEvent e) {
+							searchWindow.setPage(selected);
+						}
+					});
+				}
+			}
+		}
 	}
 }

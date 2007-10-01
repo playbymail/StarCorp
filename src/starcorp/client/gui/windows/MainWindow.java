@@ -487,8 +487,15 @@ public class MainWindow extends AWindow {
 		return searchMarketWindow;
 	}
 	
-	public void openStarshipDesignWindow() {
-		// TODO open starship design window
+	public StarshipDesignWindow openStarshipDesignWindow() {
+		if(designWindow != null) {
+			designWindow.focus();
+		}
+		else {
+			designWindow = new StarshipDesignWindow(this);
+			designWindow.open(shell);
+		}
+		return designWindow;
 	}
 
 	public TurnOrderWindow openTurnWindow() {

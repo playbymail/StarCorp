@@ -52,20 +52,17 @@ public class SearchLawBuilder extends ABuilderPane {
 		String show = "Showing " + searchWindow.countFilteredItems() + " of " + searchWindow.countAllItems();
 		getParent().setText(show);
 		
-		Group buttonPanel = createGroup(getParent(), widgets, null);
-		buttonPanel.setLayout(new RowLayout(SWT.HORIZONTAL));
-		
 		Set<Colony> colonies = searchWindow.getReport().getColonies();
-		final Combo coloniesCombo = createEntitySelection(buttonPanel, widgets, colonies, searchWindow.getFilterColony(), "Colony:"); 
+		final Combo coloniesCombo = createEntitySelection(getParent(), widgets, colonies, searchWindow.getFilterColony(), "Colony:"); 
 
-		final Button btnClear = createButton(buttonPanel, widgets, "Clear");
+		final Button btnClear = createButton(getParent(), widgets, "Clear");
 		btnClear.addListener(SWT.Selection, new Listener() {
 			public void handleEvent (Event event) {
 				searchWindow.set(null);
 			}
 		});
 
-		final Button btnFilter = createButton(buttonPanel, widgets, "Filter");
+		final Button btnFilter = createButton(getParent(), widgets, "Filter");
 		btnFilter.addListener(SWT.Selection, new Listener() {
 			public void handleEvent (Event event) {
 				Colony filterColony = (Colony) getComboValue(coloniesCombo);
@@ -74,27 +71,6 @@ public class SearchLawBuilder extends ABuilderPane {
 		});
 		
 		
-		if(searchWindow.countPages() > 1) { 
-			Group grpPages = createGroup(getParent(), widgets, "Pages");
-			grpPages.setLayout(new GridLayout(searchWindow.countPages(),true));
-			for(int i = 1; i <= searchWindow.countPages(); i++) {
-				if(i == searchWindow.getPage()) {
-					createLabel(grpPages, widgets, String.valueOf(i));
-				}
-				else {
-					Hyperlink lnk = createHyperlink(grpPages, widgets, String.valueOf(i));
-					final int selected = i;
-					lnk.addSelectionListener(new SelectionListener() {
-						public void widgetDefaultSelected(SelectionEvent e) {
-							searchWindow.setPage(selected);
-						}
-						public void widgetSelected(SelectionEvent e) {
-							searchWindow.setPage(selected);
-						}
-					});
-				}
-			}
-		}
 	}
 	
 }

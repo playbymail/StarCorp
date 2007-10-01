@@ -74,7 +74,7 @@ public class OrderBuilder extends ABuilderPane {
 			public void handleEvent (Event event) {
 				TurnOrder order = readOrder();
 				turn.add(order);
-				final TurnOrderWindow orderWindow = (TurnOrderWindow)mainWindow;
+				final TurnOrderWindow orderWindow = (TurnOrderWindow)getWindow();
 				orderWindow.turnEdited();
 				orderWindow.reload();
 			}
@@ -227,7 +227,7 @@ public class OrderBuilder extends ABuilderPane {
 			createShipDropDown(widgets, 0);
 		}
 		else if(type.equals(OrderType.DESIGN_SHIP)){
-			mainWindow.getMainWindow().openStarshipDesignWindow();
+			getWindow().getMainWindow().openStarshipDesignWindow();
 		}
 		else if(type.equals(OrderType.MOVE)){
 			createShipDropDown(widgets, 0);
@@ -239,7 +239,7 @@ public class OrderBuilder extends ABuilderPane {
 			createStarSystemDropDown(widgets, 1);
 		}
 		
-		mainWindow.redraw();
+		getWindow().redraw();
 	}
 	
 	private TurnOrder readOrder() {

@@ -70,7 +70,7 @@ public abstract class ATablePane extends AWindowPane {
 	
 
 	protected void createWidgets(List<Widget> widgets) {
-		getParent().setLayout(new RowLayout(SWT.HORIZONTAL));
+		getParent().setLayout(new RowLayout(SWT.VERTICAL));
 		table = new Table(getParent(),getTableStyle());
 		table.setHeaderVisible(isHeaderVisible());
 		table.setLinesVisible(isLinesVisible());

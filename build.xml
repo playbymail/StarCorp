@@ -147,6 +147,7 @@
 				<include name="NOTICE"/>
 				<include name="appsettings.ini"/>
 				<include name="build.xml"/>
+				<include name="build.bat"/>
 				<include name="server.bat.template"/>
 				<exclude name="**/server.properties"/>
 				<exclude name="**/client.properties"/>
@@ -161,7 +162,7 @@
 			<config headerType="gui" jar="dist/client/${clientJarName}.jar" 
 				outfile="dist/client/${clientJarName}.exe" 
 				errTitle="${projectName}" icon="launch4j\icon.ico">
-				<jre minVersion="1.4.0" />
+				<jre minVersion="1.5.0" />
 				<splash file="launch4j\splash.bmp" waitForWindow="true" timeout="60" timeoutErr="false" />
 				<versionInfo fileVersion="${version}" txtFileVersion="${version}" 
 					fileDescription="${clientJarName}" copyright="2007" productVersion="${version}" 

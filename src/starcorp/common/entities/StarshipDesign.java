@@ -342,6 +342,10 @@ public class StarshipDesign extends ANamedEntity {
 		return item;
 	}
 	
+	public void clearHulls() {
+		hulls.clear();
+	}
+	
 	public void addHulls(StarshipHulls hullType, int quantity) {
 		Items item = getHulls(hullType);
 		if(item == null) {

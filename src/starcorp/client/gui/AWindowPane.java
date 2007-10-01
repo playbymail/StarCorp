@@ -586,4 +586,8 @@ public abstract class AWindowPane implements IComponent {
 		return true;
 	}
 
+	public AWindow getWindow() {
+		return window;
+	}
+
 }

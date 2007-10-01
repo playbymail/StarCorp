@@ -26,13 +26,10 @@ import org.eclipse.swt.widgets.Widget;
  */
 public abstract class ABuilderPane extends AWindowPane {
 
-	protected final ADataEntryWindow mainWindow;
-	
 	private Group builderGroup;
 	
-	public ABuilderPane(ADataEntryWindow mainWindow) {
+	public ABuilderPane(AWindow mainWindow) {
 		super(mainWindow);
-		this.mainWindow = mainWindow;
 	}
 	
 	/* (non-Javadoc)
@@ -42,7 +39,7 @@ public abstract class ABuilderPane extends AWindowPane {
 	protected void createWidgets(List<Widget> widgets) {
 		builderGroup = createGroup(super.getParent(), widgets, "");
 		GridData data = new GridData(SWT.LEFT,SWT.TOP,true,true,1,1);
-		RowLayout layout = new RowLayout(SWT.VERTICAL);
+		RowLayout layout = new RowLayout(SWT.HORIZONTAL);
 		layout.marginWidth=20;
 		layout.marginHeight=10;
 		builderGroup.setLayout(layout);

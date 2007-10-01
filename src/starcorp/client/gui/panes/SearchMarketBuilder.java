@@ -54,36 +54,33 @@ public class SearchMarketBuilder extends ABuilderPane {
 		String show = "Showing " + searchWindow.countFilteredItems() + " of " + searchWindow.countAllItems();
 		getParent().setText(show);
 		
-		Group buttonPanel = createGroup(getParent(), widgets, null);
-		buttonPanel.setLayout(new RowLayout(SWT.HORIZONTAL));
-		
-		final Text txtName = createTextInput(buttonPanel, widgets, "Name:");
+		final Text txtName = createTextInput(getParent(), widgets, "Name:");
 		if(searchWindow.getFilterName() != null) {
 			txtName.setText(searchWindow.getFilterName());
 		}
 		txtName.setSize(100, 20);
 		List<AItemType> types = AItemType.listTypes();
-		final Combo typesCombo = createTypeSelection(buttonPanel, widgets, types, searchWindow.getFilterType(), "Type:");
+		final Combo typesCombo = createTypeSelection(getParent(), widgets, types, searchWindow.getFilterType(), "Type:");
 		Set<Colony> colonies = searchWindow.getReport().getColonies();
-		final Combo coloniesCombo = createEntitySelection(buttonPanel, widgets, colonies, searchWindow.getFilterColony(), "Colony:"); 
-		final Text txtQty = createIntegerInput(buttonPanel, widgets, "Min. Quantity:");
+		final Combo coloniesCombo = createEntitySelection(getParent(), widgets, colonies, searchWindow.getFilterColony(), "Colony:"); 
+		final Text txtQty = createIntegerInput(getParent(), widgets, "Min. Quantity:");
 		if(searchWindow.getFilterQuantity() > 0) {
 			txtQty.setText(String.valueOf(searchWindow.getFilterQuantity()));
 		}
 		txtQty.setSize(100, 20);
-		final Text txtPrice = createIntegerInput(buttonPanel, widgets, "Max. Price:");
+		final Text txtPrice = createIntegerInput(getParent(), widgets, "Max. Price:");
 		if(searchWindow.getFilterPrice() > 0) {
 			txtPrice.setText(String.valueOf(searchWindow.getFilterPrice()));
 		}
 		
-		final Button btnClear = createButton(buttonPanel, widgets, "Clear");
+		final Button btnClear = createButton(getParent(), widgets, "Clear");
 		btnClear.addListener(SWT.Selection, new Listener() {
 			public void handleEvent (Event event) {
 				searchWindow.set(0, -1, "", null, null);
 			}
 		});
 
-		final Button btnFilter = createButton(buttonPanel, widgets, "Filter");
+		final Button btnFilter = createButton(getParent(), widgets, "Filter");
 		btnFilter.addListener(SWT.Selection, new Listener() {
 			public void handleEvent (Event event) {
 				String filterName = txtName.getText();
@@ -98,27 +95,6 @@ public class SearchMarketBuilder extends ABuilderPane {
 		});
 		
 		
-		if(searchWindow.countPages() > 1) { 
-			Group grpPages = createGroup(getParent(), widgets, "Pages");
-			grpPages.setLayout(new GridLayout(searchWindow.countPages(),true));
-			for(int i = 1; i <= searchWindow.countPages(); i++) {
-				if(i == searchWindow.getPage()) {
-					createLabel(grpPages, widgets, String.valueOf(i));
-				}
-				else {
-					Hyperlink lnk = createHyperlink(grpPages, widgets, String.valueOf(i));
-					final int selected = i;
-					lnk.addSelectionListener(new SelectionListener() {
-						public void widgetDefaultSelected(SelectionEvent e) {
-							searchWindow.setPage(selected);
-						}
-						public void widgetSelected(SelectionEvent e) {
-							searchWindow.setPage(selected);
-						}
-					});
-				}
-			}
-		}
 	}
 	
 }
