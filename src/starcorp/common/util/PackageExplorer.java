@@ -55,7 +55,7 @@ public class PackageExplorer {
 	}
 	
 	private static List<Class> loadDirectory(List<Class> classes, String packageName, URL resource) throws IOException, ClassNotFoundException {
-		return loadDirectory(classes, packageName, URLDecoder.decode(resource.getFile()));
+		return loadDirectory(classes, packageName, URLDecoder.decode(resource.getFile(),"UTF-8"));
 	}
 	
 	private static List<Class> loadDirectory(List<Class> classes, String packageName, String fullPath) throws IOException, ClassNotFoundException {

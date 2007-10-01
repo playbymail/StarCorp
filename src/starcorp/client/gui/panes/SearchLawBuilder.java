@@ -23,17 +23,13 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 
 import starcorp.client.gui.ABuilderPane;
 import starcorp.client.gui.ADataEntryWindow;
 import starcorp.client.gui.widgets.Hyperlink;
-import starcorp.client.gui.windows.SearchItemsWindow;
 import starcorp.client.gui.windows.SearchLawsWindow;
 import starcorp.common.entities.Colony;
-import starcorp.common.types.AFacilityType;
-import starcorp.common.types.AItemType;
 
 /**
  * starcorp.client.gui.SearchLawBuilder

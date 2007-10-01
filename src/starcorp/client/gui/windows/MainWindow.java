@@ -29,21 +29,23 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 
+import starcorp.client.ClientConfiguration;
 import starcorp.client.gui.ADataPane;
 import starcorp.client.gui.AWindow;
 import starcorp.client.gui.panes.CorporationPane;
 import starcorp.client.gui.panes.SimpleTextPane;
+import starcorp.client.gui.widgets.ConfigurationDialog;
 import starcorp.client.gui.widgets.CredentialsDialog;
 import starcorp.client.gui.widgets.Menu;
 import starcorp.client.gui.widgets.Toolbar;
 import starcorp.client.gui.widgets.TreeBrowser;
-import starcorp.client.turns.TurnSubmitter;
 import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Planet;
 import starcorp.common.turns.Turn;
 import starcorp.common.turns.TurnOrder;
 import starcorp.common.turns.TurnReport;
 import starcorp.common.types.GalacticDate;
+import starcorp.common.util.SendEmail;
 import starcorp.common.util.ZipTools;
 
 /**
@@ -500,6 +502,11 @@ public class MainWindow extends AWindow {
 		}
 		return turnWindow;
 	}
+	
+	public void promptConfiguration() {
+		ConfigurationDialog dialog = new ConfigurationDialog(shell);
+		dialog.open();
+	}
 
 	public Corporation promptCredentials() {
 		Corporation existing = getCorporation();
@@ -600,14 +607,30 @@ public class MainWindow extends AWindow {
 			}
 		}
 		try {
-			TurnSubmitter.submit(currentTurn);
-			menu.setEnableSubmit(false);
-			toolbar.setEnableSubmit(false);
-			if(turnWindow != null) {
-				turnWindow.dispose();
-				turnWindow = null;
+			if(ClientConfiguration.getSmtpHost() == null) {
+				promptConfiguration();
 			}
-			messageBox("Turn Submitted", "Your turn has successfully been submitted.", SWT.ICON_INFORMATION | SWT.OK);
+			if(ClientConfiguration.getSmtpHost() == null) {
+				messageBox("Send Mail Error", "You have not configured your email server!", SWT.ICON_ERROR | SWT.OK);
+			}
+			else {
+				SendEmail email = new SendEmail(ClientConfiguration.getSmtpHost(), ClientConfiguration.getSmtpPort(), ClientConfiguration.getSmtpUser(), ClientConfiguration.getSmtpPassword());
+				String filename = "submitted-turn.xml";
+				currentTurn.write(new FileWriter(filename));
+				
+				String from = currentTurn.getCorporation().getPlayerEmail();
+				String[] to = {ClientConfiguration.getServerEmailTurns()};
+				String[] cc = {currentTurn.getCorporation().getPlayerEmail()};
+				email.send(to, cc, null, "StarCorp Turn Submission", "", from, filename);
+	
+				menu.setEnableSubmit(false);
+				toolbar.setEnableSubmit(false);
+				if(turnWindow != null) {
+					turnWindow.dispose();
+					turnWindow = null;
+				}
+				messageBox("Turn Submitted", "Your turn has successfully been submitted.", SWT.ICON_INFORMATION | SWT.OK);
+			}
 		} catch (IOException e) {
 			int buttonID = messageBox("Turn Submission Error", e.getMessage(), SWT.ICON_ERROR | SWT.ABORT | SWT.RETRY);
 			if(SWT.RETRY == buttonID) {

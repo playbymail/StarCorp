@@ -10,7 +10,10 @@
  */
 package starcorp.client;
 
+import java.io.IOException;
 import java.util.ResourceBundle;
+
+import starcorp.common.util.XMLConfiguration;
 
 /**
  * starcorp.client.ClientConfiguration
@@ -20,14 +23,55 @@ import java.util.ResourceBundle;
  */
 public class ClientConfiguration {
 
-	private static final ResourceBundle bundle = ResourceBundle.getBundle("client");
-
-	public static final String SMTP_HOST_NAME = bundle.getString("smtp.host");
-	public static final String SMTP_PORT = bundle.getString("smtp.port");
-	public static final String SMTP_AUTH_USER = bundle.getString("smtp.user");
-	public static final String SMTP_AUTH_PASSWORD = bundle.getString("smtp.password");
+	private static final XMLConfiguration config = new XMLConfiguration("client-config.xml");
 	
-	public static final String SERVER_EMAIL_TURNS = bundle.getString("server.email.turns");
-	public static final String SERVER_EMAIL_BUGS = bundle.getString("server.email.bugs");
+	public synchronized static void save() {
+		try {
+			config.write("client-config.xml");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static String getSmtpHost() {
+		return config.getValue("smtp-host");
+	}
+	
+	public synchronized static void setSmtpHost(String value) {
+		config.setValue("smtp-host", value);
+	}
+	
+	public static int getSmtpPort() {
+		return config.getValueAsInt("smtp-port");
+	}
+	
+	public synchronized static void setSmtpPort(int value) {
+		config.setValue("smtp-port", value);
+	}
+	
+	public static String getSmtpUser() {
+		return config.getValue("smtp-user");
+	}
+	
+	public synchronized static void setSmtpUser(String value) {
+		config.setValue("smtp-user", value);
+	}
+	
+	public static String getSmtpPassword() {
+		return config.getValue("smtp-password");
+	}
+	
+	public synchronized static void setSmtpPassword(String value) {
+		config.setValue("smtp-password", value);
+	}
+	
 
+	public static String getServerEmailTurns() {
+		return config.getValue("server-emails-turns","starcorp.turns@gmail.com");
+	}
+
+	public synchronized static void setServerEmailTurns(String value) {
+		config.setValue("server-emails-turns", value);
+	}
+	
 }

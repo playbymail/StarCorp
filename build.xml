@@ -70,7 +70,9 @@
 	
 	<target name="dist" depends="dist-client, dist-server, dist-src"/>
 
-	<target name="dist-client" depends="installer-client"/>
+	<target name="dist-client" depends="installer-client">
+		<zip destfile="${dist}/${clientJarName}.zip" basedir="${dist}/client"/>
+	</target>
 		
 	<target name="dist-server" depends="jar-server">
 		<mkdir dir="${dist}/server/lib"/>
@@ -84,6 +86,7 @@
 		</copy>
 		<copy file="server.bat.template" tofile="${dist}/server/server.bat" />
 		<replace file="${dist}/server/server.bat" token="JarFile" value="${serverJarName}.jar" />
+		<zip destfile="${dist}/${serverJarName}.zip" basedir="${dist}/server"/>
 	</target>
 
 	<target name="jar-client" depends="compile-client">

@@ -18,16 +18,11 @@ import org.eclipse.swt.widgets.Composite;
 import starcorp.client.gui.ABuilderPane;
 import starcorp.client.gui.ADataEntryWindow;
 import starcorp.client.gui.ATablePane;
-import starcorp.client.gui.panes.ItemsTable;
 import starcorp.client.gui.panes.LawTable;
-import starcorp.client.gui.panes.SearchItemsBuilder;
 import starcorp.client.gui.panes.SearchLawBuilder;
 import starcorp.common.entities.AGovernmentLaw;
 import starcorp.common.entities.Colony;
-import starcorp.common.entities.ColonyItem;
 import starcorp.common.turns.TurnReport;
-import starcorp.common.types.AItemType;
-import starcorp.common.types.Items;
 
 /**
  * starcorp.client.gui.SearchLawsWindow
@@ -154,7 +149,6 @@ public class SearchLawsWindow extends ADataEntryWindow {
 	@Override
 	public void open(Composite parent) {
 		super.open(parent);
-		String name = report.getTurn().getCorporation().getDisplayName();
 		shell.setText("StarCorp: Laws");
 	}
 	

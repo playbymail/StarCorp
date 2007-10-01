@@ -40,11 +40,11 @@ public class SendEmail {
 	private static final String SSL_FACTORY = "javax.net.ssl.SSLSocketFactory";
 	
 	private String smtpHost;
-	private String smtpPort;
+	private int smtpPort;
 	private String smtpUser;
 	private String smtpPassword;
 	
-	public SendEmail(String smtpHost, String smtpPort, String smtpUser,
+	public SendEmail(String smtpHost, int smtpPort, String smtpUser,
 			String smtpPassword) {
 		super();
 		this.smtpHost = smtpHost;
@@ -59,13 +59,13 @@ public class SendEmail {
 		Properties props = System.getProperties();
 		props.put("mail.smtp.host", smtpHost);
 		props.put("mail.smtp.auth", "true");
-		props.put("mail.stmp.port", smtpPort);
-		// props.put("mail.debug", "true");
-		props.put("mail.smtp.port", smtpPort);
+		props.put("mail.stmp.port", String.valueOf(smtpPort));
+//		props.put("mail.debug", "true");
+		props.put("mail.smtp.port", String.valueOf(smtpPort));
 		props.put("mail.smtp.socketFactory.port", smtpPort);
 		props.put("mail.smtp.socketFactory.class", SSL_FACTORY);
 		props.put("mail.smtp.socketFactory.fallback", "false");
-		
+		System.out.println(props);
 		Authenticator auth = new Authenticator() {
 
 			@Override

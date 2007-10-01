@@ -38,7 +38,7 @@ public class ServerConfiguration {
 	public static final String FETCHER_PROVIDER = bundle.getString("fetcher.provider");
 	
 	public static final String SMTP_HOST_NAME = bundle.getString("smtp.host");
-	public static final String SMTP_PORT = bundle.getString("smtp.port");
+	public static final int SMTP_PORT = Integer.parseInt(bundle.getString("smtp.port"));
 	public static final String SMTP_AUTH_USER = bundle.getString("smtp.user");
 	public static final String SMTP_AUTH_PASSWORD = bundle.getString("smtp.password");
 	

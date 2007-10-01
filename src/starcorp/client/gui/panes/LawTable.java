@@ -16,8 +16,6 @@ import starcorp.client.gui.windows.SearchItemsWindow;
 import starcorp.client.gui.windows.SearchLawsWindow;
 import starcorp.common.entities.AGovernmentLaw;
 import starcorp.common.entities.Colony;
-import starcorp.common.entities.ColonyItem;
-import starcorp.common.types.Items;
 
 /**
  * starcorp.client.gui.LawTable

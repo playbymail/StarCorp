@@ -28,7 +28,6 @@ import starcorp.common.entities.Colony;
 import starcorp.common.entities.Facility;
 import starcorp.common.entities.Workers;
 import starcorp.common.turns.TurnOrder;
-import starcorp.common.types.AItemType;
 
 /**
  * starcorp.client.gui.panes.ColonistPane

@@ -15,9 +15,6 @@ import java.io.PrintWriter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import starcorp.common.types.Coordinates2D;
-import starcorp.common.types.Coordinates3D;
-import starcorp.common.types.ICoordinates;
 import starcorp.server.engine.AServerTask;
 import starcorp.server.shell.ACommand;
 import starcorp.server.shell.Shell;
@@ -74,21 +71,6 @@ public class History extends ACommand {
 	}
 			
 	
-	private ICoordinates parseCoordinates(String s) {
-		if(s==null)
-			return null;
-		if(s.startsWith("("))
-			s = s.substring(1);
-		if(s.endsWith(")"))
-			s = s.substring(0, s.length()-1);
-		String[] strarr = s.split(",");
-		if(strarr.length == 2) {
-			return new Coordinates2D(Integer.parseInt(strarr[0]),Integer.parseInt(strarr[1]));
-		}
-		else if(strarr.length == 3) {
-			return new Coordinates3D(Integer.parseInt(strarr[0]),Integer.parseInt(strarr[1]),Integer.parseInt(strarr[2]));
-		}
-		return null;
-	}
+
 
 }

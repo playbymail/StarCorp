@@ -10,11 +10,7 @@
  */
 package starcorp.client.gui.panes;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -22,7 +18,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Listener;
@@ -36,14 +31,9 @@ import starcorp.client.gui.windows.SearchItemsWindow;
 import starcorp.client.gui.windows.SearchLawsWindow;
 import starcorp.client.gui.windows.SearchMarketWindow;
 import starcorp.common.entities.Colony;
-import starcorp.common.entities.Corporation;
-import starcorp.common.entities.IEntity;
-import starcorp.common.entities.MarketItem;
 import starcorp.common.entities.Planet;
-import starcorp.common.entities.Starship;
 import starcorp.common.turns.TurnOrder;
 import starcorp.common.types.AFacilityType;
-import starcorp.common.types.AItemType;
 import starcorp.common.types.PopulationClass;
 
 /**

@@ -31,7 +31,6 @@ import starcorp.common.entities.Facility;
 import starcorp.common.entities.FactoryQueueItem;
 import starcorp.common.turns.TurnOrder;
 import starcorp.common.types.AItemType;
-import starcorp.common.types.ColonyHub;
 import starcorp.common.types.Factory;
 
 /**

@@ -10,7 +10,7 @@
 
   ;Name and file
   Name "StarCorp Client"
-  OutFile "StarCorp Client-Installer.exe"
+  OutFile "..\StarCorp Client-Installer.exe"
 
   ;Default installation folder
   InstallDir "$PROGRAMFILES\StarCorp PbeM\StarCorp Client"
