@@ -555,14 +555,14 @@ public class HibernateStore implements IEntityStore {
 		return c;
 	}
 
-	public Corporation getCorporation(String email, String password) {
-		String q = "from Corporation where playerEmail = :email and playerPassword = :password";
+	public boolean authorize(String email, String password) {
+		String q = "select count(c) from Corporation as c where c.playerEmail = :email and c.playerPassword = :password";
 		Map<String, Object> map = prepareParameters("email", email);
 		prepareParameters(map, "password", password);
 		beginTransaction();
-		Corporation c = (Corporation) loadObject(createQuery(q, map));
+		int count = (Integer) createQuery(q, map).uniqueResult();
 		commit();
-		return c;
+		return count > 0;
 	}
 
 	public long getCredits(long entity) {

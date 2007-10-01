@@ -114,7 +114,7 @@ public class StarshipPane extends AEntityPane {
 		Set<StellarAnomoly> anomolies = report.getScannedAnomolies(location);
 		
 		Group grpActions = createGroup(getParent(), widgets, "Special Actions");
-		grpActions.setLayout(new GridLayout(1,false));
+		grpActions.setLayout(new GridLayout(4,false));
 		grpActions.setLayoutData(new GridData(SWT.LEFT,SWT.TOP,true,true));
 		
 		if(ship.inOrbit() && design.canProbePlanet()) {

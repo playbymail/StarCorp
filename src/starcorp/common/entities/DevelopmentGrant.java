@@ -56,8 +56,8 @@ public class DevelopmentGrant extends AGovernmentLaw {
 		return e;
 	}
 	@Override
-	public String toString() {
-		return type.getKey() + " \u20a1 " + grant + " " + super.toString();
+	public String getDisplayName() {
+		return "Grant of \u20a1 " + grant + " for building 1 x " + type.getName();
 	}
 
 }

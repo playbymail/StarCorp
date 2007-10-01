@@ -44,15 +44,8 @@ public class StarshipDesignPane extends AEntityPane {
 	protected void createWidgets(List<Widget> widgets) {
 		super.createWidgets(widgets);
 		
-		GridData data = new GridData();
-		data.minimumWidth=500;
-		data.heightHint=100;
-		data.verticalAlignment=SWT.TOP;
-		data.horizontalSpan=2;
-		
 		Group grpData =  createGroup(getParent(), widgets, "Data");
 		grpData.setLayout(new GridLayout(2,true));
-		grpData.setLayoutData(data);
 		
 		createLabel(grpData, widgets, "Hulls: " +design.countHulls());
 		createLabel(grpData, widgets, "Mass: " +design.getTotalMass() + "mu");
@@ -63,9 +56,9 @@ public class StarshipDesignPane extends AEntityPane {
 		createLabel(grpData, widgets, "Short Range Scanners: " +(design.canScanStarSystem() ? "yes" : "no"));
 		createLabel(grpData, widgets, "Long Range Scanners: " +design.getScanGalaxyRange());
 
-		Group grpCargo = createGroup(getParent(), widgets, "Cargo Capacity");
+		Group grpCargo = createGroup(grpData, widgets, "Cargo Capacity");
 		grpCargo.setLayout(new RowLayout(SWT.VERTICAL));
-		data = new GridData();
+		GridData data = new GridData();
 		data.minimumWidth=250;
 		data.verticalAlignment=SWT.TOP;
 		grpCargo.setLayoutData(data);
@@ -76,7 +69,7 @@ public class StarshipDesignPane extends AEntityPane {
 		createLabel(grpCargo, widgets, "Organics: " +design.getOrganicsCapacity() + "mu");
 		createLabel(grpCargo, widgets, "Liquids / Gas: " +design.getLiquidGasCapacity() + "mu");
 
-		Group grpAbilities = createGroup(getParent(),widgets,"Special Abilities");
+		Group grpAbilities = createGroup(grpData,widgets,"Special Abilities");
 		grpAbilities.setLayout(new FillLayout(SWT.VERTICAL));
 		data = new GridData();
 		data.minimumWidth=250;

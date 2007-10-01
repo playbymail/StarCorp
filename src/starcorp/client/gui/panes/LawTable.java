@@ -12,6 +12,12 @@ package starcorp.client.gui.panes;
 
 import starcorp.client.gui.ADataEntryWindow;
 import starcorp.client.gui.ATablePane;
+import starcorp.client.gui.windows.SearchItemsWindow;
+import starcorp.client.gui.windows.SearchLawsWindow;
+import starcorp.common.entities.AGovernmentLaw;
+import starcorp.common.entities.Colony;
+import starcorp.common.entities.ColonyItem;
+import starcorp.common.types.Items;
 
 /**
  * starcorp.client.gui.LawTable
@@ -20,22 +26,64 @@ import starcorp.client.gui.ATablePane;
  * @version 25 Sep 2007
  */
 public class LawTable extends ATablePane {
-
+	private final SearchLawsWindow searchWindow;
+	
 	public LawTable(ADataEntryWindow mainWindow) {
 		super(mainWindow);
-		// TODO Auto-generated constructor stub
+		this.searchWindow = (SearchLawsWindow) mainWindow;
 	}
-	
+
 	@Override
 	protected int countColumns() {
-		// TODO Auto-generated method stub
-		return 0;
+		return 2;
 	}
 
 	@Override
 	protected String getColumnName(int index) {
-		// TODO Auto-generated method stub
-		return null;
+		switch(index) {
+		case 0 : return "Colony";
+		case 1 : return "Description";
+		}
+		return "";
 	}
 
+	@Override
+	protected boolean isEditable() {
+		return false;
+	}
+
+	@Override
+	public void populate() {
+		int total = searchWindow.countFilteredItems();
+		if(total < 1) {
+			String[] values = {"No items found"};
+			createRow(values);
+		}
+		else {
+			int page = searchWindow.getPage();
+			int start = (page - 1) * SearchItemsWindow.ITEMS_PER_PAGE;
+			int end = start + SearchItemsWindow.ITEMS_PER_PAGE;
+			if(start < 0) start = 0;
+			if(end > total) end = total;
+			for(int n = start; n < end; n++) {
+				AGovernmentLaw law = searchWindow.get(n);
+				if(law == null)
+					return;
+				Colony colony = searchWindow.getReport().getColony(law.getColony()); 
+				String[] values = new String[countColumns()];
+				values[0] = colony.getDisplayName();
+				values[1] = law.getDisplayName();
+				createRow(values);
+			}
+		}
+	}
+
+	@Override
+	protected int getColumnWidth(int index) {
+		switch(index) {
+		case 0 : return 150;
+		case 1 : return 300;
+		}
+		return super.getColumnWidth(index);
+	}
 }

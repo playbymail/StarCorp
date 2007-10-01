@@ -24,6 +24,7 @@ import starcorp.common.types.Items;
  * @version 25 Sep 2007
  */
 public class ItemsTable extends ATablePane {
+	// TODO sell items from table
 	private final SearchItemsWindow searchWindow;
 	
 	public ItemsTable(ADataEntryWindow mainWindow) {

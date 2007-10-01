@@ -18,6 +18,7 @@ import org.eclipse.swt.widgets.Widget;
 
 import starcorp.client.gui.windows.MainWindow;
 import starcorp.common.entities.Colony;
+import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Facility;
 import starcorp.common.entities.IEntity;
 import starcorp.common.entities.MarketItem;
@@ -26,10 +27,13 @@ import starcorp.common.entities.StarSystem;
 import starcorp.common.entities.StarSystemEntity;
 import starcorp.common.entities.Starship;
 import starcorp.common.entities.StellarAnomoly;
+import starcorp.common.entities.Workers;
 import starcorp.common.turns.TurnOrder;
 import starcorp.common.turns.TurnReport;
+import starcorp.common.types.AFacilityType;
 import starcorp.common.types.AItemType;
 import starcorp.common.types.OrderType;
+import starcorp.common.types.PopulationClass;
 
 /**
  * starcorp.client.gui.AEntityPane
@@ -86,6 +90,37 @@ public abstract class AEntityPane extends ADataPane {
 		return mainWindow.getTurnReport();
 	}
 	
+	protected TurnOrder issueGrant(Colony colony, PopulationClass type, int credits) {
+		TurnOrder order = new TurnOrder();
+		order.setType(OrderType.getType(OrderType.ISSUE_COLONIST_GRANT));
+		order.add(colony.getID());
+		order.add(type.getKey());
+		order.add(credits);
+		return order;
+	}
+
+	protected TurnOrder issueGrant(Colony colony, AFacilityType type, int credits) {
+		TurnOrder order = new TurnOrder();
+		order.setType(OrderType.getType(OrderType.ISSUE_DEVELOPMENT_GRANT));
+		order.add(colony.getID());
+		order.add(type.getKey());
+		order.add(credits);
+		return order;
+	}
+	
+	protected TurnOrder issueLease(Colony colony, AFacilityType type, int price, boolean forSelf) {
+		TurnOrder order = new TurnOrder();
+		order.setType(OrderType.getType(OrderType.ISSUE_LEASE));
+		order.add(colony.getID());
+		order.add(type.getKey());
+		order.add(price);
+		if(forSelf) {
+			Corporation corp = getTurnReport().getTurn().getCorporation();
+			order.add(corp.getID());
+		}
+		return order;
+	}
+
 	protected TurnOrder jettisonOrder(Starship ship, AItemType type, int qty) {
 		TurnOrder order = new TurnOrder();
 		order.setType(OrderType.getType(OrderType.JETTISON_ITEM));
@@ -240,6 +275,15 @@ public abstract class AEntityPane extends ADataPane {
 		order.add(facility.getID());
 		order.add(type.getKey());
 		order.add(qty);
+		return order;
+	}
+
+	protected TurnOrder setSalaryOrder(Workers workers, int salary) {
+		TurnOrder order = new TurnOrder();
+		order.setType(OrderType.getType(OrderType.SET_SALARY));
+		order.add(workers.getFacility());
+		order.add(workers.getPopClassType());
+		order.add(salary);
 		return order;
 	}
 

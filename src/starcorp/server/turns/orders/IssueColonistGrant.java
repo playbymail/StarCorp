@@ -56,10 +56,10 @@ public class IssueColonistGrant extends AOrderProcessor {
 			grant.setCredits(credit);
 			grant.setIssuedDate(ServerConfiguration.getCurrentDate());
 			grant.setPopClass(popClass);
-			
+			grant.setAvailable(true);
 			entityStore.create(grant);
 			
-			OrderReport report = new OrderReport(order,grant, corp);
+			OrderReport report = new OrderReport(order,colony, corp);
 			report.add(popClass.getName());
 			report.add(credit);
 			report.add(colony.getName());

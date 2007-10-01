@@ -36,6 +36,7 @@ import starcorp.client.gui.panes.ColonyPane;
 import starcorp.client.gui.panes.CorporationPane;
 import starcorp.client.gui.panes.FacilityPane;
 import starcorp.client.gui.panes.FacilityTypePane;
+import starcorp.client.gui.panes.GovernmentPane;
 import starcorp.client.gui.panes.ItemPane;
 import starcorp.client.gui.panes.StarshipDesignPane;
 import starcorp.client.gui.panes.StarshipPane;
@@ -288,12 +289,24 @@ public abstract class AWindowPane implements IComponent {
 		Hyperlink lnk = createHyperlink(parent, widgets, label);
 		lnk.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
-				window.getMainWindow().set(new ColonyPane(window.getMainWindow(),colony));
-				window.getMainWindow().focus();
+				if(colony.getGovernment() == window.getMainWindow().getTurnReport().getTurn().getCorporation().getID()) {
+					window.getMainWindow().set(new GovernmentPane(window.getMainWindow(),colony));
+					window.getMainWindow().focus();
+				}
+				else {
+					window.getMainWindow().set(new ColonyPane(window.getMainWindow(),colony));
+					window.getMainWindow().focus();
+				}
 			}
 			public void widgetSelected(SelectionEvent e) {
-				window.getMainWindow().set(new ColonyPane(window.getMainWindow(),colony));
-				window.getMainWindow().focus();
+				if(colony.getGovernment() == window.getMainWindow().getTurnReport().getTurn().getCorporation().getID()) {
+					window.getMainWindow().set(new GovernmentPane(window.getMainWindow(),colony));
+					window.getMainWindow().focus();
+				}
+				else {
+					window.getMainWindow().set(new ColonyPane(window.getMainWindow(),colony));
+					window.getMainWindow().focus();
+				}
 			}
 		});
 		return lnk;

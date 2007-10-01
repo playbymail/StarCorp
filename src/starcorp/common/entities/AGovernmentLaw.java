@@ -56,7 +56,7 @@ public abstract class AGovernmentLaw implements IEntity {
 	}
 
 	public Element toBasicXML(Element parent) {
-		Element root = parent.addElement("law");
+		Element root = parent.addElement("entity");
 		root.addAttribute("ID", String.valueOf(ID));
 		root.addAttribute("class", getClass().getSimpleName());
 		root.addAttribute("colony", String.valueOf(colony));

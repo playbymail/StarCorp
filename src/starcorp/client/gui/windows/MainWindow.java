@@ -124,6 +124,7 @@ public class MainWindow extends AWindow {
 					loadReport(fileName);
 				}
 			} catch (Throwable e) {
+				e.printStackTrace();
 				messageBox("Invalid Report", fileName + " is not a valid StarCorp turn report", SWT.ICON_ERROR | SWT.OK);
 			}
 		}
@@ -451,7 +452,7 @@ public class MainWindow extends AWindow {
 		saveTurn(fileName);
 	}
 	
-	public void openSearchItemsWindow() {
+	public SearchItemsWindow openSearchItemsWindow() {
 		if(searchItemsWindow != null) {
 			searchItemsWindow.focus();
 		}
@@ -459,13 +460,21 @@ public class MainWindow extends AWindow {
 			searchItemsWindow = new SearchItemsWindow(this);
 			searchItemsWindow.open(shell);
 		}
+		return searchItemsWindow;
 	}
 
-	public void openSearchLawWindow() {
-		// TODO open search law window
+	public SearchLawsWindow openSearchLawWindow() {
+		if(searchLawsWindow != null) {
+			searchLawsWindow.focus();
+		}
+		else {
+			searchLawsWindow = new SearchLawsWindow(this);
+			searchLawsWindow.open(shell);
+		}
+		return searchLawsWindow;
 	}
 
-	public void openSearchMarketWindow() {
+	public SearchMarketWindow openSearchMarketWindow() {
 		if(searchMarketWindow != null) {
 			searchMarketWindow.focus();
 		}
@@ -473,6 +482,7 @@ public class MainWindow extends AWindow {
 			searchMarketWindow = new SearchMarketWindow(this);
 			searchMarketWindow.open(shell);
 		}
+		return searchMarketWindow;
 	}
 	
 	public void openStarshipDesignWindow() {

@@ -12,8 +12,13 @@ package starcorp.client.gui.panes;
 
 import java.util.List;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 
 import starcorp.client.gui.AEntityPane;
@@ -22,6 +27,8 @@ import starcorp.common.entities.AColonists;
 import starcorp.common.entities.Colony;
 import starcorp.common.entities.Facility;
 import starcorp.common.entities.Workers;
+import starcorp.common.turns.TurnOrder;
+import starcorp.common.types.AItemType;
 
 /**
  * starcorp.client.gui.panes.ColonistPane
@@ -30,7 +37,6 @@ import starcorp.common.entities.Workers;
  * @version 28 Sep 2007
  */
 public class ColonistPane extends AEntityPane {
-	// TODO add set salary options
 	private final AColonists colonist;
 	
 	/**
@@ -65,13 +71,22 @@ public class ColonistPane extends AEntityPane {
 		createLabel(grp,widgets,format(colonist.getHappiness()) + "%");
 		
 		if(colonist instanceof Workers) {
-			Workers w = (Workers) colonist;
+			final Workers w = (Workers) colonist;
 			createLabel(grp, widgets, "Employer:");
 			Facility f = getTurnReport().getFacility(w.getFacility());
 			createFacilityLink(grp, widgets, f, null);
 			
-			createLabel(grp, widgets, "Salary:");
-			createLabel(grp,widgets, "\u20a1 " + format(w.getSalary()));
+			final Text txtSalary = createIntegerInput(grp,widgets, "Salary: \u20a1");
+			txtSalary.setText(String.valueOf(w.getSalary()));
+			
+			final Button btnSet = createButton(grp, widgets, "Set Salary");
+			btnSet.addListener(SWT.Selection, new Listener() {
+				public void handleEvent (Event event) {
+					int salary = getIntegerTextValue(txtSalary);
+					TurnOrder order = setSalaryOrder(w,salary);
+					mainWindow.addTurnOrder(order);
+				}
+			});
 		}
 			
 		

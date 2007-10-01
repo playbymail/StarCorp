@@ -110,10 +110,6 @@
     				<property name="year" column="foundedYear"/>
     				<property name="month" column="foundedMonth"/>
     			</component>
-    			<component name="lastTurnDate">
-    				<property name="year" column="lastTurnYear"/>
-    				<property name="month" column="lastTurnMonth"/>
-    			</component>
     			<set name="knownSystems" table="KNOWN_SYSTEMS" lazy="false">
     					<key column="ENTITY_ID"/>
     					<element column="SYSTEM_ID" type="long"/>

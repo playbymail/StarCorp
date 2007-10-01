@@ -79,7 +79,6 @@ public class OrderReportPane extends ADataPane {
 			IEntity subject = report.getSubject();
 			if(subject != null) {
 				Group grp = createGroup(getParent(), widgets, "Subject");
-				grp.setLayoutData(new GridData(SWT.LEFT,SWT.TOP,true,true,2,1));
 				grp.setLayout(new GridLayout(2,true));
 				
 				displayEntity(grp, widgets, subject);
@@ -88,7 +87,6 @@ public class OrderReportPane extends ADataPane {
 			IEntity target = report.getTarget();
 			if(target != null) {
 				Group grp = createGroup(getParent(), widgets, "Target");
-				grp.setLayoutData(new GridData(SWT.LEFT,SWT.TOP,true,true,2,1));
 				grp.setLayout(new GridLayout(2,true));
 				
 				displayEntity(grp, widgets, target);
@@ -98,7 +96,6 @@ public class OrderReportPane extends ADataPane {
 			
 			if(sq != null) {
 				Group grp = createGroup(getParent(), widgets, "Prospecting Report");
-				grp.setLayoutData(new GridData(SWT.LEFT,SWT.TOP,true,true,2,1));
 				grp.setLayout(new GridLayout(2,true));
 				createLabel(grp, widgets, "X: " + sq.getX());
 				createLabel(grp, widgets, "Y: " + sq.getY());

@@ -30,8 +30,6 @@ public class Corporation extends ANamedEntity {
 	private String playerEmail;
 	private String playerPassword;
 	private GalacticDate foundedDate;
-	private GalacticDate lastTurnDate;
-	
 	private Set<Long> knownSystems = new HashSet<Long>();
 	// TODO known planets, system entities and colonies
 	
@@ -65,9 +63,6 @@ public class Corporation extends ANamedEntity {
 			this.foundedDate = new GalacticDate(eDate.element("date"));
 		}
 		eDate = e.element("last-turn");
-		if(eDate != null) {
-			this.lastTurnDate = new GalacticDate(eDate.element("date"));
-		}
 	}
 	
 	public Element toFullXML(Element parent) {
@@ -82,8 +77,6 @@ public class Corporation extends ANamedEntity {
 		}
 		if(foundedDate != null)
 			foundedDate.toXML(root.addElement("founded"));
-		if(lastTurnDate != null)
-			lastTurnDate.toXML(root.addElement("last-turn"));
 		return root;
 	}
 	
@@ -120,14 +113,6 @@ public class Corporation extends ANamedEntity {
 
 	public void setPlayerPassword(String playerPassword) {
 		this.playerPassword = playerPassword;
-	}
-
-	public GalacticDate getLastTurnDate() {
-		return lastTurnDate;
-	}
-
-	public void setLastTurnDate(GalacticDate lastTurnDate) {
-		this.lastTurnDate = lastTurnDate;
 	}
 
 	public Set<Long> getKnownSystems() {

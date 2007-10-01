@@ -49,7 +49,6 @@ import starcorp.common.types.PopulationClass;
  * @version 25 Sep 2007
  */
 public class OrderBuilder extends ABuilderPane {
-	// TODO replace Add, Clear and Submit buttons with icons
 	private final Turn turn;
 	private final TurnReport report;
 	private Group[] orderArgumentPanels = new Group[5];

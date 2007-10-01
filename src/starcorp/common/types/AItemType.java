@@ -12,11 +12,13 @@ package starcorp.common.types;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -223,5 +225,17 @@ public abstract class AItemType extends ABaseType {
 	@Override
 	public String toString() {
 		return super.toString() + " [" + getKey() + "]";
+	}
+	
+	public Set<AItemType> usedIn() {
+		Set<AItemType> set = new HashSet<AItemType>();
+		List<AItemType> list = listTypes(AFactoryItem.class);
+		for(AItemType o : list) {
+			AFactoryItem type = (AFactoryItem) o;
+			if(type.isComponent(this)) {
+				set.add(type);
+			}
+		}
+		return set;
 	}
 }

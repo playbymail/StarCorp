@@ -23,6 +23,9 @@ import starcorp.common.entities.IEntity;
 public class Util {
 
 	public static IEntity fromXML(Element e) {
+		if(e == null) {
+			return null;
+		}
 		String className = "starcorp.common.entities." + e.attributeValue("class");
 		IEntity entity;
 		try {

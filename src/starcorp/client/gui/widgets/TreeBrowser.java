@@ -31,6 +31,7 @@ import starcorp.client.gui.panes.ColonyPane;
 import starcorp.client.gui.panes.CorporationPane;
 import starcorp.client.gui.panes.FacilityPane;
 import starcorp.client.gui.panes.FacilityTypePane;
+import starcorp.client.gui.panes.GovernmentPane;
 import starcorp.client.gui.panes.OrderReportPane;
 import starcorp.client.gui.panes.StarshipDesignPane;
 import starcorp.client.gui.panes.StarshipPane;
@@ -58,9 +59,7 @@ public class TreeBrowser implements IComponent  {
 	
 	private Composite parent;
 	private Tree tree;
-	private List<TreeItem> listItemOrders = new ArrayList<TreeItem>();
-	private List<TreeItem> listItemShips = new ArrayList<TreeItem>();
-	private List<TreeItem> listItemFacilities = new ArrayList<TreeItem>();
+	private List<TreeItem> listItems = new ArrayList<TreeItem>();
 	
 	private TurnReport report;
 	
@@ -70,9 +69,9 @@ public class TreeBrowser implements IComponent  {
 	
 	public void setReport(TurnReport report) {
 		this.report = report;
-		dispose(listItemOrders);
-		dispose(listItemShips);
-		dispose(listItemFacilities);
+		dispose(listItems);
+		dispose(listItems);
+		dispose(listItems);
 		if(tree != null && !tree.isDisposed())
 			tree.dispose();
 		tree = new Tree(parent, SWT.BORDER);
@@ -111,7 +110,7 @@ public class TreeBrowser implements IComponent  {
 				tree.addListener(SWT.Selection, listenOrder(order));
 				item.setText(order.getType() == null ? "Unknown" : order.getType().getName());
 				item.setData(order);
-				listItemOrders.add(item);
+				listItems.add(item);
 				// TODO context menu: redo order
 			}
 			Set<StarshipDesign> designs = report.getPlayerDesigns();
@@ -123,7 +122,7 @@ public class TreeBrowser implements IComponent  {
 					tree.addListener(SWT.Selection, listenDesign(design));
 					shipItem.setText(design.getName() +" [" + design.getID() +"]");
 					shipItem.setData(design);
-					listItemShips.add(shipItem);
+					listItems.add(shipItem);
 					// TODO context menu: build ship
 					Set<Starship> ships = mainWindow.getTurnReport().getPlayerStarships(design);
 					if(ships != null && ships.size() > 0) {
@@ -132,7 +131,7 @@ public class TreeBrowser implements IComponent  {
 							tree.addListener(SWT.Selection, listenShip(ship));
 							item.setText(ship.getName() +" [" + ship.getID() +"]");
 							item.setData(ship);
-							listItemShips.add(item);
+							listItems.add(item);
 							// TODO context menu with suitable orders for ships
 						}
 					}
@@ -146,7 +145,7 @@ public class TreeBrowser implements IComponent  {
 					TreeItem itemType = new TreeItem(itemFacilities,SWT.NONE);
 					itemType.setText(type.getName());
 					itemType.setData(type);
-					listItemFacilities.add(itemType);
+					listItems.add(itemType);
 					tree.addListener(SWT.Selection, listenFacilityType(type));
 					Map<Long,Set<Facility>> subMap = map.get(type);
 					for(Long colonyID : subMap.keySet()) {
@@ -155,15 +154,28 @@ public class TreeBrowser implements IComponent  {
 						itemColony.setText(colony.getDisplayName());
 						itemColony.setData(colony);
 						tree.addListener(SWT.Selection, listenColony(colony));
-						listItemFacilities.add(itemColony);
+						listItems.add(itemColony);
 						for(Facility facility : subMap.get(colony.getID())) {
 							TreeItem item = new TreeItem(itemColony,SWT.NONE);
 							tree.addListener(SWT.Selection, listenFacility(facility));
 							item.setText(facility.getTypeClass().getName() +" [" + facility.getID() +"]");
 							item.setData(facility);
-							listItemFacilities.add(item);
+							listItems.add(item);
 							// TODO context menu with suitable orders for facilities
 						}
+					}
+				}
+
+				Set<Colony> governments = report.getPlayerGovernments();
+				if(governments.size() > 0) {
+					TreeItem itemDesigns = new TreeItem(tree,SWT.NONE);
+					itemDesigns.setText("Governments");
+					for(Colony colony : governments) {
+						TreeItem govtItem = new TreeItem(itemDesigns,SWT.NONE);
+						tree.addListener(SWT.Selection, listenGovernment(colony));
+						govtItem.setText(colony.getDisplayName());
+						govtItem.setData(colony);
+						listItems.add(govtItem);
 					}
 				}
 			}
@@ -182,9 +194,7 @@ public class TreeBrowser implements IComponent  {
 	}
 	
 	public void dispose() {
-		dispose(listItemFacilities);
-		dispose(listItemShips);
-		dispose(listItemOrders);
+		dispose(listItems);
 		if(tree != null && !tree.isDisposed())
 			tree.dispose();
 		parent.dispose();
@@ -227,6 +237,15 @@ public class TreeBrowser implements IComponent  {
 		};
 	}
 	
+	private Listener listenGovernment(final Colony colony) {
+		return new Listener() {
+			public void handleEvent(Event event) {
+				if(event.item.getData() == colony)
+					mainWindow.set(new GovernmentPane(mainWindow, colony));
+			}
+		};
+	}
+
 	private Listener listenFacilityType(final AFacilityType type) {
 		return new Listener() {
 			public void handleEvent(Event event) {

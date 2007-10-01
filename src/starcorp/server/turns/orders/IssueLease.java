@@ -40,7 +40,8 @@ public class IssueLease extends AOrderProcessor {
 		
 		Colony colony = (Colony) entityStore.load(Colony.class, colonyId);
 		AFacilityType type = AFacilityType.getType(facilityType);
-		Corporation licensee = (Corporation) entityStore.load(Corporation.class, licenseeId);
+		Corporation licensee = null;
+		if(licenseeId > 0) licensee = (Corporation) entityStore.load(Corporation.class, licenseeId);
 		
 		if(colony == null) {
 			error = new TurnError(TurnError.INVALID_COLONY,order);
@@ -55,13 +56,15 @@ public class IssueLease extends AOrderProcessor {
 			FacilityLease lease = new FacilityLease();
 			lease.setColony(colony.getID());
 			lease.setIssuedDate(ServerConfiguration.getCurrentDate());
-			lease.setLicensee(licensee.getID());
+			if(licensee != null) {
+				lease.setLicensee(licensee.getID());
+			}
 			lease.setPrice(price);
 			lease.setTypeClass(type);
-			
+			lease.setAvailable(true);
 			entityStore.create(lease);
 			
-			OrderReport report = new OrderReport(order,lease, corp);
+			OrderReport report = new OrderReport(order,colony, corp);
 			report.add(type.getName());
 			report.add(price);
 			report.add(colony.getName());

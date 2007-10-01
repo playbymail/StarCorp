@@ -21,6 +21,8 @@ import javax.mail.MessagingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import starcorp.common.entities.AGovernmentLaw;
 import starcorp.common.entities.Colony;
 import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Facility;
@@ -72,6 +74,9 @@ public class TurnProcessor extends AServerTask {
 			log.debug("Zipping " + file + " to " + zipFile);
 		}
 		ZipTools.zip(files, zipFile);
+		if(corp.getPlayerEmail() == null || corp.getPlayerEmail().length() < 1) {
+			return;
+		}
 		String[] to = {corp.getPlayerName() + "<" + corp.getPlayerEmail() + ">"};
 		String subject = "Starcorp turn " + date.getMonth() + "." + date.getYear();
 		String message = "Please find your reports file attached.  Save to a convenient location and open it with your StarCorp client.";
@@ -89,15 +94,11 @@ public class TurnProcessor extends AServerTask {
 				Turn turn = null;
 				try {
 					turn = new Turn(new FileInputStream(turns[i]));
-					Corporation corp = authorize(turn.getCorporation());
-					if(corp == null) {
-						corp = register(turn.getCorporation());
-						if(corp == null) {
+					boolean authorized = authorize(turn.getCorporation());
+					if(authorized) {
+						if(!register(turn.getCorporation())) {
 							turn.add(TurnError.ERROR_AUTHORIZATION_FAILED);
 						}
-					}
-					if(corp != null){
-						turn.setCorporation(corp);
 					}
 				}
 				catch(Exception e) {
@@ -175,9 +176,6 @@ public class TurnProcessor extends AServerTask {
 		Corporation corp = turn.getCorporation();
 		TurnReport report = new TurnReport(turn);
 		if(corp != null){
-			GalacticDate currentDate = ServerConfiguration.getCurrentDate();
-			corp.setLastTurnDate(currentDate);
-			entityStore.update(corp);
 			for(TurnOrder order : turn.getOrders()) {
 				order.setCorp(corp);
 				TurnError error = process(order);
@@ -223,7 +221,11 @@ public class TurnProcessor extends AServerTask {
 				}
 			}
 			report.addPlayerEntities(ships);
-			report.setLaws(entityStore.listLaws());
+			List<AGovernmentLaw> laws = entityStore.listLaws();
+			if(log.isDebugEnabled()) {
+				log.debug("Laws: " + laws.size());
+			}
+			report.setLaws(laws);
 			report.setItems(entityStore.listItems(turn.getCorporation().getID()));
 			report.setEmployees(entityStore.listWorkersByEmployer(corp.getID()));
 			report.setFactoryQueue(entityStore.listQueueByCorporation(corp.getID()));
@@ -250,17 +252,17 @@ public class TurnProcessor extends AServerTask {
 		return report;
 	}
 	
-	private Corporation register(Corporation corp) {
+	private boolean register(Corporation corp) {
 		Corporation existing = entityStore.getCorporation(corp.getPlayerEmail());
 		if(existing == null) {
 			corp.setFoundedDate(ServerConfiguration.getCurrentDate());
 			corp = (Corporation) entityStore.create(corp);
 			entityStore.addCredits(corp.getID(), ServerConfiguration.SETUP_INITIAL_CREDITS, ServerConfiguration.SETUP_DESCRIPTION);
 			corp = createStartingPosition(corp);
-			return corp;
+			return true;
 		}
 		else {
-			return null;
+			return false;
 		}
 	}
 	
@@ -304,8 +306,8 @@ public class TurnProcessor extends AServerTask {
 		return corp;
 	}
 	
-	private Corporation authorize(Corporation corp) {
-		return entityStore.getCorporation(corp.getPlayerEmail(), corp.getPlayerPassword());
+	private boolean authorize(Corporation corp) {
+		return entityStore.authorize(corp.getPlayerEmail(), corp.getPlayerPassword());
 	}
 	
 	private TurnError process(TurnOrder order) {

@@ -64,4 +64,9 @@ public class ColonistGrant extends AGovernmentLaw {
 	public String toString() {
 		return popClass.getKey() + " \u20a1 " + credits + " " + super.toString(); 
 	}
+
+	@Override
+	public String getDisplayName() {
+		return "Grant " + popClass.getName() + " \u20a1 " + credits + " each.";
+	}
 }

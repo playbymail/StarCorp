@@ -11,12 +11,16 @@
 package starcorp.common.util;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 /**
  * starcorp.common.util.PackageExplorer
@@ -26,57 +30,81 @@ import java.util.List;
  */
 public class PackageExplorer {
 
-    /**
-     * Attempts to list all the classes in the specified package as determined
-     * by the context class loader
-     * 
-     * From http://forum.java.sun.com/thread.jspa?threadID=341935&start=15&tstart=0
-     * 
-     * @param pckgname
-     *            the package name to search
-     * @return a list of classes that exist within that package
-     * @throws ClassNotFoundException
-     *             if something went wrong
-     */
-    public static List<Class> getClassesForPackage(String pckgname) throws ClassNotFoundException {
-        // This will hold a list of directories matching the pckgname. There may be more than one if a package is split over multiple jars/paths
-        ArrayList<File> directories = new ArrayList<File>();
+	private static List<Class> loadJar(List<Class> classes, String packageName, URL resource) throws IOException, ClassNotFoundException {
+		JarURLConnection conn = (JarURLConnection) resource.openConnection();
+		JarFile jarFile = conn.getJarFile();
+		Enumeration<JarEntry> entries = jarFile.entries();
+		String packagePath = packageName.replace('.', '/');
+		while (entries.hasMoreElements()) {
+			JarEntry entry = entries.nextElement();
+			if ((entry.getName().startsWith(packagePath) || entry.getName().startsWith("WEB-INF/classes/" + packagePath)) && 
+					entry.getName().indexOf('$') == -1 && entry.getName().endsWith(".class")) {
+				
+				String className = entry.getName();
+				if (className.startsWith("/"))
+					className = className.substring(1);
+				className = className.replace('/', '.');
+				
+				className = className.substring(0, className.length() - ".class".length());				
+				
+				Class clazz = Class.forName(className);
+				classes.add(clazz);
+			}
+		}
+		return classes;
+	}
+	
+	private static List<Class> loadDirectory(List<Class> classes, String packageName, URL resource) throws IOException, ClassNotFoundException {
+		return loadDirectory(classes, packageName, URLDecoder.decode(resource.getFile()));
+	}
+	
+	private static List<Class> loadDirectory(List<Class> classes, String packageName, String fullPath) throws IOException, ClassNotFoundException {
+		File directory = new File(fullPath);
+		if (!directory.isDirectory()) 
+			throw new IOException("Invalid directory " + directory.getAbsolutePath());
+		
+		File[] files = directory.listFiles();
+		for (File file : files) {
+			if (file.isDirectory())
+				loadDirectory(classes, packageName + '.' + file.getName(), file.getAbsolutePath());
+			else if (file.getName().indexOf('$') == -1 && file.getName().endsWith(".class")) {
+				String simpleName = file.getName();
+				simpleName = simpleName.substring(0, simpleName.length() - ".class".length());
+				String className = String.format("%s.%s", packageName, simpleName);
+				Class clazz = Class.forName(className);
+				classes.add(clazz);
+			}
+		}
+		return classes;
+	}
+	
+    public static List<Class> getClassesForPackage(String packageName) throws ClassNotFoundException {
+		List<Class> classes = new ArrayList<Class>();
         try {
             ClassLoader cld = Thread.currentThread().getContextClassLoader();
             if (cld == null) {
                 throw new ClassNotFoundException("Can't get class loader.");
             }
-            String path = pckgname.replace('.', '/');
-            // Ask for all resources for the path
+            String path = packageName.replace('.', '/');
             Enumeration<URL> resources = cld.getResources(path);
             while (resources.hasMoreElements()) {
-                directories.add(new File(URLDecoder.decode(resources.nextElement().getPath(), "UTF-8")));
+            	URL resource = resources.nextElement();
+            	if(resource.getProtocol().equalsIgnoreCase("FILE")) {
+            		loadDirectory(classes, packageName, resource);
+            	}
+            	else if(resource.getProtocol().equalsIgnoreCase("JAR")){
+            		loadJar(classes, packageName, resource);
+            	}
+            	else {
+            		throw new ClassNotFoundException("Unknown protocol " + resource.getProtocol());
+            	}
             }
         } catch (NullPointerException x) {
-            throw new ClassNotFoundException(pckgname + " does not appear to be a valid package (Null pointer exception)");
+            throw new ClassNotFoundException(packageName + " does not appear to be a valid package (Null pointer exception)");
         } catch (UnsupportedEncodingException encex) {
-            throw new ClassNotFoundException(pckgname + " does not appear to be a valid package (Unsupported encoding)");
+            throw new ClassNotFoundException(packageName + " does not appear to be a valid package (Unsupported encoding)");
         } catch (java.io.IOException ioex) {
-            throw new ClassNotFoundException("IOException was thrown when trying to get all resources for " + pckgname);
-        }
- 
-        ArrayList<Class> classes = new ArrayList<Class>();
-        // For every directory identified capture all the .class files
-        for (File directory : directories) {
-            if (directory.exists()) {
-                // Get the list of the files contained in the package
-                String[] files = directory.list();
-                for (String file : files) {
-                    // we are only interested in .class files
-                	// also ignore inner and anonymous classes
-                    if (file.endsWith(".class") && file.indexOf("$") == -1) {
-                        // removes the .class extension
-                        classes.add(Class.forName(pckgname + '.' + file.substring(0, file.length() - 6)));
-                    }
-                }
-            } else {
-                throw new ClassNotFoundException(pckgname + " (" + directory.getPath() + ") does not appear to be a valid package");
-            }
+            throw new ClassNotFoundException("IOException was thrown when trying to get all resources for " + packageName +": " + ioex.getMessage(),ioex);
         }
         return classes;
     }

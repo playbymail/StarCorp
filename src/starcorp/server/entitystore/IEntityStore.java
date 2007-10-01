@@ -104,7 +104,7 @@ public interface IEntityStore {
 	public abstract List<FactoryQueueItem> listQueue(long facility);
 	
 	public abstract Corporation getCorporation(String email);
-	public abstract Corporation getCorporation(String email, String password);
+	public abstract boolean authorize(String email, String password);
 
 	public abstract List<DevelopmentGrant> listDevelopmentGrants(long owner, boolean openOnly);
 	public abstract DevelopmentGrant getDevelopmentGrant(long colony, AFacilityType type, boolean openOnly);

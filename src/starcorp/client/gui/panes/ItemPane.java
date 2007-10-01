@@ -38,7 +38,6 @@ import starcorp.common.types.StarshipHulls;
  * @version 26 Sep 2007
  */
 public class ItemPane extends ATypePane {
-	// TODO add list of items it is used in production for
 	private AItemType type;
 	
 	/**
@@ -104,7 +103,17 @@ public class ItemPane extends ATypePane {
 			}
 		}
 		
-		
+		Set<AItemType> components = type.usedIn();
+		if(components.size() > 0) {
+			grp = createGroup(getParent(), widgets, "Needed For");
+			grp.setLayout(new GridLayout(5,false));
+			GridData data = new GridData();
+			data.horizontalSpan=2;
+			grp.setLayoutData(data);
+			for(AItemType type : components) {
+				createItemLink(grp, widgets, type, null);
+			}
+		}
 	}
 
 }

@@ -70,11 +70,7 @@ public class Toolbar implements IComponent  {
 	private Image loadIcon(Composite parent, String imageFile) {
 		InputStream is = null;
 		Image img = null;
-		try {
-			is = new FileInputStream(imageFile);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
+		is = getClass().getResourceAsStream(imageFile);
 		if(is != null) {
 			img = new Image(parent.getDisplay(),is);
 			System.out.println("Loaded " + imageFile);
@@ -86,17 +82,17 @@ public class Toolbar implements IComponent  {
 	}
 	
 	private void loadIcons(Composite parent) {
-		icons[0] = loadIcon(parent,"images/icons/load-report.gif");
-		icons[1] = loadIcon(parent,"images/icons/new-turn.gif");
-		icons[2] = loadIcon(parent,"images/icons/open-turn.gif");
-		icons[3] = loadIcon(parent,"images/icons/save-turn.gif");
-		icons[4] = loadIcon(parent,"images/icons/submit-turn.gif");
-		icons[5] = loadIcon(parent,"images/icons/search-items.gif");
-		icons[6] = loadIcon(parent,"images/icons/search-market.gif");
-		icons[7] = loadIcon(parent,"images/icons/search-laws.gif");
-		icons[8] = loadIcon(parent,"images/icons/design-ship.gif");
-		icons[9] = loadIcon(parent,"images/icons/left.gif");
-		icons[10] = loadIcon(parent,"images/icons/right.gif");
+		icons[0] = loadIcon(parent,"/images/icons/load-report.gif");
+		icons[1] = loadIcon(parent,"/images/icons/new-turn.gif");
+		icons[2] = loadIcon(parent,"/images/icons/open-turn.gif");
+		icons[3] = loadIcon(parent,"/images/icons/save-turn.gif");
+		icons[4] = loadIcon(parent,"/images/icons/submit-turn.gif");
+		icons[5] = loadIcon(parent,"/images/icons/search-items.gif");
+		icons[6] = loadIcon(parent,"/images/icons/search-market.gif");
+		icons[7] = loadIcon(parent,"/images/icons/search-laws.gif");
+		icons[8] = loadIcon(parent,"/images/icons/design-ship.gif");
+		icons[9] = loadIcon(parent,"/images/icons/left.gif");
+		icons[10] = loadIcon(parent,"/images/icons/right.gif");
 	}
 
 	public void open(Composite parent) {

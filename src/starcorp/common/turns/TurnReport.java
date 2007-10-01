@@ -59,17 +59,17 @@ import starcorp.common.util.Util;
 public class TurnReport {
 
 	private Set<Colony> colonies = new HashSet<Colony>();
-	private Set<Planet> planets = new HashSet<Planet>();
-	private Set<StarSystem> systems = new HashSet<StarSystem>();
-	private Set<Facility> facilities = new HashSet<Facility>();
 	private Set<Corporation> corporations = new HashSet<Corporation>();
 	private long credits;
 	private List<AColonists> employees;
+	private Set<Facility> facilities = new HashSet<Facility>();
 	private List<FactoryQueueItem> factoryQueue;
 	private List<ColonyItem> items;
 	private List<AGovernmentLaw> laws;
-	private List<MarketItem> market; 
-	private List<IEntity> playerEntities = new ArrayList<IEntity>();
+	private List<MarketItem> market;
+	private Set<Planet> planets = new HashSet<Planet>();
+	private List<IEntity> playerEntities = new ArrayList<IEntity>(); 
+	private Set<StarSystem> systems = new HashSet<StarSystem>();
 	private Turn turn;
 	
 	public TurnReport(Element e) {
@@ -86,6 +86,24 @@ public class TurnReport {
 		this.turn = turn;
 	}
 	
+	public void addPlayerEntities(List<?> entities) {
+		for(Object o : entities) {
+			IEntity entity = (IEntity) o;
+			addPlayerEntity(entity);
+			
+		}
+	}
+
+	public void addPlayerEntity(IEntity entity) {
+		playerEntities.add(entity);
+		if(entity instanceof Facility)
+			facilities.add((Facility)entity);
+	}
+
+	public void addScanned(Colony colony) {
+		colonies.add(colony);
+	}
+	
 	public void addScanned(Corporation corp) {
 		corporations.add(corp);
 	}
@@ -94,30 +112,12 @@ public class TurnReport {
 		facilities.add(facility);
 	}
 
-	public void addScanned(Colony colony) {
-		colonies.add(colony);
-	}
-	
 	public void addScanned(Planet planet) {
 		planets.add(planet);
 	}
-
+	
 	public void addScanned(StarSystem system) {
 		systems.add(system);
-	}
-
-	public void addPlayerEntities(List<?> entities) {
-		for(Object o : entities) {
-			IEntity entity = (IEntity) o;
-			addPlayerEntity(entity);
-			
-		}
-	}
-	
-	public void addPlayerEntity(IEntity entity) {
-		playerEntities.add(entity);
-		if(entity instanceof Facility)
-			facilities.add((Facility)entity);
 	}
 	
 	public int countPlayerFacilities() {
@@ -132,6 +132,56 @@ public class TurnReport {
 	
 	public int countPlayerStarships() {
 		return getPlayerStarships().size();
+	}
+	
+	public Set<Colony> getColonies() {
+		return colonies;
+	}
+	
+	public Set<Colony> getColoniesByPlanet(long planet) {
+		Set<Colony> colonies = new TreeSet<Colony>();
+		for(Colony colony : getColonies()) {
+			if(colony.getPlanet() == planet)
+				colonies.add(colony);
+		}
+		return colonies;
+	}
+	
+	public Set<Colony> getColoniesByGovernment(long government) {
+		Set<Colony> colonies = new TreeSet<Colony>();
+		for(Colony colony : getColonies()) {
+			if(colony.getGovernment() == government)
+				colonies.add(colony);
+		}
+		return colonies;
+	}
+
+	public Colony getColony(long ID) {
+		if(colonies == null || ID < 1) {
+			return null;
+		}
+		for(Colony colony : getColonies()) {
+			if(colony.getID() == ID)
+				return colony;
+		}
+		return null;
+	}
+	
+	public Corporation getCorporation(long ID) {
+		if(turn.getCorporation().getID() == ID)
+			return turn.getCorporation();
+		if(corporations == null || ID < 1) {
+			return null;
+		}
+		for(Corporation c : corporations) {
+			if(c.getID() == ID)
+				return c;
+		}
+		return null;
+	}
+	
+	public Set<Corporation> getCorporations() {
+		return corporations;
 	}
 	
 	public long getCredits() {
@@ -152,7 +202,22 @@ public class TurnReport {
 		}
 		return set;
 	}
-	
+
+	public Set<Facility> getFacilities() {
+		return facilities;
+	}
+
+	public Facility getFacility(long ID) {
+		if(facilities == null || ID < 1) {
+			return null;
+		}
+		for(Facility f : facilities) {
+			if(f.getID() == ID)
+				return f;
+		}
+		return null;
+	}
+
 	public List<FactoryQueueItem> getFactoryQueue() {
 		return factoryQueue;
 	}
@@ -161,38 +226,14 @@ public class TurnReport {
 		return items;
 	}
 	
-	public Set<Colony> getColonies() {
-		return colonies;
-	}
-	
-	public Set<Colony> getColoniesByPlanet(long planet) {
-		Set<Colony> colonies = new TreeSet<Colony>();
-		for(Colony colony : getColonies()) {
-			if(colony.getPlanet() == planet)
-				colonies.add(colony);
-		}
-		return colonies;
-	}
-	
-	public Colony getColony(long ID) {
-		if(colonies == null || ID < 1) {
-			return null;
-		}
-		for(Colony colony : getColonies()) {
-			if(colony.getID() == ID)
-				return colony;
-		}
-		return null;
-	}
-
 	public List<AGovernmentLaw> getLaws() {
 		return laws;
 	}
-
+	
 	public List<MarketItem> getMarket() {
 		return market;
 	}
-
+	
 	public Map<Long, Set<MarketItem>> getMarketByColony() {
 		Map<Long, Set<MarketItem>> map = new TreeMap<Long, Set<MarketItem>>();
 		for(MarketItem item : getMarket()) {
@@ -219,6 +260,38 @@ public class TurnReport {
 		return map;
 	}
 	
+	public Planet getPlanet(long ID) {
+		if(planets == null || ID < 1) 
+			return null;
+		for(Planet p : planets) {
+			if(p.getID() == ID)
+				return p;
+		}
+		return null;
+	}
+	
+	public Set<Planet> getPlanets() {
+		return planets;
+	}
+	
+	public Set<Planet> getPlanetsByLocation(long systemID, CoordinatesPolar location) {
+		Set<Planet> entities = new TreeSet<Planet>();
+		for(Planet p : planets) {
+			if(p.getSystem() == systemID && p.getLocation().equals(location))
+				entities.add(p);
+		}
+		return entities;
+	}
+	
+	public Set<Planet> getPlanetsBySystem(long systemID) {
+		Set<Planet> entities = new TreeSet<Planet>();
+		for(Planet p : planets) {
+			if(p.getSystem() == systemID)
+				entities.add(p);
+		}
+		return entities;
+	}
+	
 	public Set<StarshipDesign> getPlayerDesigns() {
 		Set<StarshipDesign> list = new TreeSet<StarshipDesign>();
 		for(Object o : playerEntities) {
@@ -232,6 +305,10 @@ public class TurnReport {
 		return playerEntities;
 	}
 	
+	public Set<Colony> getPlayerGovernments() {
+		return getColoniesByGovernment(turn.getCorporation().getID());
+	}
+	
 	public Set<Facility> getPlayerFacilities() {
 		Set<Facility> list = new TreeSet<Facility>();
 		for(Object o : playerEntities) {
@@ -241,7 +318,7 @@ public class TurnReport {
 		}
 		return list;
 	}
-	
+
 	public Map<Long,Set<Facility>> getPlayerFacilitiesByColony() {
 		Map<Long, Set<Facility>> map = new TreeMap<Long, Set<Facility>>(); 
 		for(Object o : playerEntities) {
@@ -257,7 +334,7 @@ public class TurnReport {
 		}
 		return map;
 	}
-	
+
 	public Set<Facility> getPlayerFacilitiesByType(Class clazz) {
 		Set<Facility> list = new TreeSet<Facility>();
 		for(Object o : playerEntities) {
@@ -292,7 +369,6 @@ public class TurnReport {
 		}
 		return facMap;
 	}
-	
 	public Set<Starship> getPlayerOrbitingrStarships(Planet planet) {
 		Set<Starship> list = new TreeSet<Starship>();
 		for(Starship ship : getPlayerStarships() ) {
@@ -301,7 +377,6 @@ public class TurnReport {
 		}
 		return list;
 	}
-	
 	public Set<Starship> getPlayerStarships() {
 		Set<Starship> list = new TreeSet<Starship>();
 		for(Object o : playerEntities) {
@@ -323,7 +398,7 @@ public class TurnReport {
 	public Set<Starship> getPlayerStarships(StarshipDesign design) {
 		return getPlayerStarshipsByDesign().get(design);
 	}
-	
+
 	public Map<StarshipDesign,Set<Starship>> getPlayerStarshipsByDesign() {
 		Map<StarshipDesign,Set<Starship>> map = new TreeMap<StarshipDesign, Set<Starship>>();
 		
@@ -363,7 +438,7 @@ public class TurnReport {
 //		System.out.println("queue items for " + facility + ": " + set.size());
 		return set;
 	}
-	
+
 	public Set<StellarAnomoly> getScannedAnomolies() {
 		Set<StellarAnomoly> list = new TreeSet<StellarAnomoly>();
 		for(Object o : turn.getScannedEntities(StellarAnomoly.class)) {
@@ -371,6 +446,7 @@ public class TurnReport {
 		}
 		return list;
 	}
+
 	public Set<StellarAnomoly> getScannedAnomolies(CoordinatesPolar location) {
 		Set<StellarAnomoly> list = new TreeSet<StellarAnomoly>();
 		for(Object o : turn.getScannedEntities(StellarAnomoly.class)) {
@@ -380,6 +456,7 @@ public class TurnReport {
 		}
 		return list;
 	}
+
 	public Set<StarSystemEntity> getScannedAsteroids() {
 		Set<StarSystemEntity> entities = new TreeSet<StarSystemEntity>();
 		for(Object o :turn.getScannedEntities(StarSystemEntity.class)) {
@@ -390,7 +467,7 @@ public class TurnReport {
 		}
 		return entities;
 	}
-	
+
 	public Set<StarSystemEntity> getScannedAsteroids(CoordinatesPolar location) {
 		Set<StarSystemEntity> entities = new TreeSet<StarSystemEntity>();
 		for(Object o :turn.getScannedEntities(StarSystemEntity.class)) {
@@ -401,7 +478,7 @@ public class TurnReport {
 		}
 		return entities;
 	}
-	
+
 	public Set<StarSystemEntity> getScannedEntitiesExcludeShips(long systemID) {
 		Set<StarSystemEntity> entities = new TreeSet<StarSystemEntity>();
 		for(Object o :turn.getScannedEntities(StarSystemEntity.class)) {
@@ -436,22 +513,18 @@ public class TurnReport {
 		return entities;
 	}
 
-	public Set<Planet> getPlanetsBySystem(long systemID) {
-		Set<Planet> entities = new TreeSet<Planet>();
-		for(Planet p : planets) {
-			if(p.getSystem() == systemID)
-				entities.add(p);
+	public StarSystem getSystem(long ID) {
+		if(systems == null || ID < 1)
+			return null;
+		for(StarSystem system : systems) {
+			if(system.getID() == ID)
+				return system;
 		}
-		return entities;
+		return null;
 	}
 
-	public Set<Planet> getPlanetsByLocation(long systemID, CoordinatesPolar location) {
-		Set<Planet> entities = new TreeSet<Planet>();
-		for(Planet p : planets) {
-			if(p.getSystem() == systemID && p.getLocation().equals(location))
-				entities.add(p);
-		}
-		return entities;
+	public Set<StarSystem> getSystems() {
+		return systems;
 	}
 
 	public Turn getTurn() {
@@ -542,6 +615,7 @@ public class TurnReport {
 		laws = new ArrayList<AGovernmentLaw>();
 		Element eLaws = e.element("laws");
 		if(eLaws != null) {
+			System.out.println(eLaws);
 			for(Iterator<?> i = eLaws.elementIterator("entity"); i.hasNext();) {
 				AGovernmentLaw item = (AGovernmentLaw) Util.fromXML((Element)i.next());
 				if(item != null)
@@ -563,12 +637,20 @@ public class TurnReport {
 		this.colonies = colonies;
 	}
 
+	public void setCorporations(Set<Corporation> corporations) {
+		this.corporations = corporations;
+	}
+	
 	public void setCredits(long credits) {
 		this.credits = credits;
 	}
 
 	public void setEmployees(List<AColonists> employees) {
 		this.employees = employees;
+	}
+
+	public void setFacilities(Set<Facility> facilities) {
+		this.facilities = facilities;
 	}
 
 	public void setFactoryQueue(List<FactoryQueueItem> factoryQueue) {
@@ -585,6 +667,14 @@ public class TurnReport {
 
 	public void setMarket(List<MarketItem> market) {
 		this.market = market;
+	}
+
+	public void setPlanets(Set<Planet> planets) {
+		this.planets = planets;
+	}
+
+	public void setSystems(Set<StarSystem> systems) {
+		this.systems = systems;
 	}
 
 	public void setTurn(Turn turn) {
@@ -686,81 +776,5 @@ public class TurnReport {
 		
 		xmlWriter.write(doc);
 		xmlWriter.close();
-	}
-	
-	public Planet getPlanet(long ID) {
-		if(planets == null || ID < 1) 
-			return null;
-		for(Planet p : planets) {
-			if(p.getID() == ID)
-				return p;
-		}
-		return null;
-	}
-
-	public Set<Planet> getPlanets() {
-		return planets;
-	}
-
-	public void setPlanets(Set<Planet> planets) {
-		this.planets = planets;
-	}
-
-	public StarSystem getSystem(long ID) {
-		if(systems == null || ID < 1)
-			return null;
-		for(StarSystem system : systems) {
-			if(system.getID() == ID)
-				return system;
-		}
-		return null;
-	}
-
-	public Set<StarSystem> getSystems() {
-		return systems;
-	}
-
-	public void setSystems(Set<StarSystem> systems) {
-		this.systems = systems;
-	}
-
-	public Facility getFacility(long ID) {
-		if(facilities == null || ID < 1) {
-			return null;
-		}
-		for(Facility f : facilities) {
-			if(f.getID() == ID)
-				return f;
-		}
-		return null;
-	}
-
-	public Set<Facility> getFacilities() {
-		return facilities;
-	}
-
-	public void setFacilities(Set<Facility> facilities) {
-		this.facilities = facilities;
-	}
-
-	public Corporation getCorporation(long ID) {
-		if(turn.getCorporation().getID() == ID)
-			return turn.getCorporation();
-		if(corporations == null || ID < 1) {
-			return null;
-		}
-		for(Corporation c : corporations) {
-			if(c.getID() == ID)
-				return c;
-		}
-		return null;
-	}
-
-	public Set<Corporation> getCorporations() {
-		return corporations;
-	}
-
-	public void setCorporations(Set<Corporation> corporations) {
-		this.corporations = corporations;
 	}
 }

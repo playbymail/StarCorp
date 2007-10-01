@@ -55,10 +55,10 @@ public class IssueDevelopmentGrant extends AOrderProcessor {
 			grant.setGrant(credit);
 			grant.setIssuedDate(ServerConfiguration.getCurrentDate());
 			grant.setTypeClass(type);
-			
+			grant.setAvailable(true);
 			entityStore.create(grant);
 			
-			OrderReport report = new OrderReport(order,grant, corp);
+			OrderReport report = new OrderReport(order,colony, corp);
 			report.add(type.getName());
 			report.add(credit);
 			report.add(colony.getName());

@@ -7,6 +7,15 @@ import java.util.TreeSet;
 
 public abstract class AFactoryItem extends AItemType {
 
+	public boolean isComponent(AItemType type) {
+		Set<Items> items = getComponent();
+		for(Items item : items) {
+			if(item.getTypeClass().equals(type))
+				return true;
+		}
+		return false;
+	}
+	
 	public Set<Items> getComponent() {
 		Set<Items> items = new TreeSet<Items>();
 		Enumeration<String> keys = bundle.getKeys();

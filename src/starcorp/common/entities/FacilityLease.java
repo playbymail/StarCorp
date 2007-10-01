@@ -70,4 +70,9 @@ public class FacilityLease extends AGovernmentLaw {
 		return type.getKey() + " " + super.toString();
 	}
 	
+	@Override
+	public String getDisplayName() {
+		return "Lease to build 1 x " + type.getName() + (licensee > 0 ? " (SOLD)" : "");
+	}
+	
 }
