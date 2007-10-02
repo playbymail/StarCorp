@@ -111,7 +111,7 @@ public class OrderReportPane extends ADataPane {
 			if(scanned.size() > 0) {
 				Group grp = createGroup(getParent(), widgets, "Scanned");
 				grp.setLayoutData(new GridData(SWT.LEFT,SWT.TOP,true,true,2,1));
-				grp.setLayout(new GridLayout(2,true));
+				grp.setLayout(new GridLayout(4,true));
 				for(Object o : scanned) {
 					displayEntity(grp, widgets, o);
 				}
