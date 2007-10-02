@@ -560,7 +560,7 @@ public class HibernateStore implements IEntityStore {
 		Map<String, Object> map = prepareParameters("email", email);
 		prepareParameters(map, "password", password);
 		beginTransaction();
-		int count = (Integer) createQuery(q, map).uniqueResult();
+		long count = (Long) createQuery(q, map).uniqueResult();
 		commit();
 		return count > 0;
 	}
