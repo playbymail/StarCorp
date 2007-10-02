@@ -419,7 +419,7 @@ public class TurnReport {
 	public Set<Starship> getPlayerStarshipsInOrOrbitingColony(Colony colony) {
 		Set<Starship> list = new TreeSet<Starship>();
 		for(Starship ship : getPlayerStarships() ) {
-			if(colony.equals(ship.getColony()) || ship.isOrbiting(colony.getID()))
+			if(colony.getID() == ship.getColony() || ship.isOrbiting(colony.getPlanet()))
 				list.add(ship);
 		}
 		return list;
