@@ -245,7 +245,15 @@ public class MainWindow extends AWindow {
 	}
 	
 	public void close() {
-		setCurrentTurn(null);
+		if(isTurnDirty()) {
+			int buttonID = messageBox("Save Current Turn", "Do you wish to save the current turn first?", SWT.ICON_WARNING | SWT.YES | SWT.NO | SWT.CANCEL);
+			if(buttonID == SWT.CANCEL) {
+				return;
+			}
+			else if(buttonID == SWT.YES) {
+				openSaveTurn();
+			}
+		}
 		closeChildWindows();
 		super.close();
 		System.exit(0);
@@ -619,6 +627,9 @@ public class MainWindow extends AWindow {
 			}
 			if(ClientConfiguration.getSmtpHost() == null) {
 				messageBox("Send Mail Error", "You have not configured your email server!", SWT.ICON_ERROR | SWT.OK);
+			}
+			else if(currentTurn.getCorporation().getPlayerEmail() == null) {
+				messageBox("Send Mail Error", "You have not specified an email address!", SWT.ICON_ERROR | SWT.OK);
 			}
 			else {
 				SendEmail email = new SendEmail(ClientConfiguration.getSmtpHost(), ClientConfiguration.getSmtpPort(), ClientConfiguration.getSmtpUser(), ClientConfiguration.getSmtpPassword());
