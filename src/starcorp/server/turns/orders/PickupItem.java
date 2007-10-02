@@ -101,7 +101,7 @@ public class PickupItem extends AOrderProcessor {
 				orbitalDock.incTransactionCount();
 				entityStore.update(orbitalDock);
 			}
-			report = new OrderReport(order,item,ship);
+			report = new OrderReport(order,colony,ship);
 			report.add(quantity);
 			report.add(type.getName());
 			report.add(colony.getName());

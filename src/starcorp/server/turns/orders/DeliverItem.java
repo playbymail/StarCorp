@@ -35,7 +35,6 @@ import starcorp.server.turns.AOrderProcessor;
  * @version 17 Sep 2007
  */
 public class DeliverItem extends AOrderProcessor {
-	// TODO test
 	public TurnError process(TurnOrder order) {
 		TurnError error = null;
 		OrderReport report = null;
@@ -105,7 +104,7 @@ public class DeliverItem extends AOrderProcessor {
 				orbitalDock.incTransactionCount();
 				entityStore.update(orbitalDock);
 			}
-			report = new OrderReport(order,item,ship);
+			report = new OrderReport(order,colony,ship);
 			report.add(quantity);
 			report.add(type.getName());
 			report.add(colony.getName());
