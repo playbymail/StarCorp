@@ -102,7 +102,7 @@ public class TurnProcessor extends AServerTask {
 					}
 				}
 				catch(Exception e) {
-					log.warn(this + ": Error reading turn file " + turns[i].getName() + " because " + e.getMessage());
+					log.warn(this + ": Error reading turn file " + turns[i].getName() + " because " + e.getMessage(),e);
 				}
 				if(turn != null) {
 					try {
@@ -202,8 +202,17 @@ public class TurnProcessor extends AServerTask {
 					log.debug("Processed " + order + " : error = " + error);
 			}
 			turn.setProcessedDate(ServerConfiguration.getCurrentDate());
-			corp = (Corporation) entityStore.load(Corporation.class, corp.getID());
-			turn.setCorporation(corp);
+			if(corp.getID() < 1) {
+				String email = corp.getPlayerEmail();
+				corp = entityStore.getCorporation(email);
+				if(corp == null) {
+					log.error("No corporation found with email " + email);
+					return report;
+				}
+				else {
+					turn.setCorporation(corp);
+				}
+			}
 			report.addPlayerEntities(entityStore.listDesigns(corp.getID()));
 			List<Facility> facilities = entityStore.listFacilitiesByOwner(corp.getID());
 			for(Facility facility : facilities) {
