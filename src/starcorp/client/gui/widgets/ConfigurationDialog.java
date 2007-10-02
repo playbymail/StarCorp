@@ -25,7 +25,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import starcorp.client.ClientConfiguration;
-import starcorp.common.entities.Corporation;
 
 /**
  * starcorp.client.gui.ConfigurationDialog

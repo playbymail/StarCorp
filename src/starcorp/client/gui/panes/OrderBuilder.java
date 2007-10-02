@@ -346,7 +346,6 @@ public class OrderBuilder extends ABuilderPane {
 	}
 	
 	private void createFactoryDropDown(List<Widget> widgets, int index) {
-		// TODO make this drop down filterable by colony
 		if(report != null)
 			setContents(index,createEntitySelection(orderArgumentPanels[index], widgets, report.getPlayerFacilitiesByType(Factory.class), null),"Factory");
 		else

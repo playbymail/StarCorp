@@ -14,20 +14,14 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Widget;
 
 import starcorp.client.gui.ABuilderPane;
 import starcorp.client.gui.ADataEntryWindow;
-import starcorp.client.gui.widgets.Hyperlink;
 import starcorp.client.gui.windows.SearchLawsWindow;
 import starcorp.common.entities.Colony;
 
