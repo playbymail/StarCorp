@@ -57,8 +57,8 @@ public class OrderReportPane extends ADataPane {
 
 	@Override
 	protected void createWidgets(List<Widget> widgets) {
-		createLabel(getParent(),widgets,order.toString());
-		
+		Group grpSummary = createGroup(getParent(), widgets, order.toString());
+		grpSummary.setLayout(new GridLayout(2,false));
 		String txt = null;
 		if(report != null) {
 			if(report.getDescription() != null) {
@@ -72,11 +72,9 @@ public class OrderReportPane extends ADataPane {
 		if(txt == null) {
 			txt = "No report for this order.";
 		}
+		createLabel(grpSummary, widgets, txt).setLayoutData(new GridData(SWT.CENTER,SWT.TOP,true,true,2,1));
 		
 		if(report != null) {
-			Group grpSummary = createGroup(getParent(), widgets, "Summary");
-			createLabel(grpSummary, widgets, txt).setLayoutData(new GridData(SWT.CENTER,SWT.TOP,true,true,2,1));
-			grpSummary.setLayout(new GridLayout(2,false));
 			IEntity subject = report.getSubject();
 			if(subject != null) {
 				createLabel(grpSummary, widgets, "Subject:");
