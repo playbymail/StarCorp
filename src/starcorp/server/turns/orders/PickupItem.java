@@ -34,7 +34,6 @@ import starcorp.server.turns.AOrderProcessor;
  * @version 17 Sep 2007
  */
 public class PickupItem extends AOrderProcessor {
-	// TODO test
 	public TurnError process(TurnOrder order) {
 		TurnError error = null;
 		OrderReport report = null;
@@ -50,9 +49,13 @@ public class PickupItem extends AOrderProcessor {
 		if(colony != null)
 			colonyPlanet = ((Planet) entityStore.load(Planet.class, colony.getPlanet()));
 		AItemType type = AItemType.getType(itemTypeKey);
-		ColonyItem item = entityStore.getItem(colony.getID(), corp.getID(), type);
+		ColonyItem item = null;
+		if(colony != null && corp != null) 
+			item = entityStore.getItem(colony.getID(), corp.getID(), type);
 
-		Facility orbitalDock = entityStore.getFacility(colony.getID(), OrbitalDock.class);
+		Facility orbitalDock = null;
+		if(colony != null)
+			orbitalDock = entityStore.getFacility(colony.getID(), OrbitalDock.class);
 		
 		List<?> dockWorkers = orbitalDock == null ? null : entityStore.listWorkersByFacility(orbitalDock.getID());
 		
