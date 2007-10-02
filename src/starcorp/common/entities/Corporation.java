@@ -31,7 +31,6 @@ public class Corporation extends ANamedEntity {
 	private String playerPassword;
 	private GalacticDate foundedDate;
 	private Set<Long> knownSystems = new HashSet<Long>();
-	// TODO known planets, system entities and colonies
 	
 	public Corporation() {
 		

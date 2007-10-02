@@ -377,7 +377,6 @@ public class OrderBuilder extends ABuilderPane {
 	}
 	
 	private void createShipDesignDropDown(List<Widget> widgets, int index) {
-		// TODO fix this to have a combo showing available hulls and a list showing currently chosen with an option to delete ones in list
 		if(report != null)
 			setContents(index,createEntitySelection(orderArgumentPanels[index], widgets, report.getPlayerDesigns(), null),"Starship Design");
 		else

@@ -90,7 +90,7 @@ public class GeneratorProcessor extends AServerTask {
 				item.add(qty);
 				deposit.remove(qty);
 				entityStore.update(item);
-				entityStore.update(deposit); // TODO deposit yield is being set to 0!
+				entityStore.update(deposit);
 				if(log.isDebugEnabled())
 					log.debug(this + ": " + generator + " generated " + qty + " x " + deposit.getType());
 			}

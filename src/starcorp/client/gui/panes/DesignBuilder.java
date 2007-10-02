@@ -90,8 +90,6 @@ public class DesignBuilder extends ABuilderPane {
 				designWindow.getMainWindow().addTurnOrder(order);
 			}
 		});
-		
-		// TODO Auto-generated constructor stub
 	}
 
 }
