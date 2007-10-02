@@ -167,14 +167,16 @@ public class OrderBuilder extends ABuilderPane {
 			createIntegerInput(widgets, 4, "Price");
 		}
 		else if(type.equals(OrderType.SHIP_PICKUP_ITEM)){
-			createColonyDropDown(widgets, 0);
-			createItemTypeDropDown(widgets, 1);
-			createIntegerInput(widgets, 2, "Quantity");
+			createShipDropDown(widgets, 0);
+			createColonyDropDown(widgets, 1);
+			createItemTypeDropDown(widgets, 2);
+			createIntegerInput(widgets, 3, "Quantity");
 		}
 		else if(type.equals(OrderType.SHIP_DELIVER_ITEM)){
-			createColonyDropDown(widgets, 0);
-			createItemTypeDropDown(widgets, 1);
-			createIntegerInput(widgets, 2, "Quantity");
+			createShipDropDown(widgets, 0);
+			createColonyDropDown(widgets, 1);
+			createItemTypeDropDown(widgets, 2);
+			createIntegerInput(widgets, 3, "Quantity");
 		}
 		else if(type.equals(OrderType.FOUND_COLONY)){
 			createShipDropDown(widgets, 0);
