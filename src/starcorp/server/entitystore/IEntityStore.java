@@ -126,6 +126,7 @@ public interface IEntityStore {
 	public abstract List<MarketItem> listMarket(int minQty);
 	public abstract List<MarketItem> listMarketBySeller(long seller, int minQty);
 	public abstract List<MarketItem> listMarket(long colony, int minQty);
+	public abstract List<MarketItem> listMarket(long colony, AItemType type, int minQty);
 	public abstract List<MarketItem> listMarket(long colony, List<AItemType> types, int minQty);
 	
 	public abstract List<Starship> listShips(long owner);

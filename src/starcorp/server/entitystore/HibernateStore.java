@@ -911,6 +911,13 @@ public class HibernateStore implements IEntityStore {
 		return copyMarket(listObject(createQuery(q, "colony", colony)));
 	}
 
+	public List<MarketItem> listMarket(long colony, AItemType type, int minQty) {
+		String q = "from MarketItem where colony = :colony and item.quantity >= "
+				+ minQty + " and item.type = '" + type.getKey() + "'";
+		beginTransaction();
+		return copyMarket(listObject(createQuery(q, "colony", colony)));
+	}
+
 	public List<MarketItem> listMarket(long colony, List<AItemType> types,
 			int minQty) {
 		beginTransaction();
