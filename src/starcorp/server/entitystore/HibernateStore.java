@@ -861,7 +861,7 @@ public class HibernateStore implements IEntityStore {
 	}
 
 	public List<ColonyItem> listItems(long owner) {
-		String q = "from ColonyItem where owner = :owner";
+		String q = "from ColonyItem where owner = :owner and item.quantity > 0";
 		beginTransaction();
 		return copyItems(listObject(createQuery(q, "owner", owner)));
 	}
