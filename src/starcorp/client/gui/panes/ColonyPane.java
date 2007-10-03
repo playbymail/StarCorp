@@ -103,7 +103,7 @@ public class ColonyPane extends AEntityPane {
 		createLabel(grp,widgets, "Price (ea.)");
 		createLabel(grp, widgets, "");
 		
-		Set<MarketItem> set = getTurnReport().getMarketByColony().get(colony.getID());
+		List<MarketItem> set = getTurnReport().getMarketByColony().get(colony.getID());
 		if(set != null) {
 			Iterator<MarketItem> i = set.iterator();
 			for(int count = 0; i.hasNext() && count < (MARKET_ITEMS_PER_PAGE * (page - 1));count++) {

@@ -256,12 +256,12 @@ public class TurnReport {
 		return market;
 	}
 	
-	public Map<Long, Set<MarketItem>> getMarketByColony() {
-		Map<Long, Set<MarketItem>> map = new TreeMap<Long, Set<MarketItem>>();
+	public Map<Long, List<MarketItem>> getMarketByColony() {
+		Map<Long, List<MarketItem>> map = new TreeMap<Long, List<MarketItem>>();
 		for(MarketItem item : getMarket()) {
-			Set<MarketItem> list = map.get(item.getColony());
+			List<MarketItem> list = map.get(item.getColony());
 			if(list == null) {
-				list = new TreeSet<MarketItem>();
+				list = new ArrayList<MarketItem>();
 				map.put(item.getColony(),list);
 			}
 			list.add(item);
@@ -269,12 +269,12 @@ public class TurnReport {
 		return map;
 	}
 	
-	public Map<Long, Set<MarketItem>> getMarketBySeller() {
-		Map<Long, Set<MarketItem>> map = new TreeMap<Long, Set<MarketItem>>();
+	public Map<Long, List<MarketItem>> getMarketBySeller() {
+		Map<Long, List<MarketItem>> map = new TreeMap<Long, List<MarketItem>>();
 		for(MarketItem item : getMarket()) {
-			Set<MarketItem> list = map.get(item.getSeller());
+			List<MarketItem> list = map.get(item.getSeller());
 			if(list == null) {
-				list = new TreeSet<MarketItem>();
+				list = new ArrayList<MarketItem>();
 				map.put(item.getSeller(),list);
 			}
 			list.add(item);

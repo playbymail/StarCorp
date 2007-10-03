@@ -89,7 +89,7 @@ public class CorporationPane extends AEntityPane {
 	}
 
 	protected Group createMarket(Composite parent, List<Widget> widgets) {
-		Set<MarketItem> set = getTurnReport().getMarketBySeller().get(corp.getID());
+		List<MarketItem> set = getTurnReport().getMarketBySeller().get(corp.getID());
 		if(set == null || set.size() < 1) {
 			return null;
 		}
