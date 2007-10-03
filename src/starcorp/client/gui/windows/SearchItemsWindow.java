@@ -46,7 +46,7 @@ public class SearchItemsWindow extends ADataEntryWindow {
 	private final TurnReport report;
 	
 	public SearchItemsWindow(MainWindow mainWindow) {
-		this(mainWindow,1,0,null,null,null);
+		this(mainWindow,1,1,null,null,null);
 	}
 	
 	public SearchItemsWindow(MainWindow mainWindow, int page, int filterQuantity, String filterName, AItemType filterType, Colony filterColony) {
@@ -58,7 +58,7 @@ public class SearchItemsWindow extends ADataEntryWindow {
 		this.filterColony = filterColony;
 		this.report = mainWindow.getTurnReport();
 		this.allItems = report.getItems();
-		this.filteredItems = new ArrayList<ColonyItem>(allItems);
+		filter();
 	}
 
 	@Override
@@ -109,7 +109,7 @@ public class SearchItemsWindow extends ADataEntryWindow {
 			long colonyId = item.getColony();
 			String name = type.getName();
 			
-			if(!filter && filterQuantity > 0) {
+			if(!filter) {
 				if(quantity < filterQuantity) filter = true;
 			}
 			if(!filter && filterName != null) {
@@ -207,12 +207,6 @@ public class SearchItemsWindow extends ADataEntryWindow {
 
 	public int getFilterQuantity() {
 		return filterQuantity;
-	}
-
-	public void setFilterQuantity(int filterQuantity) {
-		this.filterQuantity = filterQuantity;
-		filter();
-		reload();
 	}
 
 	@Override

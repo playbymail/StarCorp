@@ -155,7 +155,9 @@ public class HibernateStore implements IEntityStore {
 	private List<ColonyItem> copyItems(List<?> objects) {
 		List<ColonyItem> list = new ArrayList<ColonyItem>();
 		for (Object o : objects) {
-			list.add((ColonyItem) o);
+			ColonyItem item = (ColonyItem) o;
+			if(item.getQuantity() > 0)
+				list.add(item);
 		}
 		commit();
 		return list;

@@ -85,7 +85,7 @@ public class ItemsTable extends ATablePane {
 			if(end > total) end = total;
 			for(int n = start; n < end; n++) {
 				ColonyItem item = searchWindow.get(n);
-				if(item == null || item.getQuantity() < 1)
+				if(item == null)
 					return;
 //				System.out.println("ItemsTable " + item);
 				Items items = item.getItem();

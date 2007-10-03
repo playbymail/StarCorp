@@ -66,7 +66,7 @@ public class SearchItemsBuilder extends ABuilderPane {
 		final Button btnClear = createButton(getParent(), widgets, "Clear");
 		btnClear.addListener(SWT.Selection, new Listener() {
 			public void handleEvent (Event event) {
-				searchWindow.set(0, "", null, null);
+				searchWindow.set(1, "", null, null);
 			}
 		});
 
