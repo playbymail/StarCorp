@@ -95,10 +95,16 @@ public class TurnProcessor extends AServerTask {
 				boolean authorized = false;
 				try {
 					turn = new Turn(new FileInputStream(turns[i]));
-					authorized = authorize(turn.getCorporation());
-					if(!authorized) {
-						if(!register(turn.getCorporation())) {
-							turn.add(TurnError.ERROR_AUTHORIZATION_FAILED);
+					if(!Turn.VERSION.equals(turn.getVersion())) {
+						turn.add(TurnError.ERROR_VERSION_INVALID);
+					}
+					else {
+						authorized = authorize(turn.getCorporation());
+						if(!authorized) {
+							authorized = register(turn.getCorporation());
+							if(!authorized) {
+								turn.add(TurnError.ERROR_AUTHORIZATION_FAILED);
+							}
 						}
 					}
 					
