@@ -36,6 +36,7 @@ import starcorp.common.entities.Colony;
 import starcorp.common.entities.ColonyItem;
 import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Facility;
+import starcorp.common.entities.FacilityLease;
 import starcorp.common.entities.FactoryQueueItem;
 import starcorp.common.entities.IEntity;
 import starcorp.common.entities.MarketItem;
@@ -224,6 +225,27 @@ public class TurnReport {
 	
 	public List<ColonyItem> getItems() {
 		return items;
+	}
+	
+	public List<FacilityLease> getLeases(long colonyId, boolean availableOnly) {
+		List<FacilityLease> list = new ArrayList<FacilityLease>();
+		for(AGovernmentLaw law : laws) {
+			if(law instanceof FacilityLease) {
+				FacilityLease lease = (FacilityLease) law;
+				if(lease.getColony() == colonyId) {
+					if(availableOnly) {
+						if(lease.isAvailable() && lease.getLicensee() == 0) {
+							list.add(lease);
+						}
+					}
+					else {
+						list.add(lease);
+					}
+					
+				}
+			}
+		}
+		return list;
 	}
 	
 	public List<AGovernmentLaw> getLaws() {

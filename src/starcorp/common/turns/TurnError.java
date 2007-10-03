@@ -33,6 +33,8 @@ public class TurnError {
 	public static final String INVALID_FACILITY = "error.facility";
 	public static final String INVALID_FACILITY_TYPE = "error.facility.type";
 	public static final String INSUFFICIENT_BUILDING_MODULES = "error.facility.modules";
+	public static final String INSUFFICIENT_CREDITS = "error.credits";
+	public static final String NO_SUCH_LAW = "error.law.none";
 	public static final String NO_LEASE = "error.lease.none";
 	public static final String INVALID_SHIP = "error.ship";
 	public static final String INVALID_SHIP_DESIGN = "error.ship.design";

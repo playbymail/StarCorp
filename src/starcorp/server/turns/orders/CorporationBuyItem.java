@@ -10,7 +10,6 @@
  */
 package starcorp.server.turns.orders;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;

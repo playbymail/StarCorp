@@ -10,8 +10,6 @@
  */
 package starcorp.server.turns.orders;
 
-import java.util.List;
-
 import starcorp.common.entities.Corporation;
 import starcorp.common.entities.Planet;
 import starcorp.common.entities.ResourceDeposit;
