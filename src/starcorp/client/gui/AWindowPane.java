@@ -517,6 +517,24 @@ public abstract class AWindowPane implements IComponent {
 		return lnk;
 	}
 	
+	protected Hyperlink createSendEmailLink(Composite parent, List<Widget> widgets, final Corporation corp, String label) {
+		if(label == null) {
+			label = "Send Email";
+		}
+		Hyperlink lnk = createHyperlink(parent, widgets, label);
+		lnk.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {
+				window.getMainWindow().promptSendEmail(corp);
+				window.getMainWindow().focus();
+			}
+			public void widgetSelected(SelectionEvent e) {
+				window.getMainWindow().promptSendEmail(corp);
+				window.getMainWindow().focus();
+			}
+		});
+		return lnk;
+	}
+	
 	protected Hyperlink createFacilityLink(Composite parent, List<Widget> widgets, final Facility facility, String label) {
 		if(label == null) {
 			label = facility.getDisplayName();

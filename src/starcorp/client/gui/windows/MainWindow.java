@@ -37,6 +37,7 @@ import starcorp.client.gui.panes.SimpleTextPane;
 import starcorp.client.gui.widgets.ConfigurationDialog;
 import starcorp.client.gui.widgets.CredentialsDialog;
 import starcorp.client.gui.widgets.Menu;
+import starcorp.client.gui.widgets.SendEmailDialog;
 import starcorp.client.gui.widgets.Toolbar;
 import starcorp.client.gui.widgets.TreeBrowser;
 import starcorp.common.entities.Corporation;
@@ -516,6 +517,20 @@ public class MainWindow extends AWindow {
 			turnWindow.focus();
 		}
 		return turnWindow;
+	}
+	
+	public void promptSendEmail(Corporation to) {
+		Corporation from = currentTurn == null ? null : currentTurn.getCorporation() == null ? null : currentTurn.getCorporation();
+		if(from == null && turnReport != null) {
+			from = turnReport.getTurn().getCorporation();
+		}
+		if(from == null) {
+			messageBox("Send Email Error", "Cannot send emails without authenticating your corporation", SWT.ICON_ERROR | SWT.OK);
+		}
+		else {
+			SendEmailDialog dialog = new SendEmailDialog(shell,from,to);
+			dialog.open();
+		}
 	}
 	
 	public void promptConfiguration() {
