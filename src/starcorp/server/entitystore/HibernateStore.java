@@ -633,16 +633,6 @@ public class HibernateStore implements IEntityStore {
 		return null;
 	}
 
-	public ColonyItem getItem(long colony, AItemType type) {
-		String q = "from ColonyItem where colony = :colony and item.type = :type";
-		Map<String, Object> map = prepareParameters("colony", colony);
-		prepareParameters(map, "type", type.getKey());
-		beginTransaction();
-		ColonyItem i = (ColonyItem) loadObject(createQuery(q, map));
-		commit();
-		return i;
-	}
-
 	public ColonyItem getItem(long colony, long owner, AItemType type) {
 		String q = "from ColonyItem where colony = :colony and owner = :owner and item.type = :type";
 		Map<String, Object> map = prepareParameters("colony", colony);

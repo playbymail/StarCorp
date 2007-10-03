@@ -97,7 +97,6 @@ public interface IEntityStore {
 	
 	public abstract List<ColonyItem> listItems(long owner);
 	public abstract List<ColonyItem> listItems(long owner, long colony, List<AItemType> types);
-	public abstract ColonyItem getItem(long colony, AItemType type);
 	public abstract ColonyItem getItem(long colony, long owner, AItemType type);
 	
 	public abstract List<FactoryQueueItem> listQueueByCorporation(long corp);

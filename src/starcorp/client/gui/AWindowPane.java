@@ -176,6 +176,16 @@ public abstract class AWindowPane implements IComponent {
 		return order;
 	}
 
+	protected TurnOrder deliverOrder(Starship ship, AItemType type, int qty) {
+		TurnOrder order = new TurnOrder();
+		order.setType(OrderType.getType(OrderType.SHIP_DELIVER_ITEM));
+		order.add(ship.getID());
+		order.add(ship.getColony());
+		order.add(type.getKey());
+		order.add(qty);
+		return order;
+	}
+
 	protected TurnOrder sellOrder(long colonyId, AItemType type, int qty, int price) {
 		TurnOrder order = new TurnOrder();
 		order.setType(OrderType.getType(OrderType.CORP_SELL_ITEM));
