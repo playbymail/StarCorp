@@ -92,21 +92,23 @@ public class TurnProcessor extends AServerTask {
 			}
 			else {
 				Turn turn = null;
+				boolean authorized = false;
 				try {
 					turn = new Turn(new FileInputStream(turns[i]));
-					boolean authorized = authorize(turn.getCorporation());
-					if(authorized) {
+					authorized = authorize(turn.getCorporation());
+					if(!authorized) {
 						if(!register(turn.getCorporation())) {
 							turn.add(TurnError.ERROR_AUTHORIZATION_FAILED);
 						}
 					}
+					
 				}
 				catch(Exception e) {
 					log.warn(this + ": Error reading turn file " + turns[i].getName() + " because " + e.getMessage(),e);
 				}
 				if(turn != null) {
 					try {
-						TurnReport report = process(turn);
+						TurnReport report = authorized ? process(turn) : new TurnReport(turn);
 						GalacticDate date = ServerConfiguration.getCurrentDate();
 						Corporation corp = report.getTurn().getCorporation();
 						String filename =  corp.getPlayerEmail() + "-turn-" + date.getMonth() + "-" +  date.getYear() + ".xml";
