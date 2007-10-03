@@ -22,6 +22,7 @@ import starcorp.client.gui.panes.LawTable;
 import starcorp.client.gui.panes.SearchLawBuilder;
 import starcorp.common.entities.AGovernmentLaw;
 import starcorp.common.entities.Colony;
+import starcorp.common.entities.FacilityLease;
 import starcorp.common.turns.TurnReport;
 
 /**
@@ -36,19 +37,23 @@ public class SearchLawsWindow extends ADataEntryWindow {
 	
 	private int page;
 	private Colony filterColony;
+	private long filterLicensee;
+	private Class filterType;
 	private List<AGovernmentLaw> filteredLaws;
 
 	private final List<AGovernmentLaw> allLaws;
 	private final TurnReport report;
 	
 	public SearchLawsWindow(MainWindow mainWindow) {
-		this(mainWindow,1,null);
+		this(mainWindow,1,-1,null,null);
 	}
 	
-	public SearchLawsWindow(MainWindow mainWindow, int page, Colony filterColony) {
+	public SearchLawsWindow(MainWindow mainWindow, int page, long filterLicensee, Colony filterColony, Class filterType) {
 		super(mainWindow);
 		this.page = page;
+		this.filterLicensee = filterLicensee;
 		this.filterColony = filterColony;
+		this.filterType = filterType;
 		this.report = mainWindow.getTurnReport();
 		this.allLaws = report.getLaws();
 		this.filteredLaws = new ArrayList<AGovernmentLaw>(allLaws);
@@ -88,6 +93,17 @@ public class SearchLawsWindow extends ADataEntryWindow {
 			boolean filter = false;
 			long colonyId = law.getColony();
 			
+			if(!filter && filterType != null) {
+				if(!(law.getClass().equals(filterType))) filter = true;
+			}
+			
+			if(!filter && filterLicensee > -1) {
+				if(law instanceof FacilityLease) {
+					FacilityLease lease = (FacilityLease) law;
+					if(lease.getLicensee() != filterLicensee) filter = true;
+				}
+			}
+			
 			if(!filter && filterColony != null) {
 				if(filterColony.getID() != colonyId) filter = true;
 			}
@@ -98,8 +114,10 @@ public class SearchLawsWindow extends ADataEntryWindow {
 		}
 	}
 	
-	public void set(Colony filterColony) {
+	public void set(long filterLicensee, Class filterType, Colony filterColony) {
 		this.filterColony = filterColony;
+		this.filterType = filterType;
+		this.filterLicensee = filterLicensee;
 		this.page = 1;
 		filter();
 		reload();
@@ -130,6 +148,26 @@ public class SearchLawsWindow extends ADataEntryWindow {
 
 	public void setFilterColony(Colony filterColony) {
 		this.filterColony = filterColony;
+		filter();
+		reload();
+	}
+
+	public Class getFilterType() {
+		return filterType;
+	}
+
+	public void setFilterType(Class filterType) {
+		this.filterType = filterType;
+		filter();
+		reload();
+	}
+
+	public long getFilterLicensee() {
+		return filterLicensee;
+	}
+
+	public void setFilterLicensee(long filterLicensee) {
+		this.filterLicensee = filterLicensee;
 		filter();
 		reload();
 	}
@@ -167,4 +205,5 @@ public class SearchLawsWindow extends ADataEntryWindow {
 		super.close();
 		mainWindow.searchLawsWindow = null;
 	}
+
 }

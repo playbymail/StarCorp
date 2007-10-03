@@ -30,7 +30,6 @@ import starcorp.client.gui.ABuilderPane;
 import starcorp.client.gui.ADataEntryWindow;
 import starcorp.client.gui.windows.TurnOrderWindow;
 import starcorp.common.entities.Colony;
-import starcorp.common.entities.FacilityLease;
 import starcorp.common.entities.IEntity;
 import starcorp.common.turns.Turn;
 import starcorp.common.turns.TurnOrder;

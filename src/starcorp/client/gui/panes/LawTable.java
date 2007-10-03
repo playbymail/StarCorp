@@ -12,10 +12,14 @@ package starcorp.client.gui.panes;
 
 import java.util.List;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Widget;
 
 import starcorp.client.gui.ADataEntryWindow;
@@ -25,6 +29,8 @@ import starcorp.client.gui.windows.SearchItemsWindow;
 import starcorp.client.gui.windows.SearchLawsWindow;
 import starcorp.common.entities.AGovernmentLaw;
 import starcorp.common.entities.Colony;
+import starcorp.common.entities.FacilityLease;
+import starcorp.common.turns.TurnOrder;
 
 /**
  * starcorp.client.gui.LawTable
@@ -34,6 +40,9 @@ import starcorp.common.entities.Colony;
  */
 public class LawTable extends ATablePane {
 	private final SearchLawsWindow searchWindow;
+	
+	private int start;
+	private int end;
 	
 	public LawTable(ADataEntryWindow mainWindow) {
 		super(mainWindow);
@@ -68,8 +77,8 @@ public class LawTable extends ATablePane {
 		}
 		else {
 			int page = searchWindow.getPage();
-			int start = (page - 1) * SearchItemsWindow.ITEMS_PER_PAGE;
-			int end = start + SearchItemsWindow.ITEMS_PER_PAGE;
+			start = (page - 1) * SearchItemsWindow.ITEMS_PER_PAGE;
+			end = start + SearchItemsWindow.ITEMS_PER_PAGE;
 			if(start < 0) start = 0;
 			if(end > total) end = total;
 			for(int n = start; n < end; n++) {
@@ -97,6 +106,26 @@ public class LawTable extends ATablePane {
 	@Override
 	protected void createWidgets(List<Widget> widgets) {
 		super.createWidgets(widgets);
+		Group grp = createGroup(getParent(), widgets, "Lease");
+		RowLayout layout = new RowLayout(SWT.HORIZONTAL);
+		layout.marginWidth=10;
+		layout.marginHeight=5;
+		grp.setLayout(layout);
+		createButton(grp, widgets, "Buy")
+		.addListener(SWT.Selection, new Listener() {
+			public void handleEvent (Event event) {
+				for(int i : getChecked()) {
+					int n = start + i;
+					AGovernmentLaw law = searchWindow.get(n);
+					if(law instanceof FacilityLease) {
+						TurnOrder order = buyLease(law);
+						getWindow().getMainWindow().addTurnOrder(order);
+					}
+				}
+				getWindow().redraw();
+			}
+		});
+
 		if(searchWindow.countPages() > 1) { 
 			Group grpPages = createGroup(getParent(), widgets, "Pages");
 			grpPages.setLayout(new GridLayout(searchWindow.countPages(),true));

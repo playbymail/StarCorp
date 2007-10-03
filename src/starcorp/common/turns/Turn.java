@@ -152,6 +152,10 @@ public class Turn {
 		orders.add(order);
 	}
 	
+	public void remove(int orderIndex) {
+		orders.remove(orderIndex);
+	}
+	
 	public Iterator<TurnOrder> orders() {
 		return orders.iterator();
 	}

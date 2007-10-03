@@ -74,11 +74,11 @@ public class GovernmentPane extends AEntityPane {
 		lnkLaws.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
 				SearchLawsWindow window = mainWindow.openSearchLawWindow();
-				window.set(colony);
+				window.set(-1, null, colony);
 			}
 			public void widgetSelected(SelectionEvent e) {
 				SearchLawsWindow window = mainWindow.openSearchLawWindow();
-				window.set(colony);
+				window.set(-1, null, colony);
 			}
 		});
 		
