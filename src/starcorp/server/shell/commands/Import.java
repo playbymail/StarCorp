@@ -11,51 +11,53 @@
 package starcorp.server.shell.commands;
 
 import java.io.PrintWriter;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import starcorp.common.entities.IEntity;
+import starcorp.common.util.Util;
 import starcorp.server.engine.AServerTask;
 import starcorp.server.shell.ACommand;
 import starcorp.server.shell.Shell;
 
 /**
- * starcorp.server.shell.commands.Delete
- * 
+ * starcorp.server.shell.commands.Import
+ *
  * @author Seyed Razavi <monkeyx@gmail.com>
- * @version 20 Sep 2007
+ * @version 4 Oct 2007
  */
-public class Delete extends ACommand {
-	private static Log log = LogFactory.getLog(Delete.class);
-
-	/*
-	 * (non-Javadoc)
-	 * 
+public class Import extends ACommand {
+	private static final Log log = LogFactory.getLog(Import.class);
+	
+	/* (non-Javadoc)
 	 * @see starcorp.server.shell.ACommand#getHelpText()
 	 */
 	@Override
 	public String getHelpText() {
-		return "del (Entity Class) (ID)\n\nDeletes the specified entity (and all child entities associated with it).";
+		return "Import (Filename)\n\nImports the entities specified in the file. If there is an ID conflict, the entity will NOT be imported.";
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see starcorp.server.shell.ACommand#getName()
 	 */
 	@Override
 	public String getName() {
-		return "del";
+		return "import";
 	}
 
+	/* (non-Javadoc)
+	 * @see starcorp.server.shell.ACommand#task(starcorp.server.shell.ACommand.Arguments, java.io.PrintWriter)
+	 */
+	@Override
 	public AServerTask task(final Arguments args, final PrintWriter out) {
 		return new AServerTask() {
 			public String toString() {
 				return super.toString() + (args.count() > 0 ?  " [" + args + "]" : "");
 			}
 			protected String getName() {
-				return "del";
+				return "import";
 			}
 
 			protected Log getLog() {
@@ -63,28 +65,34 @@ public class Delete extends ACommand {
 			}
 
 			protected void doJob() throws Exception {
-				String entityClass = args.get(0);
-				int ID = args.getAsInt(1);
-				if (entityClass == null || ID == 0) {
+				String fileName = args.get(0);
+				if(fileName == null) {
 					out.println();
-					out.print("Invalid arguments");
-				} else {
-					String className = "starcorp.common.entities."
-							+ entityClass;
-					Class<?> clazz = Class.forName(className);
-					IEntity o = entityStore.load(clazz, ID);
-					if (o == null) {
-						out.println();
-						out.println("No such entity.");
-					} else {
-						entityStore.delete(o);
+					out.println("Invalid arguments.");
+				}
+				else {
+					List<IEntity> entities = Util.readXML(fileName);
+					log.info("Found " + entities.size() + " to import.");
+					int imported = 0;
+					int failed = 0;
+					for(IEntity entity : entities) {
+						try {
+							entityStore.importEntity(entity);
+							log.info("Imported " + entity.getDisplayName());
+							imported++;
+						}
+						catch(Throwable e) {
+							log.error("Failed to import " + entity.getDisplayName(),e);
+							failed++;
+						}
 					}
 					out.println();
-					out.println("Entity " + o + " deleted.");
-					out.print(Shell.PROMPT);
-					out.flush();
+					out.println("Imported " + imported + " entities. Failed to import " + failed +" entities");
 				}
+				out.print(Shell.PROMPT);
+				out.flush();
 			}
 		};
 	}
+
 }

@@ -25,7 +25,9 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
+import starcorp.common.entities.ABaseEntity;
 import starcorp.common.entities.AColonists;
+import starcorp.common.entities.ACorporateItem;
 import starcorp.common.entities.AGovernmentLaw;
 import starcorp.common.entities.CashTransaction;
 import starcorp.common.entities.CreditAccount;
@@ -87,6 +89,14 @@ public class HibernateStore implements IEntityStore {
 		getSession().flush();
 		getSession().getTransaction().commit();
 		getSession().close();
+	}
+
+	private List<IEntity> copyEntities(List<?> objects, List<IEntity> list) {
+		for (Object o : objects) {
+			list.add((IEntity) o);
+		}
+		commit();
+		return list;
 	}
 
 	private List<CreditAccount> copyAccounts(List<?> objects) {
@@ -168,6 +178,7 @@ public class HibernateStore implements IEntityStore {
 		for(Object o : objects) {
 			list.add((AGovernmentLaw)o);
 		}
+		commit();
 		return list;
 	}
 
@@ -212,6 +223,7 @@ public class HibernateStore implements IEntityStore {
 		for(Object o : objects) {
 			list.add((FactoryQueueItem)o);
 		}
+		commit();
 		return list;
 	}
 
@@ -1208,6 +1220,33 @@ public class HibernateStore implements IEntityStore {
 		String q = "update AColonists set happiness = 0.0";
 		beginTransaction();
 		createQuery(q).executeUpdate();
+		commit();
+	}
+
+	public List<IEntity> list(Class<?> entityClass) {
+		return list(entityClass, new ArrayList<IEntity>());
+	}
+	
+	private List<IEntity> list(Class<?> entityClass, List<IEntity> list) {
+		String q = "from " + entityClass.getSimpleName();
+		beginTransaction();
+		return copyEntities(listObject(createQuery(q)),list);
+	}
+
+	public List<IEntity> listAll() {
+		List<IEntity> list = new ArrayList<IEntity>();
+		list(ABaseEntity.class, list);
+		list(ACorporateItem.class, list);
+		list(AGovernmentLaw.class, list);
+		list(CashTransaction.class, list);
+		list(CreditAccount.class, list);
+		list(ResourceDeposit.class, list);
+		return list;
+	}
+
+	public void importEntity(IEntity entity) {
+		beginTransaction();
+		getSession().save(entity);
 		commit();
 	}
 

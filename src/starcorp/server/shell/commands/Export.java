@@ -11,51 +11,53 @@
 package starcorp.server.shell.commands;
 
 import java.io.PrintWriter;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import starcorp.common.entities.IEntity;
+import starcorp.common.util.Util;
 import starcorp.server.engine.AServerTask;
 import starcorp.server.shell.ACommand;
 import starcorp.server.shell.Shell;
 
 /**
- * starcorp.server.shell.commands.Delete
- * 
+ * starcorp.server.shell.commands.Export
+ *
  * @author Seyed Razavi <monkeyx@gmail.com>
- * @version 20 Sep 2007
+ * @version 4 Oct 2007
  */
-public class Delete extends ACommand {
-	private static Log log = LogFactory.getLog(Delete.class);
-
-	/*
-	 * (non-Javadoc)
-	 * 
+public class Export extends ACommand {
+	private static final Log log = LogFactory.getLog(Export.class);
+	
+	/* (non-Javadoc)
 	 * @see starcorp.server.shell.ACommand#getHelpText()
 	 */
 	@Override
 	public String getHelpText() {
-		return "del (Entity Class) (ID)\n\nDeletes the specified entity (and all child entities associated with it).";
+		return "Export (Entity Class) (ID)\nExports the specified entity (or all of a class if no ID is specified) to an XML file called export.xml.  If no entity class or ID is specified everything is exported.";
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see starcorp.server.shell.ACommand#getName()
 	 */
 	@Override
 	public String getName() {
-		return "del";
+		return "export";
 	}
 
+	/* (non-Javadoc)
+	 * @see starcorp.server.shell.ACommand#task(starcorp.server.shell.ACommand.Arguments, java.io.PrintWriter)
+	 */
+	@Override
 	public AServerTask task(final Arguments args, final PrintWriter out) {
 		return new AServerTask() {
 			public String toString() {
 				return super.toString() + (args.count() > 0 ?  " [" + args + "]" : "");
 			}
 			protected String getName() {
-				return "del";
+				return "export";
 			}
 
 			protected Log getLog() {
@@ -65,26 +67,38 @@ public class Delete extends ACommand {
 			protected void doJob() throws Exception {
 				String entityClass = args.get(0);
 				int ID = args.getAsInt(1);
-				if (entityClass == null || ID == 0) {
-					out.println();
-					out.print("Invalid arguments");
-				} else {
+				String msg = null;
+				if(entityClass != null) {
 					String className = "starcorp.common.entities."
 							+ entityClass;
 					Class<?> clazz = Class.forName(className);
-					IEntity o = entityStore.load(clazz, ID);
-					if (o == null) {
-						out.println();
-						out.println("No such entity.");
-					} else {
-						entityStore.delete(o);
+					if(ID > 0) {
+						IEntity o = entityStore.load(clazz, ID);
+						if (o == null) {
+							out.println();
+							out.println("No such entity.");
+						} else {
+							Util.write(o, "export.xml", "starcorp", true);
+							msg = o.getDisplayName();
+						}
 					}
-					out.println();
-					out.println("Entity " + o + " deleted.");
-					out.print(Shell.PROMPT);
-					out.flush();
+					else {
+						List<IEntity> entities = entityStore.list(clazz);
+						Util.write(entities,"export.xml","starcorp", true);
+						msg = entities.size() + " of " + clazz.getSimpleName();
+					}
 				}
+				else {
+					List<IEntity> entities = entityStore.listAll();
+					Util.write(entities,"export.xml","starcorp", true);
+					msg = entities.size() + " entities.";
+				}
+				out.println();
+				out.println("Exported " + msg);
+				out.print(Shell.PROMPT);
+				out.flush();
 			}
 		};
 	}
+
 }

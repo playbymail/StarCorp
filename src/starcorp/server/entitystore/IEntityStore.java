@@ -67,6 +67,9 @@ public interface IEntityStore {
 	public abstract IEntity load(Class<?> entityClass, long ID);
 	public abstract IEntity create(IEntity entity);
 	public abstract IEntity update(IEntity entity);
+	public abstract List<IEntity> list(Class<?> entityClass);
+	public abstract List<IEntity> listAll();
+	public abstract void importEntity(IEntity entity); 
 	
 	public abstract void delete(IEntity entity);
 	
