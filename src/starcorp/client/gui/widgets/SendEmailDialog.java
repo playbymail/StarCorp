@@ -10,6 +10,8 @@
  */
 package starcorp.client.gui.widgets;
 
+import java.io.InputStream;
+
 import javax.mail.MessagingException;
 
 import org.eclipse.swt.SWT;
@@ -17,6 +19,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.FontMetrics;
 import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -39,11 +42,11 @@ import starcorp.common.util.SendEmail;
  * @version 3 Oct 2007
  */
 public class SendEmailDialog extends Dialog {
+	private static final String ICON_RESOURCE_NAME = "/images/32x32.png";
+	
 	private Corporation fromCorporation;
 	private Corporation toCorporation;
 	private boolean sent;
-
-
 
 	public SendEmailDialog(Shell parent) {
 		this(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL, null,null);
@@ -67,6 +70,11 @@ public class SendEmailDialog extends Dialog {
 	public boolean open() {
 		final Shell shell = new Shell(getParent(), getStyle());
 		shell.setText(getText());
+		InputStream is = getClass().getResourceAsStream(ICON_RESOURCE_NAME);
+		if(is != null) {
+			Image icon = new Image(shell.getDisplay(),is);
+			shell.setImage(icon);
+		}
 		createContents(shell);
 		shell.pack();
 		center(shell);
