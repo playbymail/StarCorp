@@ -54,7 +54,6 @@ public class Menu implements IComponent  {
 
 	public void open(Composite parent) {
 		final Shell shell = (Shell) parent; 
-		// TODO keyboard accelerators for menu items
 		menu = new org.eclipse.swt.widgets.Menu(shell, SWT.BAR);
 		menu.setVisible(true);
 		shell.setMenuBar(menu);

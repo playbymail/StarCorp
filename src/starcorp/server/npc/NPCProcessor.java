@@ -46,13 +46,6 @@ public class NPCProcessor extends AServerTask {
 
 	private static Log log = LogFactory.getLog(NPCProcessor.class);
 	
-	/**
-	 * 
-	 */
-	public NPCProcessor() {
-		// TODO Auto-generated constructor stub
-	}
-	
 	private boolean matchType(AItemType type, List<ResourceDeposit> deposits) {
 		for(ResourceDeposit deposit : deposits) {
 			if(deposit.getTypeClass().equals(type))
