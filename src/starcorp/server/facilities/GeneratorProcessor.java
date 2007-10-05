@@ -102,6 +102,7 @@ public class GeneratorProcessor extends AServerTask {
 		if(total < 1) {
 			generator.setOpen(false);
 			entityStore.update(generator);
+			log.info("Closed " + generator + " as no suitable resources can be gathered.");
 		}
 	}
 
