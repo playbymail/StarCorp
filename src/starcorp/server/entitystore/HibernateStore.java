@@ -54,6 +54,7 @@ import starcorp.common.types.AItemType;
 import starcorp.common.types.AtmosphereType;
 import starcorp.common.types.Coordinates3D;
 import starcorp.common.types.CoordinatesPolar;
+import starcorp.common.types.Factory;
 import starcorp.common.types.ICoordinates;
 import starcorp.common.types.PopulationClass;
 import starcorp.server.ServerConfiguration;
@@ -530,7 +531,8 @@ public class HibernateStore implements IEntityStore {
 		Query query = createQuery(q, "colony", colony);
 		double avg = 0.0;
 		try {
-			avg = (Double) query.uniqueResult();
+			Double dbl = (Double) query.uniqueResult(); 
+			avg = dbl == null ? 0.0 : dbl;
 		}
 		catch(Throwable e) {
 			log.error(e.getMessage(),e);
@@ -858,7 +860,7 @@ public class HibernateStore implements IEntityStore {
 	}
 
 	public List<Facility> listFacilitiesPowered(List<AFacilityType> types) {
-		String q = "from Facility where powered = true";
+		String q = "from Facility where open = true and powered = true";
 		if(types != null && types.size() > 0) {
 			q += " and type IN (";
 			int i = 0;
@@ -1248,6 +1250,67 @@ public class HibernateStore implements IEntityStore {
 		beginTransaction();
 		getSession().save(entity);
 		commit();
+	}
+
+	public List<Facility> listNPCEmptyQueueFactories() {
+		String q = "select fac from Facility as fac where fac.open = true and " +
+					"fac.owner IN (select ID from Corporation where playerEmail IS NULL) and " + 
+					"fac.ID NOT IN (select q.factory from " +
+					"FactoryQueueItem as q group by q.factory) and fac.type IN (";
+		List<AFacilityType> types = AFacilityType.listTypes(Factory.class);
+		int i = 0;
+		for(AFacilityType type : types) {
+			if(i > 0) q += ", ";
+			q += "'" + type.getKey() + "'";
+			i++;
+		}
+		q += ")";
+		beginTransaction();
+		return copyFacilities(listObject(createQuery(q)));
+	}
+
+	public List<Facility> listNPCFactories() {
+		String q = "select fac from Facility as fac where fac.open = true and " +
+					"fac.owner IN (select ID from Corporation where playerEmail IS NULL) " + 
+					"and fac.type IN (";
+		List<AFacilityType> types = AFacilityType.listTypes(Factory.class);
+		int i = 0;
+		for(AFacilityType type : types) {
+			if(i > 0) q += ", ";
+			q += "'" + type.getKey() + "'";
+			i++;
+		}
+		q += ")";
+		beginTransaction();
+		return copyFacilities(listObject(createQuery(q)));
+	}
+
+	public List<ResourceDeposit> listDepositsByColony(long colonyId) {
+		Colony colony = (Colony) load(Colony.class, colonyId);
+		if(colony == null) {
+			return null;
+		}
+		String q = "select rd from ResourceDeposit as rd where rd.location = :location " +
+		"and rd.systemEntity = " + colony.getPlanet();
+		beginTransaction();
+		return copyDeposits(listObject(createQuery(q, "location", colony.getLocation())));
+	}
+
+	public List<ColonyItem> listAllNPCItems(Class<?> typeClass, int minQty) {
+		String q = "select ci from ColonyItem as ci where ci.item.quantity > " + minQty +
+			" and ci.owner IN (select ID from Corporation where playerEmail IS NULL)" +
+			" and ci.item.type IN (";
+		List<AItemType> types = AItemType.listTypes(typeClass);
+		int count = 0;
+		for(AItemType type : types ) {
+			if(count > 0)
+				q += ", ";
+			q += "'" + type.getKey() + "'";
+			count++;
+		}
+		q += ")";
+		beginTransaction();
+		return copyItems(listObject(createQuery(q)));
 	}
 
 }

@@ -98,6 +98,7 @@ public interface IEntityStore {
 	public abstract List<Colony> searchColonies(long excludeSystem);
 	public abstract Colony getColony(long planet, ICoordinates location);
 	
+	public abstract List<ColonyItem> listAllNPCItems(Class<?> typeClass, int minQty);
 	public abstract List<ColonyItem> listItems(long owner);
 	public abstract List<ColonyItem> listItems(long owner, long colony, List<AItemType> types);
 	public abstract ColonyItem getItem(long colony, long owner, AItemType type);
@@ -112,6 +113,8 @@ public interface IEntityStore {
 	public abstract DevelopmentGrant getDevelopmentGrant(long colony, AFacilityType type, boolean openOnly);
 	
 	public abstract List<Facility> listFacilities();
+	public abstract List<Facility> listNPCFactories();
+	public abstract List<Facility> listNPCEmptyQueueFactories();
 	public abstract List<Facility> listFacilitiesPowered(List<AFacilityType> types);
 	public abstract List<Facility> listFacilities(long colony);
 	public abstract List<Facility> listFacilitiesByOwner(long owner);
@@ -150,6 +153,7 @@ public interface IEntityStore {
 	public abstract List<AColonists> listUnemployed(long colony);
 	public abstract Unemployed getUnemployed(long colony, PopulationClass popClass);
 	
+	public abstract List<ResourceDeposit> listDepositsByColony(long colonyId);
 	public abstract List<ResourceDeposit> listDeposits(long systemEntity);
 	public abstract List<ResourceDeposit> listDeposits(long planet, ICoordinates location);
 	public abstract List<ResourceDeposit> listDeposits(long planet, List<AItemType> types, int minTotal);
