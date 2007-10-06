@@ -17,6 +17,7 @@ import org.eclipse.swt.widgets.Composite;
 
 import starcorp.client.gui.ABuilderPane;
 import starcorp.client.gui.ADataEntryWindow;
+import starcorp.client.gui.ASearchWindow;
 import starcorp.client.gui.ATablePane;
 import starcorp.client.gui.panes.LawTable;
 import starcorp.client.gui.panes.SearchLawBuilder;
@@ -31,32 +32,29 @@ import starcorp.common.turns.TurnReport;
  * @author Seyed Razavi <monkeyx@gmail.com>
  * @version 25 Sep 2007
  */
-public class SearchLawsWindow extends ADataEntryWindow {
+public class SearchLawsWindow extends ASearchWindow {
 	// TODO sorting by column
-	public static final int ITEMS_PER_PAGE = 20;
-	
-	private int page;
 	private Colony filterColony;
 	private long filterLicensee;
 	private Class filterType;
 	private List<AGovernmentLaw> filteredLaws;
 
 	private final List<AGovernmentLaw> allLaws;
-	private final TurnReport report;
+	
+	private SearchLawBuilder builder; 
 	
 	public SearchLawsWindow(MainWindow mainWindow) {
-		this(mainWindow,1,-1,null,null);
+		this(mainWindow,-1,null,null);
 	}
 	
-	public SearchLawsWindow(MainWindow mainWindow, int page, long filterLicensee, Colony filterColony, Class filterType) {
+	public SearchLawsWindow(MainWindow mainWindow, long filterLicensee, Colony filterColony, Class filterType) {
 		super(mainWindow);
-		this.page = page;
 		this.filterLicensee = filterLicensee;
 		this.filterColony = filterColony;
 		this.filterType = filterType;
-		this.report = mainWindow.getTurnReport();
-		this.allLaws = report.getLaws();
+		this.allLaws = getReport().getLaws();
 		this.filteredLaws = new ArrayList<AGovernmentLaw>(allLaws);
+		filter();
 	}
 
 	public int countAllItems() {
@@ -67,21 +65,7 @@ public class SearchLawsWindow extends ADataEntryWindow {
 		return (filteredLaws == null ? 0 : filteredLaws.size());
 	}
 	
-	public int countPages() {
-		int total;
-		if(filteredLaws == null) {
-			total = allLaws.size();
-		}
-		else {
-			total = filteredLaws.size();
-		}
-		int pages = total / ITEMS_PER_PAGE;
-		if(total % ITEMS_PER_PAGE > 0)
-			pages++;
-		return pages;
-	}
-	
-	private void filter() {
+	protected void filter() {
 		if(filteredLaws == null) {
 			filteredLaws = new ArrayList<AGovernmentLaw>();
 		}
@@ -114,12 +98,12 @@ public class SearchLawsWindow extends ADataEntryWindow {
 		}
 	}
 	
-	public void set(long filterLicensee, Class filterType, Colony filterColony) {
+	public void set(long filterLicensee, Class<?> filterType, Colony filterColony) {
 		this.filterColony = filterColony;
 		this.filterType = filterType;
 		this.filterLicensee = filterLicensee;
-		this.page = 1;
 		filter();
+		setPage(1);
 		reload();
 	}
 	
@@ -127,57 +111,20 @@ public class SearchLawsWindow extends ADataEntryWindow {
 		return filteredLaws.get(index);
 	}
 
-	public int getPage() {
-		return page;
-	}
-
-	public void setPage(int page) {
-		if(page > countPages()) {
-			page = countPages();
-		}
-		else if(page < 1) {
-			page = 1;
-		}
-		this.page = page;
-		reload();
-	}
-
 	public Colony getFilterColony() {
 		return filterColony;
 	}
 
-	public void setFilterColony(Colony filterColony) {
-		this.filterColony = filterColony;
-		filter();
-		reload();
-	}
-
-	public Class getFilterType() {
+	public Class<?> getFilterType() {
 		return filterType;
-	}
-
-	public void setFilterType(Class filterType) {
-		this.filterType = filterType;
-		filter();
-		reload();
 	}
 
 	public long getFilterLicensee() {
 		return filterLicensee;
 	}
 
-	public void setFilterLicensee(long filterLicensee) {
-		this.filterLicensee = filterLicensee;
-		filter();
-		reload();
-	}
-
 	public List<AGovernmentLaw> getAllLaws() {
 		return allLaws;
-	}
-
-	public TurnReport getReport() {
-		return report;
 	}
 
 	public List<AGovernmentLaw> getFilteredLaws() {
@@ -192,7 +139,8 @@ public class SearchLawsWindow extends ADataEntryWindow {
 	
 	@Override
 	protected ABuilderPane createBuilder() {
-		return new SearchLawBuilder(this);
+		builder = new SearchLawBuilder(this);
+		return builder;
 	}
 
 	@Override
@@ -204,6 +152,17 @@ public class SearchLawsWindow extends ADataEntryWindow {
 	protected void close() {
 		super.close();
 		mainWindow.searchLawsWindow = null;
+	}
+
+	@Override
+	public void clear() {
+		set(-1, null, null);
+	}
+
+	@Override
+	public void search() {
+		set(builder.getFilterLicensee(), builder.getFilterType(), builder.getFilterColony());
+		
 	}
 
 }

@@ -36,6 +36,11 @@ import starcorp.common.types.AItemType;
 public class SearchItemsBuilder extends ABuilderPane {
 	private final SearchItemsWindow searchWindow;
 	
+	private Text txtName;
+	private Combo typesCombo;
+	private Combo coloniesCombo;
+	private Text txtQty;
+	
 	public SearchItemsBuilder(ADataEntryWindow mainWindow) {
 		super(mainWindow);
 		this.searchWindow = (SearchItemsWindow) mainWindow;
@@ -48,42 +53,39 @@ public class SearchItemsBuilder extends ABuilderPane {
 		String show = "Showing " + searchWindow.countFilteredItems() + " of " + searchWindow.countAllItems();
 		getParent().setText(show);
 		
-		final Text txtName = createTextInput(getParent(), widgets, "Name:");
+		txtName = createTextInput(getParent(), widgets, "Name:");
 		if(searchWindow.getFilterName() != null) {
 			txtName.setText(searchWindow.getFilterName());
 		}
 		txtName.setSize(100, 20);
 		List<AItemType> types = AItemType.listTypes();
-		final Combo typesCombo = createTypeSelection(getParent(), widgets, types, searchWindow.getFilterType(), "Type:");
+		typesCombo = createTypeSelection(getParent(), widgets, types, searchWindow.getFilterType(), "Type:");
 		Set<Colony> colonies = searchWindow.getReport().getColonies();
-		final Combo coloniesCombo = createEntitySelection(getParent(), widgets, colonies, searchWindow.getFilterColony(), "Colony:"); 
-		final Text txtQty = createIntegerInput(getParent(), widgets, "Min. Quantity:");
+		coloniesCombo = createEntitySelection(getParent(), widgets, colonies, searchWindow.getFilterColony(), "Colony:"); 
+		txtQty = createIntegerInput(getParent(), widgets, "Min. Quantity:");
 		if(searchWindow.getFilterQuantity() > 0) {
 			txtQty.setText(String.valueOf(searchWindow.getFilterQuantity()));
 		}
 		txtQty.setSize(100, 20);
 
-		final Button btnClear = createButton(getParent(), widgets, "Clear");
-		btnClear.addListener(SWT.Selection, new Listener() {
-			public void handleEvent (Event event) {
-				searchWindow.set(1, "", null, null);
-			}
-		});
-
-		final Button btnFilter = createButton(getParent(), widgets, "Filter");
-		btnFilter.addListener(SWT.Selection, new Listener() {
-			public void handleEvent (Event event) {
-				String filterName = txtName.getText();
-				if(filterName != null && filterName.length() < 1) filterName = null;
-				int filterQuantity = getIntegerTextValue(txtQty);
-				AItemType filterType = (AItemType) getComboValue(typesCombo);
-				Colony filterColony = (Colony) getComboValue(coloniesCombo);
-				System.out.println("Filter: name=" + filterName + " : qty=" + filterQuantity + " : type=" + filterType + " : colony=" + filterColony );
-				searchWindow.set(filterQuantity, filterName, filterType, filterColony);
-			}
-		});
-		
-		
+	}
+	
+	public Colony getFilterColony() {
+		return (Colony) getComboValue(coloniesCombo);
+	}
+	
+	public String getFilterName() {
+		String filterName = txtName.getText();
+		if(filterName != null && filterName.length() < 1) filterName = null;
+		return filterName;
+	}
+	
+	public int getFilterQuantity() {
+		return getIntegerTextValue(txtQty);
+	}
+	
+	public AItemType getFilterType() {
+		return (AItemType) getComboValue(typesCombo);
 	}
 	
 }

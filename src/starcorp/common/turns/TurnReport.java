@@ -72,6 +72,7 @@ public class TurnReport {
 	private List<IEntity> playerEntities = new ArrayList<IEntity>(); 
 	private Set<StarSystem> systems = new HashSet<StarSystem>();
 	private Turn turn;
+	private List<AColonists> unemployed;
 	
 	public TurnReport(Element e) {
 		readXML(e);
@@ -625,6 +626,15 @@ public class TurnReport {
 					employees.add(worker);
 			}
 		}
+		unemployed = new ArrayList<AColonists>();
+		Element eUnemployed = e.element("unemployed");
+		if(eUnemployed != null) {
+			for(Iterator<?> i = eUnemployed.elementIterator("entity"); i.hasNext();) {
+				AColonists worker  = (AColonists) Util.fromXML((Element)i.next());
+				if(worker != null)
+					unemployed.add(worker);
+			}
+		}
 		market = new ArrayList<MarketItem>();
 		Element eMarket = e.element("market");
 		if(eMarket != null) {
@@ -748,6 +758,13 @@ public class TurnReport {
 				if(c != null)c.toBasicXML(e);
 			}
 		}
+		e = root.addElement("unemployed");
+		if(unemployed != null) {
+			e.addAttribute("size", String.valueOf(unemployed.size()));
+			for(AColonists c : unemployed) {
+				if(c != null)c.toBasicXML(e);
+			}
+		}
 		e = root.addElement("factory-queue");
 		if(factoryQueue != null) {
 			e.addAttribute("size", String.valueOf(factoryQueue.size()));
@@ -798,5 +815,22 @@ public class TurnReport {
 		
 		xmlWriter.write(doc);
 		xmlWriter.close();
+	}
+
+	public List<AColonists> getUnemployed(long colonyId) {
+		List<AColonists> list = new ArrayList<AColonists>();
+		for(AColonists c : unemployed) {
+			if(c.getColony() == colonyId)
+				list.add(c);
+		}
+		return list;
+	}
+
+	public List<AColonists> getUnemployed() {
+		return unemployed;
+	}
+
+	public void setUnemployed(List<AColonists> unemployed) {
+		this.unemployed = unemployed;
 	}
 }

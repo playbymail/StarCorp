@@ -151,6 +151,7 @@ public interface IEntityStore {
 	public abstract Workers getWorkers(long facility, PopulationClass popClass);
 	public abstract List<AColonists> listUnemployed();
 	public abstract List<AColonists> listUnemployed(long colony);
+	public abstract List<AColonists> listUnemployedByGovernment(long corpId);
 	public abstract Unemployed getUnemployed(long colony, PopulationClass popClass);
 	
 	public abstract List<ResourceDeposit> listDepositsByColony(long colonyId);

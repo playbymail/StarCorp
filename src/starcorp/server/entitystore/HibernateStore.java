@@ -1059,6 +1059,12 @@ public class HibernateStore implements IEntityStore {
 		return copyColonists(listObject(createQuery(q, "colony", colony)));
 	}
 
+	public List<AColonists> listUnemployedByGovernment(long corpId) {
+		String q = "from Unemployed where colony IN (select ID from Colony where government = " + corpId + ")";
+		beginTransaction();
+		return copyColonists(listObject(createQuery(q)));
+	}
+
 	public List<AColonists> listWorkersByColony(long colony) {
 		String q = "from Workers where colony = :colony";
 		beginTransaction();

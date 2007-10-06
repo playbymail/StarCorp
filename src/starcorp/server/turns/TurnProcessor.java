@@ -243,6 +243,7 @@ public class TurnProcessor extends AServerTask {
 				log.debug("Laws: " + laws.size());
 			}
 			report.setLaws(laws);
+			report.setUnemployed(entityStore.listUnemployedByGovernment(turn.getCorporation().getID()));
 			report.setItems(entityStore.listItems(turn.getCorporation().getID()));
 			report.setEmployees(entityStore.listWorkersByEmployer(corp.getID()));
 			report.setFactoryQueue(entityStore.listQueueByCorporation(corp.getID()));

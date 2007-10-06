@@ -25,8 +25,8 @@ import org.eclipse.swt.widgets.Widget;
 
 import starcorp.client.gui.ADataEntryWindow;
 import starcorp.client.gui.ATablePane;
+import starcorp.client.gui.ASearchWindow;
 import starcorp.client.gui.widgets.Hyperlink;
-import starcorp.client.gui.windows.SearchItemsWindow;
 import starcorp.client.gui.windows.SearchMarketWindow;
 import starcorp.common.entities.Colony;
 import starcorp.common.entities.MarketItem;
@@ -81,8 +81,8 @@ public class MarketTable extends ATablePane {
 		}
 		else {
 			int page = searchWindow.getPage();
-			start = (page - 1) * SearchItemsWindow.ITEMS_PER_PAGE;
-			end = start + SearchItemsWindow.ITEMS_PER_PAGE;
+			start = (page - 1) * ASearchWindow.ITEMS_PER_PAGE;
+			end = start + ASearchWindow.ITEMS_PER_PAGE;
 			System.out.println("ItemsTable populate: " + total + " total " + page + " page " + start + " start " + end + " end");
 			if(start < 0) start = 0;
 			if(end > total) end = total;
@@ -136,26 +136,5 @@ public class MarketTable extends ATablePane {
 			}
 		});
 		
-		if(searchWindow.countPages() > 1) { 
-			Group grpPages = createGroup(getParent(), widgets, "Pages");
-			grpPages.setLayout(new GridLayout(searchWindow.countPages(),true));
-			for(int i = 1; i <= searchWindow.countPages(); i++) {
-				if(i == searchWindow.getPage()) {
-					createLabel(grpPages, widgets, String.valueOf(i));
-				}
-				else {
-					Hyperlink lnk = createHyperlink(grpPages, widgets, String.valueOf(i));
-					final int selected = i;
-					lnk.addSelectionListener(new SelectionListener() {
-						public void widgetDefaultSelected(SelectionEvent e) {
-							searchWindow.setPage(selected);
-						}
-						public void widgetSelected(SelectionEvent e) {
-							searchWindow.setPage(selected);
-						}
-					});
-				}
-			}
-		}
 	}
 }
